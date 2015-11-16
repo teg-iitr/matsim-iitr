@@ -16,26 +16,23 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.agarwalamit.munich.speedPCUVariation;
+package playground.agarwalamit.mixedTraffic.patnaIndia;
 
-import playground.agarwalamit.analysis.congestion.AbsoluteDelays;
-import playground.agarwalamit.analysis.emission.AbsoluteEmissions;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.core.router.util.TravelTime;
+import org.matsim.vehicles.Vehicle;
+
+import playground.agarwalamit.mixedTraffic.MixedTrafficVehiclesUtils;
 
 /**
  * @author amit
  */
 
-public class EquilAnalysis {
-	
-	private String [] runCases =  {"allCar_20","allCar_30","allCar_40","allCar_50","allCar_60","allCar_70","allCar_80","allCar_90","allCar_100"};
-	private String outDir = "./equil/output/";
-	
-	public static void main(String[] args) {
-		new EquilAnalysis().run();
-	}
-	
-	private void run(){
-		new AbsoluteEmissions(outDir).runAndWrite(runCases);
-		new AbsoluteDelays(outDir).runAndWrite(runCases);
-	}
+public class FreeSpeedTravelTimeForBike implements TravelTime {
+
+		@Override
+		public double getLinkTravelTime(Link link, double time, Person person, Vehicle vehicle) {
+			return link.getLength() / Math.min( MixedTrafficVehiclesUtils.getSpeed("bike"), link.getFreespeed(time) );
+		}
 }

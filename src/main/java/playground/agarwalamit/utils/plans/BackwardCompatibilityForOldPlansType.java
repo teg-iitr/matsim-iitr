@@ -16,7 +16,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.agarwalamit.mixedTraffic.patnaIndia;
+package playground.agarwalamit.utils.plans;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,14 +41,12 @@ import org.matsim.core.scenario.ScenarioUtils;
 import playground.agarwalamit.utils.LoadMyScenarios;
 
 /**
- * All main mode had "Generic" route type which is converted to "links" route.
- * Consequently, old plans file can not be read with the current head. It needs to be converted first.
  * @author amit
  */
 
-public class BackwardCompatibilityForRouteType {
+public class BackwardCompatibilityForOldPlansType {
 
-	public BackwardCompatibilityForRouteType(String inputPlansFile, Collection<String> mainModes2) {
+	public BackwardCompatibilityForOldPlansType(String inputPlansFile, Collection<String> mainModes2) {
 		this.inputPlans = inputPlansFile;
 		this.mainModes = mainModes2;
 		this.scOut = ScenarioUtils.createScenario(ConfigUtils.createConfig());
@@ -60,12 +58,46 @@ public class BackwardCompatibilityForRouteType {
 
 	public static void main(String[] args) {
 		Collection <String> mainModes = Arrays.asList("car","motorbike","bike");
-		BackwardCompatibilityForRouteType bcrouteTyp = new BackwardCompatibilityForRouteType("../../../../repos/runs-svn/patnaIndia/inputs/SelectedPlansOnly.xml", mainModes);
-		bcrouteTyp.startProcessing();
+		BackwardCompatibilityForOldPlansType bcrouteTyp = new BackwardCompatibilityForOldPlansType("../../../../repos/runs-svn/patnaIndia/inputs/SelectedPlansOnly.xml", mainModes);
+		bcrouteTyp.extractPlansExcludingLinkInfo();
 		bcrouteTyp.writePopOut("../../../../repos/runs-svn/patnaIndia/inputs/SelectedPlans_new.xml.gz");
 	}
 
-	public void startProcessing(){
+	/**
+	 * Excluding routes in legs and assigning activities on coords rather than on link 
+	 * because, link information in network  may not be same after some time.
+	 */
+	public void extractPlansExcludingLinkInfo(){
+		Scenario scIn = LoadMyScenarios.loadScenarioFromPlans(inputPlans);
+		Population popOut = scOut.getPopulation();
+		for (Person p : scIn.getPopulation().getPersons().values()) {
+			Person pOut = popOut.getFactory().createPerson(p.getId());
+			popOut.addPerson(pOut);
+			for (Plan plan : p.getPlans()){
+				Plan planOut = popOut.getFactory().createPlan();
+				List<PlanElement> pes = plan.getPlanElements();
+				for ( PlanElement pe : pes){
+					if(pe instanceof Leg) {
+						Leg leg = (Leg) pe;
+						Leg legOut = popOut.getFactory().createLeg(leg.getMode());
+						planOut.addLeg(legOut);
+					} else {
+						Activity actIn = (Activity)pe;
+						Activity actOut = popOut.getFactory().createActivityFromCoord(actIn.getType(), actIn.getCoord());
+						actOut.setEndTime(actIn.getEndTime());
+						planOut.addActivity(actOut);
+					}
+				}
+				pOut.addPlan(planOut);
+			}
+		}
+	}
+	
+	/**
+	 * All main mode had "Generic" route type which is converted to "links" route (nov'15).
+	 * Consequently, old plans file can not be used with the current head. Routes needs to be converted first.
+	 */
+	public void extractPlansIncludingLegRoutes(){
 		Scenario scIn = LoadMyScenarios.loadScenarioFromPlans(inputPlans);
 		Population popOut = scOut.getPopulation();
 		for (Person p : scIn.getPopulation().getPersons().values()) {
@@ -102,7 +134,8 @@ public class BackwardCompatibilityForRouteType {
 						}
 						planOut.addLeg(legOut);
 					} else {
-						planOut.addActivity((Activity)pe);
+						Activity actIn = (Activity)pe;
+						planOut.addActivity(actIn);
 					}
 				}
 				pOut.addPlan(planOut);

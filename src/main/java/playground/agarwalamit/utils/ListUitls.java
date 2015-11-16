@@ -16,36 +16,52 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.agarwalamit.mixedTraffic.seepage.TestSetUp;
+package playground.agarwalamit.utils;
 
-import org.apache.log4j.Logger;
-import org.matsim.core.api.experimental.events.EventsManager;
-import org.matsim.core.events.EventsUtils;
-import org.matsim.core.events.MatsimEventsReader;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author amit
  */
-public class Analyzer {
-	public static final Logger log = Logger.getLogger(Analyzer.class);
 
-	public static void main(String[] args) {
-		String outputDir =  "/Users/amit/Documents/repos/shared-svn/projects/mixedTraffic/seepage/xt_1Link/seepage/";
-		String eventsFile = outputDir+"ITERS/it.0/0.events.xml.gz";
-		
-		Analyzer ana = new Analyzer();
-		ana.analyzeFlow(eventsFile);
+public class ListUitls {
+
+	public static int intSum(List<Integer> intList){
+		if(intList==null)	return 0;
+
+		int sum = 0;
+		for(Integer i: intList) {
+			sum = sum+i;
+		}
+		return sum;
 	}
+	
+	public static double doubleSum(List<Double> doubleList){
+		if(doubleList==null)	return 0;
 
-	private void analyzeFlow(String eventsFile){
-		EventsManager events = EventsUtils.createEventsManager();
-		AverageLinkFlowHandler linkFlow = new AverageLinkFlowHandler();
-		MatsimEventsReader reader = new MatsimEventsReader(events);
-		events.addHandler(linkFlow);
-		reader.readFile(eventsFile);
-		
-		log.info("Inflow : - "+linkFlow.getInflow().toString());
-		log.info("Outflow : - "+linkFlow.getOutflow().toString());
-		
+		double sum = 0;
+		for(Double i: doubleList) {
+			sum = sum+i;
+		}
+		return sum;
+	}
+	
+	/**
+	 * @param list1
+	 * @param list2
+	 * @return it will divide all the elements of list1 by the elements of list2.
+	 */
+	public static List<Double> divide(List<Double> list1, List<Double> list2) {
+		List<Double> outList = new ArrayList<>();
+		if(list1 == null || list2 == null ) throw new RuntimeException("Either of the list is null. Aborting ...");
+		else if (list1.size() != list2.size()) throw new RuntimeException("Size of the lists are not equla. Aborting ...");
+		else if (list1.isEmpty() ) return outList;
+		else {
+			for(int ii=0; ii<list1.size(); ii++){
+				outList.add( list1.get(ii)/list2.get(ii) );
+			}
+		}
+		return null;
 	}
 }
