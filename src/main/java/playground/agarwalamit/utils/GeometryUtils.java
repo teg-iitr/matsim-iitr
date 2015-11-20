@@ -16,26 +16,32 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.agarwalamit.munich.speedPCUVariation;
+package playground.agarwalamit.utils;
 
-import playground.agarwalamit.analysis.congestion.AbsoluteDelays;
-import playground.agarwalamit.analysis.emission.AbsoluteEmissions;
+import java.util.Random;
+
+import org.matsim.core.gbl.MatsimRandom;
+import org.matsim.core.utils.geometry.geotools.MGC;
+import org.opengis.feature.simple.SimpleFeature;
+
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * @author amit
  */
 
-public class EquilAnalysis {
-	
-	private String [] runCases =  {"allCar_20","allCar_30","allCar_40","allCar_50","allCar_60","allCar_70","allCar_80","allCar_90","allCar_100"};
-	private String outDir = "./equil/output/";
-	
-	public static void main(String[] args) {
-		new EquilAnalysis().run();
-	}
-	
-	private void run(){
-		new AbsoluteEmissions(outDir).runAndWrite(runCases);
-		new AbsoluteDelays(outDir).runAndWrite(runCases);
+public class GeometryUtils {
+
+	public static Point getRandomPointsFromWard (SimpleFeature feature) {
+		Random random = MatsimRandom.getRandom(); // matsim random will return same coord.
+		Point p = null;
+		double x,y;
+		do {
+			x = feature.getBounds().getMinX()+random.nextDouble()*(feature.getBounds().getMaxX()-feature.getBounds().getMinX());
+			y = feature.getBounds().getMinY()+random.nextDouble()*(feature.getBounds().getMaxY()-feature.getBounds().getMinY());
+			p= MGC.xy2Point(x, y);
+		} while (!((Geometry) feature.getDefaultGeometry()).contains(p));
+		return p;
 	}
 }
