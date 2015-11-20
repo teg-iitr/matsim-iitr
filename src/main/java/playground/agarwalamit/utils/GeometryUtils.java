@@ -18,50 +18,30 @@
  * *********************************************************************** */
 package playground.agarwalamit.utils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Random;
+
+import org.matsim.core.gbl.MatsimRandom;
+import org.matsim.core.utils.geometry.geotools.MGC;
+import org.opengis.feature.simple.SimpleFeature;
+
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * @author amit
  */
 
-public class ListUitls {
+public class GeometryUtils {
 
-	public static int intSum(List<Integer> intList){
-		if(intList==null)	return 0;
-
-		int sum = 0;
-		for(Integer i: intList) {
-			sum = sum+i;
-		}
-		return sum;
-	}
-	
-	public static double doubleSum(List<Double> doubleList){
-		if(doubleList==null)	return 0;
-
-		double sum = 0;
-		for(Double i: doubleList) {
-			sum = sum+i;
-		}
-		return sum;
-	}
-	
-	/**
-	 * @param list1
-	 * @param list2
-	 * @return it will divide all the elements of list1 by the elements of list2.
-	 */
-	public static List<Double> divide(List<Double> list1, List<Double> list2) {
-		List<Double> outList = new ArrayList<>();
-		if(list1 == null || list2 == null ) throw new RuntimeException("Either of the list is null. Aborting ...");
-		else if (list1.size() != list2.size()) throw new RuntimeException("Size of the lists are not equla. Aborting ...");
-		else if (list1.isEmpty() ) return outList;
-		else {
-			for(int ii=0; ii<list1.size(); ii++){
-				outList.add( list1.get(ii)/list2.get(ii) );
-			}
-		}
-		return null;
+	public static Point getRandomPointsFromWard (SimpleFeature feature) {
+		Random random = MatsimRandom.getRandom(); // matsim random will return same coord.
+		Point p = null;
+		double x,y;
+		do {
+			x = feature.getBounds().getMinX()+random.nextDouble()*(feature.getBounds().getMaxX()-feature.getBounds().getMinX());
+			y = feature.getBounds().getMinY()+random.nextDouble()*(feature.getBounds().getMaxY()-feature.getBounds().getMinY());
+			p= MGC.xy2Point(x, y);
+		} while (!((Geometry) feature.getDefaultGeometry()).contains(p));
+		return p;
 	}
 }
