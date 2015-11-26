@@ -16,10 +16,13 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.agarwalamit.mixedTraffic.plots;
 
 /**
- * @author amit
+ * All plots with density should be used with fundamental diagram set up, thus deprecated. I should remove/clean all of these eventually. Amit nov 15
  */
 
-// ZZ_TODO: this package is too old; check classes and clean them.
+@Deprecated
+package playground.agarwalamit.mixedTraffic.plots.vsDensity;
+
+
+
