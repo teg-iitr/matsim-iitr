@@ -16,7 +16,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.agarwalamit.utils.templates;
+package playground.agarwalamit.templates;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,7 +52,7 @@ import playground.agarwalamit.mixedTraffic.MixedTrafficVehiclesUtils;
  */
 public class EventsFromRoutes {
 	
-	final static String outputFolder = "./outputPassinRate_LinkEnterDensity/1c8B/";
+	final static String OUTPUT_FOLDER = "./outputPassinRate_LinkEnterDensity/1c8B/";
 
 	public static void main(String[] args) {
 		new EventsFromRoutes().writeEvents();
@@ -68,7 +68,7 @@ public class EventsFromRoutes {
 
 		EventsManager manager = EventsUtils.createEventsManager();
 		manager.addHandler(new PersonLinkTravelTimeEventHandler(personLinkTravelTimes));
-		EventWriterXML eventWriterXML = new EventWriterXML(outputFolder+"/events.xml");
+		EventWriterXML eventWriterXML = new EventWriterXML(OUTPUT_FOLDER+"/events.xml");
 		manager.addHandler(eventWriterXML);
 		
 		QSim qSim = createQSim(net,manager);
