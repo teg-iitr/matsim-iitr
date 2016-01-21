@@ -16,7 +16,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.agarwalamit.utils.templates;
+package playground.agarwalamit.templates;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +32,7 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.algorithms.EventWriterXML;
+import org.matsim.core.events.algorithms.Vehicle2DriverEventHandler;
 import org.matsim.core.mobsim.qsim.ActivityEngine;
 import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.TeleportationEngine;
@@ -51,7 +52,7 @@ import playground.agarwalamit.mixedTraffic.MixedTrafficVehiclesUtils;
  */
 public class EventsFromRoutes {
 	
-	final static String outputFolder = "./outputPassinRate_LinkEnterDensity/1c8B/";
+	final static String OUTPUT_FOLDER = "./outputPassinRate_LinkEnterDensity/1c8B/";
 
 	public static void main(String[] args) {
 		new EventsFromRoutes().writeEvents();
@@ -67,7 +68,7 @@ public class EventsFromRoutes {
 
 		EventsManager manager = EventsUtils.createEventsManager();
 		manager.addHandler(new PersonLinkTravelTimeEventHandler(personLinkTravelTimes));
-		EventWriterXML eventWriterXML = new EventWriterXML(outputFolder+"/events.xml");
+		EventWriterXML eventWriterXML = new EventWriterXML(OUTPUT_FOLDER+"/events.xml");
 		manager.addHandler(eventWriterXML);
 		
 		QSim qSim = createQSim(net,manager);
@@ -110,6 +111,7 @@ public class EventsFromRoutes {
 	private static class PersonLinkTravelTimeEventHandler implements LinkEnterEventHandler, LinkLeaveEventHandler {
 
 		private final Map<Id<Person>, Map<Id<Link>, Double>> personLinkTravelTimes;
+		private Vehicle2DriverEventHandler delegate = new Vehicle2DriverEventHandler();
 
 		public PersonLinkTravelTimeEventHandler(Map<Id<Person>, Map<Id<Link>, Double>> agentTravelTimes) {
 			this.personLinkTravelTimes = agentTravelTimes;
@@ -117,19 +119,19 @@ public class EventsFromRoutes {
 
 		@Override
 		public void handleEvent(LinkEnterEvent event) {
-			System.out.println(event.toString());
-			Map<Id<Link>, Double> travelTimes = this.personLinkTravelTimes.get(event.getDriverId());
+			Id<Person> personId = this.delegate.getDriverOfVehicle(event.getVehicleId());
+			Map<Id<Link>, Double> travelTimes = this.personLinkTravelTimes.get(personId);
 			if (travelTimes == null) {
 				travelTimes = new HashMap<>();
-				this.personLinkTravelTimes.put(event.getDriverId(), travelTimes);
+				this.personLinkTravelTimes.put(personId, travelTimes);
 			}
 			travelTimes.put(event.getLinkId(), Double.valueOf(event.getTime()));
 		}
 
 		@Override
 		public void handleEvent(LinkLeaveEvent event) {
-			System.out.println(event.toString());
-			Map<Id<Link>, Double> travelTimes = this.personLinkTravelTimes.get(event.getDriverId());
+			Id<Person> personId = this.delegate.getDriverOfVehicle(event.getVehicleId());
+			Map<Id<Link>, Double> travelTimes = this.personLinkTravelTimes.get(personId);
 			if (travelTimes != null) {
 				Double d = travelTimes.get(event.getLinkId());
 				if (d != null) {

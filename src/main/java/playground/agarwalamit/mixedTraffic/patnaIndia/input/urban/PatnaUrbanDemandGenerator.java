@@ -16,7 +16,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.agarwalamit.mixedTraffic.patnaIndia.input;
+package playground.agarwalamit.mixedTraffic.patnaIndia.input.urban;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -44,8 +44,8 @@ import org.opengis.feature.simple.SimpleFeature;
 
 import com.vividsolutions.jts.geom.Point;
 
-import playground.agarwalamit.mixedTraffic.patnaIndia.PatnaUtils;
-import playground.agarwalamit.mixedTraffic.patnaIndia.PatnaUtils.PatnaActivityTypes;
+import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
+import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils.PatnaUrbanActivityTypes;
 import playground.agarwalamit.utils.GeometryUtils;
 /**
  * @author amit
@@ -55,18 +55,24 @@ public class PatnaUrbanDemandGenerator {
 	private static final Logger LOG = Logger.getLogger(PatnaUrbanDemandGenerator.class);
 
 	private Scenario scenario;
-	private final String outputDir;
 	private Collection<SimpleFeature> features ;
+	private final int cloningFactor ;
 
-	public PatnaUrbanDemandGenerator(final String outputDir) {
-		this.outputDir = outputDir;
+	public PatnaUrbanDemandGenerator() {
+		this(1);
+	}
+
+	public PatnaUrbanDemandGenerator(final int cloningFactor) {
+		this.cloningFactor = cloningFactor;
 	}
 
 	public static void main (String []args) {
-		new PatnaUrbanDemandGenerator(PatnaUtils.INPUT_FILES_DIR).startProcessingAndWritePlans();
+		PatnaUrbanDemandGenerator pudg = new PatnaUrbanDemandGenerator();
+		pudg.startProcessing();
+		pudg.writePlans(PatnaUtils.INPUT_FILES_DIR);
 	}
 
-	public void startProcessingAndWritePlans() {
+	public void startProcessing() {
 		this.features = readZoneFilesAndReturnFeatures();
 
 		String planFile1 = PatnaUtils.INPUT_FILES_DIR+"/Urban_PlanFile.CSV"; // urban plans for all zones except 27 to 42.
@@ -79,9 +85,15 @@ public class PatnaUrbanDemandGenerator {
 		filesReader(planFile1, "nonSlum_");
 		filesReader(planFile2, "nonSlum_");
 		filesReader(planFile3, "slum_");
-
-		new PopulationWriter(scenario.getPopulation()).write(this.outputDir+"/initial_plans.xml.gz");
+	}
+	
+	public void writePlans(final String outputDir){
+		new PopulationWriter(scenario.getPopulation()).write(outputDir+"/initial_urban_plans_"+cloningFactor+"pct.xml.gz");
 		LOG.info("Writing Plan file is finished.");
+	}
+	
+	public Population getPopulation(){
+		return scenario.getPopulation();
 	}
 
 	private Collection<SimpleFeature> readZoneFilesAndReturnFeatures() {
@@ -112,46 +124,49 @@ public class PatnaUrbanDemandGenerator {
 
 				toZoneId = getCorrectZoneNumber(toZoneId);
 
-				if (fromZoneId.equals(toZoneId)) {
-					// intraZonal trips
-					while (iterator.hasNext()){
+				for (int ii = 0; ii< cloningFactor; ii++){ // this will give random points for activities in the plan of every cloned person
 
-						SimpleFeature feature = iterator.next();
+					if (fromZoneId.equals(toZoneId)) {
+						// intraZonal trips
+						while (iterator.hasNext()){
 
-						p = GeometryUtils.getRandomPointsFromWard(feature);
-						Coord fromZoneCoord = new Coord(p.getX(), p.getY());
-						homeZoneCoordTransform = PatnaUtils.COORDINATE_TRANSFORMATION.transform(fromZoneCoord);
+							SimpleFeature feature = iterator.next();
 
-						q = GeometryUtils.getRandomPointsFromWard(feature);
-						Coord toZoneCoord = new Coord(q.getX(), q.getY());
-						workZoneCoordTransform= PatnaUtils.COORDINATE_TRANSFORMATION.transform(toZoneCoord);
-					}
-				} else {														
-					while (iterator.hasNext()){
-						SimpleFeature feature = iterator.next();
-						int id = (Integer) feature.getAttribute("ID1");
-						String zoneId  = String.valueOf(id);
-
-						if(fromZoneId.equals(zoneId) ) {
-							p = GeometryUtils.getRandomPointsFromWard(feature);
+							p = GeometryUtils.getRandomPointsInsideFeature(feature);
 							Coord fromZoneCoord = new Coord(p.getX(), p.getY());
 							homeZoneCoordTransform = PatnaUtils.COORDINATE_TRANSFORMATION.transform(fromZoneCoord);
-						}
-						else if (toZoneId.equals(zoneId)){
-							q = GeometryUtils.getRandomPointsFromWard(feature);
+
+							q = GeometryUtils.getRandomPointsInsideFeature(feature);
 							Coord toZoneCoord = new Coord(q.getX(), q.getY());
 							workZoneCoordTransform= PatnaUtils.COORDINATE_TRANSFORMATION.transform(toZoneCoord);
 						}
-					}
-				}  
+					} else {														
+						while (iterator.hasNext()){
+							SimpleFeature feature = iterator.next();
+							int id = (Integer) feature.getAttribute("ID1");
+							String zoneId  = String.valueOf(id);
 
-				Person person = factory.createPerson(Id.createPersonId(idPrefix+population.getPersons().size()));
-				population.addPerson(person);
+							if(fromZoneId.equals(zoneId) ) {
+								p = GeometryUtils.getRandomPointsInsideFeature(feature);
+								Coord fromZoneCoord = new Coord(p.getX(), p.getY());
+								homeZoneCoordTransform = PatnaUtils.COORDINATE_TRANSFORMATION.transform(fromZoneCoord);
+							}
+							else if (toZoneId.equals(zoneId)){
+								q = GeometryUtils.getRandomPointsInsideFeature(feature);
+								Coord toZoneCoord = new Coord(q.getX(), q.getY());
+								workZoneCoordTransform= PatnaUtils.COORDINATE_TRANSFORMATION.transform(toZoneCoord);
+							}
+						}
+					}  
 
-				String travelMode = getTravelMode(parts [8]);
+					Person person = factory.createPerson(Id.createPersonId(idPrefix+population.getPersons().size()));
+					population.addPerson(person);
 
-				Plan plan = createPlan( workZoneCoordTransform, homeZoneCoordTransform, travelMode, tripPurpose);
-				person.addPlan(plan);
+					String travelMode = getTravelMode(parts [8]);
+
+					Plan plan = createPlan( workZoneCoordTransform, homeZoneCoordTransform, travelMode, tripPurpose);
+					person.addPlan(plan);
+				}
 
 				line = bufferedReader.readLine();
 				iterator = features.iterator();
@@ -218,38 +233,38 @@ public class PatnaUrbanDemandGenerator {
 		case "1" : {//work act starts between 8 to 9:30 and duration is 8 hours
 			homeActEndTime = 8.0*3600. + random.nextInt(91)*60.; 
 			secondActEndTimeLeaveTime = homeActEndTime + 8*3600.; 
-			secondActType = PatnaActivityTypes.valueOf("work").toString();
+			secondActType = PatnaUrbanActivityTypes.valueOf("work").toString();
 			break; 
 		}  
 		case "2" : { // educational act starts between between 6:30 to 8:30 hours and duration is assumed about 7 hours
 			homeActEndTime = 6.5*3600. + random.nextInt(121)*60.; 
 			secondActEndTimeLeaveTime = homeActEndTime + 7*3600.;
-			secondActType = PatnaActivityTypes.valueOf("educational").toString();
+			secondActType = PatnaUrbanActivityTypes.valueOf("educational").toString();
 			break;
 		}  
 		case "3" : {// social duration between 5 to 7 hours
 			homeActEndTime= 10.*3600. ; 
 			secondActEndTimeLeaveTime = homeActEndTime+ 5.*3600. + random.nextInt(121)*60.; 
-			secondActType = PatnaActivityTypes.valueOf("social").toString();
+			secondActType = PatnaUrbanActivityTypes.valueOf("social").toString();
 			break;
 		}  
 		case "4" : { // other act duration between 5 to 7 hours
 			homeActEndTime = 8.*3600 ; 
 			secondActEndTimeLeaveTime= homeActEndTime + 5.*3600. + random.nextInt(121)*60.; 
-			secondActType = PatnaActivityTypes.valueOf("other").toString();
+			secondActType = PatnaUrbanActivityTypes.valueOf("other").toString();
 			break;
 		} 
 		case "9999" : { // no data
 			homeActEndTime = 8.*3600. + random.nextInt(121)*60.; 
 			secondActEndTimeLeaveTime= homeActEndTime + 7*3600.; 
-			secondActType = PatnaActivityTypes.valueOf("unknown").toString();
+			secondActType = PatnaUrbanActivityTypes.valueOf("unknown").toString();
 			break;
 		} 
 		default : throw new RuntimeException("Trip purpose input code is not recognized. Aborting ...");
 		}
 
 
-		Activity homeAct = populationFactory.createActivityFromCoord(PatnaActivityTypes.valueOf("home").toString(), fromZoneFeatureCoord);
+		Activity homeAct = populationFactory.createActivityFromCoord(PatnaUrbanActivityTypes.valueOf("home").toString(), fromZoneFeatureCoord);
 		homeAct.setEndTime(homeActEndTime); 								
 		plan.addActivity(homeAct);
 		plan.addLeg(populationFactory.createLeg(mode));

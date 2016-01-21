@@ -1,4 +1,4 @@
-package playground.agarwalamit.mixedTraffic.patnaIndia.input;
+package playground.agarwalamit.mixedTraffic.patnaIndia.input.urban;
 
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -10,15 +10,15 @@ import org.matsim.core.config.groups.QSimConfigGroup.LinkDynamics;
 import org.matsim.core.config.groups.QSimConfigGroup.SnapshotStyle;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 
-import playground.agarwalamit.mixedTraffic.patnaIndia.PatnaUtils;
+import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 
-public class PatnaConfigGenerator {
+public class PatnaUrbanConfigGenerator {
 
 	private Config config;
 
 	public static void main(String[] args) {
 		String outputConfig = "";
-		PatnaConfigGenerator configFile = new PatnaConfigGenerator();
+		PatnaUrbanConfigGenerator configFile = new PatnaUrbanConfigGenerator();
 		configFile.createBasicConfigSettings();
 		new ConfigWriter(configFile.getPatnaConfig()).write(outputConfig);
 	}
@@ -41,7 +41,7 @@ public class PatnaConfigGenerator {
 		config.qsim().setStorageCapFactor(0.033);
 		config.qsim().setEndTime(36*3600);
 		config.qsim().setLinkDynamics(LinkDynamics.PassingQ.toString());
-		config.qsim().setMainModes(PatnaUtils.MAIN_MODES);
+		config.qsim().setMainModes(PatnaUtils.URBAN_MAIN_MODES);
 		config.qsim().setSnapshotStyle(SnapshotStyle.queue);
 		
 		config.setParam("TimeAllocationMutator", "mutationAffectsDuration", "false");
@@ -105,7 +105,7 @@ public class PatnaConfigGenerator {
 		walk.setMarginalUtilityOfTraveling(0.0);
 		config.planCalcScore().addModeParams(walk);
 
-		config.plansCalcRoute().setNetworkModes(PatnaUtils.MAIN_MODES);
+		config.plansCalcRoute().setNetworkModes(PatnaUtils.URBAN_MAIN_MODES);
 
 		{
 			ModeRoutingParams mrp = new ModeRoutingParams("walk");
