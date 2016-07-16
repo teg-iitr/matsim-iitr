@@ -58,7 +58,7 @@ import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
  * @author amit
  */
 
-public class PatnaJointCalibrationControler {
+public class JointCalibrationControler {
 
 	private final static double SAMPLE_SIZE = 0.10;
 	private final static String subPopAttributeName = "userGroup";
@@ -73,7 +73,7 @@ public class PatnaJointCalibrationControler {
 
 	public static void main(String[] args) {
 		Config config = ConfigUtils.createConfig();
-		PatnaJointCalibrationControler pjc = new PatnaJointCalibrationControler();
+		JointCalibrationControler pjc = new JointCalibrationControler();
 
 		if(args.length>0){
 			ConfigUtils.loadConfig(config, args[0]);
@@ -150,15 +150,13 @@ public class PatnaJointCalibrationControler {
 		int lastIt = controler.getConfig().controler().getLastIteration();
 		for (int index =firstIt+1; index <lastIt; index ++){
 			String dirToDel = OUTPUT_DIR+"/ITERS/it."+index;
-			Logger.getLogger(PatnaJointCalibrationControler.class).info("Deleting the directory "+dirToDel);
+			Logger.getLogger(JointCalibrationControler.class).info("Deleting the directory "+dirToDel);
 			IOUtils.deleteDirectory(new File(dirToDel),false);
 		}
 
 		new File(OUTPUT_DIR+"/analysis/").mkdir();
 		String outputEventsFile = OUTPUT_DIR+"/output_events.xml.gz";
 		// write some default analysis
-		StatsWriter.run(OUTPUT_DIR);
-
 		ModalTravelTimeAnalyzer mtta = new ModalTravelTimeAnalyzer(outputEventsFile);
 		mtta.run();
 		mtta.writeResults(OUTPUT_DIR+"/analysis/modalTravelTime.txt");
@@ -166,6 +164,8 @@ public class PatnaJointCalibrationControler {
 		ModalShareFromEvents msc = new ModalShareFromEvents(outputEventsFile);
 		msc.run();
 		msc.writeResults(OUTPUT_DIR+"/analysis/modalShareFromEvents.txt");
+		
+		StatsWriter.run(OUTPUT_DIR);
 	}
 
 	/**
