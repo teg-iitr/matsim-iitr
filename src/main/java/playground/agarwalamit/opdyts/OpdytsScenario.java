@@ -17,20 +17,18 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.utils;
 
-import java.util.List;
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.population.Person;
+package playground.agarwalamit.opdyts;
 
 /**
- * @author amit
+ * Created by amit on 03/10/16.
  */
+@SuppressWarnings("DefaultFileTemplate")
+public enum OpdytsScenario {
 
-public interface PersonFilter {
-	
-	String getUserGroupAsStringFromPersonId(final Id<Person> personId);
-
-	List<String> getUserGroupsAsStrings();
+    EQUIL,
+    EQUIL_MIXEDTRAFFIC,
+    PATNA_1Pct,
+    PATNA_10Pct
 
 }

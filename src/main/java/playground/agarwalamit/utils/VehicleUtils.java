@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2016 by the members listed in the COPYING,        *
+ * copyright       : (C) 2017 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -19,18 +19,29 @@
 
 package playground.agarwalamit.utils;
 
-import java.util.List;
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.population.Person;
+import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.vehicles.VehicleReaderV1;
+import org.matsim.vehicles.VehicleType;
+import org.matsim.vehicles.Vehicles;
 
 /**
- * @author amit
+ * Created by amit on 13/01/2017.
  */
 
-public interface PersonFilter {
-	
-	String getUserGroupAsStringFromPersonId(final Id<Person> personId);
 
-	List<String> getUserGroupsAsStrings();
+public final class VehicleUtils {
+
+    private static final Logger LOGGER = Logger.getLogger(VehicleUtils.class);
+
+    public static void addVehiclesToScenarioFromVehicleFile(final String vehiclesFile, final Scenario scenario){
+        Vehicles vehs = org.matsim.vehicles.VehicleUtils.createVehiclesContainer();
+        new VehicleReaderV1(vehs).readFile(vehiclesFile);
+
+        for(VehicleType vt : vehs.getVehicleTypes().values()) {
+
+            scenario.getVehicles().addVehicleType(vt);
+        }
+    }
 
 }

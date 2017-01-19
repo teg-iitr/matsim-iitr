@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2016 by the members listed in the COPYING,        *
+ * copyright       : (C) 2017 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,17 +17,19 @@
  *                                                                         *
  * *********************************************************************** */
 
-
 package playground.agarwalamit.opdyts;
 
+import java.util.Map;
+
 /**
- * Created by amit on 03/10/16.
+ * Created by amit on 13/01/2017.
  */
-public enum OpdytsScenarios {
+@SuppressWarnings("DefaultFileTemplate")
+public interface DistanceDistribution {
 
-    EQUIL,
-    EQUIL_MIXEDTRAFFIC,
-    PATNA_1Pct,
-    PATNA_10Pct;
+    double [] getDistClasses();
 
+    Map<String, double[]> getMode2DistanceBasedLegs();
+
+    OpdytsScenario getOpdytsScenario();
 }
