@@ -23,25 +23,25 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import floetteroed.utilities.math.Vector;
-import opdytsintegration.MATSimCountingStateAnalyzer;
-import opdytsintegration.SimulationStateAnalyzerProvider;
-import opdytsintegration.utils.TimeDiscretization;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
+import org.matsim.contrib.opdyts.MATSimCountingStateAnalyzer;
+import org.matsim.contrib.opdyts.SimulationStateAnalyzerProvider;
+import org.matsim.contrib.opdyts.utils.TimeDiscretization;
 import org.matsim.core.events.handler.EventHandler;
 
 /**
- * Created by amit on 15.06.17. Adapted after {@link opdytsintegration.car.DifferentiatedLinkOccupancyAnalyzer}
+ * Created by amit on 15.06.17. Adapted after {@link org.matsim.contrib.opdyts.car.DifferentiatedLinkOccupancyAnalyzer}
  */
 
-public class TeleportationODAnalyzer implements PersonDepartureEventHandler {
+public class TeleportationODLinkAnalyzer implements PersonDepartureEventHandler {
 
     private final Map<String, MATSimCountingStateAnalyzer<Zone>> mode2stateAnalyzer;
     private final Set<Zone> relevantZones;
 
-    public TeleportationODAnalyzer(final TimeDiscretization timeDiscretization,
-                                   final Set<Zone> relevantZones,
-                                   final Set<String> relevantModes) {
+    public TeleportationODLinkAnalyzer(final TimeDiscretization timeDiscretization,
+                                       final Set<Zone> relevantZones,
+                                       final Set<String> relevantModes) {
         this.relevantZones = relevantZones;
         this.mode2stateAnalyzer = new LinkedHashMap<>();
         for (String mode : relevantModes) {
@@ -66,7 +66,7 @@ public class TeleportationODAnalyzer implements PersonDepartureEventHandler {
 
     @Override
     public void handleEvent(PersonDepartureEvent event) {
-        // TODO need to use coordinates from plans than link for beeline distances. Amit July'17
+        // adapt this for coordinates than link ids. Amit July'17
         final MATSimCountingStateAnalyzer<Zone> stateAnalyzer = this.mode2stateAnalyzer.get(event.getLegMode());
         if (this.mode2stateAnalyzer.containsKey(event.getLegMode())) {
             for (Zone zone : this.relevantZones ) {
@@ -86,7 +86,7 @@ public class TeleportationODAnalyzer implements PersonDepartureEventHandler {
         private final TimeDiscretization timeDiscretization;
         private final Set<String> relevantTeleportationMdoes;
         private final Set<Zone> relevantZones;
-        private TeleportationODAnalyzer teleportationODAnalyzer;
+        private TeleportationODLinkAnalyzer teleportationODAnalyzer;
 
         public Provider(final TimeDiscretization timeDiscretization,
                                                          final Set<String> relevantTeleportationMdoes,
@@ -104,7 +104,7 @@ public class TeleportationODAnalyzer implements PersonDepartureEventHandler {
 
         @Override
         public EventHandler newEventHandler() {
-            this.teleportationODAnalyzer = new TeleportationODAnalyzer(timeDiscretization, relevantZones, relevantTeleportationMdoes);
+            this.teleportationODAnalyzer = new TeleportationODLinkAnalyzer(timeDiscretization, relevantZones, relevantTeleportationMdoes);
             return this.teleportationODAnalyzer;
         }
 
