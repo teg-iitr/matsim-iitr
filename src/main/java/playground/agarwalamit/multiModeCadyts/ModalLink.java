@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2018 by the members listed in the COPYING,        *
+ * copyright       : (C) 2016 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,35 +17,51 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.cadyts.marginals.prep;
+package playground.agarwalamit.multiModeCadyts;
 
-import java.util.Set;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Identifiable;
+import org.matsim.api.core.v01.network.Link;
 
 /**
- * Created by amit on 21.02.18.
+ * A class to create a object which contains modal and link information. 
+ * 
+ * @author amit
  */
 
-public class DistanceDistributionUtils {
+public final class ModalLink implements Identifiable<ModalLink> {
+	
+	private final String mode;
+	private final Id<Link> linkId;
+	private final Id<ModalLink> id;
+	
+	private static final String separator = "_&_";
+	
+	public String getMode() {
+		return mode;
+	}
 
-    private static final String ID_SEPERATOR = "_&_";
+	public Id<Link> getLinkId() {
+		return linkId;
+	}
 
-    public enum DistanceUnit {meter, kilometer}
+	ModalLink(final String mode, final Id<Link> linkId) {
+		this.mode = mode;
+		this.linkId = linkId;
+		this.id = Id.create(this.mode.concat(getModeLinkSplitter()).concat(this.linkId.toString()), ModalLink.class);
+	}
 
-    public enum DistanceDistributionFileLabels {mode, distanceLowerLimit, distanceUpperLimit, measuredCount}
+	@Override
+	public String toString(){
+		return this.mode.concat(getModeLinkSplitter()).concat(this.linkId.toString());
+	}
+	
+	public static String getModeLinkSplitter(){
+		return separator;
+	}
 
-    public static DistanceBin.DistanceRange getDistanceRange(double distance, Set<DistanceBin.DistanceRange> distanceRanges){
-//        if(distanceRanges.isEmpty()) throw new RuntimeException("Distance range set is empty.");
-
-        for(DistanceBin.DistanceRange distanceRange : distanceRanges) {
-            if (distance >= distanceRange.getLowerLimit() && distance < distanceRange.getUpperLimit())
-                return distanceRange;
-        }
-        throw new RuntimeException("No distance range found for "+ distance);
-    }
-
-    public static Id<ModalBinIdentifier> getModalBinId(String mode, DistanceBin.DistanceRange distanceRange){
-        return Id.create( mode.concat(ID_SEPERATOR).concat( String.valueOf(distanceRange) ), ModalBinIdentifier.class);
-    }
-
+	@Override
+	public Id<ModalLink> getId() {
+		return this.id;
+	}
 }

@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2018 by the members listed in the COPYING,        *
+ * copyright       : (C) 2016 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -17,11 +17,27 @@
  *                                                                         *
  * *********************************************************************** */
 
+package playground.agarwalamit.multiModeCadyts;
 
-package playground.agarwalamit.cadyts.marginals;
+import java.util.Map;
+
+import org.matsim.api.core.v01.Id;
+import org.matsim.contrib.cadyts.general.LookUpItemFromId;
+
 /**
- *
- * The idea is to use Cadyts for given (beeline) distance distributions.
- *
- * Created by amit on 20.02.18.
+ * @author amit
  */
+
+class ModalLinkLookUp implements LookUpItemFromId<ModalLink> {
+	
+	private final Map<String, ModalLink> mappingOfModalLink ;
+	
+	ModalLinkLookUp (final Map<String, ModalLink> modalLinkContainer){
+		this.mappingOfModalLink = modalLinkContainer;
+	}
+	
+	@Override
+	public ModalLink getItem( Id<ModalLink> id ) {
+		return this.mappingOfModalLink.get(id.toString());
+	}
+}

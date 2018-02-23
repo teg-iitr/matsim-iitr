@@ -18,7 +18,7 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.agarwalamit.cadyts.multiModeCadyts;
+package playground.agarwalamit.multiModeCadyts;
 
 import java.io.IOException;
 import java.util.Map;
