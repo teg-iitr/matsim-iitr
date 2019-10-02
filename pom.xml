@@ -2,7 +2,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.matsim.iitr</groupId>
+	<groupId>org.matsim.teg-iitr</groupId>
 	<artifactId>matsim-playground</artifactId>
 	<packaging>pom</packaging>
 	<version>12.0-SNAPSHOT</version>
@@ -35,20 +35,20 @@
 			<name>Geotools repository</name>
 			<url>http://download.osgeo.org/webdav/geotools</url>
 		</repository>
-		<repository>
-			<!-- for older jsprit versions. please migrate to new, they are on Maven 
-				central -->
+		<!-- <repository>
+			for older jsprit versions. please migrate to new, they are on Maven 
+				central 
 			<id>jsprit-releases</id>
 			<url>https://github.com/jsprit/mvn-rep/raw/master/releases</url>
-		</repository>
-		<repository>
+		</repository> -->
+		<!-- <repository>
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
-		</repository>
-		<repository>
+		</repository> -->
+		<!-- <repository>
 			<id>matsim-vsp-vsp-playgrounds</id>
 			<url>https://packagecloud.io/matsim-vsp/vsp-playgrounds/maven2</url>
-		</repository>
+		</repository> -->
 	</repositories>
 
 	<build>
@@ -163,11 +163,11 @@
 			<version>12.0-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>com.github.matsim-org</groupId>
 			<artifactId>evacuation-gui</artifactId>
 			<version>-SNAPSHOT</version>
-		</dependency>
+		</dependency> -->
 		<!-- <dependency>
 			<groupId>com.vividsolutions</groupId>
 			<artifactId>jts</artifactId>
@@ -178,7 +178,7 @@
 			<artifactId>jts-core</artifactId>
 			<version>1.16.1</version>
 		</dependency> -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>cadytsIntegration</artifactId>
 			<version>12.0-SNAPSHOT</version>
@@ -186,10 +186,8 @@
 		<dependency>
 			<groupId>com.github.matsim-org</groupId>
 			<artifactId>Opdyts-MATSim-Integration</artifactId>
-			<!-- <version>-SNAPSHOT</version> -->
-			<!-- <version>-77a4cad5f1-1</version> -->
 			<version>0.0.1-aa6d8cd2f3-1</version>
-		</dependency>
+		</dependency> -->
 		<!-- https://mvnrepository.com/artifact/org.apache.spark/spark-core -->
 		<!-- <dependency> -->
 		<!-- <groupId>org.apache.spark</groupId> -->
@@ -198,7 +196,7 @@
 		<!-- </dependency> -->
 		<!--following is required to avoid exception (trying to access com.google.common.base.Stopwatch.init 
 			which is not accessible anymore) -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>18.0</version>
@@ -212,7 +210,7 @@
 		<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
 		<artifactId>vsp</artifactId>
 		<version>12.0-SNAPSHOT</version>
-	</dependency>
+	</dependency> -->
 	</dependencies>
 
 	<profiles>
