@@ -16,7 +16,7 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package amit.utils;
+package playground.utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
