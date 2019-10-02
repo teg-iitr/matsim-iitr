@@ -4,3 +4,9 @@
 target
 output/
 results.txt
+*.DS_Store
+*.iml
+.idea
+
+*/test/output/
+*/output
