@@ -156,10 +156,12 @@ public class PedestrianWithPTTest {
 		config.qsim().setEndTime(24.0*3600);
 		config.qsim().setMainModes(Arrays.asList("car",walkModeName)); // car is still necessary for PT simulation
 		config.qsim().setLinkDynamics(LinkDynamics.PassingQ);
-		config.qsim().setVehiclesSource(VehiclesSource.fromVehiclesData);
+		config.qsim().setVehiclesSource(VehiclesSource.modeVehicleTypesFromVehiclesData);
 		config.travelTimeCalculator().setAnalyzedModesAsString(StringUtils.join(new String[]{walkModeName}, ","));
 		config.travelTimeCalculator().setFilterModes(true);
 		config.plansCalcRoute().setNetworkModes(Arrays.asList(walkModeName));
+
+		config.plansCalcRoute().removeModeRoutingParams(walkModeName);
 
 		config.planCalcScore().getOrCreateModeParams(walkModeName).setConstant(0.);
 		config.plansCalcRoute().getOrCreateModeRoutingParams(TransportMode.pt).setBeelineDistanceFactor(1.3);
@@ -222,32 +224,28 @@ public class PedestrianWithPTTest {
 	}
 
 	private void createVehicles() {
+		Vehicles vehicles = this.scenario.getTransitVehicles();
+		VehiclesFactory vb = vehicles.getFactory();
 		{
-			Vehicles vehicles = this.scenario.getTransitVehicles();
-			VehiclesFactory vb = vehicles.getFactory();
-
 			// bus like
 			VehicleType busType = vb.createVehicleType(Id.create("bus", VehicleType.class));
 			busType.setMaximumVelocity(5.0);
 			busType.setPcuEquivalents(3.);
-//			VehicleCapacity capacity = vb.createVehicleCapacity();
-//			capacity.setSeats(Integer.valueOf(9999));
-//			capacity.setStandingRoom(Integer.valueOf(0));
-//			busType.setCapacity(capacity);
+			VehicleCapacity capacity = busType.getCapacity();
+			capacity.setSeats(Integer.valueOf(9999));
+			capacity.setStandingRoom(Integer.valueOf(0));
 			vehicles.addVehicleType(busType);
 
 			vehicles.addVehicle( vb.createVehicle(Id.create("bus_1", Vehicle.class), busType));
 		}
 
 		{
-			Vehicles vehs = this.scenario.getVehicles();
-
-			VehicleType carType = vehs.getFactory().createVehicleType(Id.create(walkModeName, VehicleType.class));
+			VehicleType carType = vb.createVehicleType(Id.create(walkModeName, VehicleType.class));
 			carType.setMaximumVelocity(10.);
 			carType.setPcuEquivalents(1.);
-			vehs.addVehicleType(carType);
+			vehicles.addVehicleType(carType);
 
-			vehs.addVehicle(vehs.getFactory().createVehicle(Id.create(walkModeName+"User", Vehicle.class), carType) );
+			vehicles.addVehicle(vb.createVehicle(Id.create(walkModeName+"User", Vehicle.class), carType) );
 		}
 	}
 

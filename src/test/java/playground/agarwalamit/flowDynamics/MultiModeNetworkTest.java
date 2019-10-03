@@ -128,6 +128,7 @@ public class MultiModeNetworkTest {
         List<String> networkModes = new ArrayList<>(Arrays.asList( transportModes));
         config.qsim().setMainModes(networkModes);
         config.plansCalcRoute().setNetworkModes(networkModes);
+        config.plansCalcRoute().removeModeRoutingParams("bike");
         config.travelTimeCalculator().setAnalyzedModesAsString(StringUtils.join(networkModes, ","));
         config.travelTimeCalculator().setSeparateModes(true);
 

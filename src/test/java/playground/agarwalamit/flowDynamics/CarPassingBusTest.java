@@ -65,11 +65,7 @@ import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.pt.transitSchedule.api.TransitScheduleFactory;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 import org.matsim.testcases.MatsimTestUtils;
-import org.matsim.vehicles.Vehicle;
-import org.matsim.vehicles.VehicleCapacity;
-import org.matsim.vehicles.VehicleType;
-import org.matsim.vehicles.Vehicles;
-import org.matsim.vehicles.VehiclesFactory;
+import org.matsim.vehicles.*;
 import org.matsim.vis.otfvis.OTFClientLive;
 import org.matsim.vis.otfvis.OnTheFlyServer;
 
@@ -126,7 +122,7 @@ public class CarPassingBusTest {
 		config.qsim().setEndTime(24.0*3600);
 		config.qsim().setMainModes(Arrays.asList(TransportMode.car));
 		config.qsim().setLinkDynamics(LinkDynamics.PassingQ);
-		config.qsim().setVehiclesSource(VehiclesSource.fromVehiclesData);
+		config.qsim().setVehiclesSource(VehiclesSource.modeVehicleTypesFromVehiclesData);
 	}
 
 	private void createNetwork() {
@@ -194,10 +190,9 @@ public class CarPassingBusTest {
 			VehicleType busType = vb.createVehicleType(Id.create("bus", VehicleType.class));
 			busType.setMaximumVelocity(5.0);
 			busType.setPcuEquivalents(3.);
-//			VehicleCapacity capacity = vb.createVehicleCapacity();
-//			capacity.setSeats(Integer.valueOf(9999));
-//			capacity.setStandingRoom(Integer.valueOf(0));
-//			busType.setCapacity(capacity);
+			VehicleCapacity capacity = busType.getCapacity();
+			capacity.setSeats(Integer.valueOf(9999));
+			capacity.setStandingRoom(Integer.valueOf(0));
 			vehicles.addVehicleType(busType);
 			vehicles.addVehicle( vb.createVehicle(Id.create("bus_1", Vehicle.class), busType));
 		}
