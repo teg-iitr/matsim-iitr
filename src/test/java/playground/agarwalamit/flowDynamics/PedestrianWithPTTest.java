@@ -230,10 +230,10 @@ public class PedestrianWithPTTest {
 			VehicleType busType = vb.createVehicleType(Id.create("bus", VehicleType.class));
 			busType.setMaximumVelocity(5.0);
 			busType.setPcuEquivalents(3.);
-			VehicleCapacity capacity = vb.createVehicleCapacity();
-			capacity.setSeats(Integer.valueOf(9999));
-			capacity.setStandingRoom(Integer.valueOf(0));
-			busType.setCapacity(capacity);
+//			VehicleCapacity capacity = vb.createVehicleCapacity();
+//			capacity.setSeats(Integer.valueOf(9999));
+//			capacity.setStandingRoom(Integer.valueOf(0));
+//			busType.setCapacity(capacity);
 			vehicles.addVehicleType(busType);
 
 			vehicles.addVehicle( vb.createVehicle(Id.create("bus_1", Vehicle.class), busType));

@@ -38,7 +38,7 @@ public class ModeChoiceObjectiveFunctionTest {
 	@Test
 	public void test() throws Exception {
 		
-		PrintStream writer = IOUtils.getPrintStream("results.txt");
+		PrintStream writer = IOUtils.getPrintStream(IOUtils.getFileUrl("results.txt"));
 		
 		for ( int abc=1 ; abc < 99 ; abc ++ ) {
 			

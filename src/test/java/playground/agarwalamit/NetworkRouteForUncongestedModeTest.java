@@ -52,7 +52,7 @@ public class NetworkRouteForUncongestedModeTest {
 
 	@Rule public MatsimTestUtils helper = new MatsimTestUtils();
 
-	private final static URL EQUIL_NETWORK = IOUtils.newUrl(ExamplesUtils.getTestScenarioURL("equil"), "network.xml");
+	private final static URL EQUIL_NETWORK = IOUtils.extendUrl(ExamplesUtils.getTestScenarioURL("equil"), "network.xml");
 
 	/**
 	 * Every link must allow car and ride mode if networkModes are car and ride. 

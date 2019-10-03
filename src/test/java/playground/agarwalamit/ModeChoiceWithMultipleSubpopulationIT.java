@@ -49,14 +49,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * See a simple example {@link tutorial.programming.example18MultipleSubpopulations.RunSubpopulationsExample} without mode choice
+ * See a simple example {tutorial.programming.example18MultipleSubpopulations.RunSubpopulationsExample} without mode choice
  * Created by amit on 18.06.17.
  */
 
 public class ModeChoiceWithMultipleSubpopulationIT {
 
 	private static final URL EQUIL_DIR = ExamplesUtils.getTestScenarioURL("equil-mixedTraffic");
-	private static final URL PLANS_FILE = IOUtils.newUrl(EQUIL_DIR, "plans2000.xml.gz");
+	private static final URL PLANS_FILE = IOUtils.extendUrl(EQUIL_DIR, "plans2000.xml.gz");
 
 	private static final String SUBPOP_ATTRIB_NAME = "subpopulation";
 	private static final String SUBPOP1_NAME = "lower"; // half of the persons will fall under this group
@@ -67,7 +67,7 @@ public class ModeChoiceWithMultipleSubpopulationIT {
 
 	@Test
 	public void run() {
-		Config config = ConfigUtils.loadConfig(IOUtils.newUrl(EQUIL_DIR,"config-with-mode-vehicles.xml"));
+		Config config = ConfigUtils.loadConfig(IOUtils.extendUrl(EQUIL_DIR,"config-with-mode-vehicles.xml"));
 		config.controler().setOutputDirectory(helper.getOutputDirectory());
 		config.plans().setInputFile(PLANS_FILE.toString());
 
