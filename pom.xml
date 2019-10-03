@@ -45,10 +45,10 @@
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
 		</repository>
-		 <!--<repository>-->
-			<!--<id>matsim-vsp-vsp-playgrounds</id>-->
-			<!--<url>https://packagecloud.io/matsim-vsp/vsp-playgrounds/maven2</url>-->
-		<!--</repository>-->
+		 <repository>
+			<id>matsim-vsp-vsp-playgrounds</id>
+			<url>https://packagecloud.io/matsim-vsp/vsp-playgrounds/maven2</url>
+		</repository>
 	</repositories>
 
 	<build>
