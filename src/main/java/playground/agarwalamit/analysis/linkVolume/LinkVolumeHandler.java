@@ -33,8 +33,8 @@ import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.events.algorithms.Vehicle2DriverEventHandler;
+import org.matsim.vehicles.MatsimVehicleReader;
 import org.matsim.vehicles.Vehicle;
-import org.matsim.vehicles.VehicleReaderV1;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
 import playground.agarwalamit.mixedTraffic.MixedTrafficVehiclesUtils;
@@ -62,7 +62,8 @@ public class LinkVolumeHandler implements LinkLeaveEventHandler, VehicleEntersTr
 		reset(0);
 		if (VehiclesFile!=null) {
 			Vehicles vehs = VehicleUtils.createVehiclesContainer();
-			VehicleReaderV1 vr = new VehicleReaderV1(vehs);
+//			VehicleReaderV1 vr = new VehicleReaderV1(vehs);
+			MatsimVehicleReader vr = new MatsimVehicleReader(vehs);
 			vr.readFile(VehiclesFile);
 
 			vehs.getVehicleTypes().values().forEach(

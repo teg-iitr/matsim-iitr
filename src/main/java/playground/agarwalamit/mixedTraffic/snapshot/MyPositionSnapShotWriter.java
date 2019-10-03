@@ -68,7 +68,7 @@ public class MyPositionSnapShotWriter implements SnapshotWriter {
 		}
 		
 		try {
-			this.out = IOUtils.getBufferedWriter(filename, true);
+			this.out = IOUtils.getBufferedWriter(filename);
 			String header = Labels.VEHICLE
 					+ "\t" + Labels.TIME
 					+ "\t" + Labels.LINK_ID

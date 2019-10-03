@@ -38,6 +38,8 @@ import org.matsim.core.mobsim.qsim.interfaces.SignalizeableItem;
 import org.matsim.core.mobsim.qsim.pt.TransitDriverAgent;
 import org.matsim.core.mobsim.qsim.qnetsimengine.AbstractQLink.HandleTransitStopResult;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QLinkImpl.LaneFactory;
+import org.matsim.core.mobsim.qsim.qnetsimengine.flow_efficiency.DefaultFlowEfficiencyCalculator;
+import org.matsim.core.mobsim.qsim.qnetsimengine.flow_efficiency.FlowEfficiencyCalculator;
 import org.matsim.core.mobsim.qsim.qnetsimengine.linkspeedcalculator.LinkSpeedCalculator;
 import org.matsim.core.mobsim.qsim.qnetsimengine.vehicleq.FIFOVehicleQ;
 import org.matsim.core.mobsim.qsim.qnetsimengine.vehicleq.PassingVehicleQ;
@@ -47,7 +49,6 @@ import org.matsim.lanes.Lane;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 import org.matsim.vis.snapshotwriters.VisVehicle;
-import playground.agarwalamit.fundamentalDiagrams.AttributableVehicle;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -82,6 +83,7 @@ final class DynamicHeadwayQueueWithBuffer implements QLaneI, SignalizeableItem {
 		private Double effectiveNumberOfLanes = null ;
 		private Double flowCapacity_s = null ;
  		private final NetsimEngineContext context;
+		private FlowEfficiencyCalculator flowEfficiencyCalculator;
 		Builder( final NetsimEngineContext context ) {
 			this.context = context ;
 			if (context.qsimConfig.getLinkDynamics() == LinkDynamics.PassingQ ||
@@ -94,13 +96,15 @@ final class DynamicHeadwayQueueWithBuffer implements QLaneI, SignalizeableItem {
 		void setLength(Double length) { this.length = length; }
 		void setEffectiveNumberOfLanes(Double effectiveNumberOfLanes) { this.effectiveNumberOfLanes = effectiveNumberOfLanes; }
 		void setFlowCapacity_s(Double flowCapacity_s) { this.flowCapacity_s = flowCapacity_s; }
+		void setFlowEfficiencyCalculator(FlowEfficiencyCalculator flowEfficiencyCalculator) { this.flowEfficiencyCalculator = flowEfficiencyCalculator; }
 		@Override public DynamicHeadwayQueueWithBuffer createLane(AbstractQLink qLink ) {
 			// a number of things I cannot configure before I have the qlink:
 			if ( id==null ) { id = Id.create( qLink.getLink().getId() , Lane.class ) ; }
 			if ( length==null ) { length = qLink.getLink().getLength() ; }
 			if ( effectiveNumberOfLanes==null ) { effectiveNumberOfLanes = qLink.getLink().getNumberOfLanes() ; }
 			if ( flowCapacity_s==null ) { flowCapacity_s = ((Link)qLink.getLink()).getFlowCapacityPerSec() ; }
-			return new DynamicHeadwayQueueWithBuffer( qLink.getInternalInterface(), vehicleQueue, id, length, effectiveNumberOfLanes, flowCapacity_s, context ) ;
+			if (flowEfficiencyCalculator == null) { flowEfficiencyCalculator = new DefaultFlowEfficiencyCalculator(); }
+			return new DynamicHeadwayQueueWithBuffer( qLink.getInternalInterface(), vehicleQueue, id, length, effectiveNumberOfLanes, flowCapacity_s, context, flowEfficiencyCalculator ) ;
 		}
 	}
 
@@ -187,14 +191,18 @@ final class DynamicHeadwayQueueWithBuffer implements QLaneI, SignalizeableItem {
 
 	private double accumulatedInflowCap = 1. ;
 
+	private final FlowEfficiencyCalculator flowEfficiencyCalculator;
+
 	private DynamicHeadwayQueueWithBuffer(AbstractQLink.QLinkInternalInterface qlink, final VehicleQ<QVehicle> vehicleQueue, Id<Lane> laneId,
-										  double length, double effectiveNumberOfLanes, double flowCapacity_s, final NetsimEngineContext context) {
+										  double length, double effectiveNumberOfLanes, double flowCapacity_s, final NetsimEngineContext context,
+										  FlowEfficiencyCalculator flowEfficiencyCalculator) {
 		// the general idea is to give this object no longer access to "everything".  Objects get back pointers (here qlink), but they
 		// do not present the back pointer to the outside.  In consequence, this object can go up to qlink, but not any further. kai, mar'16
 		// Now I am even trying to get rid of the full qLink back pointer (since it allows, e.g., going back to Link). kai, feb'18
 
 //		log.setLevel(Level.DEBUG);
 
+		this.flowEfficiencyCalculator = flowEfficiencyCalculator;
 		this.qLink = qlink;
 		this.id = laneId ;
 		this.context = context ;
@@ -238,7 +246,7 @@ final class DynamicHeadwayQueueWithBuffer implements QLaneI, SignalizeableItem {
 		// kai/mz/amit, mar'12
 
 		double now = context.getSimTimer().getTimeOfDay() ;
-		flowcap_accumulate.addValue(-veh.getFlowCapacityConsumptionInEquivalents(), now);
+		flowcap_accumulate.addValue(-getFlowCapacityConsumptionInEquivalents(veh), now);
 
 		buffer.add(veh);
 		if (buffer.size() == 1) {
@@ -522,12 +530,14 @@ final class DynamicHeadwayQueueWithBuffer implements QLaneI, SignalizeableItem {
 	private double lastVehMoveTime = 0.;
 	private boolean moveVehicleBasedOnHeadway(QVehicle veh){
 		double now = context.getSimTimer().getTimeOfDay();
-		boolean test = (now-lastVehMoveTime) >= (double) ((AttributableVehicle)veh.getVehicle()).getAttributes().getAttribute("headway");
+		boolean test = true;
+//		boolean test = (now-lastVehMoveTime) >= (double) ((AttributableVehicle)veh.getVehicle()).getAttributes().getAttribute("headway");
 		if ( test ){
 			lastVehMoveTime = now;
 			return true;
 		}
-		return false;
+//		return false;
+		throw new RuntimeException("Part of the code is commented at multiple places, thus, this functionality might not work. Find comments related to attributable vehicles, fix them first.");
 	}
 
 	private void removeVehicleFromQueue(final QVehicle veh2Remove) {
@@ -820,7 +830,7 @@ final class DynamicHeadwayQueueWithBuffer implements QLaneI, SignalizeableItem {
 				break;
 			case kinematicWaves:
 				this.remainingHolesStorageCapacity -= veh.getSizeInEquivalents();
-				this.accumulatedInflowCap -= veh.getFlowCapacityConsumptionInEquivalents() ;
+				this.accumulatedInflowCap -= getFlowCapacityConsumptionInEquivalents(veh) ;
 				break;
 			default: throw new RuntimeException("The traffic dynmics "+context.qsimConfig.getTrafficDynamics()+" is not implemented yet.");
 		}
@@ -979,6 +989,11 @@ final class DynamicHeadwayQueueWithBuffer implements QLaneI, SignalizeableItem {
 	@Override
 	public double getLoadIndicator() {
 		return usedStorageCapacity;
+	}
+
+	private double getFlowCapacityConsumptionInEquivalents(QVehicle vehicle) {
+		double flowEfficiency = flowEfficiencyCalculator.calculateFlowEfficiency(vehicle.getVehicle(), qLink.getLink());
+		return vehicle.getSizeInEquivalents() / flowEfficiency;
 	}
 
 }

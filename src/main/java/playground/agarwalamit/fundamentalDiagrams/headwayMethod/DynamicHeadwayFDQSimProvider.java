@@ -25,7 +25,7 @@ import org.matsim.vehicles.VehicleType;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 
-import playground.agarwalamit.fundamentalDiagrams.AttributableVehicle;
+import org.matsim.vehicles.VehicleUtils;
 import playground.agarwalamit.fundamentalDiagrams.core.FDConfigGroup;
 import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
 import playground.agarwalamit.fundamentalDiagrams.core.FDNetworkGenerator;
@@ -92,8 +92,9 @@ public class DynamicHeadwayFDQSimProvider implements Provider<Mobsim> {
 					agent.setStabilityTester(stabilityTester);
 					qSim.insertAgentIntoMobsim(agent);
 
-					AttributableVehicle attributableVehicle = new AttributableVehicle(Id.create(agent.getId(), Vehicle.class), modeToVehicleTypes.get(travelMode));
-					attributableVehicle.getAttributes().putAttribute("headway", 3600./fdConfigGroup.getTrackLinkCapacity() ); //initialize
+					Vehicle attributableVehicle = VehicleUtils.createVehicle(Id.create(agent.getId(), Vehicle.class), modeToVehicleTypes.get(travelMode));
+					//FIXME: similar to vehicleType, vehicle does not implement attributable, need to find a way
+					//attributableVehicle.getAttributes().putAttribute("headway", 3600./fdConfigGroup.getTrackLinkCapacity() ); //initialize
 					final QVehicle vehicle = new QVehicleImpl(
 //							VehicleUtils.getFactory().createVehicle(Id.create(agent.getId(), Vehicle.class),
 							attributableVehicle);

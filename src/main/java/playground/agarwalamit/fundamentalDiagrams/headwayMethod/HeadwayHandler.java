@@ -41,7 +41,6 @@ import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.Vehicles;
-import playground.agarwalamit.fundamentalDiagrams.AttributableVehicle;
 import playground.agarwalamit.fundamentalDiagrams.core.FDConfigGroup;
 import playground.agarwalamit.fundamentalDiagrams.core.FDDataContainer;
 import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
@@ -88,7 +87,8 @@ public class HeadwayHandler implements LinkEnterEventHandler, LinkLeaveEventHand
             double speed = this.fdNetworkGenerator.getLengthOfTrack() / (event.getTime() - this.linkEnterTime.get(event.getVehicleId()));
             Vehicle veh = vehicles.getVehicles().get(event.getVehicleId());
             double headway = getReactionTime() + veh.getType().getLength() / speed ; //it is better to estimate here so that it can be logged too.
-            ((AttributableVehicle) vehicles.getVehicles().get(event.getVehicleId())).getAttributes().putAttribute("headway", headway);
+            //FIXME: similar to vehicleType, vehicle does not implement attributable, need to find a way.
+//            ((AttributableVehicle) vehicles.getVehicles().get(event.getVehicleId())).getAttributes().putAttribute("headway", headway);
 
             // store headways
             String mode = veh.getType().getId().toString();

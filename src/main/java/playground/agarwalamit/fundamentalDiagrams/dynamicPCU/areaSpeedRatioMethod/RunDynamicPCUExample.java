@@ -32,8 +32,8 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vehicles.VehicleType;
+import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
-import playground.agarwalamit.fundamentalDiagrams.AttributableVehicleType;
 import playground.agarwalamit.fundamentalDiagrams.FDUtils;
 import playground.agarwalamit.fundamentalDiagrams.core.FDConfigGroup;
 import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
@@ -81,7 +81,8 @@ public class RunDynamicPCUExample {
         Vehicles vehicles = scenario.getVehicles();
 
         for (String mode : mainModes){
-            AttributableVehicleType veh = new AttributableVehicleType(Id.create(mode,VehicleType.class));
+//            AttributableVehicleType veh = new AttributableVehicleType(Id.create(mode,VehicleType.class));
+            VehicleType veh = VehicleUtils.createVehicleType(Id.create(mode,VehicleType.class));
             veh.setPcuEquivalents(MixedTrafficVehiclesUtils.getPCU(mode));
             veh.setMaximumVelocity(MixedTrafficVehiclesUtils.getSpeed(mode));
             veh.setLength(MixedTrafficVehiclesUtils.getLength(mode));

@@ -86,7 +86,7 @@ public final class TravelModesFlowDynamicsUpdator {
 			double nowTime = event.getTime();
 
 			this.updateFlow15Min(nowTime, this.vehicleType.getPcuEquivalents());
-//			this.updateFlow15Min(nowTime, (double) ((AttributableVehicle)scenario.getVehicles().getVehicles().get(event.getVehicleId())).getAttributes().getAttribute("vehicle_pcu"));
+//			this.updateFlow15Min(nowTime, (double) ((Vehicle)scenario.getVehicles().getVehicles().get(event.getVehicleId())).getAttributes().getAttribute("vehicle_pcu"));
 			this.updateSpeedTable(nowTime, personId);
 
 			//Checking for stability

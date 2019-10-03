@@ -21,7 +21,7 @@ package playground.agarwalamit.utils;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.vehicles.VehicleReaderV1;
+import org.matsim.vehicles.MatsimVehicleReader;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.Vehicles;
 
@@ -36,7 +36,8 @@ public final class VehicleUtils {
 
     public static void addVehiclesToScenarioFromVehicleFile(final String vehiclesFile, final Scenario scenario){
         Vehicles vehs = org.matsim.vehicles.VehicleUtils.createVehiclesContainer();
-        new VehicleReaderV1(vehs).readFile(vehiclesFile);
+//        new VehicleReaderV1(vehs).readFile(vehiclesFile);
+        new MatsimVehicleReader(vehs).readFile(vehiclesFile);
 
         for(VehicleType vt : vehs.getVehicleTypes().values()) {
 

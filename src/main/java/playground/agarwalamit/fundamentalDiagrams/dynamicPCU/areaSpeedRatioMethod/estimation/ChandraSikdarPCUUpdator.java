@@ -41,7 +41,6 @@ import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
-import playground.agarwalamit.fundamentalDiagrams.AttributableVehicleType;
 import playground.agarwalamit.fundamentalDiagrams.core.FDConfigGroup;
 import playground.agarwalamit.fundamentalDiagrams.core.FDDataContainer;
 import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
@@ -183,7 +182,7 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
 //        if (  EnumUtils.isValidEnum(VehicleProjectedAreaRatio.class, mode) ){
 //            return VehicleProjectedAreaRatio.getProjectedAreaRatio(mode);
 //        } else {
-            return (double) ((AttributableVehicleType) scenario.getVehicles()
+            return (double) ( scenario.getVehicles()
                                                                .getVehicleTypes()
                                                                .get(Id.create(mode, VehicleType.class))).getAttributes()
                                                                                                         .getAttribute(

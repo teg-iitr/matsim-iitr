@@ -1,7 +1,6 @@
 package playground.jaipur.network;
 
 import java.util.Collection;
-import amit.jaipur.JaipurUtils;
 import org.locationtech.jts.geom.Geometry;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Scenario;
@@ -18,6 +17,7 @@ import org.matsim.core.utils.io.OsmNetworkReader;
 import org.matsim.core.utils.io.OsmNetworkReader.OsmFilter;
 import org.opengis.feature.simple.SimpleFeature;
 import playground.agarwalamit.utils.geometry.GeometryUtils;
+import playground.jaipur.JaipurUtils;
 
 /**
  * 

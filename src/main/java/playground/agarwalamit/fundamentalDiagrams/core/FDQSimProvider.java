@@ -22,14 +22,13 @@ import org.matsim.core.mobsim.qsim.qnetsimengine.QVehicle;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QVehicleImpl;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
+import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vis.otfvis.OTFClientLive;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import org.matsim.vis.otfvis.OnTheFlyServer;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-
-import playground.agarwalamit.fundamentalDiagrams.AttributableVehicle;
 
 public class FDQSimProvider implements Provider<Mobsim> {
 	
@@ -89,7 +88,8 @@ public class FDQSimProvider implements Provider<Mobsim> {
 					agent.setStabilityTester(stabilityTester);
 					qSim.insertAgentIntoMobsim(agent);
 
-					AttributableVehicle attributableVehicle = new AttributableVehicle(Id.create(agent.getId(), Vehicle.class), modeToVehicleTypes.get(travelMode));
+//					AttributableVehicle attributableVehicle = new AttributableVehicle(Id.create(agent.getId(), Vehicle.class), modeToVehicleTypes.get(travelMode));
+					Vehicle attributableVehicle = VehicleUtils.createVehicle(Id.create(agent.getId(), Vehicle.class), modeToVehicleTypes.get(travelMode));
 					final QVehicle vehicle = new QVehicleImpl(
 //							VehicleUtils.getFactory().createVehicle(Id.create(agent.getId(), Vehicle.class), modeToVehicleTypes.get(travelMode))
 							attributableVehicle
