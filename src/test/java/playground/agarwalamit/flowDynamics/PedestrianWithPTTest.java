@@ -159,7 +159,7 @@ public class PedestrianWithPTTest {
 		config.qsim().setVehiclesSource(VehiclesSource.modeVehicleTypesFromVehiclesData);
 		config.travelTimeCalculator().setAnalyzedModesAsString(StringUtils.join(new String[]{walkModeName}, ","));
 		config.travelTimeCalculator().setFilterModes(true);
-		config.plansCalcRoute().setNetworkModes(Arrays.asList(walkModeName));
+		config.plansCalcRoute().setNetworkModes(Arrays.asList("car",walkModeName));
 
 		config.plansCalcRoute().removeModeRoutingParams(walkModeName);
 

@@ -6,8 +6,4 @@ env:
   global:
     - MAVEN_OPTS="-Xmx2g"
 
-script: mvn -install -Dmaven.test.redirectTestOutputToFile -Dmatsim.preferLocalDtds=true
-
-cache:
-  directories:
-  - $HOME/.m2
+script: mvn install -Dmaven.test.redirectTestOutputToFile -Dmatsim.preferLocalDtds=true

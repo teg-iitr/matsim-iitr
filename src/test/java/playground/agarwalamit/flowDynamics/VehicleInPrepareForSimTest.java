@@ -105,6 +105,7 @@ public class VehicleInPrepareForSimTest {
         config.travelTimeCalculator().setAnalyzedModesAsString(StringUtils.join(networkModes, ","));
         config.travelTimeCalculator().setSeparateModes(true);
 
+        config.plansCalcRoute().removeModeRoutingParams("bike");
         config.planCalcScore().getOrCreateModeParams("bike").setConstant(0.);
 
         config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
@@ -240,10 +241,12 @@ public class VehicleInPrepareForSimTest {
         VehicleType bike = VehicleUtils.getFactory().createVehicleType(Id.create(transportModes[0], VehicleType.class));
         bike.setMaximumVelocity(5);
         bike.setPcuEquivalents(0.25);
+        bike.setNetworkMode(transportModes[0]);
 
         VehicleType car = VehicleUtils.getFactory().createVehicleType(Id.create(transportModes[1], VehicleType.class));
         car.setMaximumVelocity(20);
         car.setPcuEquivalents(1.0);
+        car.setNetworkMode(transportModes[1]);
 
         VehicleType [] vehTypes = {bike, car};
 
@@ -280,8 +283,9 @@ public class VehicleInPrepareForSimTest {
                     if(! scenario.getVehicles().getVehicleTypes().containsKey(vehTypes[i].getId())) {
                         scenario.getVehicles().addVehicleType(vehTypes[i]);
                     }
-
                     Id<Vehicle> vId = Id.create(p.getId(),Vehicle.class);
+                    VehicleUtils.insertVehicleIdIntoAttributes(p,vehTypes[i].getNetworkMode(),vId);
+
                     Vehicle v = VehicleUtils.getFactory().createVehicle(vId, vehTypes[i]);
                     scenario.getVehicles().addVehicle(v);
                     break;
