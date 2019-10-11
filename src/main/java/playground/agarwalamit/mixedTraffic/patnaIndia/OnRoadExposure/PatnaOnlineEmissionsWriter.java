@@ -23,7 +23,6 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.emissions.EmissionModule;
 import org.matsim.contrib.emissions.HbefaVehicleCategory;
-import org.matsim.contrib.emissions.EmissionSpecificationMarker;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -89,9 +88,8 @@ public class PatnaOnlineEmissionsWriter {
             else if  (vt.getId().toString().equals("truck")) vehicleCategory = HbefaVehicleCategory.HEAVY_GOODS_VEHICLE;
             else throw new RuntimeException("not implemented yet.");
 
-            vt.setDescription(  EmissionSpecificationMarker.BEGIN_EMISSIONS.toString()+
-                    vehicleCategory.toString().concat(";;;")+
-                    EmissionSpecificationMarker.END_EMISSIONS.toString() );
+            vt.getAttributes().putAttribute("hbefaVehicleTypeDescription",
+                    vehicleCategory.toString().concat(";;;"));
         }
 
         final Controler controler = new Controler(scenario);

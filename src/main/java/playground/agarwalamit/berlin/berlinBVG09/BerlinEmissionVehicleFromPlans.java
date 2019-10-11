@@ -24,9 +24,9 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.emissions.EmissionUtils;
 import org.matsim.contrib.emissions.HbefaVehicleAttributes;
 import org.matsim.contrib.emissions.HbefaVehicleCategory;
-import org.matsim.contrib.emissions.EmissionSpecificationMarker;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -106,11 +106,12 @@ public class BerlinEmissionVehicleFromPlans {
 			if(isCreateVehicle){
 				vehicleAttributes = new HbefaVehicleAttributes();
 				Id<VehicleType> vehTypeId = Id.create(vehicleCategory + ";" + 
-						vehicleAttributes.getHbefaTechnology() + ";" + 
-						vehicleAttributes.getHbefaSizeClass() + ";" + 
-						vehicleAttributes.getHbefaEmConcept(), VehicleType.class);
+						"average" + ";" +
+						"average" + ";" +
+						"average", VehicleType.class);
 				VehicleType vehicleType = VehicleUtils.getFactory().createVehicleType(vehTypeId);
-				vehicleType.setDescription(EmissionSpecificationMarker.BEGIN_EMISSIONS+vehTypeId.toString()+EmissionSpecificationMarker.END_EMISSIONS);
+				vehicleType.getAttributes().putAttribute("hbefaVehicleTypeDescription",vehTypeId.toString());
+//				vehicleType.setDescription(EmissionUtils.EmissionSpecificationMarker.BEGIN_EMISSIONS+vehTypeId.toString()+EmissionSpecificationMarker.END_EMISSIONS);
 
 				if(!(outputVehicles.getVehicleTypes().containsKey(vehTypeId))){
 					outputVehicles.addVehicleType(vehicleType);

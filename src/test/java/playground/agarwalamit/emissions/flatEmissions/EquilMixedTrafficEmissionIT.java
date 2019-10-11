@@ -37,7 +37,6 @@ import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonMoneyEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.emissions.EmissionModule;
-import org.matsim.contrib.emissions.EmissionSpecificationMarker;
 import org.matsim.contrib.emissions.HbefaVehicleCategory;
 import org.matsim.contrib.emissions.events.ColdEmissionEvent;
 import org.matsim.contrib.emissions.events.ColdEmissionEventHandler;
@@ -129,9 +128,7 @@ public class EquilMixedTrafficEmissionIT {
 		car.setMaximumVelocity(100.0/3.6);
 		car.setPcuEquivalents(1.0);
 //		car.setDescription(HbefaVehicleCategory.PASSENGER_CAR.toString().concat(";petrol (4S);&gt;=2L;PC-P-Euro-0"));
-		car.setDescription(EmissionSpecificationMarker.BEGIN_EMISSIONS.toString()
-				+ HbefaVehicleCategory.PASSENGER_CAR.toString().concat(";petrol (4S);>=2L;PC-P-Euro-0")
-				+ EmissionSpecificationMarker.END_EMISSIONS.toString() );
+		car.getAttributes().putAttribute("hbefaVehicleTypeDescription", HbefaVehicleCategory.PASSENGER_CAR.toString().concat(";petrol (4S);>=2L;PC-P-Euro-0") );
 		// Info: "&gt;" is an escape character for ">" in xml (http://stackoverflow.com/a/1091953/1359166); need to be very careful with them.
 		// thus, reading from vehicles file and directly passing to vehicles container is not the same.
 		vehs.addVehicleType(car);
@@ -139,9 +136,8 @@ public class EquilMixedTrafficEmissionIT {
 		VehicleType bike = vehs.getFactory().createVehicleType(Id.create("bicycle",VehicleType.class));
 		bike.setMaximumVelocity(20./3.6);
 		bike.setPcuEquivalents(0.25);
-		bike.setDescription(EmissionSpecificationMarker.BEGIN_EMISSIONS.toString()+
-				HbefaVehicleCategory.ZERO_EMISSION_VEHICLE.toString().concat(";;;")+
-				EmissionSpecificationMarker.END_EMISSIONS.toString() );
+		bike.getAttributes().putAttribute("hbefaVehicleTypeDescription",
+				HbefaVehicleCategory.ZERO_EMISSION_VEHICLE.toString().concat(";;;"));
 		vehs.addVehicleType(bike);
 
 		if(! this.vehiclesSource.equals(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData)) {
