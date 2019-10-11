@@ -264,7 +264,7 @@ public class EmissionEventsTest {
     }
 
     private void emissionSettings(final Scenario scenario, final boolean isWritingEmissionsEvents){
-        String inputFilesDir = "../benjamin/test/input/playground/benjamin/internalization/";
+        String inputFilesDir = "./test/input/playground/agarwalamit/emissions/internalization/";
 
         Config config = scenario.getConfig();
         EmissionsConfigGroup ecg = new EmissionsConfigGroup() ;

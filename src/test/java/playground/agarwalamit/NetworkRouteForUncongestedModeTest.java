@@ -63,7 +63,7 @@ public class NetworkRouteForUncongestedModeTest {
 
 		Scenario sc = createSceanrio();
 		sc.getConfig().controler().setOutputDirectory(helper.getOutputDirectory());
-		
+		sc.getConfig().plansCalcRoute().removeModeRoutingParams("ride");
 		// set allowed modes on each link
 		for (Link l : sc.getNetwork().getLinks().values()) {
 			l.setAllowedModes(new HashSet<>(Arrays.asList("car","ride")));
