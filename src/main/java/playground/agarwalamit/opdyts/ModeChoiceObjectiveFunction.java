@@ -150,7 +150,9 @@ public class ModeChoiceObjectiveFunction implements ObjectiveFunction {
 
         for (Id<Person> personId : persons) {
             Plan plan = matSimState.getSelectedPlan(personId);
-            List<TripStructureUtils.Trip> trips = TripStructureUtils.getTrips(plan, tripRouter.getStageActivityTypes());
+            List<TripStructureUtils.Trip> trips = TripStructureUtils.getTrips(plan
+//                    , tripRouter.getStageActivityTypes()
+            );
             for (TripStructureUtils.Trip trip : trips) {
                 List<String> tripTypes = new ArrayList<>();
                 String mode = mainModeIdentifier.identifyMainMode(trip.getLegsOnly());
