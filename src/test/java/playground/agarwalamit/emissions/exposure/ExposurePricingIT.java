@@ -60,11 +60,7 @@ import playground.agarwalamit.analysis.emission.AirPollutionExposureAnalysisCont
 import playground.agarwalamit.analysis.emission.experienced.ExperiencedEmissionCostHandler;
 import playground.agarwalamit.munich.utils.MunichPersonFilter;
 import playground.agarwalamit.utils.PersonFilter;
-import playground.benjamin.scenarios.munich.exposure.EmissionResponsibilityTravelDisutilityCalculatorFactory;
-import playground.vsp.airPollution.exposure.EmissionResponsibilityCostModule;
-import playground.vsp.airPollution.exposure.GridTools;
-import playground.vsp.airPollution.exposure.InternalizeEmissionResponsibilityControlerListener;
-import playground.vsp.airPollution.exposure.ResponsibilityGridTools;
+import playground.vsp.airPollution.exposure.*;
 
 
 /**
@@ -174,7 +170,8 @@ public class ExposurePricingIT {
 
 
 		final EmissionResponsibilityTravelDisutilityCalculatorFactory emfac = new EmissionResponsibilityTravelDisutilityCalculatorFactory(
-        );
+        	new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, sc.getConfig().planCalcScore())
+				);
 
 		controler.addOverridingModule(new AbstractModule() {
 

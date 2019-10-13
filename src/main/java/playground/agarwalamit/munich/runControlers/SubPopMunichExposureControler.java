@@ -24,6 +24,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.emissions.EmissionModule;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
@@ -39,13 +40,10 @@ import org.matsim.core.replanning.modules.SubtourModeChoice;
 import org.matsim.core.replanning.selectors.RandomPlanSelector;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.router.TripRouter;
+import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.scenario.ScenarioUtils;
 import playground.agarwalamit.utils.FileUtils;
-import playground.benjamin.scenarios.munich.exposure.EmissionResponsibilityTravelDisutilityCalculatorFactory;
-import playground.vsp.airPollution.exposure.EmissionResponsibilityCostModule;
-import playground.vsp.airPollution.exposure.GridTools;
-import playground.vsp.airPollution.exposure.InternalizeEmissionResponsibilityControlerListener;
-import playground.vsp.airPollution.exposure.ResponsibilityGridTools;
+import playground.vsp.airPollution.exposure.*;
 
 /**
  * @author amit
@@ -152,7 +150,9 @@ public class SubPopMunichExposureControler {
 		ecg.setConsideringCO2Costs(Boolean.parseBoolean(considerCO2Costs));
 		ecg.setEmissionCostMultiplicationFactor(Double.parseDouble(emissionCostMultiplicationFactor));
 
-		final EmissionResponsibilityTravelDisutilityCalculatorFactory emfac = new EmissionResponsibilityTravelDisutilityCalculatorFactory();
+		final EmissionResponsibilityTravelDisutilityCalculatorFactory emfac = new EmissionResponsibilityTravelDisutilityCalculatorFactory(
+				new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig().planCalcScore())
+		);
 		
 		controler.addOverridingModule(new AbstractModule() {
 			

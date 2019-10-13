@@ -36,10 +36,9 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.vehicles.*;
 import playground.agarwalamit.utils.FileUtils;
-import playground.benjamin.scenarios.manteuffel.ManteuffelEmissionVehicleGenerator;
 
 /**
- * @author benjamin (after {@link ManteuffelEmissionVehicleGenerator}
+ * @author benjamin
  *
  */
 public class BerlinEmissionVehicleFromEvents implements VehicleEntersTrafficEventHandler, TransitDriverStartsEventHandler {

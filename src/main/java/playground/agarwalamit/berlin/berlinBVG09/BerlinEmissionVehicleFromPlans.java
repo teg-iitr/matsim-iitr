@@ -32,10 +32,8 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vehicles.*;
 import playground.agarwalamit.utils.FileUtils;
-import playground.benjamin.scenarios.manteuffel.ManteuffelEmissionVehicleGenerator;
-
 /**
- * @author benjamin (after {@link ManteuffelEmissionVehicleGenerator}
+ * @author benjamin
  *
  */
 public class BerlinEmissionVehicleFromPlans {

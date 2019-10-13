@@ -52,8 +52,8 @@ import playground.agarwalamit.mixedTraffic.patnaIndia.input.joint.JointCalibrati
 import playground.agarwalamit.munich.utils.MunichPersonFilter;
 import playground.agarwalamit.munich.utils.MunichPersonFilter.MunichUserGroup;
 import playground.agarwalamit.utils.FileUtils;
-import playground.benjamin.internalization.EmissionTravelDisutilityCalculatorFactory;
 import playground.vsp.airPollution.flatEmissions.EmissionCostModule;
+import playground.vsp.airPollution.flatEmissions.EmissionTravelDisutilityCalculatorFactory;
 import playground.vsp.airPollution.flatEmissions.InternalizeEmissionsControlerListener;
 import playground.vsp.congestion.controler.MarginalCongestionPricingContolerListener;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
@@ -158,7 +158,8 @@ public class SubPopMunichControler {
 		if(internalizeEmission){
 			// this affects the router by overwriting its generalized cost function (TravelDisutility):
 			final EmissionTravelDisutilityCalculatorFactory emissionTducf = new EmissionTravelDisutilityCalculatorFactory(
-            );
+					new RandomizingTimeDistanceTravelDisutilityFactory( TransportMode.car, config.planCalcScore())
+					);
 			controler.addOverridingModule(new AbstractModule() {
 				@Override
 				public void install() {
