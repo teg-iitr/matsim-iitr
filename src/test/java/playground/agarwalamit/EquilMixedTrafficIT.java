@@ -106,11 +106,11 @@ public class EquilMixedTrafficIT {
         Id<Vehicle> bikeVeh = Id.createVehicleId("10_bicycle");
         Id<Vehicle> carVeh = Id.createVehicleId(1);
 
-        Id<Link> link2 = Id.createLinkId(3);
+        Id<Link> link5 = Id.createLinkId(5);
         Id<Link> link22 = Id.createLinkId(22);
 
-        Assert.assertEquals("Wrong travel time of agent 9 on link 2", Math.floor(10000 / 4.17) + 1.0, vehicle2link2leaveTime.get(bikeVeh).get(link2) - vehicle2link2enterTime.get(bikeVeh).get(link2), MatsimTestUtils.EPSILON);
-        Assert.assertEquals("Wrong travel time of agent 2 on link 2", Math.floor(10000 / 16.677) + 1.0, vehicle2link2leaveTime.get(carVeh).get(link2) - vehicle2link2enterTime.get(carVeh).get(link2), MatsimTestUtils.EPSILON);
+        Assert.assertEquals("Wrong travel time of agent 9 on link 5", Math.floor(10000 / 4.17) + 1.0, vehicle2link2leaveTime.get(bikeVeh).get(link5) - vehicle2link2enterTime.get(bikeVeh).get(link5), MatsimTestUtils.EPSILON);
+        Assert.assertEquals("Wrong travel time of agent 2 on link 5", Math.floor(10000 / 16.677) + 1.0, vehicle2link2leaveTime.get(carVeh).get(link5) - vehicle2link2enterTime.get(carVeh).get(link5), MatsimTestUtils.EPSILON);
 
         Tuple<Double,Double> bikeSpeed = speedEventHandler.mode2minmaxSpeed.get("bicycle");
         Tuple<Double,Double> carSpeed = speedEventHandler.mode2minmaxSpeed.get("car");

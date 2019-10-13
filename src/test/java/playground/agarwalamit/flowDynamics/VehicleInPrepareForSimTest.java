@@ -280,14 +280,20 @@ public class VehicleInPrepareForSimTest {
                     }
                     break;
                 case fromVehiclesData:
-                    if(! scenario.getVehicles().getVehicleTypes().containsKey(vehTypes[i].getId())) {
-                        scenario.getVehicles().addVehicleType(vehTypes[i]);
-                    }
-                    Id<Vehicle> vId = Id.create(p.getId(),Vehicle.class);
-                    VehicleUtils.insertVehicleIdIntoAttributes(p,vehTypes[i].getNetworkMode(),vId);
 
-                    Vehicle v = VehicleUtils.getFactory().createVehicle(vId, vehTypes[i]);
-                    scenario.getVehicles().addVehicle(v);
+                    Arrays.stream(vehTypes).forEach(vt->
+                            {
+                                if(! scenario.getVehicles().getVehicleTypes().containsKey(vt.getId())) {
+                                    scenario.getVehicles().addVehicleType(vt);
+                                }
+                                //add all other vehicles for mode choice && fromVehiclesData
+                                Id<Vehicle> vId = Id.create(p.getId()+"_"+vt.getNetworkMode(),Vehicle.class);
+                                VehicleUtils.insertVehicleIdIntoAttributes(p,vt.getNetworkMode(),vId);
+
+                                Vehicle v = VehicleUtils.getFactory().createVehicle(vId, vt);
+                                scenario.getVehicles().addVehicle(v);
+                            }
+                    );
                     break;
                 default:
                     throw new RuntimeException("not implemented yet.");
