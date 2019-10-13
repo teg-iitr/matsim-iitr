@@ -31,9 +31,8 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigReader;
 import org.matsim.core.utils.io.IOUtils;
 
+import playground.agarwalamit.munich.utils.MunichPersonFilter;
 import playground.agarwalamit.utils.LoadMyScenarios;
-import playground.benjamin.scenarios.munich.analysis.filter.PersonFilter;
-import playground.benjamin.scenarios.munich.analysis.filter.UserGroup;
 
 /**
  * A class to get activity duration distribution for each activity type. 
@@ -64,7 +63,7 @@ public class ActivityType2ActivityDurationDistribution {
 	 * @param outputDir
 	 * @param userGroup for which distribution is required
 	 */
-	public ActivityType2ActivityDurationDistribution(final String outputDir, final UserGroup userGroup) {
+	public ActivityType2ActivityDurationDistribution(final String outputDir, final MunichPersonFilter.MunichUserGroup userGroup) {
 		this.outputDir = outputDir;
 		this.sortPersons = true;
 		this.userGroup = userGroup.toString();
@@ -74,7 +73,7 @@ public class ActivityType2ActivityDurationDistribution {
 	public static void main(String[] args) {
 		String outputDir = "/Users/aagarwal/Desktop/ils4/agarwal/munich/output/1pct/";
 		String [] runCases = { "baseCaseCtd","ei","ci","eci"};
-		new ActivityType2ActivityDurationDistribution(outputDir,UserGroup.URBAN).run(runCases);
+		new ActivityType2ActivityDurationDistribution(outputDir, MunichPersonFilter.MunichUserGroup.Urban).run(runCases);
 	}
 
 	public void run(final String [] runCases){
@@ -171,10 +170,10 @@ public class ActivityType2ActivityDurationDistribution {
 			actType2ActDuration2LegCount.put(actTyp, time2LegCount);
 		}
 
-		PersonFilter pf = new PersonFilter();
+		MunichPersonFilter pf = new MunichPersonFilter();
 		for(Id<Person> id : personId2ActDurations.keySet()){
 			if(sortPersons ){
-				if(pf.isPersonIdFromUserGroup(id, UserGroup.valueOf(userGroup))){
+				if(pf.isPersonIdFromUserGroup(id, MunichPersonFilter.MunichUserGroup.valueOf(userGroup))){
 					storeData(id);
 				}
 			} else {

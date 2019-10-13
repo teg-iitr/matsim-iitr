@@ -32,7 +32,6 @@ import org.matsim.core.utils.io.IOUtils;
 
 import playground.agarwalamit.munich.utils.MunichPersonFilter;
 import playground.agarwalamit.utils.LoadMyScenarios;
-import playground.benjamin.scenarios.munich.analysis.filter.UserGroup;
 
 /**
  * @author amit
@@ -41,11 +40,11 @@ import playground.benjamin.scenarios.munich.analysis.filter.UserGroup;
 public class ActivityCounter {
 	private static final MunichPersonFilter PF = new MunichPersonFilter();
 	private final String inputPlansFile ;
-	private final UserGroup ug;
+	private final MunichPersonFilter.MunichUserGroup ug;
 	private final SortedMap<String, Integer> actTyp2Count = new TreeMap<>();
 	private final boolean isSorting;
 
-	public ActivityCounter(final String inputPlansFile, final UserGroup ug){
+	public ActivityCounter(final String inputPlansFile, final MunichPersonFilter.MunichUserGroup ug){
 		this.inputPlansFile = inputPlansFile;
 		this.ug = ug;
 		this.isSorting = true;
@@ -59,7 +58,7 @@ public class ActivityCounter {
 
 	public static void main(String[] args) {
 		String outputFilesDir = "../../../../repos/runs-svn/detEval/emissionCongestionInternalization/output/1pct/run0/baseCaseCtd/";		
-		ActivityCounter ac = new ActivityCounter(outputFilesDir+"/output_plans.xml.gz",UserGroup.URBAN);
+		ActivityCounter ac = new ActivityCounter(outputFilesDir+"/output_plans.xml.gz", MunichPersonFilter.MunichUserGroup.Urban);
 		ac.count(outputFilesDir);
 		ac.writeData(outputFilesDir+"/analysis/");
 	}

@@ -38,7 +38,7 @@ import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 import org.matsim.vis.snapshotwriters.SnapshotWriter;
-import playground.benjamin.utils.BkNumberUtils;
+import playground.agarwalamit.utils.NumberUtils;
 
 /**
 * @author amit
@@ -145,7 +145,7 @@ public class MyPositionSnapShotWriter implements SnapshotWriter {
 
 			if ( Math.abs( distFromNodeAndPoint + distPointAndToNode - distFromNodeAndToNode ) < 0.01) { // assuming link to be straight line
 				// 0.01 to ignore rounding errors, In general, if AC + CB = AB => C lies on AB
-				distFromFromNode = BkNumberUtils.roundDouble(distFromNodeAndPoint, 2);
+				distFromFromNode = NumberUtils.round(distFromNodeAndPoint, 2);
 				link2positions.put(l.getId(), distFromFromNode);
 			}
 		}

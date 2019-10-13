@@ -20,15 +20,11 @@ package playground.agarwalamit.munich.analysis.userGroup;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.utils.io.IOUtils;
-
+import playground.agarwalamit.munich.utils.MunichPersonFilter;
 import playground.agarwalamit.utils.LoadMyScenarios;
-import playground.benjamin.scenarios.munich.analysis.filter.PersonFilter;
-import playground.benjamin.scenarios.munich.analysis.filter.UserGroup;
-
 
 /**
  * @author amit
@@ -43,11 +39,11 @@ public class ShareOfUserGroups {
 	public static void main(String[] args) {
 		BufferedWriter writer = IOUtils.getBufferedWriter(outputDir+"/analysis/subPopulationShare.txt");
 		Scenario sc = LoadMyScenarios.loadScenarioFromPlansAndNetwork(populationFile, networkFile);
-		PersonFilter pf = new PersonFilter();
+		MunichPersonFilter pf = new MunichPersonFilter();
 		Population wholePop = sc.getPopulation();
 		try {
 			writer.write("UserGroup \t PopulationSize \t percentageShare \n");
-			for(UserGroup ug:UserGroup.values()){
+			for(MunichPersonFilter.MunichUserGroup ug: MunichPersonFilter.MunichUserGroup.values()){
 				Population pop = pf.getPopulation(wholePop,ug);
 				double share = (double) pop.getPersons().size()*100/ (double) wholePop.getPersons().size();
 				writer.write(ug.toString()+"\t"+pop.getPersons().size()+"\t"+share+"\n");

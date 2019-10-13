@@ -36,9 +36,7 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.events.handler.EventHandler;
 import org.matsim.core.utils.io.IOUtils;
-
-import playground.benjamin.scenarios.munich.analysis.filter.PersonFilter;
-import playground.benjamin.scenarios.munich.analysis.filter.UserGroup;
+import playground.agarwalamit.munich.utils.MunichPersonFilter;
 import playground.vsp.analysis.modules.AbstractAnalysisModule;
 
 /**
@@ -54,9 +52,9 @@ public class LegModeRouteDistanceDistributionAnalyzer extends AbstractAnalysisMo
 	private SortedMap<String, Map<Id<Person>, List<Double>>> mode2PersonId2dist;
 	private TripDistanceHandler lmrdh;
 	private String eventsFile;
-	private UserGroup userGroup = null;
+	private MunichPersonFilter.MunichUserGroup userGroup = null;
 
-	public LegModeRouteDistanceDistributionAnalyzer(final UserGroup userGroup) {
+	public LegModeRouteDistanceDistributionAnalyzer(final MunichPersonFilter.MunichUserGroup userGroup) {
 		super(LegModeRouteDistanceDistributionAnalyzer.class.getSimpleName());
 		LOG.info("enabled");
 		this.userGroup = userGroup;
@@ -108,7 +106,7 @@ public class LegModeRouteDistanceDistributionAnalyzer extends AbstractAnalysisMo
 	}
 
 	private void calculateMode2DistanceClass2LegCount() {
-		PersonFilter pf = new PersonFilter();
+		MunichPersonFilter pf = new MunichPersonFilter();
 		for(String mode : mode2PersonId2dist.keySet()){
 			for(Id<Person> personId :mode2PersonId2dist.get(mode).keySet()){
 				if(this.userGroup!=null ){

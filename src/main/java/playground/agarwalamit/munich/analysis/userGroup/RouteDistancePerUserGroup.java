@@ -37,10 +37,9 @@ import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.utils.io.IOUtils;
 
 import playground.agarwalamit.analysis.tripDistance.TripDistanceHandler;
+import playground.agarwalamit.munich.utils.MunichPersonFilter;
 import playground.agarwalamit.munich.utils.UserGroupUtilsExtended;
 import playground.agarwalamit.utils.LoadMyScenarios;
-import playground.benjamin.scenarios.munich.analysis.filter.PersonFilter;
-import playground.benjamin.scenarios.munich.analysis.filter.UserGroup;
 
 /**
  * @author amit
@@ -63,10 +62,10 @@ public class RouteDistancePerUserGroup {
 	private final String eventsFile = outputDir+"/ITERS/it."+lastIteration+"/"+lastIteration+".events.xml.gz";
 	private final Scenario sc;
 	private final UserGroupUtilsExtended usrGrpExtended;
-	private final SortedMap<UserGroup, SortedMap<String, Double>> usrGrp2Mode2MeanDistance = new TreeMap<>();
-	private final SortedMap<UserGroup, SortedMap<String, Double>> usrGrp2Mode2MedianDistance = new TreeMap<>();
+	private final SortedMap<MunichPersonFilter.MunichUserGroup, SortedMap<String, Double>> usrGrp2Mode2MeanDistance = new TreeMap<>();
+	private final SortedMap<MunichPersonFilter.MunichUserGroup, SortedMap<String, Double>> usrGrp2Mode2MedianDistance = new TreeMap<>();
 	private SortedMap<String, Map<Id<Person>, List<Double>>> mode2PersonId2RouteDist;
-	private final SortedMap<UserGroup, List<Double>> userGrpToBoxPlotData;
+	private final SortedMap<MunichPersonFilter.MunichUserGroup, List<Double>> userGrpToBoxPlotData;
 
     public static void main(String[] args) {
 		RouteDistancePerUserGroup routeDistUG = new RouteDistancePerUserGroup();
@@ -92,7 +91,7 @@ public class RouteDistancePerUserGroup {
 		BufferedWriter writer = IOUtils.getBufferedWriter(outputFolder+"/usrGrp2TravelMode2MeanAndMedianRouteDistance.txt");
 		try {
 			writer.write("UserGroup \t travelMode \t MeanRouteDistance \t MedianRouteDistance \n");
-			for(UserGroup ug:this.usrGrp2Mode2MeanDistance.keySet()){
+			for(MunichPersonFilter.MunichUserGroup ug:this.usrGrp2Mode2MeanDistance.keySet()){
 				for(String travelMode:this.usrGrp2Mode2MeanDistance.get(ug).keySet()){
 					writer.write(ug+"\t"+travelMode+"\t"+this.usrGrp2Mode2MeanDistance.get(ug).get(travelMode)+"\t"+this.usrGrp2Mode2MedianDistance.get(ug).get(travelMode)+"\n");
 				}
@@ -106,7 +105,7 @@ public class RouteDistancePerUserGroup {
 		try {
 			String outputFile = outputFolder+"/boxPlot/";
 			new File(outputFile).mkdirs();
-			for(UserGroup ug :this.userGrpToBoxPlotData.keySet()){
+			for(MunichPersonFilter.MunichUserGroup ug :this.userGrpToBoxPlotData.keySet()){
 				writer = IOUtils.getBufferedWriter(outputFile+"/travelDistance_"+ug+".txt");
 				writer.write(ug+"\n");
 				for(double d :this.userGrpToBoxPlotData.get(ug)){
@@ -122,16 +121,16 @@ public class RouteDistancePerUserGroup {
 	}
 	
 	private void createBoxPlotData (Map<Id<Person>, Double> map){
-		PersonFilter pf = new PersonFilter();
+		MunichPersonFilter pf = new MunichPersonFilter();
 		
-		for(UserGroup ug:UserGroup.values()){
+		for(MunichPersonFilter.MunichUserGroup ug: MunichPersonFilter.MunichUserGroup.values()){
 			Population relevantPop = pf.getPopulation(sc.getPopulation(), ug);
 			userGrpToBoxPlotData.put(ug, this.usrGrpExtended.getTotalStatListForBoxPlot(map, relevantPop));
 		}
 	}
 	private void getUserGroupDistanceMeanAndMeadian(){
-		PersonFilter pf = new PersonFilter();
-		for(UserGroup ug:UserGroup.values()){
+		MunichPersonFilter pf = new MunichPersonFilter();
+		for(MunichPersonFilter.MunichUserGroup ug: MunichPersonFilter.MunichUserGroup.values()){
 			Population pop = pf.getPopulation(sc.getPopulation(), ug);
 			this.usrGrp2Mode2MeanDistance.put(ug, this.usrGrpExtended.calculateTravelMode2MeanFromLists(mode2PersonId2RouteDist, pop));
 			this.usrGrp2Mode2MedianDistance.put(ug, this.usrGrpExtended.calculateTravelMode2MedianFromLists(mode2PersonId2RouteDist, pop));

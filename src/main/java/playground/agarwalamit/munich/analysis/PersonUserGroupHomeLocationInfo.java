@@ -28,9 +28,8 @@ import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.utils.io.IOUtils;
 
+import playground.agarwalamit.munich.utils.MunichPersonFilter;
 import playground.agarwalamit.utils.LoadMyScenarios;
-import playground.benjamin.scenarios.munich.analysis.filter.PersonFilter;
-import playground.benjamin.scenarios.munich.analysis.filter.UserGroup;
 
 /**
  * @author amit
@@ -38,7 +37,7 @@ import playground.benjamin.scenarios.munich.analysis.filter.UserGroup;
 
 public class PersonUserGroupHomeLocationInfo {
 
-	private final PersonFilter pf = new PersonFilter();
+	private final MunichPersonFilter pf = new MunichPersonFilter();
 
 	public static void main(String[] args) {
 
@@ -57,7 +56,7 @@ public class PersonUserGroupHomeLocationInfo {
 		try {
 			writer.write("personId \t userGroup \t homeX \t homeY \n");
 			
-			for(UserGroup ug : UserGroup.values()){
+			for(MunichPersonFilter.MunichUserGroup ug : MunichPersonFilter.MunichUserGroup.values()){
 				Population pop = pf.getPopulation(sc.getPopulation(), ug);
 				for(Person p:pop.getPersons().values()){
 					Coord homeCoord = null;

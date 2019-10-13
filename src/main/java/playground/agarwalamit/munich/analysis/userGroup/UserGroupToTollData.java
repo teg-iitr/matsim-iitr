@@ -24,13 +24,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.utils.io.IOUtils;
-
-import playground.benjamin.scenarios.munich.analysis.filter.PersonFilter;
-import playground.benjamin.scenarios.munich.analysis.filter.UserGroup;
+import playground.agarwalamit.munich.utils.MunichPersonFilter;
 
 /**
  * @author amit
@@ -39,7 +36,7 @@ import playground.benjamin.scenarios.munich.analysis.filter.UserGroup;
 public class UserGroupToTollData {
 
 	private final Map<Id<Person>, Double> person2Toll = new HashMap<>();
-	private final Map<UserGroup, Double> userGrpToToll = new TreeMap<>();
+	private final Map<MunichPersonFilter.MunichUserGroup, Double> userGrpToToll = new TreeMap<>();
 
 
 	public static void main(String[] args) {
@@ -80,13 +77,13 @@ public class UserGroupToTollData {
 	}
 
 	private void filterAndWriteUserGroupData(String outFile){
-		PersonFilter pf = new PersonFilter();
+		MunichPersonFilter pf = new MunichPersonFilter();
 
-		for(UserGroup ug : UserGroup.values()){
+		for(MunichPersonFilter.MunichUserGroup ug : MunichPersonFilter.MunichUserGroup.values()){
 			userGrpToToll.put(ug, 0.);
 		}
 
-		for(UserGroup ug : UserGroup.values()){
+		for(MunichPersonFilter.MunichUserGroup ug : MunichPersonFilter.MunichUserGroup.values()){
 			for(Id<Person> pId : person2Toll.keySet()){
 				if(pf.isPersonIdFromUserGroup(pId, ug)){
 					double tollSoFar = userGrpToToll.get(ug);
@@ -98,7 +95,7 @@ public class UserGroupToTollData {
 		BufferedWriter writer = IOUtils.getBufferedWriter(outFile);
 		try {
 			writer.write("UserGroup\t toll \n");
-			for(UserGroup ug :userGrpToToll.keySet()){
+			for(MunichPersonFilter.MunichUserGroup ug :userGrpToToll.keySet()){
 				writer.write(ug+"\t"+userGrpToToll.get(ug)+"\n");
 			}
 			writer.close();

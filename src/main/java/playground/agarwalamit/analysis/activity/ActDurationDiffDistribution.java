@@ -34,9 +34,7 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigReader;
 import org.matsim.core.utils.io.IOUtils;
-
-import playground.benjamin.scenarios.munich.analysis.filter.PersonFilter;
-import playground.benjamin.scenarios.munich.analysis.filter.UserGroup;
+import playground.agarwalamit.munich.utils.MunichPersonFilter;
 
 /**
  * A class to get the distribution of activity duration differences.
@@ -70,7 +68,7 @@ public class ActDurationDiffDistribution {
 	 * @param bau business as usual scenario name or run number for baseCaseCtd
 	 * @param userGroup for which distribution is required
 	 */
-	public ActDurationDiffDistribution(final String outputDir, final String bau, final UserGroup userGroup) {
+	public ActDurationDiffDistribution(final String outputDir, final String bau, final MunichPersonFilter.MunichUserGroup userGroup) {
 		this.outputDir = outputDir;
 		this.bau = bau;
 		this.sortPersons = true;
@@ -207,10 +205,10 @@ public class ActDurationDiffDistribution {
 			actType2ActDurationDiff2LegCount.put(actTyp, time2LegCount);
 		}
 
-		PersonFilter pf = new PersonFilter();
+		MunichPersonFilter pf = new MunichPersonFilter();
 		for(Id<Person> id : personId2ActDurationDiff.keySet()){
 			if(sortPersons ){
-				if(pf.isPersonIdFromUserGroup(id, UserGroup.valueOf(userGroup))){
+				if(pf.isPersonIdFromUserGroup(id, MunichPersonFilter.MunichUserGroup.valueOf(userGroup))){
 					storeData(id);
 				}
 			} else {

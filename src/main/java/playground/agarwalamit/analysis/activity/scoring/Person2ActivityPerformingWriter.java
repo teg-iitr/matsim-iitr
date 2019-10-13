@@ -34,11 +34,9 @@ import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.core.utils.misc.Time;
 import playground.agarwalamit.analysis.activity.ActivityType2ActDurationsAnalyzer;
+import playground.agarwalamit.munich.utils.MunichPersonFilter;
 import playground.agarwalamit.utils.FileUtils;
 import playground.agarwalamit.utils.LoadMyScenarios;
-import playground.benjamin.scenarios.munich.analysis.filter.PersonFilter;
-import playground.benjamin.scenarios.munich.analysis.filter.UserGroup;
-
 import java.io.BufferedWriter;
 import java.util.*;
 
@@ -51,7 +49,7 @@ public class Person2ActivityPerformingWriter {
 	private static final String outputFilesDir = FileUtils.RUNS_SVN+"/detEval/emissionCongestionInternalization/output/1pct/run0/baseCaseCtd/";
 	private final Map<Id<Person>,Map<String, Double>> personId2Act2UtilPerf = new HashMap<>();
 	private final Set<String> actTypes = new HashSet<>();
-	private final UserGroup userGroup = UserGroup.URBAN;
+	private final MunichPersonFilter.MunichUserGroup userGroup = MunichPersonFilter.MunichUserGroup.Urban;
 
 	public static void main(String[] args) {
 		new Person2ActivityPerformingWriter().run();
@@ -174,7 +172,7 @@ public class Person2ActivityPerformingWriter {
 	 * @return activity type to total utility of performing
 	 */
 	public SortedMap<String, Double> getActType2TotalUtilOfPerforming(){
-		PersonFilter pf = new PersonFilter();
+		MunichPersonFilter pf = new MunichPersonFilter();
 		SortedMap<String, Double> act2TotalUtilPerforming = new TreeMap<>();
 
 		for(String actType : actTypes){

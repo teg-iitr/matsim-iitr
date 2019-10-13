@@ -32,12 +32,10 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.utils.io.IOUtils;
-
 import playground.agarwalamit.analysis.tripTime.ModalTravelTimeAnalyzer;
+import playground.agarwalamit.munich.utils.MunichPersonFilter;
 import playground.agarwalamit.munich.utils.UserGroupUtilsExtended;
 import playground.agarwalamit.utils.LoadMyScenarios;
-import playground.benjamin.scenarios.munich.analysis.filter.PersonFilter;
-import playground.benjamin.scenarios.munich.analysis.filter.UserGroup;
 
 /**
  * @author amit
@@ -65,11 +63,11 @@ public class TravelTimePerUserGroup  {
 	
 	private final String outputDir = "../../../../repos/runs-svn/detEval/emissionCongestionInternalization/otherRuns/output/1pct/run10/policies/backcasting/exposure/25ExI/";
 
-    private final SortedMap<UserGroup, SortedMap<String, Double>> usrGrp2Mode2MeanTime = new TreeMap<>();
-	private final SortedMap<UserGroup, SortedMap<String, Double>> usrGrp2Mode2MedianTime = new TreeMap<>();
+    private final SortedMap<MunichPersonFilter.MunichUserGroup, SortedMap<String, Double>> usrGrp2Mode2MeanTime = new TreeMap<>();
+	private final SortedMap<MunichPersonFilter.MunichUserGroup, SortedMap<String, Double>> usrGrp2Mode2MedianTime = new TreeMap<>();
 	
 	private final UserGroupUtilsExtended usrGrpExtended;
-	private final SortedMap<UserGroup, List<Double>> userGrpToBoxPlotData;
+	private final SortedMap<MunichPersonFilter.MunichUserGroup, List<Double>> userGrpToBoxPlotData;
 
 	public static void main(String[] args) {
 
@@ -93,7 +91,7 @@ public class TravelTimePerUserGroup  {
 		BufferedWriter writer = IOUtils.getBufferedWriter(outputFolder+"/usrGrp2TravelMode2MeanAndMedianTravelTime.txt");
 		try {
 			writer.write("UserGroup \t travelMode \t MeanTravelTime \t MedianTravelTime \n");
-			for(UserGroup ug:this.usrGrp2Mode2MeanTime.keySet()){
+			for(MunichPersonFilter.MunichUserGroup ug:this.usrGrp2Mode2MeanTime.keySet()){
 				for(String travelMode:this.usrGrp2Mode2MeanTime.get(ug).keySet()){
 					writer.write(ug+"\t"+travelMode+"\t"+this.usrGrp2Mode2MeanTime.get(ug).get(travelMode)+"\t"+this.usrGrp2Mode2MedianTime.get(ug).get(travelMode)+"\n");
 				}
@@ -107,7 +105,7 @@ public class TravelTimePerUserGroup  {
 		try {
 			String outputFile = outputFolder+"/boxPlot/";
 			new File(outputFile).mkdirs();
-			for(UserGroup ug :this.userGrpToBoxPlotData.keySet()){
+			for(MunichPersonFilter.MunichUserGroup ug :this.userGrpToBoxPlotData.keySet()){
 				writer = IOUtils.getBufferedWriter(outputFile+"/travelTime_"+ug+".txt");
 				writer.write(ug+"\n");
 				for(double d :this.userGrpToBoxPlotData.get(ug)){
@@ -123,16 +121,16 @@ public class TravelTimePerUserGroup  {
 	}
 
 	private void createBoxPlotData (Map<Id<Person>, Double> map){
-		PersonFilter pf = new PersonFilter();
-		for(UserGroup ug:UserGroup.values()){
+		MunichPersonFilter pf = new MunichPersonFilter();
+		for(MunichPersonFilter.MunichUserGroup ug: MunichPersonFilter.MunichUserGroup.values()){
 			Population relevantPop = pf.getPopulation(sc.getPopulation(), ug);
 			userGrpToBoxPlotData.put(ug, this.usrGrpExtended.getTotalStatListForBoxPlot(map, relevantPop));
 		}
 	}
 	
 	private void getUserGroupTravelMeanAndMeadian(){
-		PersonFilter pf = new PersonFilter();
-		for(UserGroup ug:UserGroup.values()){
+		MunichPersonFilter pf = new MunichPersonFilter();
+		for(MunichPersonFilter.MunichUserGroup ug: MunichPersonFilter.MunichUserGroup.values()){
 			Population pop = pf.getPopulation(sc.getPopulation(), ug);
 			this.usrGrp2Mode2MeanTime.put(ug, this.usrGrpExtended.calculateTravelMode2MeanFromLists(this.mode2PersonId2TravelTimes, pop));
 			this.usrGrp2Mode2MedianTime.put(ug, this.usrGrpExtended.calculateTravelMode2MedianFromLists(this.mode2PersonId2TravelTimes, pop));

@@ -29,8 +29,7 @@ import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.utils.io.IOUtils;
-
-import playground.benjamin.scenarios.munich.analysis.filter.UserGroup;
+import playground.agarwalamit.munich.utils.MunichPersonFilter;
 
 /**
  * 
@@ -64,8 +63,8 @@ public class FilteredDepartureTimeAnalyzer {
 
 		double timebinSize = 3600.;
 		
-		for (UserGroup ug : UserGroup.values()) {
-			if(ug.equals(UserGroup.REV_COMMUTER)) continue;
+		for (MunichPersonFilter.MunichUserGroup ug : MunichPersonFilter.MunichUserGroup.values()) {
+			if(ug.equals(MunichPersonFilter.MunichUserGroup.Rev_Commuter)) continue;
 			FilteredDepartureTimeAnalyzer lmtdd = new FilteredDepartureTimeAnalyzer(eventsFile, timebinSize);
 			lmtdd.run();
 			lmtdd.writeResults(outDir+"/analysis/departureCounts_"+ug.toString()+".txt");	

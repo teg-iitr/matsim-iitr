@@ -37,11 +37,10 @@ import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.utils.io.IOUtils;
 
 import playground.agarwalamit.analysis.congestion.ExperiencedDelayAnalyzer;
+import playground.agarwalamit.munich.utils.MunichPersonFilter;
 import playground.agarwalamit.utils.LoadMyScenarios;
 import playground.vsp.airPollution.flatEmissions.EmissionCostFactors;
 import playground.agarwalamit.utils.MapUtils;
-import playground.benjamin.scenarios.munich.analysis.filter.PersonFilter;
-import playground.benjamin.scenarios.munich.analysis.filter.UserGroup;
 import playground.vsp.analysis.modules.emissionsAnalyzer.EmissionsAnalyzer;
 
 /**
@@ -71,9 +70,9 @@ public class DelaysAndEmissionCostsDiff {
 		String fileLocation = outputDir+"/analysis/boxPlot/";
 		new File(fileLocation).mkdirs();
 		BufferedWriter writer;
-		SortedMap<UserGroup, Population> userGrpToPopulation = getPopulationPerUserGroup();
+		SortedMap<MunichPersonFilter.MunichUserGroup, Population> userGrpToPopulation = getPopulationPerUserGroup();
 		for(String run:map.keySet()){
-			for(UserGroup ug:userGrpToPopulation.keySet()){
+			for(MunichPersonFilter.MunichUserGroup ug:userGrpToPopulation.keySet()){
 				writer = IOUtils.getBufferedWriter(fileLocation+run+"_"+ug+"_"+fileName+"Diff.txt");
 				try {
 					writer.write(run+ug.toString()+"\n");
@@ -90,12 +89,12 @@ public class DelaysAndEmissionCostsDiff {
 		}
 	}
 
-	private SortedMap<UserGroup, Population> getPopulationPerUserGroup(){
-		SortedMap<UserGroup, Population> userGrpToPopulation = new TreeMap<>();
-		PersonFilter pf = new PersonFilter();
+	private SortedMap<MunichPersonFilter.MunichUserGroup, Population> getPopulationPerUserGroup(){
+		SortedMap<MunichPersonFilter.MunichUserGroup, Population> userGrpToPopulation = new TreeMap<>();
+		MunichPersonFilter pf = new MunichPersonFilter();
 		String plansFileBAU = outputDir+bau+"/output_plans.xml.gz";
 		Scenario scenario = LoadMyScenarios.loadScenarioFromPlans(plansFileBAU);
-		for(UserGroup ug : UserGroup.values()){
+		for(MunichPersonFilter.MunichUserGroup ug : MunichPersonFilter.MunichUserGroup.values()){
 			userGrpToPopulation.put(ug, pf.getPopulation(scenario.getPopulation(), ug));
 		}
 		return userGrpToPopulation;

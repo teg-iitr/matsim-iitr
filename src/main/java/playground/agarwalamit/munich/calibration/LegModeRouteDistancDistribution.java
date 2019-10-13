@@ -19,13 +19,11 @@
 package playground.agarwalamit.munich.calibration;
 
 import java.io.File;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
-
 import playground.agarwalamit.analysis.tripDistance.LegModeRouteDistanceDistributionAnalyzer;
+import playground.agarwalamit.munich.utils.MunichPersonFilter;
 import playground.agarwalamit.utils.LoadMyScenarios;
-import playground.benjamin.scenarios.munich.analysis.filter.UserGroup;
 import playground.vsp.analysis.modules.legModeDistanceDistribution.LegModeDistanceDistribution;
 
 /**
@@ -53,7 +51,7 @@ public class LegModeRouteDistancDistribution {
 	 * It will write route distance distribution from events and take the beeline distance for teleported modes	
 	 */
 	private void runRoutesDistance(final String runNr, final Scenario sc){
-		UserGroup ug =  UserGroup.URBAN;
+		MunichPersonFilter.MunichUserGroup ug =  MunichPersonFilter.MunichUserGroup.Urban;
 		int lastIteration = sc.getConfig().controler().getLastIteration();
 		String eventsFile = sc.getConfig().controler().getOutputDirectory()+"/ITERS/it."+lastIteration+"/"+lastIteration+".events.xml.gz";
 		LegModeRouteDistanceDistributionAnalyzer lmdfed = new LegModeRouteDistanceDistributionAnalyzer(/*ug*/);

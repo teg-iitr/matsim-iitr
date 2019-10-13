@@ -33,9 +33,8 @@ import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.utils.io.IOUtils;
 
+import playground.agarwalamit.munich.utils.MunichPersonFilter;
 import playground.agarwalamit.utils.LoadMyScenarios;
-import playground.benjamin.scenarios.munich.analysis.filter.PersonFilter;
-import playground.benjamin.scenarios.munich.analysis.filter.UserGroup;
 
 /**
  * @author amit
@@ -43,7 +42,7 @@ import playground.benjamin.scenarios.munich.analysis.filter.UserGroup;
 
 public class ChoiceSetAnalysis {
 
-	private final PersonFilter pf = new PersonFilter();
+	private final MunichPersonFilter pf = new MunichPersonFilter();
 	private Map<List<String>, Integer> modeSequence2Count;
 	private Map<List<String>, Double> modeSequence2TotalScore;
 	private Map<List<String>, Double> modeSequence2TotalBestScore;
@@ -65,7 +64,7 @@ public class ChoiceSetAnalysis {
 		try {
 			writer.write("userGroup \t modeSequence \t numberOfSuchPlans \t carsInChoiceSet \t totalScoreAllPlans \t totalBestScore \t totalExecutedScore \n ");
 			
-			for(UserGroup ug :UserGroup.values()){
+			for(MunichPersonFilter.MunichUserGroup  ug : MunichPersonFilter.MunichUserGroup.values()){
 				processScenario(pf.getPopulation(sc.getPopulation(), ug));
 
 				for(List<String> modes : modeSequence2Count.keySet()){
