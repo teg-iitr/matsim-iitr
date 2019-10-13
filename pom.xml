@@ -3,15 +3,15 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.teg-iitr</groupId>
-	<artifactId>matsim-playground</artifactId>
+	<artifactId>matsim-iitr</artifactId>
 	<packaging>jar</packaging>
 	<version>12.0-SNAPSHOT</version>
-	<name>matsim-playground</name>
+	<name>matsim-iitr</name>
 
 	<scm>
-		<url>https://github.com/teg-iitr/matsim-playground.git</url>
-		<connection>scm:git:git://github.com/teg-iitr/matsim-playground.git</connection>
-		<developerConnection>scm:git:git@github.com:teg-iitr/matsim-playground.git</developerConnection>
+		<url>https://github.com/teg-iitr/matsim-iitr.git</url>
+		<connection>scm:git:git://github.com/teg-iitr/matsim-iitr.git</connection>
+		<developerConnection>scm:git:git@github.com:teg-iitr/matsim-iitr.git</developerConnection>
 	</scm>
 
 	<properties>
