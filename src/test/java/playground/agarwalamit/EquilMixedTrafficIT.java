@@ -156,6 +156,7 @@ public class EquilMixedTrafficIT {
         VehicleType bicycle = vehs.getFactory().createVehicleType(Id.create("bicycle", VehicleType.class));
         bicycle.setMaximumVelocity(4.17);
         bicycle.setPcuEquivalents(0.25);
+        bicycle.setNetworkMode("bicycle");
         vehs.addVehicleType(bicycle);
 
         // get bicycle-car or car-bicycle in plan.

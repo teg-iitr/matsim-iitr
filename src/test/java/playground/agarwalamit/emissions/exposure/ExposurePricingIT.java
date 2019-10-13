@@ -46,6 +46,7 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.contrib.emissions.EmissionModule;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.core.config.Config;
+import org.matsim.core.config.groups.ControlerConfigGroup;
 import org.matsim.core.config.groups.StrategyConfigGroup;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
@@ -122,6 +123,8 @@ public class ExposurePricingIT {
 		String outputDirectory = helper.getOutputDirectory() + "/" + (isConsideringCO2Costs ? "considerCO2Costs" : "notConsiderCO2Costs") + "_"+this.noOfTimeBins+"_timeBins/";
 		sc.getConfig().controler().setOutputDirectory(outputDirectory);
 
+		sc.getConfig().controler().setRoutingAlgorithmType(ControlerConfigGroup.RoutingAlgorithmType.Dijkstra);
+
 		Controler controler = new Controler(sc);
 
 		/* 
@@ -148,7 +151,8 @@ public class ExposurePricingIT {
 		Scenario sc = minimalControlerSetting(isConsideringCO2Costs);
 		ScenarioUtils.loadScenario(sc); // need to load vehicles. Amit Sep 2016
 
-		sc.getConfig().plansCalcRoute().setInsertingAccessEgressWalk(true); 
+		sc.getConfig().plansCalcRoute().setInsertingAccessEgressWalk(true);
+		sc.getConfig().controler().setRoutingAlgorithmType(ControlerConfigGroup.RoutingAlgorithmType.Dijkstra);
 
 		String outputDirectory = helper.getOutputDirectory() + "/" + (isConsideringCO2Costs ? "considerCO2Costs" : "notConsiderCO2Costs") + "_"+this.noOfTimeBins+"_timeBins/";
 		sc.getConfig().controler().setOutputDirectory(outputDirectory);
@@ -217,6 +221,7 @@ public class ExposurePricingIT {
 		sc.getConfig().controler().setOutputDirectory(outputDirectory);
 
 		sc.getConfig().controler().setLastIteration(1);
+		sc.getConfig().controler().setRoutingAlgorithmType(ControlerConfigGroup.RoutingAlgorithmType.Dijkstra);
 
 		Controler controler = new Controler(sc);
 		/* 

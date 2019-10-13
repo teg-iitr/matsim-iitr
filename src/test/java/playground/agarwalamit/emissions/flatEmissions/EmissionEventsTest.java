@@ -44,6 +44,7 @@ import org.matsim.core.events.algorithms.EventWriterXML;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
+import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
 
 import java.io.File;
@@ -110,6 +111,10 @@ public class EmissionEventsTest {
         car.getAttributes().putAttribute("hbefaVehicleTypeDescription",        HbefaVehicleCategory.PASSENGER_CAR.toString().concat(";petrol (4S);>=2L;PC-P-Euro-0"));
         // Info: "&gt;" is an escape character for ">" in xml (http://stackoverflow.com/a/1091953/1359166); need to be very careful with them.
         // thus, reading from vehicles file and directly passing to vehicles container is not the same.
+        VehicleUtils.setHbefaVehicleCategory(car.getEngineInformation(),HbefaVehicleCategory.PASSENGER_CAR.toString());
+        VehicleUtils.setHbefaEmissionsConcept(car.getEngineInformation(),"PC-P-Euro-0");
+        VehicleUtils.setHbefaSizeClass(car.getEngineInformation(), ">=2L");
+        VehicleUtils.setHbefaTechnology(car.getEngineInformation(),"petrol (4S)");
         vehs.addVehicleType(car);
 
         Vehicle carVeh = vehs.getFactory().createVehicle(Id.createVehicleId(carPersonId),car);
@@ -120,6 +125,8 @@ public class EmissionEventsTest {
         bike.setPcuEquivalents(0.25);
         bike.getAttributes().putAttribute("hbefaVehicleTypeDescription",
                 HbefaVehicleCategory.ZERO_EMISSION_VEHICLE.toString().concat(";;;") );
+        VehicleUtils.setHbefaVehicleCategory(bike.getEngineInformation(),HbefaVehicleCategory.ZERO_EMISSION_VEHICLE.toString());
+        bike.setNetworkMode("bicycle");
         vehs.addVehicleType(bike);
 
         {
