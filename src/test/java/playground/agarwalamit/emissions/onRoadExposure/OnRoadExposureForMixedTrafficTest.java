@@ -45,6 +45,7 @@ import org.matsim.core.controler.Controler;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
+import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
 import playground.agarwalamit.utils.MapUtils;
 
@@ -73,7 +74,8 @@ public class OnRoadExposureForMixedTrafficTest {
     @Parameterized.Parameters(name = "{index}: vehicleSource == {0};")
     public static List<Object[]> considerCO2 () {
         Object[] [] considerCO2 = new Object [] [] {
-                { QSimConfigGroup.VehiclesSource.fromVehiclesData},
+                //fro 'frommVEhiclesData' vehicle Ids must be provided with person attributes, this vehicle source is not imp. here. Amit Oct'19
+//                { QSimConfigGroup.VehiclesSource.fromVehiclesData},
                 {QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData}
         };
         return Arrays.asList(considerCO2);
@@ -170,6 +172,11 @@ public class OnRoadExposureForMixedTrafficTest {
                  );
         // Info: "&gt;" is an escape character for ">" in xml (http://stackoverflow.com/a/1091953/1359166); need to be very careful with them.
         // thus, reading from vehicles file and directly passing to vehicles container is not the same.
+        VehicleUtils.setHbefaVehicleCategory(car.getEngineInformation(),HbefaVehicleCategory.PASSENGER_CAR.toString());
+        VehicleUtils.setHbefaEmissionsConcept(car.getEngineInformation(),"PC-P-Euro-0");
+        VehicleUtils.setHbefaSizeClass(car.getEngineInformation(), ">=2L");
+        VehicleUtils.setHbefaTechnology(car.getEngineInformation(),"petrol (4S)");
+
         vehs.addVehicleType(car);
 
         VehicleType bike = vehs.getFactory().createVehicleType(Id.create("bicycle", VehicleType.class));
@@ -177,6 +184,8 @@ public class OnRoadExposureForMixedTrafficTest {
         bike.setPcuEquivalents(0.25);
         bike.getAttributes().putAttribute("hbefaVehicleTypeDescription",
                 HbefaVehicleCategory.ZERO_EMISSION_VEHICLE.toString().concat(";;;") );
+        VehicleUtils.setHbefaVehicleCategory(bike.getEngineInformation(),HbefaVehicleCategory.ZERO_EMISSION_VEHICLE.toString());
+        bike.setNetworkMode("bicycle");
         vehs.addVehicleType(bike);
 
         if (!this.vehiclesSource.equals(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData)) {
@@ -227,7 +236,7 @@ public class OnRoadExposureForMixedTrafficTest {
     }
 
     private void emissionSettings(Scenario scenario){
-        String inputFilesDir = "../benjamin/test/input/playground/benjamin/internalization/";
+        String inputFilesDir = "./test/input/playground/agarwalamit/emissions/internalization/";
 
         String roadTypeMappingFile = inputFilesDir + "/roadTypeMapping.txt";
         String emissionVehicleFile = inputFilesDir + "/equil_emissionVehicles_1pct.xml.gz";
