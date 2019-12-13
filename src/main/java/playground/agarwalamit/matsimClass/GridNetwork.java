@@ -3,15 +3,20 @@ package playground.agarwalamit.matsimClass;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.*;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class GridNetwork {
+
+    public static final double LengthOfGrid = 10000.0;
 
     GridNetwork () {
         Scenario scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
@@ -30,55 +35,55 @@ public class GridNetwork {
     public void run() {
 
         // major artrials at every 500m [nodes also at 250 to connect arterials with them
-        createLinks(new Coord(0.,0.), new Coord[] {new Coord(250,0), new Coord(0,250)},
-                1000.0, 3);
-        createLinks(new Coord(1000.,1000.), new Coord[] {new Coord(-250,0), new Coord(0,-250)},
-                1000.0, 3);
-        createLinks(new Coord(500.,500.), new Coord[] {new Coord(250.0, 0.)},
-                500.0, 3);
-        createLinks(new Coord(500.,500.), new Coord[] { new Coord(0,250)},
-                500.0, 3);
-        createLinks(new Coord(500.,500.), new Coord[] {new Coord(-250,0)},
-                500.0, 3);
-        createLinks(new Coord(500.,500.), new Coord[] { new Coord(0,-250)},
-                500.0, 3);
+        createLinks(new Coord(0.,0.), new Coord[] {new Coord(LengthOfGrid/4,0), new Coord(0,LengthOfGrid/4)},
+                LengthOfGrid, 3);
+        createLinks(new Coord(LengthOfGrid,LengthOfGrid), new Coord[] {new Coord(-LengthOfGrid/4,0), new Coord(0,-LengthOfGrid/4)},
+                LengthOfGrid, 3);
+        createLinks(new Coord(LengthOfGrid/2,LengthOfGrid/2), new Coord[] {new Coord(LengthOfGrid/4, 0.)},
+                LengthOfGrid/2, 3);
+        createLinks(new Coord(LengthOfGrid/2,LengthOfGrid/2), new Coord[] { new Coord(0,LengthOfGrid/4)},
+                LengthOfGrid/2, 3);
+        createLinks(new Coord(LengthOfGrid/2,LengthOfGrid/2), new Coord[] {new Coord(-LengthOfGrid/4,0)},
+                LengthOfGrid/2, 3);
+        createLinks(new Coord(LengthOfGrid/2,LengthOfGrid/2), new Coord[] { new Coord(0,-LengthOfGrid/4)},
+                LengthOfGrid/2, 3);
 
         //arterials at every 250m [nodes also at 100m to connect with sub-arterials]
-        createLinks(new Coord(0.,250.), new Coord[] {new Coord(100,0)},
-                1000.0, 2);
-        createLinks(new Coord(0.,750.), new Coord[] {new Coord(100,0)},
-                1000.0, 2);
-        createLinks(new Coord(250.,0.), new Coord[] {new Coord(0,100)},
-                1000.0, 2);
-        createLinks(new Coord(750.,0.), new Coord[] {new Coord(0,100)},
-                1000.0, 2);
+        createLinks(new Coord(0.,LengthOfGrid/4.), new Coord[] {new Coord(LengthOfGrid/10,0)},
+                LengthOfGrid, 2);
+        createLinks(new Coord(0.,3*LengthOfGrid/4), new Coord[] {new Coord(LengthOfGrid/10,0)},
+                LengthOfGrid, 2);
+        createLinks(new Coord(LengthOfGrid/4,0.), new Coord[] {new Coord(0,LengthOfGrid/10)},
+                LengthOfGrid, 2);
+        createLinks(new Coord(3*LengthOfGrid/4.,0.), new Coord[] {new Coord(0,LengthOfGrid/10)},
+                LengthOfGrid, 2);
 
         //sub-arterials at every 100m
         for (int i=1; i<=9; i++){
             if (i==5) continue;
-            createLinks(new Coord(0.,100.*i), new Coord[] {new Coord(100,0)},
-                    200.0, 1);
-            createLinks(new Coord(200.,100.*i), new Coord[] {new Coord(50,0)},
-                    100.0, 1);
-            createLinks(new Coord(300.,100.*i), new Coord[] {new Coord(100,0)},
-                    400.0, 1);
-            createLinks(new Coord(700.,100.*i), new Coord[] {new Coord(50,0)},
-                    100.0, 1);
-            createLinks(new Coord(800.,100.*i), new Coord[] {new Coord(100,0)},
-                    200.0, 1);
+            createLinks(new Coord(0.,LengthOfGrid*i/10), new Coord[] {new Coord(LengthOfGrid/10,0)},
+                    LengthOfGrid/5, 1);
+            createLinks(new Coord(LengthOfGrid/5,LengthOfGrid*i/10), new Coord[] {new Coord(LengthOfGrid/20,0)},
+                    LengthOfGrid/10, 1);
+            createLinks(new Coord(3*LengthOfGrid/10,LengthOfGrid*i/10), new Coord[] {new Coord(LengthOfGrid/10,0)},
+                    4*LengthOfGrid/10, 1);
+            createLinks(new Coord(7*LengthOfGrid/10,LengthOfGrid*i/10), new Coord[] {new Coord(LengthOfGrid/20,0)},
+                    LengthOfGrid/10, 1);
+            createLinks(new Coord(8*LengthOfGrid/10,LengthOfGrid*i/10), new Coord[] {new Coord(LengthOfGrid/10,0)},
+                    LengthOfGrid/5, 1);
 
-            createLinks(new Coord(100.*i,0), new Coord[] {new Coord(0,100)},
-                    200.0, 1);
-            createLinks(new Coord(100.*i,200), new Coord[] {new Coord(0,50)},
-                    100.0, 1);
-            createLinks(new Coord(100.*i,300), new Coord[] {new Coord(0,100)},
-                    400.0, 1);
-            createLinks(new Coord(100.*i,700), new Coord[] {new Coord(0,50)},
-                    100.0, 1);
-            createLinks(new Coord(100.*i,800), new Coord[] {new Coord(0,100)},
-                    200.0, 1);
+            createLinks(new Coord(LengthOfGrid/10*i,0), new Coord[] {new Coord(0,LengthOfGrid/10)},
+                    LengthOfGrid/5, 1);
+            createLinks(new Coord(LengthOfGrid*i/10,LengthOfGrid/5), new Coord[] {new Coord(0,LengthOfGrid/20)},
+                    LengthOfGrid/10, 1);
+            createLinks(new Coord(LengthOfGrid*i/10,3*LengthOfGrid/10), new Coord[] {new Coord(0,LengthOfGrid/10)},
+                    4*LengthOfGrid/10, 1);
+            createLinks(new Coord(LengthOfGrid*i/10,7*LengthOfGrid/10), new Coord[] {new Coord(0,LengthOfGrid/20)},
+                    LengthOfGrid/10, 1);
+            createLinks(new Coord(LengthOfGrid*i/10,8*LengthOfGrid/10), new Coord[] {new Coord(0,LengthOfGrid/10)},
+                    LengthOfGrid/5, 1);
         }
-        new NetworkWriter(network).write("C:\\Users\\Amit Agarwal\\Downloads\\gridNet.xml.gz");
+        new NetworkWriter(network).write("C:\\\\Users\\\\Amit Agarwal\\\\Downloads\\\\gridNetwork\\\\input\\\\gridNet.xml.gz");
     }
 
     private void createLinks(Coord initialCoord, Coord[] increaments, double lengthToMove, double numberOfLanes){
@@ -92,11 +97,17 @@ public class GridNetwork {
 
                 Link link = networkFactory.createLink(Id.createLinkId(network.getLinks().size()+1),fromNode, toNode);
                 link.setNumberOfLanes(numberOfLanes);
+                link.setFreespeed(getSpeed(numberOfLanes));
+                link.setCapacity(getCapacity(numberOfLanes));
+                link.setAllowedModes(getAllowedModes(numberOfLanes));
                 double linkLength = NetworkUtils.getEuclideanDistance(initialCoord, nextCoord);
                 network.addLink(link);
 
                 Link revLink = networkFactory.createLink(Id.createLinkId(network.getLinks().size()+1),toNode, fromNode);
+                revLink.setCapacity(getCapacity(numberOfLanes));
                 revLink.setNumberOfLanes(numberOfLanes);
+                revLink.setFreespeed(getSpeed(numberOfLanes));
+                revLink.setAllowedModes(getAllowedModes(numberOfLanes));
                 network.addLink(revLink);
                 //set link attributes
 
@@ -104,6 +115,32 @@ public class GridNetwork {
                 initialCoord = nextCoord;
             }
         }
+    }
+
+    private double getCapacity(double noOfLanes){
+        if (noOfLanes==1) return 1500;
+        else if (noOfLanes==2) return 2*1600.;
+        else if (noOfLanes==3) return 3*1800;
+        else throw new RuntimeException("not implemented yet.");
+    }
+
+    private double getSpeed(double noOfLanes){
+        if (noOfLanes==1) return 80/3.6;
+        else if (noOfLanes==2) return 60/3.6;
+        else if (noOfLanes==3) return 60/3.6;
+        else throw new RuntimeException("not implemented yet.");
+    }
+
+    private Set<String> getAllowedModes(double noOfLanes){
+        Set<String> allowedModes = new HashSet<>();
+        allowedModes.add(TransportMode.car);
+        allowedModes.add("motorcycle");
+
+        if (noOfLanes==1 || noOfLanes ==2) {
+            allowedModes.add("bicycle");
+            return allowedModes;
+        } else if (noOfLanes==3) return allowedModes;
+        else throw new RuntimeException("not implemented yet.");
     }
 
     public  Node getOrCreateNode(Coord cord) {
