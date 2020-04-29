@@ -2,7 +2,7 @@
 .project
 .settings
 target
-output/
+*output/
 results.txt
 *.DS_Store
 *.iml
