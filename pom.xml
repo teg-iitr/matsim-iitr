@@ -5,7 +5,7 @@
 	<groupId>com.github.teg-iitr</groupId>
 	<artifactId>matsim-iitr</artifactId>
 	<packaging>jar</packaging>
-	<version>12.0-SNAPSHOT</version>
+	<version>1.0-SNAPSHOT</version>
 	<name>matsim-iitr</name>
 
 	<scm>
@@ -16,6 +16,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<matsim.version>12.0-SNAPSHOT</matsim.version>
 	</properties>
 
 	<repositories>
@@ -39,6 +40,11 @@
 			<url>https://repo.osgeo.org/repository/release/</url>
 			<snapshots><enabled>false</enabled></snapshots>
 			<releases><enabled>true</enabled></releases>
+		</repository>
+		<!--OSM contrib uses this repo which I had to add here.-->
+		<repository>
+			<id>topobyte</id>
+			<url>https://mvn.topobyte.de</url>
 		</repository>
 		<!--<repository>-->
 			<!--&lt;!&ndash; Geotools is not on Maven central &ndash;&gt;-->
@@ -73,27 +79,27 @@
 		<dependency>
 			<groupId>org.matsim</groupId>
 			<artifactId>matsim</artifactId>
-			<version>12.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.matsim</groupId>
 			<artifactId>matsim</artifactId>
-			<version>12.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.matsim</groupId>
 			<artifactId>matsim-examples</artifactId>
-			<version>12.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>analysis</artifactId>
-			<version>12.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.matsim-org</groupId>
@@ -113,17 +119,17 @@
 		<dependency>
 		<groupId>org.matsim.contrib</groupId>
 		<artifactId>cadytsIntegration</artifactId>
-		<version>12.0-SNAPSHOT</version>
+		<version>${matsim.version}</version>
 	</dependency>
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>vsp</artifactId>
-			<version>12.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>signals</artifactId>
-			<version>12.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.matsim-org</groupId>
