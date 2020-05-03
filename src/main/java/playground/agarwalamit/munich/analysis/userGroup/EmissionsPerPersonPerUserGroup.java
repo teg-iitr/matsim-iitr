@@ -31,7 +31,7 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.contrib.emissions.types.WarmPollutant;
+import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.contrib.emissions.EmissionUtils;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.utils.io.IOUtils;
@@ -40,6 +40,8 @@ import playground.agarwalamit.munich.utils.MunichPersonFilter.MunichUserGroup;
 import playground.agarwalamit.utils.LoadMyScenarios;
 import playground.vsp.airPollution.flatEmissions.EmissionCostFactors;
 import playground.vsp.analysis.modules.emissionsAnalyzer.EmissionsAnalyzer;
+
+import static org.matsim.contrib.emissions.Pollutant.*;
 
 /**
  * A class to get emissions and emissions cost for each user group.
@@ -53,7 +55,7 @@ public class EmissionsPerPersonPerUserGroup {
 	private final String outputDir;
 	private SortedMap<MunichUserGroup, SortedMap<String, Double>> userGroupToEmissions;
 	private Scenario scenario;
-	private Map<Id<Person>, SortedMap<String, Double>> emissionsPerPerson;
+	private Map<Id<Person>, SortedMap<Pollutant, Double>> emissionsPerPerson;
 	private final MunichPersonFilter pf = new MunichPersonFilter();
 	
 	public EmissionsPerPersonPerUserGroup(String outputDir) {
@@ -78,7 +80,7 @@ public class EmissionsPerPersonPerUserGroup {
 
 		for(MunichUserGroup ug:MunichUserGroup.values()){
 			SortedMap<String, Double> pollutantToValue = new TreeMap<>();
-			for(WarmPollutant wm:WarmPollutant.values()) {//because ('warmPollutants' U 'coldPollutants') = 'warmPollutants'
+			for(Pollutant wm:Pollutant.values()) {
 				pollutantToValue.put(wm.toString(), 0.0);
 			}
 			this.userGroupToEmissions.put(ug, pollutantToValue);
@@ -95,8 +97,9 @@ public class EmissionsPerPersonPerUserGroup {
 			ema.preProcessData();
 			ema.postProcessData();
 
-			Map<Id<Person>, SortedMap<String, Double>> totalEmissions = ema.getPerson2totalEmissions();
-			Set<String> pollutants = new HashSet<>(Arrays.asList("CO", "CO2(total)", "FC", "HC", "NMHC", "NOx", "NO2","PM", "SO2"));
+			Map<Id<Person>, SortedMap<Pollutant, Double>> totalEmissions = ema.getPerson2totalEmissions();
+//			Set<Pollutant> pollutants = new HashSet<Pollutant>(Arrays.asList("CO", "CO2(total)", "FC", "HC", "NMHC", "NOx", "NO2","PM", "SO2"));
+			Set<Pollutant> pollutants = new HashSet<>(Arrays.asList(CO, CO2_TOTAL, FC, HC, NMHC, NOx, NO2,PM, SO2));
 			emissionsPerPerson = EmissionUtils.setNonCalculatedEmissionsForPopulation(scenario.getPopulation(), totalEmissions, pollutants);
 
 			getTotalEmissionsPerUserGroup(this.emissionsPerPerson);
@@ -154,14 +157,14 @@ public class EmissionsPerPersonPerUserGroup {
 	}
 
 	private void getTotalEmissionsPerUserGroup(
-			Map<Id<Person>, SortedMap<String, Double>> emissionsPerPerson) {
+			Map<Id<Person>, SortedMap<Pollutant, Double>> emissionsPerPerson) {
 		for(Id<Person> personId: scenario.getPopulation().getPersons().keySet()){
 			MunichUserGroup ug = pf.getMunichUserGroupFromPersonId(personId);
 			SortedMap<String, Double> emissionsNewValue = new TreeMap<>();
-			for(String str: emissionsPerPerson.get(personId).keySet()){
-				double emissionSoFar = this.userGroupToEmissions.get(ug).get(str);
-				double emissionNewValue = emissionSoFar+emissionsPerPerson.get(personId).get(str);
-				emissionsNewValue.put(str, emissionNewValue);
+			for(Pollutant poll: emissionsPerPerson.get(personId).keySet()){
+				double emissionSoFar = this.userGroupToEmissions.get(ug).get(poll);
+				double emissionNewValue = emissionSoFar+emissionsPerPerson.get(personId).get(poll);
+				emissionsNewValue.put(poll.toString(), emissionNewValue);
 			}
 			this.userGroupToEmissions.put(ug, emissionsNewValue);
 		}

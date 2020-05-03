@@ -29,9 +29,9 @@ import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.contrib.emissions.events.WarmEmissionEvent;
 import org.matsim.contrib.emissions.events.WarmEmissionEventHandler;
-import org.matsim.contrib.emissions.types.WarmPollutant;
 import org.matsim.vehicles.Vehicle;
 import playground.agarwalamit.analysis.emission.EmissionsPerLinkWarmEventHandler;
 import playground.agarwalamit.munich.analysis.userGroup.EmissionsPerPersonPerUserGroup;
@@ -130,7 +130,7 @@ public class FilteredWarmEmissionHandler implements VehicleEntersTrafficEventHan
 		return delegate.getTime2linkIdLeaveCount();
 	}
 
-	public Map<Double, Map<Id<Link>, Map<String, Double>>> getWarmEmissionsPerLinkAndTimeInterval() {
+	public Map<Double, Map<Id<Link>, Map<Pollutant, Double>>> getWarmEmissionsPerLinkAndTimeInterval() {
 		return delegate.getWarmEmissionsPerLinkAndTimeInterval();
 	}
 

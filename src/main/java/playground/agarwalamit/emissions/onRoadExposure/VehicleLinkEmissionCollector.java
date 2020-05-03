@@ -23,8 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.emissions.types.ColdPollutant;
-import org.matsim.contrib.emissions.types.WarmPollutant;
+import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.vehicles.Vehicle;
 
 /**
@@ -49,8 +48,8 @@ public class VehicleLinkEmissionCollector {
 
     private void initialize(){
         this.emissions.clear();
-        for (WarmPollutant warmPollutant : WarmPollutant.values()) {
-            if (warmPollutant.equals(WarmPollutant.CO2_TOTAL)) continue;
+        for (Pollutant warmPollutant : Pollutant.values()) {
+            if (warmPollutant.equals(Pollutant.CO2_TOTAL)) continue;
             emissions.put(warmPollutant.toString(), 0.);
         }
     }
@@ -63,17 +62,9 @@ public class VehicleLinkEmissionCollector {
         travelTime += time;
     }
 
-    void addColdEmissions(Map<String, Double> map, double linkLength) {
-        this.emissions.entrySet()
-                      .stream()
-                      .filter(e -> ColdPollutant.getValue(e.getKey())!=null)
-                      .forEach(e -> this.emissions.put(e.getKey(),
-                              e.getValue() + map.get(ColdPollutant.valueOf(e.getKey()).getText())/linkLength ));
-    }
-
-    void addWarmEmissions(Map<String, Double> map, double linkLength) {
+    void addEmissions(Map<Pollutant, Double> map, double linkLength) {
         this.emissions.forEach((key, value) -> this.emissions.put(key,
-                value + map.get(WarmPollutant.valueOf(key).getText()) / linkLength));
+                value + map.get(Pollutant.valueOf(key)) / linkLength));
     }
 
     Map<String, Double> getInhaledMass(OnRoadExposureConfigGroup config) {

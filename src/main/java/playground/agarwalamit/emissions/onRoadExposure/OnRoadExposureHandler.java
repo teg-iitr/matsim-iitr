@@ -200,7 +200,7 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
                 this.agentsOnLink.get(coldEmissionEvent.getLinkId())
                                  .values()
                                  .stream()
-                                 .forEach(e -> e.addColdEmissions(coldEmissionEvent.getColdEmissions(), this.network.getLinks().get(coldEmissionEvent.getLinkId()).getLength() ));
+                                 .forEach(e -> e.addEmissions(coldEmissionEvent.getColdEmissions(), this.network.getLinks().get(coldEmissionEvent.getLinkId()).getLength() ));
 
             } else if(event instanceof WarmEmissionEvent) {
 
@@ -208,7 +208,7 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
                 this.agentsOnLink.get(warmEmissionEvent.getLinkId())
                                  .values()
                                  .stream()
-                                 .forEach(e -> e.addWarmEmissions(warmEmissionEvent.getWarmEmissions(), this.network.getLinks().get(warmEmissionEvent.getLinkId()).getLength()));
+                                 .forEach(e -> e.addEmissions(warmEmissionEvent.getWarmEmissions(), this.network.getLinks().get(warmEmissionEvent.getLinkId()).getLength()));
 
             } else if(event instanceof VehicleLeavesTrafficEvent) {
 

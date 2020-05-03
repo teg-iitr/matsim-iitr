@@ -28,9 +28,8 @@ import java.util.SortedMap;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.contrib.emissions.events.EmissionEventsReader;
-import org.matsim.contrib.emissions.types.ColdPollutant;
-import org.matsim.contrib.emissions.types.WarmPollutant;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
@@ -110,8 +109,8 @@ public class LinkSpeedEmissionWriter {
         EmissionEventsReader reader2 = new EmissionEventsReader(eventsManager2);
         reader2.readFile(emissionEventsFile);
 
-        Map<Double, Map<Id<Link>, Map<String, Double>>> time2warmEmissionsTotal = warmEmissionHandler.getWarmEmissionsPerLinkAndTimeInterval();
-        Map<Double, Map<Id<Link>, Map<String, Double>>> time2coldEmissionsTotal = coldEmissionHandler.getColdEmissionsPerLinkAndTimeInterval();
+        Map<Double, Map<Id<Link>, Map<Pollutant, Double>>> time2warmEmissionsTotal = warmEmissionHandler.getWarmEmissionsPerLinkAndTimeInterval();
+        Map<Double, Map<Id<Link>, Map<Pollutant, Double>>> time2coldEmissionsTotal = coldEmissionHandler.getColdEmissionsPerLinkAndTimeInterval();
 
         BufferedWriter writer = IOUtils.getBufferedWriter(outFile);
         try {
@@ -122,10 +121,10 @@ public class LinkSpeedEmissionWriter {
                 for (Id<Link> linkId : time2link2speed.get(time).keySet()) {
                     double warmNO2 = time2warmEmissionsTotal.getOrDefault(time, new HashMap<>())
                                                             .getOrDefault(linkId, new HashMap<>())
-                                                            .getOrDefault(WarmPollutant.NO2, 0.);
+                                                            .getOrDefault(Pollutant.NO2, 0.);
                     double coldNO2 = time2coldEmissionsTotal.getOrDefault(time, new HashMap<>())
                                                             .getOrDefault(linkId, new HashMap<>())
-                                                            .getOrDefault(ColdPollutant.NO2, 0.);
+                                                            .getOrDefault(Pollutant.NO2, 0.);
                     double totalNO2 = warmNO2 + coldNO2;
                     double speed = NumberUtils.round(time2link2speed.get(time).get(linkId), 2);
                     writer.write(time + "\t" + linkId + "\t" + speed + "\t" + warmNO2 + "\t" + coldNO2 + "\t" + totalNO2 + "\n");

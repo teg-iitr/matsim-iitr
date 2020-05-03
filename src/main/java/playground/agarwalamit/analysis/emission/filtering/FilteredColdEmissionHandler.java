@@ -29,9 +29,9 @@ import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.contrib.emissions.events.ColdEmissionEvent;
 import org.matsim.contrib.emissions.events.ColdEmissionEventHandler;
-import org.matsim.contrib.emissions.types.ColdPollutant;
 import org.matsim.vehicles.Vehicle;
 import playground.agarwalamit.analysis.emission.EmissionsPerLinkColdEventHandler;
 import playground.agarwalamit.munich.analysis.userGroup.EmissionsPerPersonPerUserGroup;
@@ -125,7 +125,7 @@ public class FilteredColdEmissionHandler implements VehicleEntersTrafficEventHan
 		}
 	}
 
-	public Map<Double, Map<Id<Link>, Map<String, Double>>> getColdEmissionsPerLinkAndTimeInterval() {
+	public Map<Double, Map<Id<Link>, Map<Pollutant, Double>>> getColdEmissionsPerLinkAndTimeInterval() {
 		return delegate.getColdEmissionsPerLinkAndTimeInterval();
 	}
 

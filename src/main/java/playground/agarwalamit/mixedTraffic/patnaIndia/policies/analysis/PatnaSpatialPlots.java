@@ -28,7 +28,7 @@ import org.locationtech.jts.geom.Point;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.contrib.emissions.types.WarmPollutant;
+import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.io.IOUtils;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -123,17 +123,17 @@ public class PatnaSpatialPlots {
                     double linkEmissionPolicy =0;
 
                     if(linkEmissionsBau.containsKey(id) && linkEmissionsPolicy.containsKey(id)) {
-                        linkEmissionBau = countScaleFactor * linkEmissionsBau.get(id).get(WarmPollutant.NO2.toString());
-                        linkEmissionPolicy = countScaleFactor * linkEmissionsPolicy.get(id).get(WarmPollutant.NO2.toString());
+                        linkEmissionBau = countScaleFactor * linkEmissionsBau.get(id).get(Pollutant.NO2.toString());
+                        linkEmissionPolicy = countScaleFactor * linkEmissionsPolicy.get(id).get(Pollutant.NO2.toString());
                     } else if(linkEmissionsBau.containsKey(id)){
-                        linkEmissionBau = countScaleFactor * linkEmissionsBau.get(id).get(WarmPollutant.NO2.toString());
+                        linkEmissionBau = countScaleFactor * linkEmissionsBau.get(id).get(Pollutant.NO2.toString());
                     } else if(linkEmissionsPolicy.containsKey(id)){
-                        linkEmissionPolicy = countScaleFactor * linkEmissionsPolicy.get(id).get(WarmPollutant.NO2.toString());
+                        linkEmissionPolicy = countScaleFactor * linkEmissionsPolicy.get(id).get(Pollutant.NO2.toString());
                     }
                     emiss = linkEmissionPolicy - linkEmissionBau;
 
                 } else {
-                    if(linkEmissionsBau.containsKey(id)) emiss = countScaleFactor * linkEmissionsBau.get(id).get(WarmPollutant.NO2.toString());
+                    if(linkEmissionsBau.containsKey(id)) emiss = countScaleFactor * linkEmissionsBau.get(id).get(Pollutant.NO2.toString());
                     else emiss =0;
                 }
 

@@ -32,7 +32,7 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.contrib.emissions.types.WarmPollutant;
+import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
@@ -385,17 +385,17 @@ public class MunichSpatialPlots {
 						double linkEmissionPolicy =0;
 
 						if(linkEmissionsBau.get(time).containsKey(id) && linkEmissionsPolicy.get(time).containsKey(id)) {
-							linkEmissionBau = countScaleFactor * linkEmissionsBau.get(time).get(id).get(WarmPollutant.NO2.toString());
-							linkEmissionPolicy = countScaleFactor * linkEmissionsPolicy.get(time).get(id).get(WarmPollutant.NO2.toString());
+							linkEmissionBau = countScaleFactor * linkEmissionsBau.get(time).get(id).get(Pollutant.NO2.toString());
+							linkEmissionPolicy = countScaleFactor * linkEmissionsPolicy.get(time).get(id).get(Pollutant.NO2.toString());
 						} else if(linkEmissionsBau.get(time).containsKey(id)){
-							linkEmissionBau = countScaleFactor * linkEmissionsBau.get(time).get(id).get(WarmPollutant.NO2.toString());
+							linkEmissionBau = countScaleFactor * linkEmissionsBau.get(time).get(id).get(Pollutant.NO2.toString());
 						} else if(linkEmissionsPolicy.get(time).containsKey(id)){
-							linkEmissionPolicy = countScaleFactor * linkEmissionsPolicy.get(time).get(id).get(WarmPollutant.NO2.toString());
+							linkEmissionPolicy = countScaleFactor * linkEmissionsPolicy.get(time).get(id).get(Pollutant.NO2.toString());
 						}
 						emiss = linkEmissionPolicy - linkEmissionBau;
 
 					} else {
-						if(linkEmissionsBau.get(time).containsKey(id)) emiss = countScaleFactor * linkEmissionsBau.get(time).get(id).get(WarmPollutant.NO2.toString());
+						if(linkEmissionsBau.get(time).containsKey(id)) emiss = countScaleFactor * linkEmissionsBau.get(time).get(id).get(Pollutant.NO2.toString());
 						else emiss =0;
 					}
 

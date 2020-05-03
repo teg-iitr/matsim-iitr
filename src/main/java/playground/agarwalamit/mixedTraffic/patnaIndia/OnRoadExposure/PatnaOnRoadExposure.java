@@ -38,8 +38,8 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
+import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.contrib.emissions.events.EmissionEventsReader;
-import org.matsim.contrib.emissions.types.WarmPollutant;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
@@ -122,30 +122,30 @@ private static final String data_dates [] = {"_22Nov2017"};
         onRoadExposureConfigGroup.setUsingMicroGramUnits(true);
 
         if(data_date.equals("_22Nov2017")) {
-            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.PM.toString(), 217.36 * Math.pow(10,-6));
-            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.CO.toString(), 1410.0* Math.pow(10,-6));
-            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.NO2.toString(), 116.79* Math.pow(10,-6));
-            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.SO2.toString(), 21.44* Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(Pollutant.PM.toString(), 217.36 * Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(Pollutant.CO.toString(), 1410.0* Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(Pollutant.NO2.toString(), 116.79* Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(Pollutant.SO2.toString(), 21.44* Math.pow(10,-6));
         } else if (data_date.equals("_22Jan2018")) {
-            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.PM.toString(), 201.16 * Math.pow(10,-6));
-            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.CO.toString(), 3470.0* Math.pow(10,-6));
-            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.NO2.toString(), 44.70* Math.pow(10,-6));
-            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.SO2.toString(), 49.82* Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(Pollutant.PM.toString(), 201.16 * Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(Pollutant.CO.toString(), 3470.0* Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(Pollutant.NO2.toString(), 44.70* Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(Pollutant.SO2.toString(), 49.82* Math.pow(10,-6));
         } else if (data_date.equals("_22Mar2018")) {
-            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.PM.toString(), 174.79 * Math.pow(10,-6));
-            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.CO.toString(), 2140.0* Math.pow(10,-6));
-            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.NO2.toString(), 24.48* Math.pow(10,-6));
-            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.SO2.toString(), 52.57* Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(Pollutant.PM.toString(), 174.79 * Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(Pollutant.CO.toString(), 2140.0* Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(Pollutant.NO2.toString(), 24.48* Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(Pollutant.SO2.toString(), 52.57* Math.pow(10,-6));
         } else if (data_date.equals("_22May2018")) {
-            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.PM.toString(), 86.54 * Math.pow(10,-6));
-            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.CO.toString(), 1120.0 * Math.pow(10,-6));
-            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.NO2.toString(), 7.65 * Math.pow(10,-6));
-            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.SO2.toString(), 43.58 * Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(Pollutant.PM.toString(), 86.54 * Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(Pollutant.CO.toString(), 1120.0 * Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(Pollutant.NO2.toString(), 7.65 * Math.pow(10,-6));
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(Pollutant.SO2.toString(), 43.58 * Math.pow(10,-6));
         } else {
-            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.PM.toString(), 0.);
-            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.CO.toString(), 0.);
-            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.NO2.toString(), 0.);
-            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(WarmPollutant.SO2.toString(), 0.);
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(Pollutant.PM.toString(), 0.);
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(Pollutant.CO.toString(), 0.);
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(Pollutant.NO2.toString(), 0.);
+            onRoadExposureConfigGroup.getPollutantToBackgroundConcentration_gm().put(Pollutant.SO2.toString(), 0.);
             data_date = "_withoutBackgroundConc";
         }
 
@@ -174,10 +174,10 @@ private static final String data_dates [] = {"_22Nov2017"};
         eventsReader.readFile(eventsFile);
 
         TreeSet<String> pollutants = new TreeSet<>();
-        pollutants.add(WarmPollutant.NO2.toString());
-        pollutants.add(WarmPollutant.CO.toString());
-        pollutants.add(WarmPollutant.PM.toString());
-        pollutants.add(WarmPollutant.SO2.toString());
+        pollutants.add(Pollutant.NO2.toString());
+        pollutants.add(Pollutant.CO.toString());
+        pollutants.add(Pollutant.PM.toString());
+        pollutants.add(Pollutant.SO2.toString());
 
         if (! new File(outputFilesDir).exists()) new File(outputFilesDir).mkdir();
         {

@@ -22,6 +22,7 @@ package playground.agarwalamit.analysis.emission;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.contrib.emissions.events.ColdEmissionEvent;
 import org.matsim.contrib.emissions.events.ColdEmissionEventHandler;
 
@@ -39,7 +40,7 @@ public class EmissionsPerLinkColdEventHandler implements
 	private static final Logger logger = Logger
 			.getLogger(EmissionsPerLinkColdEventHandler.class);
 
-	Map<Double, Map<Id<Link>, Map<String, Double>>> time2coldEmissionsTotal = new HashMap<>();
+	Map<Double, Map<Id<Link>, Map<Pollutant, Double>>> time2coldEmissionsTotal = new HashMap<>();
 
 	final int noOfTimeBins;
 	final double timeBinSize;
@@ -61,7 +62,7 @@ public class EmissionsPerLinkColdEventHandler implements
 	public void handleEvent(ColdEmissionEvent event) {
 		Double time = event.getTime();
 		Id<Link> linkId = event.getLinkId();
-		Map<String, Double> coldEmissionsOfEvent = event
+		Map<Pollutant, Double> coldEmissionsOfEvent = event
 				.getColdEmissions();
 		double endOfTimeInterval = 0.0;
 
@@ -70,7 +71,7 @@ public class EmissionsPerLinkColdEventHandler implements
 			numberOfInterval = 1; // only happens if time = 0.0
 		endOfTimeInterval = numberOfInterval * timeBinSize;
 
-		Map<Id<Link>, Map<String, Double>> coldEmissionsTotal = new HashMap<>();
+		Map<Id<Link>, Map<Pollutant, Double>> coldEmissionsTotal = new HashMap<>();
 
 		if (endOfTimeInterval < this.noOfTimeBins * this.timeBinSize+1) {
 			if (this.time2coldEmissionsTotal.get(endOfTimeInterval) != null) {
@@ -78,11 +79,11 @@ public class EmissionsPerLinkColdEventHandler implements
 						.get(endOfTimeInterval);
 
 				if (coldEmissionsTotal.get(linkId) != null) {
-					Map<String, Double> coldEmissionsSoFar = coldEmissionsTotal
+					Map<Pollutant, Double> coldEmissionsSoFar = coldEmissionsTotal
 							.get(linkId);
-					for (Entry<String, Double> entry : coldEmissionsOfEvent
+					for (Entry<Pollutant, Double> entry : coldEmissionsOfEvent
 							.entrySet()) {
-						String pollutant = entry.getKey();
+						Pollutant pollutant = entry.getKey();
 						Double eventValue = entry.getValue();
 
 						Double previousValue = coldEmissionsSoFar
@@ -102,7 +103,7 @@ public class EmissionsPerLinkColdEventHandler implements
 		}
 	}
 
-	public Map<Double, Map<Id<Link>, Map<String, Double>>> getColdEmissionsPerLinkAndTimeInterval() {
+	public Map<Double, Map<Id<Link>, Map<Pollutant, Double>>> getColdEmissionsPerLinkAndTimeInterval() {
 		return time2coldEmissionsTotal;
 	}
 

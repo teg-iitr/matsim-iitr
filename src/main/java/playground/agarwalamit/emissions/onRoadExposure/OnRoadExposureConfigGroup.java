@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.contrib.emissions.types.WarmPollutant;
+import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.core.config.ReflectiveConfigGroup;
 
 /**
@@ -50,7 +50,7 @@ public class OnRoadExposureConfigGroup extends ReflectiveConfigGroup {
     private boolean usingMicroGramUnits = true;
 
     private void initializeMaps(){
-        Arrays.stream(WarmPollutant.values()).forEach(pollutant -> {
+        Arrays.stream(Pollutant.values()).forEach(pollutant -> {
             pollutantToBackgroundConcentration.put(pollutant.toString(), 0.);
             pollutantToPenetrationRate.put(pollutant.toString(), 1.);
         });
