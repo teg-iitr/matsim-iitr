@@ -22,9 +22,15 @@ package playground.agarwalamit.fundamentalDiagrams.core;
 
 import java.io.IOException;
 import java.util.Arrays;
-import org.apache.log4j.FileAppender;
+
+import org.apache.log4j.Appender;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.FileAppender;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
@@ -162,7 +168,7 @@ public class FDModule extends AbstractModule {
 			bind(FDAgentsGenerator.class).to(FDAgentsGeneratorImpl.class);
 		}
 
-		bind(FDAgentsGeneratorControlerListner.class).asEagerSingleton(); //probably, not really necessary, since there is no shared information whereever it is required.
+		bind(FDAgentsGeneratorControlerListner.class).asEagerSingleton(); //probably, not really necessary, since there is no shared information wherever it is required.
 		addControlerListenerBinding().to(FDAgentsGeneratorControlerListner.class);
 		bind(TerminationCriterion.class).to(FDAgentsGeneratorControlerListner.class);
 
@@ -174,17 +180,19 @@ public class FDModule extends AbstractModule {
 	}
 
 	private void createLogFile(){
-		PatternLayout layout = new PatternLayout();
+		// do check the logging here. The logger has been changed. Amit, May'20
+		final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+		final Configuration config = ctx.getConfiguration();
+		final boolean appendToExistingFile = false;
+
 		String conversionPattern = " %d %4p %c{1} %L %m%n";
-		layout.setConversionPattern(conversionPattern);
-		FileAppender appender;
-		String filename = runDir + "/fdlogfile.log";
-		try {
-			appender = new FileAppender(layout, filename,false);
-		} catch (IOException e1) {
-			throw new RuntimeException("File "+filename+" not found.");
-		}
-		LOG.addAppender(appender);
+		PatternLayout layout =  PatternLayout.newBuilder().withPattern(conversionPattern).build();
+		String fd_log = "/fdlogfile.log";
+		String filename = runDir + fd_log;
+		FileAppender appender = FileAppender.newBuilder().setName(fd_log).setLayout(layout).withFileName(filename).withAppend(appendToExistingFile).build();;
+		appender.start();
+		config.getRootLogger().addAppender(appender, Level.ALL, null);
+		ctx.updateLoggers();
 	}
 
 }
