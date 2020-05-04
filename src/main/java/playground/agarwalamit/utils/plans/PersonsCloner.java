@@ -78,7 +78,7 @@ public class PersonsCloner {
 						} else {
 							Activity actIn = (Activity)pe;
 							Activity actOut = pop.getFactory().createActivityFromCoord(actIn.getType(), actIn.getCoord());
-							actOut.setEndTime( actIn.getEndTime() - 1800 + random.nextDouble()*1800 );
+							actOut.setEndTime( actIn.getEndTime().seconds() - 1800 + random.nextDouble()*1800 );
 							planOut.addActivity(actOut);
 						}
 					}

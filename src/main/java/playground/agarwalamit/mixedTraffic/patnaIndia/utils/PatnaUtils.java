@@ -43,7 +43,7 @@ public final class PatnaUtils {
 
 	public static final String INCOME_ATTRIBUTE = "monthlyIncome";
 	public static final String TRANSPORT_COST_ATTRIBUTE = "dailyTransportCost";
-	public static final String SUBPOP_ATTRIBUTE = "userGroup";
+//	public static final String SUBPOP_ATTRIBUTE = "userGroup";
 	
 //	public static final Double SLUM_AVG_INCOME = 3109.0; // sec 5.2.4, Patna CMP 
 //	public static final Double NONSLUM_AVG_INCOME = 7175.0;

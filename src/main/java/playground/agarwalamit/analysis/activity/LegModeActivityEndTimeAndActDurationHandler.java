@@ -72,7 +72,7 @@ ActivityEndEventHandler, ActivityStartEventHandler, PersonStuckEventHandler {
 				+ "if all trips of a person are made by same travel mode. "
 				+ "Because, travel mode is linked with departure events not with activity end or start events.");
 		
-		this.simEndTime = scenario.getConfig().qsim().getEndTime();
+		this.simEndTime = scenario.getConfig().qsim().getEndTime().seconds();
 		this.maxStuckAndAbortWarnCount=5;
 
 		for(Person p: scenario.getPopulation().getPersons().values()){

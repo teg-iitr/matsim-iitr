@@ -68,7 +68,7 @@ public class PeakHourTripDistanceAnalyzer  {
 			String configFile = dir+str+"/output_config.xml.gz";
 			Scenario sc = LoadMyScenarios.loadScenarioFromNetworkAndConfig(networkFile, configFile);
 
-			PeakHourTripDistanceAnalyzer tda = new PeakHourTripDistanceAnalyzer(sc.getNetwork(), sc.getConfig().qsim().getEndTime(), 30);
+			PeakHourTripDistanceAnalyzer tda = new PeakHourTripDistanceAnalyzer(sc.getNetwork(), sc.getConfig().qsim().getEndTime().seconds(), 30);
 			tda.run(eventsFile);
 			tda.writeTripData(dir+"/analysis/", str);
 		}

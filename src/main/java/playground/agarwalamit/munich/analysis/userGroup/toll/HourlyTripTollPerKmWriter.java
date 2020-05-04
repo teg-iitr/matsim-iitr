@@ -62,7 +62,7 @@ public class HourlyTripTollPerKmWriter {
 			String configFile = dir+str+"/output_config.xml.gz";
 			Scenario sc = LoadMyScenarios.loadScenarioFromNetworkAndConfig(networkFile, configFile);
 			
-			HourlyTripTollPerKmWriter tda = new HourlyTripTollPerKmWriter(sc.getNetwork(),sc.getConfig().qsim().getEndTime(), 30);
+			HourlyTripTollPerKmWriter tda = new HourlyTripTollPerKmWriter(sc.getNetwork(),sc.getConfig().qsim().getEndTime().seconds(), 30);
 			tda.run(eventsFile);
 			tda.writeUserGroupTollValuesOverTime(dir+"/analysis/", str);
 		}

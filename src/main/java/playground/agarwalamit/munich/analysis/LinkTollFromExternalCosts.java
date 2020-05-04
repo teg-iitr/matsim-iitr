@@ -26,6 +26,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
+import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.core.config.Config;
 
 import playground.agarwalamit.analysis.congestion.CausedDelayAnalyzer;
@@ -120,10 +121,10 @@ public class LinkTollFromExternalCosts {
 	public Map<Id<Link>, Double> getLink2EmissionToll(final Scenario sc){
 		int lastIt = sc.getConfig().controler().getLastIteration();
 		String emissionEventsFile = sc.getConfig().controler().getOutputDirectory()+"/ITERS/it."+lastIt+"/"+lastIt+".emission.events.xml.gz";
-		EmissionLinkAnalyzer emissionAnalyzer = new EmissionLinkAnalyzer(sc.getConfig().qsim().getEndTime(), emissionEventsFile, noOfTimeBin);
+		EmissionLinkAnalyzer emissionAnalyzer = new EmissionLinkAnalyzer(sc.getConfig().qsim().getEndTime().seconds(), emissionEventsFile, noOfTimeBin);
 		emissionAnalyzer.preProcessData();
 		emissionAnalyzer.postProcessData();
-		SortedMap<Double, Map<Id<Link>, SortedMap<String, Double>>> link2TotalEmissions = emissionAnalyzer.getLink2TotalEmissions();
+		SortedMap<Double, Map<Id<Link>, SortedMap<Pollutant, Double>>> link2TotalEmissions = emissionAnalyzer.getLink2TotalEmissions();
 
 		Map<Id<Link>, Double> linkEmissionCosts = new HashMap<>();
 

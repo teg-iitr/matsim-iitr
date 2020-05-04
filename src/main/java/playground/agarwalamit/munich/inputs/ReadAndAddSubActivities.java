@@ -25,6 +25,7 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
+import org.matsim.core.utils.misc.OptionalTime;
 import org.matsim.core.utils.misc.Time;
 
 import playground.agarwalamit.utils.LoadMyScenarios;
@@ -70,10 +71,10 @@ public class ReadAndAddSubActivities {
 			params.setActivityType(act);
 			params.setTypicalDuration(acts.get(act));
 			// setting minimal duration does not have any effect in absence of marginalUtilityForEarlyDeparture
-			params.setClosingTime(Time.UNDEFINED_TIME);
-			params.setEarliestEndTime(Time.UNDEFINED_TIME);
-			params.setLatestStartTime(Time.UNDEFINED_TIME);
-			params.setOpeningTime(Time.UNDEFINED_TIME);
+			params.setClosingTime(Double.NEGATIVE_INFINITY);
+			params.setEarliestEndTime(Double.NEGATIVE_INFINITY);
+			params.setLatestStartTime(Double.NEGATIVE_INFINITY);
+			params.setOpeningTime(Double.NEGATIVE_INFINITY);
 			config.planCalcScore().addActivityParams(params);
 		}
 		

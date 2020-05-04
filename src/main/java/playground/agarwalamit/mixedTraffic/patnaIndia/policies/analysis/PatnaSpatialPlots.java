@@ -76,8 +76,8 @@ public class PatnaSpatialPlots {
 
     private void writeEmissionsToCell(){
 
-        Map<Id<Link>,SortedMap<String,Double>> linkEmissionsBau = new HashMap<>();
-        Map<Id<Link>,SortedMap<String,Double>> linkEmissionsPolicy = new HashMap<>();
+        Map<Id<Link>,SortedMap<Pollutant,Double>> linkEmissionsBau = new HashMap<>();
+        Map<Id<Link>,SortedMap<Pollutant,Double>> linkEmissionsPolicy = new HashMap<>();
 
         SpatialDataInputs inputs;
         if (isComparing)inputs = new SpatialDataInputs(SpatialDataInputs.LinkWeightMethod.line, bauDir, policyDir);

@@ -162,7 +162,7 @@ public final class LoadMyScenarios {
 		config.addCoreModules();
 		ConfigReader configReader = new ConfigReader(config);
 		configReader.readFile(configfile);
-		Double endTime = config.qsim().getEndTime();
+		Double endTime = config.qsim().getEndTime().seconds();
 		LOG.info("Simulation end time is: " + endTime / 3600 + " hours.");
 		return endTime;
 	}

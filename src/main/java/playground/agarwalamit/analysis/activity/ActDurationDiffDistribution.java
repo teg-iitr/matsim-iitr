@@ -174,8 +174,8 @@ public class ActDurationDiffDistribution {
 		SortedMap<String, Double> act2MinDur = new TreeMap<>();
 
 		for (String actTyp :config.planCalcScore().getActivityTypes()){
-			act2TypDur.put(actTyp, config.planCalcScore().getActivityParams(actTyp).getTypicalDuration());
-			act2MinDur.put(actTyp, config.planCalcScore().getActivityParams(actTyp).getMinimalDuration());
+			act2TypDur.put(actTyp, config.planCalcScore().getActivityParams(actTyp).getTypicalDuration().seconds());
+			act2MinDur.put(actTyp, config.planCalcScore().getActivityParams(actTyp).getMinimalDuration().seconds());
 		}
 
 		String fileName = outputDir+"/analysis/actTyp2TypicalAndMinimumActDurations.txt";

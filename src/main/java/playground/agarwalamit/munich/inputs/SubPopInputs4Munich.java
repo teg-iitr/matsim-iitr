@@ -92,7 +92,7 @@ public class SubPopInputs4Munich {
 
 		Config config =  ConfigUtils.loadConfig(existingConfig);
 
-		config.plans().setSubpopulationAttributeName(subPopAttributeName); // if this is set then, one have to set same strategy for all sub pops.
+//		config.plans().setSubpopulationAttributeName(subPopAttributeName); // if this is set then, one have to set same strategy for all sub pops.
 		config.plans().setInputPersonAttributeFile(outPopAttributeFile); // this should be included in the population input file. theresa, aug'19
 
 		// get the existing strategies and add others user grp to it.

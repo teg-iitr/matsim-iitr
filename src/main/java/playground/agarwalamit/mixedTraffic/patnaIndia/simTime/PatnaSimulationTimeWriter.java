@@ -164,7 +164,7 @@ public class PatnaSimulationTimeWriter {
 		controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
 		controler.getConfig().controler().setDumpDataAtEnd(true);
 
-		final RandomizingTimeDistanceTravelDisutilityFactory builder = new RandomizingTimeDistanceTravelDisutilityFactory("bike", config.planCalcScore());
+		final RandomizingTimeDistanceTravelDisutilityFactory builder = new RandomizingTimeDistanceTravelDisutilityFactory("bike", config);
 		
 		controler.addOverridingModule(new AbstractModule() {
 			// following must be added in order to get travel time and travel disutility in the router for modes other than car

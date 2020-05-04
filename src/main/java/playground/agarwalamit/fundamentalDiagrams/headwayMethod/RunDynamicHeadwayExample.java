@@ -28,7 +28,7 @@ import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
-import org.matsim.core.mobsim.qsim.qnetsimengine.DynamicHeadwayQNetworkFactory;
+//import org.matsim.core.mobsim.qsim.qnetsimengine.DynamicHeadwayQNetworkFactory;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QNetworkFactory;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vehicles.VehicleType;
@@ -86,7 +86,8 @@ public class RunDynamicHeadwayExample {
         controler.addOverridingModule(new AbstractModule() {
             @Override
             public void install() {
-                bind(QNetworkFactory.class).to(DynamicHeadwayQNetworkFactory.class);
+                // not sure, if there is a workaroud for the QNetworkFactor, probably look on BicycleQSimModule. Amit May'20
+//                bind(QNetworkFactory.class).to(DynamicHeadwayQNetworkFactory.class);
                 bindMobsim().toProvider(DynamicHeadwayFDQSimProvider.class);
 
                 bind(HeadwayHandler.class).asEagerSingleton();

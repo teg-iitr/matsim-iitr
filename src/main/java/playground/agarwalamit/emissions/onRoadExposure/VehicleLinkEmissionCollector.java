@@ -36,7 +36,7 @@ public class VehicleLinkEmissionCollector {
     private final Id<Link> linkId;
     private final String mode;
 
-    private final Map<String, Double> emissions = new HashMap<>();
+    private final Map<Pollutant, Double> emissions = new HashMap<>();
     private double travelTime = 0;
 
     VehicleLinkEmissionCollector(Id<Vehicle> vehicleId, Id<Link> linkId, String mode) {
@@ -50,7 +50,7 @@ public class VehicleLinkEmissionCollector {
         this.emissions.clear();
         for (Pollutant warmPollutant : Pollutant.values()) {
             if (warmPollutant.equals(Pollutant.CO2_TOTAL)) continue;
-            emissions.put(warmPollutant.toString(), 0.);
+            emissions.put(warmPollutant, 0.);
         }
     }
 
@@ -64,11 +64,11 @@ public class VehicleLinkEmissionCollector {
 
     void addEmissions(Map<Pollutant, Double> map, double linkLength) {
         this.emissions.forEach((key, value) -> this.emissions.put(key,
-                value + map.get(Pollutant.valueOf(key)) / linkLength));
+                value + map.get(key) / linkLength));
     }
 
-    Map<String, Double> getInhaledMass(OnRoadExposureConfigGroup config) {
-        Map<String, Double> emiss= new OnRoadExposureCalculator(config).calculate(this.mode, emissions, travelTime);
+    Map<Pollutant, Double> getInhaledMass(OnRoadExposureConfigGroup config) {
+        Map<Pollutant, Double> emiss= new OnRoadExposureCalculator(config).calculate(this.mode, emissions, travelTime);
         this.initialize(); // clear the emissions once inhaled mass is calculated to avoid possibility of multiple counts
         return emiss;
     }

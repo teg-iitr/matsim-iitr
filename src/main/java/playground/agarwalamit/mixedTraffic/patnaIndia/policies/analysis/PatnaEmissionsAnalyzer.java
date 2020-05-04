@@ -21,12 +21,14 @@ package playground.agarwalamit.mixedTraffic.patnaIndia.policies.analysis;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.contrib.emissions.events.EmissionEventsReader;
 import org.matsim.contrib.emissions.EmissionUtils;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -70,11 +72,12 @@ public class PatnaEmissionsAnalyzer {
         emissionEventsReader.readFile(emissionEventsFile);
 
         // probably just use the total directly from event handler; (need to test first) amit June'17
-        Map<String, Double> coldEmissions = EmissionUtilsExtended.getTotalColdEmissions(emissionPersonEventHandler.getPersonId2ColdEmissions(
+        Map<Pollutant, Double> coldEmissions = EmissionUtilsExtended.getTotalEmissions(emissionPersonEventHandler.getPersonId2ColdEmissions(
                 PatnaPersonFilter.PatnaUserGroup.urban.toString(),new PatnaPersonFilter()));
-        Map<String, Double> warmEmissions = EmissionUtilsExtended.getTotalWarmEmissions(emissionPersonEventHandler.getPersonId2WarmEmissions(PatnaPersonFilter.PatnaUserGroup.urban.toString(),new PatnaPersonFilter()));
+        Map<Pollutant, Double> warmEmissions = EmissionUtilsExtended.getTotalEmissions(emissionPersonEventHandler.getPersonId2WarmEmissions(PatnaPersonFilter.PatnaUserGroup.urban.toString(),new PatnaPersonFilter()));
 
-        Map<String, Double> totalEmissions = MapUtils.mergeMaps(coldEmissions, warmEmissions);
+        Map<Pollutant, Double> totalEmissions = new HashMap<>(coldEmissions);
+        warmEmissions.forEach((k,v) -> totalEmissions.merge(k,v,Double::sum)) ;
 
 //        BufferedWriter writer = IOUtils.getBufferedWriter(outFile);
 //        try {
@@ -87,19 +90,19 @@ public class PatnaEmissionsAnalyzer {
 //            throw new RuntimeException("Data is not written/read. Reason : " + e);
 //        }
 
-        Map<Id<Vehicle>, Map<String, Double>> vehicle2totalEmissions = EmissionUtils.sumUpEmissionsPerId(emissionPersonEventHandler.getVehicleId2WarmEmissions(), emissionPersonEventHandler.getVehicleId2ColdEmissions());
-        SortedMap<String, SortedMap<String, Double>> mode2emissions=  getModalEmissions(vehicle2totalEmissions);
+        Map<Id<Vehicle>, Map<Pollutant, Double>> vehicle2totalEmissions = EmissionUtils.sumUpEmissionsPerId(emissionPersonEventHandler.getVehicleId2WarmEmissions(), emissionPersonEventHandler.getVehicleId2ColdEmissions());
+        SortedMap<String, SortedMap<Pollutant, Double>> mode2emissions=  getModalEmissions(vehicle2totalEmissions);
 
         BufferedWriter writer = IOUtils.getBufferedWriter(outFile);
         try {
             writer.write("pollutant \t");
-            for (String e : mode2emissions.get(TransportMode.car).keySet()) {
-               writer.write(e+"\t");
+            for (Pollutant e : mode2emissions.get(TransportMode.car).keySet()) {
+               writer.write(e.toString()+"\t");
             }
             writer.newLine();
             for (String str : mode2emissions.keySet()) {
                 writer.write(str +"\t");
-                for (String e : mode2emissions.get(str).keySet()) {
+                for (Pollutant e : mode2emissions.get(str).keySet()) {
                     writer.write( mode2emissions.get(str).get(e)+"\t");
                 }
                 writer.newLine();
@@ -110,16 +113,16 @@ public class PatnaEmissionsAnalyzer {
         }
     }
 
-    private SortedMap<String, SortedMap<String, Double>> getModalEmissions(final Map<Id<Vehicle>, Map<String, Double>> vehicle2emissions){
-       SortedMap<String, SortedMap<String, Double>> mode2emissions = new TreeMap<>();
+    private SortedMap<String, SortedMap<Pollutant, Double>> getModalEmissions(final Map<Id<Vehicle>, Map<Pollutant, Double>> vehicle2emissions){
+       SortedMap<String, SortedMap<Pollutant, Double>> mode2emissions = new TreeMap<>();
        for (Id<Vehicle> vehicleId : vehicle2emissions.keySet()) {
            String mode = getModeFromVehicleIdForPatna(vehicleId.toString());
-           SortedMap<String, Double> emissions = mode2emissions.get(mode);
+           SortedMap<Pollutant, Double> emissions = mode2emissions.get(mode);
            if (emissions == null) {
                emissions = new TreeMap<>(vehicle2emissions.get(vehicleId));
                mode2emissions.put(mode, emissions);
            } else {
-               for (Map.Entry<String, Double> e : vehicle2emissions.get(vehicleId).entrySet()) {
+               for (Map.Entry<Pollutant, Double> e : vehicle2emissions.get(vehicleId).entrySet()) {
                    emissions.put(e.getKey(), e.getValue() + emissions.get(e.getKey()) );
                }
            }

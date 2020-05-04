@@ -153,7 +153,7 @@ final class DynamicHeadwayQueueWithBuffer implements QLaneI, SignalizeableItem {
 	private final Queue<DynamicHeadwayQueueWithBuffer.Hole> holes = new LinkedList<>();
 
 	/** the last time-step the front-most vehicle in the buffer was moved. Used for detecting dead-locks. */
-	private double bufferLastMovedTime = Time.getUndefinedTime() ;
+	private double bufferLastMovedTime =  Double.NEGATIVE_INFINITY  ;
 	/**
 	 * The list of vehicles that have not yet reached the end of the link
 	 * according to the free travel speed of the link

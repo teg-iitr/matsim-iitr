@@ -142,7 +142,8 @@ public class SubPopMunichExposureControler {
 		
 		ecg.setEmissionRoadTypeMappingFile(emissionRelatedInputFilesDir + "/roadTypeMapping.txt");
 
-		ecg.setEmissionEfficiencyFactor(Double.parseDouble(emissionEfficiencyFactor));
+		// no idea if this functionality is available anymore. Amit May'20
+//		ecg.setEmissionEfficiencyFactor(Double.parseDouble(emissionEfficiencyFactor));
 
 		GridTools gt = new GridTools(scenario.getNetwork().getLinks(), xMin, xMax, yMin, yMax, noOfXCells, noOfYCells);
 
@@ -151,7 +152,7 @@ public class SubPopMunichExposureControler {
 		ecg.setEmissionCostMultiplicationFactor(Double.parseDouble(emissionCostMultiplicationFactor));
 
 		final EmissionResponsibilityTravelDisutilityCalculatorFactory emfac = new EmissionResponsibilityTravelDisutilityCalculatorFactory(
-				new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig().planCalcScore())
+				new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig())
 		);
 		
 		controler.addOverridingModule(new AbstractModule() {

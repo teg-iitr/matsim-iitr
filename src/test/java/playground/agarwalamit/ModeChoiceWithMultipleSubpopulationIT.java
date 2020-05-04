@@ -80,7 +80,8 @@ public class ModeChoiceWithMultipleSubpopulationIT {
 		createSubPopulationAttributes(scenario);
 
 		//  following is required to differentiate the agents based on provide subpopulation attribute name
-		scenario.getConfig().plans().setSubpopulationAttributeName(SUBPOP_ATTRIB_NAME); /* This is the default anyway. */
+		// probably, not anymore. Amit May'20
+//		scenario.getConfig().plans().setSubpopulationAttributeName(SUBPOP_ATTRIB_NAME); /* This is the default anyway. */
 
 		// clear previous strategies
 		scenario.getConfig().strategy().clearStrategySettings();

@@ -19,11 +19,13 @@
 package playground.agarwalamit.fundamentalDiagrams.shockwave;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.ControlerConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup.LinkDynamics;
 import org.matsim.core.config.groups.VspExperimentalConfigGroup;
@@ -68,7 +70,7 @@ public class ShockwaveExperiment {
 		scenario.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
 
 		scenario.getConfig().qsim().setSnapshotPeriod(1.0);
-		scenario.getConfig().controler().setSnapshotFormat(Arrays.asList( "transims", "otfvis" ));
+		scenario.getConfig().controler().setSnapshotFormat(List.of( ControlerConfigGroup.SnapshotFormat.transims, ControlerConfigGroup.SnapshotFormat.otfvis));
 		scenario.getConfig().qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
 
 		Vehicles vehicles = scenario.getVehicles();

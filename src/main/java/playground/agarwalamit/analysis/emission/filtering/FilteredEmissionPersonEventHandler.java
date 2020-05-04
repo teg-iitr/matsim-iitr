@@ -30,6 +30,7 @@ import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
 import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.contrib.emissions.events.ColdEmissionEvent;
 import org.matsim.contrib.emissions.events.ColdEmissionEventHandler;
 import org.matsim.contrib.emissions.events.WarmEmissionEvent;
@@ -124,41 +125,41 @@ public class FilteredEmissionPersonEventHandler implements ColdEmissionEventHand
 //		this.vehicleId2PersonId2.remove(event.getVehicleId(), event.getPersonId());
 	}
 
-	public Map<Id<Person>, Map<String, Double>> getPersonId2ColdEmissions() {
+	public Map<Id<Person>, Map<Pollutant, Double>> getPersonId2ColdEmissions() {
 		return delegate.getPersonId2ColdEmissions();
 	}
 
-	public Map<Id<Person>, Map<String, Double>> getPersonId2ColdEmissions(String userGroup, PersonFilter personFilter) {
+	public Map<Id<Person>, Map<Pollutant, Double>> getPersonId2ColdEmissions(String userGroup, PersonFilter personFilter) {
 		return delegate.getPersonId2ColdEmissions().entrySet().parallelStream().filter(entry -> personFilter.getUserGroupAsStringFromPersonId(entry.getKey()).equals(userGroup)).collect(
 				Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
-	public Map<Id<Person>, Map<String, Double>> getPersonId2WarmEmissions() {
+	public Map<Id<Person>, Map<Pollutant, Double>> getPersonId2WarmEmissions() {
 		return delegate.getPersonId2WarmEmissions();
 	}
 
-	public Map<Id<Person>, Map<String, Double>> getPersonId2WarmEmissions(String userGroup, PersonFilter personFilter) {
+	public Map<Id<Person>, Map<Pollutant, Double>> getPersonId2WarmEmissions(String userGroup, PersonFilter personFilter) {
 		return delegate.getPersonId2WarmEmissions().entrySet().parallelStream().filter(entry -> personFilter.getUserGroupAsStringFromPersonId(entry.getKey()).equals(userGroup)).collect(
 				Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
-	public Map<Id<Vehicle>, Map<String, Double>> getVehicleId2ColdEmissions() {
+	public Map<Id<Vehicle>, Map<Pollutant, Double>> getVehicleId2ColdEmissions() {
 		return delegate.getVehicleId2ColdEmissions();
 	}
 
-	public Map<Id<Vehicle>, Map<String, Double>> getVehicleId2WarmEmissions() {
+	public Map<Id<Vehicle>, Map<Pollutant, Double>> getVehicleId2WarmEmissions() {
 		return delegate.getVehicleId2WarmEmissions();
 	}
 
-	public Map<Id<Vehicle>, Map<String, Double>> getVehicleId2TotalEmissions(){
+	public Map<Id<Vehicle>, Map<Pollutant, Double>> getVehicleId2TotalEmissions(){
 		return delegate.getVehicleId2TotalEmissions();
 	}
 
-	public Map<Id<Person>, Map<String, Double>> getPersonId2TotalEmissions(){
+	public Map<Id<Person>, Map<Pollutant, Double>> getPersonId2TotalEmissions(){
 		return delegate.getPersonId2TotalEmissions();
 	}
 
-	public Map<Id<Person>, Map<String, Double>> getPersonId2TotalEmissions(String userGroup, PersonFilter personFilter){
+	public Map<Id<Person>, Map<Pollutant, Double>> getPersonId2TotalEmissions(String userGroup, PersonFilter personFilter){
 		return delegate.getPersonId2TotalEmissions().entrySet().parallelStream().filter(entry -> personFilter.getUserGroupAsStringFromPersonId(entry.getKey()).equals(userGroup)).collect(
 				Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}

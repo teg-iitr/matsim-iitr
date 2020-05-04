@@ -23,6 +23,7 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.utils.objectattributes.ObjectAttributesXmlWriter;
 import org.matsim.vehicles.VehicleWriterV1;
@@ -66,10 +67,11 @@ public class JointDemandGenerator {
 	}
 	
 	public void createSubpopulationAttributes(){
-		sc.getConfig().plans().setSubpopulationAttributeName(PatnaUtils.SUBPOP_ATTRIBUTE);
+//		sc.getConfig().plans().setSubpopulationAttributeName(PatnaUtils.SUBPOP_ATTRIBUTE);
 		Population pop = sc.getPopulation();
 		for(Person p : pop.getPersons().values()){
-			p.getAttributes().putAttribute(PatnaUtils.SUBPOP_ATTRIBUTE, PatnaPersonFilter.getUserGroup(p.getId()).toString() );	
+			PopulationUtils.putSubpopulation(p, PatnaPersonFilter.getUserGroup(p.getId()).toString());
+//			p.getAttributes().putAttribute(PatnaUtils.SUBPOP_ATTRIBUTE, PatnaPersonFilter.getUserGroup(p.getId()).toString() );
 		}
 	}
 

@@ -164,13 +164,13 @@ public class ExposurePricingIT {
 		 */
 
 		GridTools gt = new GridTools(sc.getNetwork().getLinks(), xMin, xMax, yMin, yMax, noOfXCells, noOfYCells);
-		Double timeBinSize = controler.getScenario().getConfig().qsim().getEndTime() / this.noOfTimeBins ;
+		Double timeBinSize = controler.getScenario().getConfig().qsim().getEndTime().seconds() / this.noOfTimeBins ;
 
 		ResponsibilityGridTools rgt = new ResponsibilityGridTools(timeBinSize, noOfTimeBins, gt);
 
 
 		final EmissionResponsibilityTravelDisutilityCalculatorFactory emfac = new EmissionResponsibilityTravelDisutilityCalculatorFactory(
-        	new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, sc.getConfig().planCalcScore())
+        	new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, sc.getConfig())
 				);
 
 		controler.addOverridingModule(new AbstractModule() {
@@ -229,12 +229,12 @@ public class ExposurePricingIT {
 		 */
 
 		GridTools gt = new GridTools(sc.getNetwork().getLinks(), xMin, xMax, yMin, yMax, noOfXCells, noOfYCells);
-		Double timeBinSize = controler.getScenario().getConfig().qsim().getEndTime() / this.noOfTimeBins ;
+		Double timeBinSize = controler.getScenario().getConfig().qsim().getEndTime().seconds() / this.noOfTimeBins ;
 
 		ResponsibilityGridTools rgt = new ResponsibilityGridTools(timeBinSize, noOfTimeBins, gt);
 //		final EmissionResponsibilityTravelDisutilityCalculatorFactory emfac = new EmissionResponsibilityTravelDisutilityCalculatorFactory(emissionModule, emissionCostModule, sc.getConfig().planCalcScore());
         final playground.vsp.airPollution.exposure.EmissionResponsibilityTravelDisutilityCalculatorFactory emfac = new playground.vsp.airPollution.exposure.EmissionResponsibilityTravelDisutilityCalculatorFactory(
-                new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig().planCalcScore())
+                new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig())
 		);
 		controler.addOverridingModule(new AbstractModule() {
 
@@ -365,7 +365,7 @@ public class ExposurePricingIT {
 		ecg.setDetailedColdEmissionFactorsFile(detailedColdEmissionFactorsFile);
 		ecg.setUsingVehicleTypeIdAsVehicleDescription(true);
 
-		ecg.setEmissionEfficiencyFactor(1.0);
+//		ecg.setEmissionEfficiencyFactor(1.0);
 		ecg.setConsideringCO2Costs(isConsideringCO2Costs);
 		ecg.setEmissionCostMultiplicationFactor(1.0);
 

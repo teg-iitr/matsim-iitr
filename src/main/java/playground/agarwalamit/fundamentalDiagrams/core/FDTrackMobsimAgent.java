@@ -25,8 +25,11 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.mobsim.framework.MobsimAgent;
 import org.matsim.core.mobsim.framework.MobsimDriverAgent;
 import org.matsim.core.mobsim.qsim.interfaces.MobsimVehicle;
+import org.matsim.core.utils.misc.OptionalTime;
 import org.matsim.facilities.Facility;
 import org.matsim.vehicles.Vehicle;
+
+import javax.swing.text.html.Option;
 
 /**
  * SSix, Amit
@@ -171,7 +174,7 @@ public class FDTrackMobsimAgent implements MobsimAgent, MobsimDriverAgent {
     }
 
     @Override
-    public Double getExpectedTravelTime() {
+    public OptionalTime getExpectedTravelTime() {
         throw new RuntimeException("not implemented");
     }
 

@@ -78,7 +78,7 @@ public class ExperiencedEmissionCostHandler implements VehicleEntersTrafficEvent
 		this.emissionCostModule = emissionCostModule;
 		this.pf = pf;
 		this.noOfTimeBins = 1;
-		this.timeBinSize = qSimConfigGroup.getEndTime()/ noOfTimeBins;
+		this.timeBinSize = qSimConfigGroup.getEndTime().seconds()/ noOfTimeBins;
 	}
 
 	public ExperiencedEmissionCostHandler(final EmissionResponsibilityCostModule emissionCostModule, final PersonFilter pf, final double simulationEndTime, final double noOfTimeBin) {
@@ -108,7 +108,7 @@ public class ExperiencedEmissionCostHandler implements VehicleEntersTrafficEvent
 		if(personId==null) throw new RuntimeException("no person is found for vehicle "+vehicleId+". This occus at "+ event.toString());
 
 		if (timeBinSize==0.) {
-			timeBinSize = qSimConfigGroup.getEndTime() / noOfTimeBins;
+			timeBinSize = qSimConfigGroup.getEndTime().seconds() / noOfTimeBins;
 		}
 		double endOfTimeInterval = Math.max(1, Math.ceil( event.getTime()/this.timeBinSize) ) * this.timeBinSize;
 
@@ -135,7 +135,7 @@ public class ExperiencedEmissionCostHandler implements VehicleEntersTrafficEvent
 		if(personId==null) throw new RuntimeException("no person is found for vehicle "+vehicleId+". This occus at "+ event.toString());
 
 		if (timeBinSize==0.) {
-			timeBinSize = qSimConfigGroup.getEndTime() / noOfTimeBins;
+			timeBinSize = qSimConfigGroup.getEndTime().seconds() / noOfTimeBins;
 		}
 		double endOfTimeInterval = Math.max(1, Math.ceil( event.getTime()/this.timeBinSize) ) * this.timeBinSize;
 

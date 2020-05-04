@@ -21,6 +21,8 @@ package playground.agarwalamit.analysis.emission;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
@@ -28,6 +30,7 @@ import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
 import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
 import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.contrib.emissions.events.ColdEmissionEvent;
 import org.matsim.contrib.emissions.events.ColdEmissionEventHandler;
 import org.matsim.contrib.emissions.events.WarmEmissionEvent;
@@ -49,10 +52,10 @@ public class EmissionPersonEventHandler implements WarmEmissionEventHandler, Col
 
     private final Map<Id<Vehicle>, Id<Person>> vehicle2DriverIdCollector = new HashMap<>();
 
-    private final Map<Id<Person>, Map<String, Double>> personId2ColdEmissions = new HashMap<>();
-    private final Map<Id<Person>, Map<String, Double>> personId2WarmEmissions = new HashMap<>();
-    private final Map<Id<Vehicle>, Map<String, Double>> vehicleId2ColdEmissions = new HashMap<>();
-    private final Map<Id<Vehicle>, Map<String, Double>> vehicleId2WarmEmissions = new HashMap<>();
+    private final Map<Id<Person>, Map<Pollutant, Double>> personId2ColdEmissions = new HashMap<>();
+    private final Map<Id<Person>, Map<Pollutant, Double>> personId2WarmEmissions = new HashMap<>();
+    private final Map<Id<Vehicle>, Map<Pollutant, Double>> vehicleId2ColdEmissions = new HashMap<>();
+    private final Map<Id<Vehicle>, Map<Pollutant, Double>> vehicleId2WarmEmissions = new HashMap<>();
 
     @Override
     public void handleEvent(WarmEmissionEvent event) {
@@ -71,14 +74,14 @@ public class EmissionPersonEventHandler implements WarmEmissionEventHandler, Col
 //            }
             this.personId2WarmEmissions.merge(driverId,
                     event.getWarmEmissions(),
-                    (a, b) -> MapUtils.mergeMaps(a, b) );
+                    (a, b) -> mergeMaps(a, b) );
         }
 
         {
 
             this.vehicleId2WarmEmissions.merge(event.getVehicleId(),
                     event.getWarmEmissions(),
-                    (a, b) -> MapUtils.mergeMaps(a, b) );
+                    (a, b) -> mergeMaps(a, b) );
         }
     }
 
@@ -89,17 +92,24 @@ public class EmissionPersonEventHandler implements WarmEmissionEventHandler, Col
 
             this.personId2ColdEmissions.merge(driverId,
                     event.getColdEmissions(),
-                    (a, b) -> MapUtils.mergeMaps(a, b));
+                    (a, b) -> mergeMaps(a, b));
         }
 
         {
 
             this.vehicleId2ColdEmissions.merge(event.getVehicleId(),
                     event.getColdEmissions(),
-                    (a, b) -> MapUtils.mergeMaps(a, b));
+                    (a, b) -> mergeMaps(a, b));
         }
 
     }
+
+    private Map<Pollutant, Double> mergeMaps(Map<Pollutant, Double> a, Map<Pollutant, Double> b) {
+        Map<Pollutant, Double> outMap = new HashMap<>(a);
+        b.forEach((k,v) -> outMap.merge(k,v,Double::sum));
+        return outMap;
+    }
+
 
     @Override
     public void reset(int iteration) {
@@ -124,28 +134,28 @@ public class EmissionPersonEventHandler implements WarmEmissionEventHandler, Col
         return this.vehicle2DriverIdCollector.get(vehicleId);
     }
 
-    public Map<Id<Person>, Map<String, Double>> getPersonId2ColdEmissions() {
+    public Map<Id<Person>, Map<Pollutant, Double>> getPersonId2ColdEmissions() {
         return personId2ColdEmissions;
     }
 
-    public Map<Id<Person>, Map<String, Double>> getPersonId2WarmEmissions() {
+    public Map<Id<Person>, Map<Pollutant, Double>> getPersonId2WarmEmissions() {
         return personId2WarmEmissions;
     }
 
-    public Map<Id<Vehicle>, Map<String, Double>> getVehicleId2ColdEmissions() {
+    public Map<Id<Vehicle>, Map<Pollutant, Double>> getVehicleId2ColdEmissions() {
         return vehicleId2ColdEmissions;
     }
 
-    public Map<Id<Vehicle>, Map<String, Double>> getVehicleId2WarmEmissions() {
+    public Map<Id<Vehicle>, Map<Pollutant, Double>> getVehicleId2WarmEmissions() {
         return vehicleId2WarmEmissions;
     }
 
-    public Map<Id<Vehicle>, Map<String, Double>> getVehicleId2TotalEmissions(){
+    public Map<Id<Vehicle>, Map<Pollutant, Double>> getVehicleId2TotalEmissions(){
         return this.vehicleId2WarmEmissions.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry ->
                 EmissionUtils.sumUpEmissions(entry.getValue(), this.vehicleId2ColdEmissions.get(entry.getKey()))));
     }
 
-    public Map<Id<Person>, Map<String, Double>> getPersonId2TotalEmissions(){
+    public Map<Id<Person>, Map<Pollutant, Double>> getPersonId2TotalEmissions(){
         return this.personId2WarmEmissions.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry ->
                 EmissionUtils.sumUpEmissions(entry.getValue(), this.personId2ColdEmissions.get(entry.getKey()))));
     }

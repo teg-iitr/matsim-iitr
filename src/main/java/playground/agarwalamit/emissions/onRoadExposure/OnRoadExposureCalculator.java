@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.apache.log4j.Logger;
+import org.matsim.contrib.emissions.Pollutant;
 
 /**
  * Created by amit on 08.11.17.
@@ -45,7 +46,7 @@ public class OnRoadExposureCalculator {
      * @param travelTime
      * @return
      */
-    public Map<String, Double> calculate(String mode, Map<String, Double> emissionRate, double travelTime) {
+    public Map<Pollutant, Double> calculate(String mode, Map<Pollutant, Double> emissionRate, double travelTime) {
         if (mode==null){
             LOGGER.warn("Mode is null. Using default values of car mode.");
         }
@@ -65,7 +66,7 @@ public class OnRoadExposureCalculator {
      * <p>p --> penetration rate</p>
      * <p>t --> travelTime</p>
      */
-    private double calculateForSinglePollutant(String pollutant, double pollutantValue, String mode, double travelTime) {
+    private double calculateForSinglePollutant(Pollutant pollutant, double pollutantValue, String mode, double travelTime) {
         if (config.getPollutantToBackgroundConcentration_gm().get(pollutant) == null) {
         	LOGGER.warn("No background concentration for " + pollutant);
         	return 0.;

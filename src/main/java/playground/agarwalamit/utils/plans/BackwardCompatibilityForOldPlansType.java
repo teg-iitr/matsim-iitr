@@ -84,7 +84,7 @@ public class BackwardCompatibilityForOldPlansType {
 					} else {
 						Activity actIn = (Activity)pe;
 						Activity actOut = popOut.getFactory().createActivityFromCoord(actIn.getType(), actIn.getCoord());
-						actOut.setEndTime(actIn.getEndTime());
+						actOut.setEndTime(actIn.getEndTime().seconds());
 						planOut.addActivity(actOut);
 					}
 				}
@@ -126,7 +126,7 @@ public class BackwardCompatibilityForOldPlansType {
 							}
 							nr.setLinkIds(r.getStartLinkId(), linkIds, r.getEndLinkId());
 							nr.setDistance(r.getDistance());
-							nr.setTravelTime(r.getTravelTime());
+							nr.setTravelTime(r.getTravelTime().seconds());
 							legOut.setRoute(nr);
 						} else {
 							legOut = leg;

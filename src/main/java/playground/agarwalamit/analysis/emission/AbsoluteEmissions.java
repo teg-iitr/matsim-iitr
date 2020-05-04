@@ -22,6 +22,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.*;
 
+import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.core.utils.io.IOUtils;
 
 import playground.agarwalamit.utils.LoadMyScenarios;
@@ -47,27 +48,27 @@ public class AbsoluteEmissions {
 	private void runAndWrite(final String[] runCases){
 		BufferedWriter writer = IOUtils.getBufferedWriter("/Users/amit/Desktop/analysis/absoluteEmissions.txt");
 
-		SortedMap<String, SortedMap<String, Double>> emissions = new TreeMap<>();
+		SortedMap<String, SortedMap<Pollutant, Double>> emissions = new TreeMap<>();
 		SortedMap<String, Double> emissionCost = new TreeMap<>();
-		Set<String> pollutants = new TreeSet<>();
+		Set<Pollutant> pollutants = new TreeSet<>();
 
 		for(String runCase:runCases){
-			SortedMap<String, Double> em = calculateTotalEmissions(runCase);
+			SortedMap<Pollutant, Double> em = calculateTotalEmissions(runCase);
 			emissions.put(runCase, em);
 			emissionCost.put(runCase, getEmissionCost(em));
 			pollutants.addAll(em.keySet());
 		}
 		try {
 			writer.write("runCase"+"\t");
-			for(String runCase:pollutants){
-				writer.write(runCase+"\t");
+			for(Pollutant runCase:pollutants){
+				writer.write(runCase.toString()+"\t");
 			}
 //			writer.write("emissionCost");
 			writer.newLine();
 
 			for(String runCase:emissions.keySet()){
 				writer.write(runCase+"\t");
-				for(String pollutant : pollutants){
+				for(Pollutant pollutant : pollutants){
 					writer.write(emissions.get(runCase).get(pollutant)+"\t");
 				}
 //				writer.write(emissionCost.get(runCase));
@@ -79,14 +80,14 @@ public class AbsoluteEmissions {
 		}
 	}
 	
-	private double getEmissionCost(final SortedMap<String, Double> em){
+	private double getEmissionCost(final SortedMap<Pollutant, Double> em){
 		double cost = Arrays.stream(EmissionCostFactors.values())
 							.mapToDouble(ecf -> em.get(ecf.toString()) * ecf.getCostFactor())
 							.sum();
 		return cost;
 	}
 	
-	private SortedMap<String,Double> calculateTotalEmissions (final String runCase){
+	private SortedMap<Pollutant,Double> calculateTotalEmissions (final String runCase){
 		String configFile = outputDir+runCase+"/output_config.xml";
 		int lastIt = LoadMyScenarios.getLastIteration(configFile);
 		String emissionEventFile = outputDir+runCase+"/ITERS/it."+lastIt+"/"+lastIt+".emission.events.xml.gz";	

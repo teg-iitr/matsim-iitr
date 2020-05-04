@@ -106,8 +106,8 @@ import playground.agarwalamit.munich.utils.MunichPersonFilter.MunichUserGroup;
 
 				if( isFirstAndLastActSame ){ // only define act type and typ dur
 
-					double homeDur = firstAct.getEndTime();
-					homeDur = homeDur +  24*3600 - lastAct.getStartTime(); 
+					double homeDur = firstAct.getEndTime().seconds();
+					homeDur = homeDur +  24*3600 - lastAct.getStartTime().seconds();
 					/* here 30*00 may not be necessary, because, this step only decide about typical duration 
 					 * and lesser typical duration is better than very high.
 					 */
@@ -118,7 +118,7 @@ import playground.agarwalamit.munich.utils.MunichPersonFilter.MunichUserGroup;
 
 				} else {
 
-					if(firstAct.getEndTime() == 0.) { 
+					if(firstAct.getEndTime().seconds() == 0.) {
 						/*
 						 * If first and last act are not same, 1800 sec will be assigned to first act during "durationConsistencyCheck(...)".
 						 * else it will be clubbed with last act and thus, will be scored together.
@@ -135,8 +135,8 @@ import playground.agarwalamit.munich.utils.MunichPersonFilter.MunichUserGroup;
 					if(pe instanceof Leg){
 
 						Leg leg = popFactory.createLeg(((Leg)pe).getMode());
-						leg.setDepartureTime(((Leg)pe).getDepartureTime()+timeShift);
-						leg.setTravelTime(((Leg)pe).getTravelTime());
+						leg.setDepartureTime(((Leg)pe).getDepartureTime().seconds() + timeShift);
+						leg.setTravelTime(((Leg)pe).getTravelTime().seconds());
 						planOut.addLeg(leg);
 
 					} else {
@@ -153,9 +153,9 @@ import playground.agarwalamit.munich.utils.MunichPersonFilter.MunichUserGroup;
 								Activity hAct = popFactory.createActivityFromCoord(actType, firstAct.getCoord());
 
 								// first act --> only end time (no need for any time shift for same first and last act)
-								if(ii==0) hAct.setEndTime(firstAct.getEndTime()); 
+								if(ii==0) hAct.setEndTime(firstAct.getEndTime().seconds());
 								// last act --> only start time
-								else hAct.setStartTime(lastAct.getStartTime() + timeShift); 
+								else hAct.setStartTime(lastAct.getStartTime().seconds() + timeShift);
 
 								planOut.addActivity(hAct);
 								typDur = homeTypDur;
@@ -164,7 +164,7 @@ import playground.agarwalamit.munich.utils.MunichPersonFilter.MunichUserGroup;
 
 								if(ii == 0){ // first
 
-									double dur = firstAct.getEndTime();
+									double dur = firstAct.getEndTime().seconds();
 									Tuple<Double, Double> durAndTimeShift = durationConsistencyCheck(dur);
 
 									typDur = Math.max(Math.floor(durAndTimeShift.getFirst()/3600), 0.5) * 3600;
@@ -174,12 +174,12 @@ import playground.agarwalamit.munich.utils.MunichPersonFilter.MunichUserGroup;
 									actType = firstAct.getType().substring(0,4).concat(typDur/3600+"H");
 									Activity act = popFactory.createActivityFromCoord(actType, firstAct.getCoord());
 									//time shift is required for first activity also, for e.g. activities having zero end time.
-									act.setEndTime(firstAct.getEndTime()+timeShift); 
+									act.setEndTime(firstAct.getEndTime().seconds()+timeShift);
 									planOut.addActivity(act);
 
 								} else { // last
 
-									if(lastAct.getStartTime() >= 24*3600) {
+									if(lastAct.getStartTime().seconds() >= 24*3600) {
 										/* skipping the person, one could skip only this activity (and the connecting leg) 
 										 * which could generate other prob like home1 -car- home2 -pt- work will reduce to home1 -car- home2 and 
 										 * home1 and home2 are not wrapped. 
@@ -188,7 +188,7 @@ import playground.agarwalamit.munich.utils.MunichPersonFilter.MunichUserGroup;
 										break;
 									}
 
-									double dur = 24*3600 - lastAct.getStartTime();
+									double dur = 24*3600 - lastAct.getStartTime().seconds();
 
 									Tuple<Double, Double> durAndTimeShift = durationConsistencyCheck(dur);
 
@@ -198,7 +198,7 @@ import playground.agarwalamit.munich.utils.MunichPersonFilter.MunichUserGroup;
 
 									actType = lastAct.getType().substring(0,4).concat(typDur/3600+"H");
 									Activity act = popFactory.createActivityFromCoord(actType, lastAct.getCoord());
-									act.setStartTime(lastAct.getStartTime()+ timeShift);
+									act.setStartTime(lastAct.getStartTime().seconds()+ timeShift);
 									planOut.addActivity(act);
 								}
 							}
@@ -207,7 +207,7 @@ import playground.agarwalamit.munich.utils.MunichPersonFilter.MunichUserGroup;
 
 							Activity currentAct = (Activity) pe;
 							Coord cord = currentAct.getCoord();
-							double dur = currentAct.getEndTime() - currentAct.getStartTime();
+							double dur = currentAct.getEndTime().seconds() - currentAct.getStartTime().seconds();
 
 							Tuple<Double, Double> durAndTimeShift = durationConsistencyCheck(dur);
 
@@ -216,11 +216,11 @@ import playground.agarwalamit.munich.utils.MunichPersonFilter.MunichUserGroup;
 							actType = currentAct.getType().substring(0, 4).concat(typDur/3600+"H");
 							Activity a1 = popFactory.createActivityFromCoord(actType, cord);
 
-							a1.setStartTime(currentAct.getStartTime() + timeShift); 
+							a1.setStartTime(currentAct.getStartTime().seconds() + timeShift);
 
 							timeShift += durAndTimeShift.getSecond();
 
-							a1.setEndTime(currentAct.getEndTime() + timeShift); 
+							a1.setEndTime(currentAct.getEndTime().seconds() + timeShift);
 							/* updated time shift --> to incorporate time shift of the current and/or previous activities. 
 							 * (Basically, multiple activities with zero duration for same person).
 							 * for e.g. see initial plan of 555576.2#10166, 555576.2#14123

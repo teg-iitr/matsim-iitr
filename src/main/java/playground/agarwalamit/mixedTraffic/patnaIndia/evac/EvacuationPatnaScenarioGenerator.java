@@ -253,7 +253,7 @@ public class EvacuationPatnaScenarioGenerator {
 						leg.getMode(), 
 						FacilitiesUtils.toFacility(home, null),
 						FacilitiesUtils.toFacility(evacAct, null), 
-						home.getEndTime(), 
+						home.getEndTime().seconds(),
 						pOut);
 
 				Route route = ((Leg)routeInfo.get(0)).getRoute();
@@ -261,7 +261,7 @@ public class EvacuationPatnaScenarioGenerator {
 				route.setEndLinkId(evacAct.getLinkId());
 
 				leg.setRoute(route);
-				leg.setTravelTime(((Leg)routeInfo.get(0)).getTravelTime());
+				leg.setTravelTime(((Leg)routeInfo.get(0)).getTravelTime().seconds());
 
 			} else {
 				continue;

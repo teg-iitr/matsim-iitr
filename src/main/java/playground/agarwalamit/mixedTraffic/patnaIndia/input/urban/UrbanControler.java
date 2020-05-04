@@ -70,7 +70,7 @@ public class UrbanControler {
 		final Controler controler = new Controler(config);
 		controler.getConfig().controler().setDumpDataAtEnd(true);
 
-		final RandomizingTimeDistanceTravelDisutilityFactory builder =  new RandomizingTimeDistanceTravelDisutilityFactory("bike", config.planCalcScore());
+		final RandomizingTimeDistanceTravelDisutilityFactory builder =  new RandomizingTimeDistanceTravelDisutilityFactory("bike", config);
 		
 		controler.addOverridingModule(new AbstractModule() {
 			@Override

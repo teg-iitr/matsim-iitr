@@ -33,6 +33,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.emissions.EmissionUtils;
+import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.utils.io.IOUtils;
 
@@ -165,9 +166,9 @@ public class DelaysAndEmissionCostsDiff {
 		ema.init((MutableScenario)sc);
 		ema.preProcessData();
 		ema.postProcessData();
-		Map<Id<Person>, SortedMap<String, Double>> totalEmissions = ema.getPerson2totalEmissions();
-		Set<String> pollutants = new HashSet<>(Arrays.asList("CO", "CO2(total)", "FC", "HC", "NMHC", "NOx", "NO2","PM", "SO2"));
-		Map<Id<Person>, SortedMap<String, Double>> personId2Emissions = EmissionUtils.setNonCalculatedEmissionsForPopulation(sc.getPopulation(), totalEmissions, pollutants);
+		Map<Id<Person>, SortedMap<Pollutant, Double>> totalEmissions = ema.getPerson2totalEmissions();
+		Set<Pollutant> pollutants = new HashSet<>(Arrays.asList(Pollutant.CO, Pollutant.CO2_TOTAL, Pollutant.FC, Pollutant.HC, Pollutant.NMHC, Pollutant.NOx,Pollutant.NO2,Pollutant.PM,Pollutant.SO2));
+		Map<Id<Person>, SortedMap<Pollutant, Double>> personId2Emissions = EmissionUtils.setNonCalculatedEmissionsForPopulation(sc.getPopulation(), totalEmissions, pollutants);
 		Map<Id<Person>, Double> personId2EmissionsCosts= new HashMap<>();
 		boolean considerCO2Costs = true;
 

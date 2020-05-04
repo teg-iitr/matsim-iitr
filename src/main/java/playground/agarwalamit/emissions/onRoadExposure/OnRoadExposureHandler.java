@@ -38,6 +38,7 @@ import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.contrib.emissions.events.ColdEmissionEvent;
 import org.matsim.contrib.emissions.events.ColdEmissionEventHandler;
 import org.matsim.contrib.emissions.events.WarmEmissionEvent;
@@ -255,7 +256,7 @@ public class OnRoadExposureHandler implements WarmEmissionEventHandler, ColdEmis
         vehicleLinkEmissionCollector = this.agentsOnLink.get(linkId).remove(vehicleId);
 
         vehicleLinkEmissionCollector.setLinkLeaveTime(time);
-        Map<String, Double> inhaledMass = vehicleLinkEmissionCollector.getInhaledMass(config);
+        Map<Pollutant, Double> inhaledMass = vehicleLinkEmissionCollector.getInhaledMass(config);
 
         this.onRoadExposureTable.addInfoToTable(driverAgents.get(vehicleId).getFirst(), linkId, driverAgents.get(vehicleId).getSecond(), time, inhaledMass);
     }

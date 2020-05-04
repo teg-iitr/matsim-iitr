@@ -48,7 +48,7 @@ public class CongestionPricingComperator {
 	public CongestionPricingComperator(String runScenario) {
 		this.pricingScenario = runScenario;
 		scenario = LoadMyScenarios.loadScenarioFromOutputDir(runDir+pricingScenario+"/");
-		simulationEndTime = scenario.getConfig().qsim().getEndTime();
+		simulationEndTime = scenario.getConfig().qsim().getEndTime().seconds();
 		int lastIt = scenario.getConfig().controler().getLastIteration();
 		eventsFile = runDir+pricingScenario+"/ITERS/it."+lastIt+"/"+lastIt+".events.xml.gz";
 

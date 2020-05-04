@@ -53,7 +53,7 @@ public class CausedDelayHandler implements CongestionEventHandler {
 	private final Network network;
 	
 	public CausedDelayHandler(final Scenario scenario, final int noOfTimeBin) {
-		double simulatioEndTime = scenario.getConfig().qsim().getEndTime();
+		double simulatioEndTime = scenario.getConfig().qsim().getEndTime().seconds();
 		this.timeBinSize = simulatioEndTime /noOfTimeBin;
 		this.network = scenario.getNetwork();
 		initialize(noOfTimeBin, scenario);

@@ -29,7 +29,6 @@ import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
 import org.matsim.api.core.v01.events.handler.TransitDriverStartsEventHandler;
 import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.contrib.emissions.HbefaVehicleAttributes;
 import org.matsim.contrib.emissions.HbefaVehicleCategory;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
@@ -109,13 +108,24 @@ public class BerlinEmissionVehicleFromEvents implements VehicleEntersTrafficEven
 	}
 
 	private void createAndAddVehicle(final HbefaVehicleCategory vehicleCategory, final Id<Vehicle> vehicleId){
-		HbefaVehicleAttributes vehicleAttributes = new HbefaVehicleAttributes();
-		Id<VehicleType> vehTypeId = Id.create(vehicleCategory + ";" +
-				"average" + ";" +
-				vehicleAttributes.getHbefaSizeClass() + ";" +
-				vehicleAttributes.getHbefaEmConcept(), VehicleType.class);
-		VehicleType vehicleType = VehicleUtils.getFactory().createVehicleType(vehTypeId);
-		vehicleType.getAttributes().putAttribute("hbefaVehicleTypeDescription",vehTypeId.toString());
+
+
+		final Id<VehicleType> vehTypeId = Id.create( "emissionsVehicle", VehicleType.class );
+		VehicleType vehicleType = VehicleUtils.getFactory().createVehicleType( vehTypeId ) ;
+		EngineInformation engineInformation = vehicleType.getEngineInformation();
+		VehicleUtils.setHbefaVehicleCategory( engineInformation, vehicleCategory.name() );
+		VehicleUtils.setHbefaTechnology( engineInformation, "average" );
+		VehicleUtils.setHbefaSizeClass( engineInformation, "average" );
+		VehicleUtils.setHbefaEmissionsConcept( engineInformation, "average" );
+
+
+//		HbefaVehicleAttributes vehicleAttributes = new HbefaVehicleAttributes();
+//		Id<VehicleType> vehTypeId = Id.create(vehicleCategory + ";" +
+//				"average" + ";" +
+//				vehicleAttributes.getHbefaSizeClass() + ";" +
+//				vehicleAttributes.getHbefaEmConcept(), VehicleType.class);
+//		VehicleType vehicleType = VehicleUtils.getFactory().createVehicleType(vehTypeId);
+//		vehicleType.getAttributes().putAttribute("hbefaVehicleTypeDescription",vehTypeId.toString());
 
 		if(!(outputVehicles.getVehicleTypes().containsKey(vehTypeId))){
 			outputVehicles.addVehicleType(vehicleType);

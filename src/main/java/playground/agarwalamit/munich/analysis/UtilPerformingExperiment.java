@@ -129,7 +129,7 @@ public class UtilPerformingExperiment extends AbstractAnalysisModule {
 		LOG.info("Storing activity type and typical durations.");
 
 		for(String actType :config.planCalcScore().getActivityTypes()){
-			actType2TypicalDuration.put(actType, config.planCalcScore().getActivityParams(actType).getTypicalDuration());
+			actType2TypicalDuration.put(actType, config.planCalcScore().getActivityParams(actType).getTypicalDuration().seconds());
 			actType2UnderPerformUtils.put(actType, 0.0);
 			actType2OverPerformUtils.put(actType, 0.0);
 			actType2EqualPerformUtils.put(actType, 0.0);

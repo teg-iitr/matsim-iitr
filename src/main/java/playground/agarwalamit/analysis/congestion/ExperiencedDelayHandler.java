@@ -80,7 +80,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler, VehicleEntersTrafficEven
 	}
 
 	private void initialize(final Scenario scenario, final int noOfTimeBins){
-		double simulationEndTime = scenario.getConfig().qsim().getEndTime();
+		double simulationEndTime = scenario.getConfig().qsim().getEndTime().seconds();
 		this.timeBinSize = simulationEndTime / noOfTimeBins;
 		Network network = scenario.getNetwork();
 

@@ -152,7 +152,7 @@ public class EquilTestSetUp {
 		Coord workCoords = new Coord(19999.0, 10000.0);
 		Activity work = pFactory.createActivityFromCoord("work" , workCoords);
 		//		Activity work = pFactory.createActivityFromLinkId("work", scenario.createId("45"));
-		work.setEndTime(home.getEndTime() + 600 + 8 * 3600);
+		work.setEndTime(home.getEndTime().seconds() + 600 + 8 * 3600);
 		plan.addActivity(work);
 
 		Leg leg2 = pFactory.createLeg(TransportMode.car);

@@ -146,7 +146,7 @@ public class OutputPlansConsistencyCheck {
      * Check if activity end time is higher than simulation end time. Such person will be "stuckAndAbort".
      */
     private void writeTestResultsForActivityEndTimeAfterSimulationTime() {
-        double simEndTime = config.qsim().getEndTime();
+        double simEndTime = config.qsim().getEndTime().seconds();
         if ( Double.isInfinite(simEndTime)) {
             LOG.warn("Probably, simulation end time is not defined. Skipping this test...");
             return;
@@ -162,7 +162,7 @@ public class OutputPlansConsistencyCheck {
                for (Plan plan : p.getPlans()) {
                    for (PlanElement pe : plan.getPlanElements()) {
                        if (pe instanceof Activity) {
-                           double actEndTime = ((Activity) pe).getEndTime();
+                           double actEndTime = ((Activity) pe).getEndTime().seconds();
                            if (actEndTime > simEndTime) {
                                LOG.error("Activity end time is " + actEndTime + " whereas simulation end time is " + simEndTime);
                                writer.write(p.getId() + "\t" + ((Activity) pe).getType() + "\t" + actEndTime + "\n");
@@ -214,11 +214,11 @@ public class OutputPlansConsistencyCheck {
                             actType2Counter.put(act.getType(), actType2Counter.get(act.getType())+1);
 
                             if (startTime==Double.NEGATIVE_INFINITY){
-                                startTime = act.getEndTime();
+                                startTime = act.getEndTime().seconds();
                                 continue;
                             }
 
-                            double dur = act.getEndTime() - startTime;
+                            double dur = act.getEndTime().seconds() - startTime;
 
                             double zeroUtilDur = actType2ZeroUtilDuration.get(act.getType());
                             if (dur <= 0 && dur!=Double.NEGATIVE_INFINITY) {
@@ -247,9 +247,9 @@ public class OutputPlansConsistencyCheck {
 
                             }
                             // if dur is negative --> do not carry forward this negative effect to duration of other activities.
-                            startTime = Math.max( startTime, act.getEndTime());
+                            startTime = Math.max( startTime, act.getEndTime().seconds());
                         } else if (pe instanceof  Leg) {
-                            startTime += ((Leg) pe).getRoute().getTravelTime(); // this is now --> start time of act after this leg
+                            startTime += ((Leg) pe).getRoute().getTravelTime().seconds(); // this is now --> start time of act after this leg
                         } else {
                             throw new RuntimeException("Plan elements " + pe.toString() + " is not known.");
                         }

@@ -121,8 +121,8 @@ public class TravelDistanceForSimTimeExp {
 		Scenario sc = ScenarioUtils.loadScenario(config);
 		
 		EventsManager manager = EventsUtils.createEventsManager();
-		ModeFilterTripDistanceHandler handler_bike = new ModeFilterTripDistanceHandler(sc.getNetwork(),sc.getConfig().qsim().getEndTime(),1,"bike");
-		ModeFilterTripDistanceHandler handler_car = new ModeFilterTripDistanceHandler(sc.getNetwork(),sc.getConfig().qsim().getEndTime(),1,"car");
+		ModeFilterTripDistanceHandler handler_bike = new ModeFilterTripDistanceHandler(sc.getNetwork(),sc.getConfig().qsim().getEndTime().seconds(),1,"bike");
+		ModeFilterTripDistanceHandler handler_car = new ModeFilterTripDistanceHandler(sc.getNetwork(),sc.getConfig().qsim().getEndTime().seconds(),1,"car");
 		TripDistanceHandler handler = new TripDistanceHandler(sc);
 		manager.addHandler(handler);
 		manager.addHandler(handler_bike);

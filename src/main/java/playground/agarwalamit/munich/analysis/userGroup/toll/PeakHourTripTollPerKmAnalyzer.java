@@ -31,6 +31,7 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.io.IOUtils;
+import org.matsim.core.utils.misc.OptionalTime;
 import playground.agarwalamit.analysis.toll.TripTollHandler;
 import playground.agarwalamit.analysis.tripDistance.ModeFilterTripDistanceHandler;
 import playground.agarwalamit.munich.utils.MunichPersonFilter;
@@ -58,10 +59,10 @@ public class PeakHourTripTollPerKmAnalyzer {
 	private final SortedMap<String, Tuple<Double,Double>> usrGrp2TollsPerKm = new TreeMap<>();
 	private final SortedMap<String, Tuple<Integer,Integer>> usrGrp2TripCounts = new TreeMap<>();
 
-	public PeakHourTripTollPerKmAnalyzer(final Network network, final double simulationEndTime, final int noOfTimeBins) {
+	public PeakHourTripTollPerKmAnalyzer(final Network network, final OptionalTime simulationEndTime, final int noOfTimeBins) {
 		LOG.warn("Peak hours are assumed as 07:00-10:00 and 15:00-18:00 by looking on the travel demand for BAU scenario.");
-		this.tollHandler = new TripTollHandler( simulationEndTime, noOfTimeBins );
-		this.distHandler = new ModeFilterTripDistanceHandler(network, simulationEndTime, noOfTimeBins);
+		this.tollHandler = new TripTollHandler( simulationEndTime.seconds(), noOfTimeBins );
+		this.distHandler = new ModeFilterTripDistanceHandler(network, simulationEndTime.seconds(), noOfTimeBins);
 		throw new RuntimeException("looks, there is some problem somewhere, cant reproduce the results (Oct 2016).");
 	} 
 

@@ -288,7 +288,8 @@ public class VehicleInPrepareForSimTest {
                                 }
                                 //add all other vehicles for mode choice && fromVehiclesData
                                 Id<Vehicle> vId = Id.create(p.getId()+"_"+vt.getNetworkMode(),Vehicle.class);
-                                VehicleUtils.insertVehicleIdIntoAttributes(p,vt.getNetworkMode(),vId);
+                                // TODO all modes can be inserted as a map. Amit May'20
+                                VehicleUtils.insertVehicleIdsIntoAttributes(p, Map.of(vt.getNetworkMode(), vId));
 
                                 Vehicle v = VehicleUtils.getFactory().createVehicle(vId, vt);
                                 scenario.getVehicles().addVehicle(v);

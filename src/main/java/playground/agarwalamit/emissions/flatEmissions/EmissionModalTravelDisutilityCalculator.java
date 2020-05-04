@@ -28,6 +28,8 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.emissions.EmissionModule;
+import org.matsim.contrib.emissions.LinkEmissionsCalculator;
+import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.contrib.emissions.WarmEmissionAnalysisModule;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
@@ -142,8 +144,8 @@ class EmissionModalTravelDisutilityCalculator implements TravelDisutility {
 		iteration. Cold emission costs are assumed not to change routing; they might change mode choice or
 		location choice (not implemented)! */
 
-        WarmEmissionAnalysisModule warmEmissionAnalysisModule = this.emissionModule.getWarmEmissionAnalysisModule();
-        Map<String, Double> expectedWarmEmissions = warmEmissionAnalysisModule.checkVehicleInfoAndCalculateWarmEmissions(
+        LinkEmissionsCalculator warmEmissionAnalysisModule = this.emissionModule.getWarmEmissionAnalysisModule();
+        Map<Pollutant, Double> expectedWarmEmissions = warmEmissionAnalysisModule.checkVehicleInfoAndCalculateWarmEmissions(
                 vehicle,
 //                NetworkUtils.getType(link),
 //                    EmissionUtils.getHbefaRoadType( link ),

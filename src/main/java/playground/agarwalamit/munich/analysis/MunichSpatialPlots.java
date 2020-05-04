@@ -343,8 +343,8 @@ public class MunichSpatialPlots {
 
 
 	public void writeEmissionToCells(){
-		Map<Double,Map<Id<Link>,SortedMap<String,Double>>> linkEmissionsBau = new HashMap<>();
-		Map<Double,Map<Id<Link>,SortedMap<String,Double>>> linkEmissionsPolicy = new HashMap<>();
+		Map<Double,Map<Id<Link>,SortedMap<Pollutant,Double>>> linkEmissionsBau = new HashMap<>();
+		Map<Double,Map<Id<Link>,SortedMap<Pollutant,Double>>> linkEmissionsPolicy = new HashMap<>();
 
 		// setting of input data
 		SpatialDataInputs inputs = new SpatialDataInputs(LinkWeightMethod.line,bau, policyCase);

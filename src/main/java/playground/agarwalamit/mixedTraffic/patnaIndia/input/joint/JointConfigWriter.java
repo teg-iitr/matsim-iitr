@@ -73,7 +73,7 @@ public class JointConfigWriter {
 		config.network().setInputFile(NET_FILE);
 
 		config.plans().setInputFile(JOINT_PLANS_10PCT);
-		config.plans().setSubpopulationAttributeName(PatnaUtils.SUBPOP_ATTRIBUTE);
+//		config.plans().setSubpopulationAttributeName(PatnaUtils.SUBPOP_ATTRIBUTE);
 		config.plans().setInputPersonAttributeFile(JOINT_PERSONS_ATTRIBUTE_10PCT);
 
 		config.qsim().setVehiclesSource(VehiclesSource.modeVehicleTypesFromVehiclesData);

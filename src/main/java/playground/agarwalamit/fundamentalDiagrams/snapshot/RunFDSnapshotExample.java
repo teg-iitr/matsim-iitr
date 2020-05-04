@@ -22,6 +22,7 @@ package playground.agarwalamit.fundamentalDiagrams.snapshot;
 import java.util.Collections;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.ControlerConfigGroup;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 import playground.agarwalamit.fundamentalDiagrams.core.FDModule;
@@ -50,7 +51,7 @@ public class RunFDSnapshotExample {
         String outFolder ="/1lane/";
         scenario.getConfig().controler().setOutputDirectory(myDir+outFolder);
         scenario.getConfig().controler().setWriteEventsInterval(1);// write events for each combination
-        scenario.getConfig().controler().setSnapshotFormat(Collections.singletonList("transims"));
+        scenario.getConfig().controler().setSnapshotFormat(Collections.singletonList(ControlerConfigGroup.SnapshotFormat.transims));
 
         Controler controler = new Controler(scenario);
         controler.addOverridingModule(new FDModule(scenario));

@@ -83,7 +83,7 @@ public class PatnaOnlineEmissionsWriter {
         for (VehicleType vt : scenario.getVehicles().getVehicleTypes().values()) {
             HbefaVehicleCategory vehicleCategory = HbefaVehicleCategory.PASSENGER_CAR;
             if (vt.getId().toString().equals(TransportMode.car)) vehicleCategory = HbefaVehicleCategory.PASSENGER_CAR;
-            else if (vt.getId().toString().equals(TransportMode.bike)) vehicleCategory = HbefaVehicleCategory.ZERO_EMISSION_VEHICLE;
+            else if (vt.getId().toString().equals(TransportMode.bike)) vehicleCategory = HbefaVehicleCategory.NON_HBEFA_VEHICLE; //ZERO_EMISSION_VEHICLE
             else if  (vt.getId().toString().equals("motorbike")) vehicleCategory = HbefaVehicleCategory.MOTORCYCLE;
             else if  (vt.getId().toString().equals("truck")) vehicleCategory = HbefaVehicleCategory.HEAVY_GOODS_VEHICLE;
             else throw new RuntimeException("not implemented yet.");

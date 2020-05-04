@@ -53,40 +53,22 @@ public final class EmissionUtilsExtended {
 		));
 	}
 
-	public static Map<String, Double> getTotalColdEmissions(final Map<Id<Person>, Map<String, Double>> person2TotalColdEmissions) {
-		Map<String, Double> totalColdEmissions = new TreeMap<>();
+	public static Map<Pollutant, Double> getTotalEmissions(final Map<Id<Person>, Map<Pollutant, Double>> person2TotalColdEmissions) {
+		Map<Pollutant, Double> totalColdEmissions = new TreeMap<>();
 
 		for(Id<Person> personId : person2TotalColdEmissions.keySet()){
-			Map<String, Double> individualColdEmissions = person2TotalColdEmissions.get(personId);
+			Map<Pollutant, Double> individualColdEmissions = person2TotalColdEmissions.get(personId);
 			double sumOfColdPollutant;
-			for(String pollutant : individualColdEmissions.keySet()){
+			for(Pollutant pollutant : individualColdEmissions.keySet()){
 				if(totalColdEmissions.containsKey(pollutant.toString())){
 					sumOfColdPollutant = totalColdEmissions.get(pollutant.toString()) + individualColdEmissions.get(pollutant);
 				} else {
 					sumOfColdPollutant = individualColdEmissions.get(pollutant);
 				}
-				totalColdEmissions.put(pollutant.toString(), sumOfColdPollutant);
+				totalColdEmissions.put(pollutant, sumOfColdPollutant);
 			}
 		}
 		return totalColdEmissions;
-	}
-
-	public static Map<String, Double> getTotalWarmEmissions(final Map<Id<Person>, Map<String, Double>> person2TotalWarmEmissions) {
-		Map<String, Double> totalWarmEmissions = new TreeMap<>();
-
-		for(Id<Person> personId : person2TotalWarmEmissions.keySet()){
-			Map<String, Double> individualWarmEmissions = person2TotalWarmEmissions.get(personId);
-			double sumOfWarmPollutant;
-			for(String pollutant : individualWarmEmissions.keySet()){
-				if(totalWarmEmissions.containsKey(pollutant.toString())){
-					sumOfWarmPollutant = totalWarmEmissions.get(pollutant.toString()) + individualWarmEmissions.get(pollutant);
-				} else {
-					sumOfWarmPollutant = individualWarmEmissions.get(pollutant);
-				}
-				totalWarmEmissions.put(pollutant.toString(), sumOfWarmPollutant);
-			}
-		}
-		return totalWarmEmissions;
 	}
 
 	public static  Map<Double, Map<Id<Link>, SortedMap<Pollutant, Double>>> convertPerLinkEmissions2String (final Network net, final Map<Double,Map<Id<Link>, Map<Pollutant, Double>>> warmEmiss) {

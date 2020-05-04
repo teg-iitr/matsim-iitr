@@ -88,7 +88,7 @@ public class BerlinTransitVehicleTypeIdentifier {
         // get info from transit vehicles
         // trains/trams will be emission free, rest will be HGV
 
-        vehicleCategoryToVehicleTypeList.put(HbefaVehicleCategory.ZERO_EMISSION_VEHICLE, new ArrayList<>());
+        vehicleCategoryToVehicleTypeList.put(HbefaVehicleCategory.NON_HBEFA_VEHICLE, new ArrayList<>());
         vehicleCategoryToVehicleTypeList.put(HbefaVehicleCategory.HEAVY_GOODS_VEHICLE, new ArrayList<>());
 
         for(VehicleType vehicleType : this.transitVehicles.getVehicleTypes().values()) {
@@ -101,7 +101,7 @@ public class BerlinTransitVehicleTypeIdentifier {
                     description.startsWith("KT4D-Doppeltraktion")|| description.startsWith("Flexity Einrichter") || description.contains("GT6") ||
                     description.contains("KT4D")) {
 
-                vehicleCategoryToVehicleTypeList.get(HbefaVehicleCategory.ZERO_EMISSION_VEHICLE).add(vehicleType.getId());
+                vehicleCategoryToVehicleTypeList.get(HbefaVehicleCategory.NON_HBEFA_VEHICLE).add(vehicleType.getId());
 
             } else if (description.startsWith("Volvo") || description.contains("bus") || description.contains("Bus") ||
                     description.equals("Solaris Urbino") || description.startsWith("MAN") || description.equals("Historisches Fahrzeug") ||
@@ -120,7 +120,7 @@ public class BerlinTransitVehicleTypeIdentifier {
                     // it looks like that total capacity of the bus are somewhat in the range of 4-8 or so (probably for 10% sample)
                     vehicleCategoryToVehicleTypeList.get(HbefaVehicleCategory.HEAVY_GOODS_VEHICLE).add(vehicleType.getId());
                 } else {
-                    vehicleCategoryToVehicleTypeList.get(HbefaVehicleCategory.ZERO_EMISSION_VEHICLE).add(vehicleType.getId());
+                    vehicleCategoryToVehicleTypeList.get(HbefaVehicleCategory.NON_HBEFA_VEHICLE).add(vehicleType.getId());
                 }
             }
         }

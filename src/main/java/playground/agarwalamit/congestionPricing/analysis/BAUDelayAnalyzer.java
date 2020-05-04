@@ -48,7 +48,7 @@ public class BAUDelayAnalyzer {
 	
 	public BAUDelayAnalyzer(String congestionImpl) {
 		scenario = LoadMyScenarios.loadScenarioFromOutputDir(runDir);
-		simulationEndTime = scenario.getConfig().qsim().getEndTime();
+		simulationEndTime = scenario.getConfig().qsim().getEndTime().seconds();
 		int lastIt = scenario.getConfig().controler().getLastIteration();
 		eventsFile = runDir+"ITERS/it."+lastIt+"/"+lastIt+".events.xml.gz";
 		congestionEventsFile = runDir+"/ITERS/it."+lastIt+"/"+lastIt+".events_"+congestionImpl+".xml.gz";

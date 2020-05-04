@@ -59,7 +59,7 @@ public class PersonArrivalAnalyzer {
 		new ConfigReader(config).readFile(configFile);
 
 		Collection<String> mainModes = config.qsim().getMainModes();
-		double endTime = config.qsim().getEndTime();
+		double endTime = config.qsim().getEndTime().seconds();
 
 		for ( String mode : mainModes){
 			SortedMap<Integer, Integer> bin2Nr = new TreeMap<>();

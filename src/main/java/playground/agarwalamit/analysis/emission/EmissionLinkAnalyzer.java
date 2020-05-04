@@ -23,6 +23,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.contrib.emissions.events.EmissionEventsReader;
 import org.matsim.contrib.emissions.EmissionUtils;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -52,10 +53,10 @@ public class EmissionLinkAnalyzer extends AbstractAnalysisModule {
 	private final String emissionEventsFile;
     private final FilteredWarmEmissionHandler warmHandler;
 	private final FilteredColdEmissionHandler coldHandler;
-	private Map<Double, Map<Id<Link>, Map<String, Double>>> link2WarmEmissions;
-	private Map<Double, Map<Id<Link>, Map<String, Double>>> link2ColdEmissions;
-	private SortedMap<Double, Map<Id<Link>, SortedMap<String, Double>>> link2TotalEmissions;
-	private SortedMap<String,Double> totalEmissions = new TreeMap<>();
+	private Map<Double, Map<Id<Link>, Map<Pollutant, Double>>> link2WarmEmissions;
+	private Map<Double, Map<Id<Link>, Map<Pollutant, Double>>> link2ColdEmissions;
+	private SortedMap<Double, Map<Id<Link>, SortedMap<Pollutant, Double>>> link2TotalEmissions;
+	private SortedMap<Pollutant,Double> totalEmissions = new TreeMap<>();
 
 	/**
 	 * This will compute the emissions only from links falling inside the given shape and consider the persons belongs to the given user group.
@@ -157,12 +158,12 @@ public class EmissionLinkAnalyzer extends AbstractAnalysisModule {
 	}
 
 	public void writeTotalEmissions(String outputFolder, String suffix) {
-		SortedMap<String,Double> emissions = getTotalEmissions();
+		SortedMap<Pollutant, Double> emissions = getTotalEmissions();
 		BufferedWriter writer = IOUtils.getBufferedWriter(outputFolder+"/totalEmissions_"+suffix+".txt");
 		try{
 			writer.write("pollutant \t emissionsInGm \n");
-			for(String emiss : emissions.keySet()){
-				writer.write(emiss+"\t"+emissions.get(emiss)+"\n");
+			for(Pollutant emiss : emissions.keySet()){
+				writer.write(emiss.toString()+"\t"+emissions.get(emiss)+"\n");
 			}
 			writer.close();
 		} catch (Exception e){
@@ -170,38 +171,39 @@ public class EmissionLinkAnalyzer extends AbstractAnalysisModule {
 		}
 	}
 
-	private SortedMap<Double, Map<Id<Link>, SortedMap<String, Double>>> sumUpEmissionsPerTimeInterval(
-			final Map<Double, Map<Id<Link>, Map<String, Double>>> time2warmEmissionsTotal,
-			final Map<Double, Map<Id<Link>, Map<String, Double>>> time2coldEmissionsTotal) {
+	private SortedMap<Double, Map<Id<Link>, SortedMap<Pollutant, Double>>> sumUpEmissionsPerTimeInterval(
+			final Map<Double, Map<Id<Link>, Map<Pollutant, Double>>> time2warmEmissionsTotal,
+			final Map<Double, Map<Id<Link>, Map<Pollutant, Double>>> time2coldEmissionsTotal) {
 
-		SortedMap<Double, Map<Id<Link>, SortedMap<String, Double>>> time2totalEmissions = new TreeMap<>();
+		SortedMap<Double, Map<Id<Link>, SortedMap<Pollutant, Double>>> time2totalEmissions = new TreeMap<>();
 
 		for(double endOfTimeInterval: time2warmEmissionsTotal.keySet()){
-			Map<Id<Link>, Map<String, Double>> warmEmissions = time2warmEmissionsTotal.get(endOfTimeInterval);
-			Map<Id<Link>, Map<String, Double>> coldEmissions = time2coldEmissionsTotal.get(endOfTimeInterval);
+			Map<Id<Link>, Map<Pollutant, Double>> warmEmissions = time2warmEmissionsTotal.get(endOfTimeInterval);
+			Map<Id<Link>, Map<Pollutant, Double>> coldEmissions = time2coldEmissionsTotal.get(endOfTimeInterval);
 
-			Map<Id<Link>, Map<String, Double>> totalEmissions = EmissionUtils.sumUpEmissionsPerId(warmEmissions, coldEmissions);
-			Map<Id<Link>, SortedMap<String, Double>> sorted_totalEmissions = new TreeMap<>();
-			for (Map.Entry<Id<Link>, Map<String,Double>> e : totalEmissions.entrySet()) {
+			Map<Id<Link>, Map<Pollutant, Double>> totalEmissions = EmissionUtils.sumUpEmissionsPerId(warmEmissions, coldEmissions);
+			Map<Id<Link>, SortedMap<Pollutant, Double>> sorted_totalEmissions = new TreeMap<>();
+			for (Map.Entry<Id<Link>, Map<Pollutant,Double>> e : totalEmissions.entrySet()) {
 				sorted_totalEmissions.put(e.getKey(), new TreeMap<>(e.getValue()));
 			}
 					
 			time2totalEmissions.put(endOfTimeInterval, sorted_totalEmissions);
 
-			this.totalEmissions = MapUtils.mergeMaps(this.totalEmissions, EmissionUtils.getTotalEmissions(sorted_totalEmissions));
+//			this.totalEmissions = MapUtils.mergeMaps(this.totalEmissions, EmissionUtils.getTotalEmissions(sorted_totalEmissions));
+			EmissionUtils.getTotalEmissions(sorted_totalEmissions).forEach( (k,v) -> this.totalEmissions.merge(k, v, Double::sum));
 		}
 		return time2totalEmissions;
 	}
 
-	public SortedMap<Double, Map<Id<Link>, SortedMap<String, Double>>> getLink2TotalEmissions() {
+	public SortedMap<Double, Map<Id<Link>, SortedMap<Pollutant, Double>>> getLink2TotalEmissions() {
 		return this.link2TotalEmissions;
 	}
 
-	public Map<Double, Map<Id<Link>, Map<String, Double>>> getLink2WarmEmissions() {
+	public Map<Double, Map<Id<Link>, Map<Pollutant, Double>>> getLink2WarmEmissions() {
 		return link2WarmEmissions;
 	}
 
-	public Map<Double, Map<Id<Link>, Map<String, Double>>> getLink2ColdEmissions() {
+	public Map<Double, Map<Id<Link>, Map<Pollutant, Double>>> getLink2ColdEmissions() {
 		return link2ColdEmissions;
 	}
 
@@ -230,7 +232,7 @@ public class EmissionLinkAnalyzer extends AbstractAnalysisModule {
 		return totalEmissionCosts;
 	}
 
-	public SortedMap<String, Double> getTotalEmissions(){
+	public SortedMap<Pollutant, Double> getTotalEmissions(){
 		return this.totalEmissions;
 	}
 }

@@ -124,8 +124,8 @@ public class EmissionEventsTest {
         bike.setMaximumVelocity(20./3.6);
         bike.setPcuEquivalents(0.25);
         bike.getAttributes().putAttribute("hbefaVehicleTypeDescription",
-                HbefaVehicleCategory.ZERO_EMISSION_VEHICLE.toString().concat(";;;") );
-        VehicleUtils.setHbefaVehicleCategory(bike.getEngineInformation(),HbefaVehicleCategory.ZERO_EMISSION_VEHICLE.toString());
+                HbefaVehicleCategory.NON_HBEFA_VEHICLE.toString().concat(";;;") ); //ZERO_EMISSION_VEHICLE
+        VehicleUtils.setHbefaVehicleCategory(bike.getEngineInformation(),HbefaVehicleCategory.NON_HBEFA_VEHICLE.toString()); //ZERO_EMISSION_VEHICLE
         bike.setNetworkMode("bicycle");
         vehs.addVehicleType(bike);
 
@@ -291,7 +291,7 @@ public class EmissionEventsTest {
         ecg.setDetailedColdEmissionFactorsFile(inputFilesDir + "/EFA_ColdStart_SubSegm_2005detailed.txt");
 
         ecg.setUsingDetailedEmissionCalculation(true);
-        ecg.setEmissionEfficiencyFactor(1.0);
+//        ecg.setEmissionEfficiencyFactor(1.0);
         ecg.setConsideringCO2Costs(true);
         ecg.setEmissionCostMultiplicationFactor(1.0);
 

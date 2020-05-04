@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 import org.locationtech.jts.geom.Geometry;
@@ -181,7 +182,7 @@ private static final String data_dates [] = {"_22Nov2017"};
 
         if (! new File(outputFilesDir).exists()) new File(outputFilesDir).mkdir();
         {
-            Map<String, Map<String, Double>> modeToInhaledMass = onRoadExposureHandler.getOnRoadExposureTable().getModeToInhaledMass();
+            Map<String, Map<Pollutant, Double>> modeToInhaledMass = onRoadExposureHandler.getOnRoadExposureTable().getModeToInhaledMass();
             String outFile = outputFilesDir+"/modeToOnRoadExposure"+ data_date +".txt";
             try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
                 writer.write("mode\t");
@@ -228,7 +229,10 @@ private static final String data_dates [] = {"_22Nov2017"};
                             zoneId = getZoneId( coord );
                             writer.write(zoneId+"\t"+coord.getX()+"\t"+coord.getY()+"\t");
                         }
-                        Map<String, Double> values = MapUtils.valueMapSum(trip.getLink2Emissions());
+                        Map<Pollutant, Double> values = trip.getLink2Emissions().values().stream()
+                                .flatMap(m -> m.entrySet().stream())
+                                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingDouble(Map.Entry::getValue)));
+
                         for (String poll : pollutants){
                             writer.write( values.get(poll) + "\t");
                         }

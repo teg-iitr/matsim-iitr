@@ -158,7 +158,7 @@ public class SubPopMunichControler {
 		if(internalizeEmission){
 			// this affects the router by overwriting its generalized cost function (TravelDisutility):
 			final EmissionTravelDisutilityCalculatorFactory emissionTducf = new EmissionTravelDisutilityCalculatorFactory(
-					new RandomizingTimeDistanceTravelDisutilityFactory( TransportMode.car, config.planCalcScore())
+					new RandomizingTimeDistanceTravelDisutilityFactory( TransportMode.car, config)
 					);
 			controler.addOverridingModule(new AbstractModule() {
 				@Override
@@ -185,7 +185,7 @@ public class SubPopMunichControler {
 
 			TollHandler tollHandler = new TollHandler(controler.getScenario());
 			final EmissionCongestionTravelDisutilityCalculatorFactory emissionCongestionTravelDisutilityCalculatorFactory =
-					new EmissionCongestionTravelDisutilityCalculatorFactory(new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car,controler.getConfig().planCalcScore()),
+					new EmissionCongestionTravelDisutilityCalculatorFactory(new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car,controler.getConfig()),
 							tollHandler);
 			controler.addOverridingModule(new AbstractModule() {
 				@Override

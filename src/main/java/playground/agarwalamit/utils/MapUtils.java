@@ -104,7 +104,7 @@ public final class MapUtils {
 		return outMap;
 	}
 
-	public static <T> Map<String, Double> valueMapSum(Map<T, Map<String,Double>> inMap) {
+	public static <T> Map<String, Double> valueMapSum(Map<T, Map<String, Double>> inMap) {
 		return inMap.values()
 					.stream()
 					.flatMap(m -> m.entrySet().stream())

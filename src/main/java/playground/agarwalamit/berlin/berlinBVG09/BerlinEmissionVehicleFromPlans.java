@@ -24,8 +24,6 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.contrib.emissions.EmissionUtils;
-import org.matsim.contrib.emissions.HbefaVehicleAttributes;
 import org.matsim.contrib.emissions.HbefaVehicleCategory;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -64,7 +62,7 @@ public class BerlinEmissionVehicleFromPlans {
 			Id<Vehicle> vehicleId = Id.create(personId, Vehicle.class); //TODO: this should be rather the vehicle, not the person; re-think EmissionModule!
 
 			HbefaVehicleCategory vehicleCategory = null;
-			HbefaVehicleAttributes vehicleAttributes = null;
+//			HbefaVehicleAttributes vehicleAttributes = null;
 			
 			boolean isCreateVehicle = true;
 
@@ -102,13 +100,21 @@ public class BerlinEmissionVehicleFromPlans {
 			}
 
 			if(isCreateVehicle){
-				vehicleAttributes = new HbefaVehicleAttributes();
-				Id<VehicleType> vehTypeId = Id.create(vehicleCategory + ";" + 
-						"average" + ";" +
-						"average" + ";" +
-						"average", VehicleType.class);
-				VehicleType vehicleType = VehicleUtils.getFactory().createVehicleType(vehTypeId);
-				vehicleType.getAttributes().putAttribute("hbefaVehicleTypeDescription",vehTypeId.toString());
+				final Id<VehicleType> vehTypeId = Id.create( "emissionsVehicle", VehicleType.class );
+				VehicleType vehicleType = VehicleUtils.getFactory().createVehicleType( vehTypeId ) ;
+				EngineInformation engineInformation = vehicleType.getEngineInformation();
+				VehicleUtils.setHbefaVehicleCategory( engineInformation, vehicleCategory.name() );
+				VehicleUtils.setHbefaTechnology( engineInformation, "average" );
+				VehicleUtils.setHbefaSizeClass( engineInformation, "average" );
+				VehicleUtils.setHbefaEmissionsConcept( engineInformation, "average" );
+
+//				vehicleAttributes = new HbefaVehicleAttributes();
+//				Id<VehicleType> vehTypeId = Id.create(vehicleCategory + ";" +
+//						"average" + ";" +
+//						"average" + ";" +
+//						"average", VehicleType.class);
+//				VehicleType vehicleType = VehicleUtils.getFactory().createVehicleType(vehTypeId);
+//				vehicleType.getAttributes().putAttribute("hbefaVehicleTypeDescription",vehTypeId.toString());
 //				vehicleType.setDescription(EmissionUtils.EmissionSpecificationMarker.BEGIN_EMISSIONS+vehTypeId.toString()+EmissionSpecificationMarker.END_EMISSIONS);
 
 				if(!(outputVehicles.getVehicleTypes().containsKey(vehTypeId))){

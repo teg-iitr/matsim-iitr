@@ -38,11 +38,11 @@ import org.matsim.api.core.v01.events.handler.PersonMoneyEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.emissions.EmissionModule;
 import org.matsim.contrib.emissions.HbefaVehicleCategory;
+import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.contrib.emissions.events.ColdEmissionEvent;
 import org.matsim.contrib.emissions.events.ColdEmissionEventHandler;
 import org.matsim.contrib.emissions.events.WarmEmissionEvent;
 import org.matsim.contrib.emissions.events.WarmEmissionEventHandler;
-import org.matsim.contrib.emissions.types.WarmPollutant;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.groups.ControlerConfigGroup;
@@ -145,9 +145,10 @@ public class EquilMixedTrafficEmissionIT {
 		VehicleType bike = vehs.getFactory().createVehicleType(Id.create("bicycle",VehicleType.class));
 		bike.setMaximumVelocity(20./3.6);
 		bike.setPcuEquivalents(0.25);
+		// following might not work, need to check. Amit May'20
 		bike.getAttributes().putAttribute("hbefaVehicleTypeDescription",
-				HbefaVehicleCategory.ZERO_EMISSION_VEHICLE.toString().concat(";;;"));
-		VehicleUtils.setHbefaVehicleCategory(bike.getEngineInformation(),HbefaVehicleCategory.ZERO_EMISSION_VEHICLE.toString());
+				HbefaVehicleCategory.NON_HBEFA_VEHICLE.toString().concat(";;;")); //ZERO_EMISSION_VEHICLE
+		VehicleUtils.setHbefaVehicleCategory(bike.getEngineInformation(),HbefaVehicleCategory.NON_HBEFA_VEHICLE.toString()); //ZERO_EMISSION_VEHICLE
 		bike.setNetworkMode("bicycle");
 		vehs.addVehicleType(bike);
 
@@ -183,7 +184,7 @@ public class EquilMixedTrafficEmissionIT {
 		sc.getConfig().controler().setRoutingAlgorithmType(ControlerConfigGroup.RoutingAlgorithmType.Dijkstra);
 
 		EmissionsConfigGroup emissionsConfigGroup = ( (EmissionsConfigGroup) sc.getConfig().getModules().get(EmissionsConfigGroup.GROUP_NAME) );
-		emissionsConfigGroup.setEmissionEfficiencyFactor(1.0);
+//		emissionsConfigGroup.setEmissionEfficiencyFactor(1.0);
 		emissionsConfigGroup.setConsideringCO2Costs(isConsideringCO2Costs);
 		emissionsConfigGroup.setEmissionCostMultiplicationFactor(1.);
 
@@ -194,8 +195,8 @@ public class EquilMixedTrafficEmissionIT {
 				bind(EmissionCostModule.class).asEagerSingleton();
 				addControlerListenerBinding().to(InternalizeEmissionsControlerListener.class);
 
-				bindCarTravelDisutilityFactory().toInstance(new EmissionModalTravelDisutilityCalculatorFactory(new RandomizingTimeDistanceTravelDisutilityFactory("car", sc.getConfig().planCalcScore())));
-				bind(TravelDisutilityFactory.class).annotatedWith(Names.named("bicycle")).toInstance(new EmissionModalTravelDisutilityCalculatorFactory(new RandomizingTimeDistanceTravelDisutilityFactory("bicycle", sc.getConfig().planCalcScore())));
+				bindCarTravelDisutilityFactory().toInstance(new EmissionModalTravelDisutilityCalculatorFactory(new RandomizingTimeDistanceTravelDisutilityFactory("car", sc.getConfig())));
+				bind(TravelDisutilityFactory.class).annotatedWith(Names.named("bicycle")).toInstance(new EmissionModalTravelDisutilityCalculatorFactory(new RandomizingTimeDistanceTravelDisutilityFactory("bicycle", sc.getConfig())));
 			}
 		});
 
@@ -251,7 +252,7 @@ public class EquilMixedTrafficEmissionIT {
 		// first coldEmission event is on departure link, thus compare money event and coldEmissionEvent
 		double firstMoneyEventToll = personMoneyHandler.events.get(1).getAmount();
 
-		Map<String, Double> coldEmiss = emissEventHandler.coldEvents.get(1).getColdEmissions();
+		Map<Pollutant, Double> coldEmiss = emissEventHandler.coldEvents.get(1).getColdEmissions();
 		double totalColdEmissAmount = 0.;
 		/*
 		 * departure time is 21600, so at this time. distance = 1.0km, parking duration = 12h, vehType="PASSENGER_CAR;petrol (4S);&gt;=2L;PC-P-Euro-0"
@@ -259,7 +260,7 @@ public class EquilMixedTrafficEmissionIT {
 		 * Thus coldEmissionCost = 0 * 384500. / (1000. * 1000.) + 45.12 * 1700. / (1000. * 1000.) + -0.03 * 9600. / (1000. * 1000.) = 0.008416
 		 */
 
-		for (String cp :coldEmiss.keySet() ){
+		for (Pollutant cp :coldEmiss.keySet() ){
 			totalColdEmissAmount += EmissionCostFactors.getCostFactor(cp.toString()) * coldEmiss.get(cp);
 		}
 
@@ -274,11 +275,11 @@ public class EquilMixedTrafficEmissionIT {
 		 *  +   0.00503000011667609 * 5 * 384500. / (1000. * 1000.) = 0.027613043
 		 *  if co2costs are considerd, then warmEmissCost = 0.01787566 +  241.78 * 5 * 70. / (1000. * 1000.) = 0.112236043
 		 */
-		Map<String, Double> warmEmiss = emissEventHandler.warmEvents.get(3).getWarmEmissions();
+		Map<Pollutant, Double> warmEmiss = emissEventHandler.warmEvents.get(3).getWarmEmissions();
 		double warmEmissTime = emissEventHandler.warmEvents.get(3).getTime();
 		double totalWarmEmissAmount = 0.;
-		for ( String wp : warmEmiss.keySet() ) {
-			if( wp.toString().equalsIgnoreCase(WarmPollutant.CO2_TOTAL.toString()) && !isConsideringCO2Costs ) {
+		for ( Pollutant wp : warmEmiss.keySet() ) {
+			if( wp.toString().equalsIgnoreCase(Pollutant.CO2_TOTAL.toString()) && !isConsideringCO2Costs ) {
 				//nothing to do
 			} else {
 				totalWarmEmissAmount += EmissionCostFactors.getCostFactor(wp.toString()) * warmEmiss.get(wp);

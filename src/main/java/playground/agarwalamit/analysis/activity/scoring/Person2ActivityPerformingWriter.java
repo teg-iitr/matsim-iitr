@@ -32,6 +32,7 @@ import org.matsim.core.scoring.functions.CharyparNagelActivityScoring;
 import org.matsim.core.scoring.functions.ScoringParameters;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.io.IOUtils;
+import org.matsim.core.utils.misc.OptionalTime;
 import org.matsim.core.utils.misc.Time;
 import playground.agarwalamit.analysis.activity.ActivityType2ActDurationsAnalyzer;
 import playground.agarwalamit.munich.utils.MunichPersonFilter;
@@ -198,14 +199,14 @@ public class Person2ActivityPerformingWriter {
 		@Override
 		public final void handleActivity(Activity activity) {
 
-			double startTime = activity.getStartTime();
-			double endTime = activity.getEndTime();
+			OptionalTime startTime = activity.getStartTime();
+			OptionalTime endTime = activity.getEndTime();
 
-			if (startTime == Time.UNDEFINED_TIME && endTime != Time.UNDEFINED_TIME) {
+			if (startTime.isUndefined() && endTime.isDefined()) {
 				throw new RuntimeException("not implemented yet.");
-			} else if (startTime != Time.UNDEFINED_TIME && endTime != Time.UNDEFINED_TIME) {
+			} else if (startTime.isDefined() && endTime.isDefined()) {
 				this.delegate.handleActivity(activity);
-			} else if (startTime != Time.UNDEFINED_TIME && endTime == Time.UNDEFINED_TIME) {
+			} else if (startTime.isDefined() && endTime.isUndefined()) {
 				throw new RuntimeException("not implemented yet.");
 			} else {
 				throw new RuntimeException("Trying to score an activity without start or end time. Should not happen."); 	

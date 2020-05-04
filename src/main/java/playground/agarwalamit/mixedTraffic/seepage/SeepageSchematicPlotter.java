@@ -19,11 +19,7 @@
 
 package playground.agarwalamit.mixedTraffic.seepage;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.log4j.Logger;
 import org.junit.Assert;
@@ -45,6 +41,7 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.ControlerConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.config.groups.QSimConfigGroup.LinkDynamics;
 import org.matsim.core.config.groups.QSimConfigGroup.SnapshotStyle;
@@ -77,7 +74,7 @@ public class SeepageSchematicPlotter {
 		sc.getConfig().qsim().setSnapshotPeriod(1);
 		sc.getConfig().qsim().setSnapshotStyle(SnapshotStyle.queue);
 
-		sc.getConfig().controler().setSnapshotFormat(Arrays.asList( "transims", "otfvis" ));
+		sc.getConfig().controler().setSnapshotFormat(List.of(ControlerConfigGroup.SnapshotFormat.transims, ControlerConfigGroup.SnapshotFormat.otfvis));
 		sc.getConfig().controler().setOutputDirectory("./output/");
 		sc.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 

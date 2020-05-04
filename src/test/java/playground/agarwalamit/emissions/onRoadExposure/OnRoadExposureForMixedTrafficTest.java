@@ -32,6 +32,7 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.emissions.EmissionModule;
 import org.matsim.contrib.emissions.HbefaVehicleCategory;
+import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.contrib.emissions.events.ColdEmissionEvent;
 import org.matsim.contrib.emissions.events.ColdEmissionEventHandler;
 import org.matsim.contrib.emissions.events.WarmEmissionEvent;
@@ -110,31 +111,31 @@ public class OnRoadExposureForMixedTrafficTest {
         controler.run();
 
         // offline calculation
-        Map<String, Double> totalInhaledMass_manual = new HashMap<>();
+        Map<Pollutant, Double> totalInhaledMass_manual = new HashMap<>();
         {
             OnRoadExposureCalculator onRoadExposureCalculator = new OnRoadExposureCalculator(onRoadExposureConfigGroup);
 
             {
                 //car driver is exposed of cold emiss
-                Map<String, Double> inhaledByCarEmiss = MapUtils.mergeMaps ( emissionAggregator.warmEmissions.get("car"), emissionAggregator.coldEmissions.get("car") );
+                Map<Pollutant, Double> inhaledByCarEmiss = mergeMaps ( emissionAggregator.warmEmissions.get("car"), emissionAggregator.coldEmissions.get("car") );
 
                 // since the background concentration=0; travel time does not matter.
-                Map<String, Double> inhaledMass_car = onRoadExposureCalculator.calculate("car", inhaledByCarEmiss, 0.);
+                Map<Pollutant, Double> inhaledMass_car = onRoadExposureCalculator.calculate("car", inhaledByCarEmiss, 0.);
                 totalInhaledMass_manual = inhaledMass_car;
             }
             {
-                Map<String, Double> inhaledByBicycleEmiss = MapUtils.mergeMaps(emissionAggregator.warmEmissions.get("bicycle"),
+                Map<Pollutant, Double> inhaledByBicycleEmiss = mergeMaps(emissionAggregator.warmEmissions.get("bicycle"),
                         emissionAggregator.coldEmissions.get("bicycle"));
 
-                Map<String, Double> inhaledMass_bicycle = onRoadExposureCalculator.calculate("bicycle", inhaledByBicycleEmiss, 0.);
+                Map<Pollutant, Double> inhaledMass_bicycle = onRoadExposureCalculator.calculate("bicycle", inhaledByBicycleEmiss, 0.);
 
-                totalInhaledMass_manual = MapUtils.mergeMaps(totalInhaledMass_manual, inhaledMass_bicycle);
+                totalInhaledMass_manual =  mergeMaps(totalInhaledMass_manual, inhaledMass_bicycle);
             }
         }
         totalInhaledMass_manual.remove("CO2_TOTAL");
 
-        Map<String, Double> totalInhaledMass_sim = onRoadExposureEventHandler.getOnRoadExposureTable().getTotalInhaledMass();
-        for (String str : totalInhaledMass_sim.keySet()) {
+        Map<Pollutant, Double> totalInhaledMass_sim = onRoadExposureEventHandler.getOnRoadExposureTable().getTotalInhaledMass();
+        for (Pollutant str : totalInhaledMass_sim.keySet()) {
         	if (totalInhaledMass_manual.get(str) == null) {
         		logger.warn("Skip test for " + str);
         	} else {
@@ -183,8 +184,8 @@ public class OnRoadExposureForMixedTrafficTest {
         bike.setMaximumVelocity(20. / 3.6);
         bike.setPcuEquivalents(0.25);
         bike.getAttributes().putAttribute("hbefaVehicleTypeDescription",
-                HbefaVehicleCategory.ZERO_EMISSION_VEHICLE.toString().concat(";;;") );
-        VehicleUtils.setHbefaVehicleCategory(bike.getEngineInformation(),HbefaVehicleCategory.ZERO_EMISSION_VEHICLE.toString());
+                HbefaVehicleCategory.NON_HBEFA_VEHICLE.toString().concat(";;;") );//ZERO_EMISSION_VEHICLE
+        VehicleUtils.setHbefaVehicleCategory(bike.getEngineInformation(),HbefaVehicleCategory.NON_HBEFA_VEHICLE.toString());//ZERO_EMISSION_VEHICLE
         bike.setNetworkMode("bicycle");
         vehs.addVehicleType(bike);
 
@@ -222,7 +223,7 @@ public class OnRoadExposureForMixedTrafficTest {
         EmissionsConfigGroup emissionsConfigGroup = ((EmissionsConfigGroup) sc.getConfig()
                                                                               .getModules()
                                                                               .get(EmissionsConfigGroup.GROUP_NAME));
-        emissionsConfigGroup.setEmissionEfficiencyFactor(1.0);
+//        emissionsConfigGroup.setEmissionEfficiencyFactor(1.0);
         emissionsConfigGroup.setConsideringCO2Costs(isConsideringCO2Costs);
         emissionsConfigGroup.setEmissionCostMultiplicationFactor(1.);
 
@@ -272,8 +273,8 @@ public class OnRoadExposureForMixedTrafficTest {
 
     private class EmissionAggregator implements ColdEmissionEventHandler, WarmEmissionEventHandler {
 
-        private Map<String, Map<String, Double>> coldEmissions = new HashMap<>();
-        private Map<String, Map<String, Double>> warmEmissions = new HashMap<>();
+        private Map<String, Map<Pollutant, Double>> coldEmissions = new HashMap<>();
+        private Map<String, Map<Pollutant, Double>> warmEmissions = new HashMap<>();
 
         private final Network network;
 
@@ -291,7 +292,7 @@ public class OnRoadExposureForMixedTrafficTest {
 
         @Override
         public void handleEvent(ColdEmissionEvent event) {
-            Map<String, Double> emiss = event.getColdEmissions()
+            Map<Pollutant, Double> emiss = event.getColdEmissions()
                                                      .entrySet()
                                                      .stream()
                                                      .collect(Collectors.toMap(e -> e.getKey(),
@@ -301,11 +302,11 @@ public class OnRoadExposureForMixedTrafficTest {
             if (    (event.getLinkId().toString().equals("12") && event.getTime()==21595.0) || // self exposed bicycle
                     (event.getLinkId().toString().equals("45") && event.getTime()==50995.0) //self exposed bicycle
                     ) {
-                coldEmissions.put("bicycle", MapUtils.mergeMaps(coldEmissions.get("bicycle"), emiss));
+                coldEmissions.put("bicycle", mergeMaps(coldEmissions.get("bicycle"), emiss));
             } else if ( (event.getLinkId().toString().equals("12") && event.getTime()==21600.0) || //self exposed car
                     (event.getLinkId().toString().equals("45") && event.getTime()==51000.0)  //self exposed car
                     ) {
-                coldEmissions.put("car", MapUtils.mergeMaps(coldEmissions.get("car"), emiss));
+                coldEmissions.put("car", mergeMaps(coldEmissions.get("car"), emiss));
             } else
 //                if (this.eventsOrder.equals(EventsComparatorForEmissions.EventsOrder.EMISSION_EVENTS_BEFORE_LINK_LEAVE_EVENT) )
                 {
@@ -313,14 +314,14 @@ public class OnRoadExposureForMixedTrafficTest {
                     // no one is on the link
 
                 } else {
-                    coldEmissions.put("car", MapUtils.mergeMaps(coldEmissions.get("car"), emiss)); // only car is exposed by its own emissions
+                    coldEmissions.put("car", mergeMaps(coldEmissions.get("car"), emiss)); // only car is exposed by its own emissions
                 }
             }
         }
 
         @Override
         public void handleEvent(WarmEmissionEvent event) {
-            Map<String, Double> emiss = event.getWarmEmissions()
+            Map<Pollutant, Double> emiss = event.getWarmEmissions()
                                                              .entrySet()
                                                              .stream()
                                                              .collect(Collectors.toMap(e -> e.getKey(),
@@ -333,16 +334,24 @@ public class OnRoadExposureForMixedTrafficTest {
                     (event.getLinkId().toString().equals("56") && event.getTime()==51038.0 ) // car emissions -> bicycle exposed
                     ) {
 
-                warmEmissions.put("bicycle", MapUtils.mergeMaps(warmEmissions.get("bicycle"), emiss));
+                warmEmissions.put("bicycle", mergeMaps(warmEmissions.get("bicycle"), emiss));
 
-                warmEmissions.put("car", MapUtils.mergeMaps(warmEmissions.get("car"), emiss));
+                warmEmissions.put("car", mergeMaps(warmEmissions.get("car"), emiss));
 
             } else
 //                if (this.eventsOrder.equals(EventsComparatorForEmissions.EventsOrder.EMISSION_EVENTS_BEFORE_LINK_LEAVE_EVENT))
                 {
-                warmEmissions.put("car", MapUtils.mergeMaps(warmEmissions.get("car"), emiss)); // only car is exposed by its own emissions; bicycle does not produce any
+                warmEmissions.put("car", mergeMaps(warmEmissions.get("car"), emiss)); // only car is exposed by its own emissions; bicycle does not produce any
             }
 
         }
+
+
+    }
+
+    private Map<Pollutant, Double> mergeMaps(Map<Pollutant, Double> car, Map<Pollutant, Double> emiss) {
+        Map<Pollutant, Double> out = new HashMap<>(car);
+        emiss.forEach((k,v) -> out.merge(k,v, Double::sum));
+        return out;
     }
 }

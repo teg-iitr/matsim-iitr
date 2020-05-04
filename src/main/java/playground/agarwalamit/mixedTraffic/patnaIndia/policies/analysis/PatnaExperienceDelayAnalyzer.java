@@ -65,7 +65,7 @@ public class PatnaExperienceDelayAnalyzer {
 	private void run (final String eventsFile, final Scenario scenario, final String outDir) {
 		PatnaPersonFilter personFilter = new PatnaPersonFilter();
 		int noOfTimeBins = 1;
-		double simEndTime = scenario.getConfig().qsim().getEndTime();
+		double simEndTime = scenario.getConfig().qsim().getEndTime().seconds();
 
 		BufferedWriter writer = IOUtils.getBufferedWriter(outDir+"/mode2personDelay.txt");
 		BufferedWriter writer2 = IOUtils.getBufferedWriter(outDir+"/mode2linkDelay.txt");

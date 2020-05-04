@@ -30,6 +30,7 @@ import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
+import org.matsim.core.config.groups.ControlerConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup.SnapshotStyle;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
@@ -83,7 +84,7 @@ public class AgentPositionWriter {
 			sc.getConfig().qsim().setLinkWidthForVis((float)0);
 			sc.getNetwork().setEffectiveLaneWidth(0.);
 
-			sc.getConfig().controler().setSnapshotFormat(Arrays.asList("transims"));
+			sc.getConfig().controler().setSnapshotFormat(Collections.singletonList(ControlerConfigGroup.SnapshotFormat.transims));
 			transimFile = apw.createAndReturnTransimSnapshotFile(sc, eventsFile);
 		} else {
 			transimFile = dir+"/TransVeh/T_["+prefix+"].veh.gz";

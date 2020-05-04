@@ -75,7 +75,7 @@ public class ManualRouteAssignerExample {
 
             TripRouterFactoryBuilderWithDefaults routerFactory = new TripRouterFactoryBuilderWithDefaults();
             routerFactory.setTravelTime(tt);
-            routerFactory.setTravelDisutility(new RandomizingTimeDistanceTravelDisutilityFactory(mode, scenario.getConfig().planCalcScore()).createTravelDisutility(tt));
+            routerFactory.setTravelDisutility(new RandomizingTimeDistanceTravelDisutilityFactory(mode, scenario.getConfig()).createTravelDisutility(tt));
 
             final TripRouter tripRouter = routerFactory.build(scNetwork).get();
             PlanAlgorithm router = new PlanRouter(tripRouter);

@@ -76,7 +76,7 @@ public class AirPollutionExposureAnalysisControlerListener implements  ShutdownL
         int lastIt = controlerConfigGroup.getLastIteration();
         String eventsFile = controlerIO.getIterationFilename(lastIt, "events.xml.gz");
 
-        IntervalHandler intervalHandler = new IntervalHandler(responsibilityGridTools.getTimeBinSize(), qSimConfigGroup.getEndTime(), gridTools);
+        IntervalHandler intervalHandler = new IntervalHandler(responsibilityGridTools.getTimeBinSize(), qSimConfigGroup.getEndTime().seconds(), gridTools);
         {
             intervalHandler.reset(0);
             EventsManager eventsManager = EventsUtils.createEventsManager();

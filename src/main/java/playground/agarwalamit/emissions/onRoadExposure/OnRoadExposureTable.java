@@ -19,14 +19,15 @@
 
 package playground.agarwalamit.emissions.onRoadExposure;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.contrib.emissions.Pollutant;
 import playground.agarwalamit.utils.MapUtils;
 
 /**
@@ -63,7 +64,7 @@ public class OnRoadExposureTable {
          * @param time
          * @param inhaledMass if already exists in the table, values will be summed
          */
-    public void addInfoToTable(Id<Person> personId, Id<Link> linkId, String mode, Double time, Map<String, Double> inhaledMass) {
+    public void addInfoToTable(Id<Person> personId, Id<Link> linkId, String mode, Double time, Map<Pollutant, Double> inhaledMass) {
         List<OnRoadTripExposureInfo> list = this.personInfo.get(personId);
         OnRoadTripExposureInfo info = list.get(list.size()-1);
         if (! info.mode.equals(mode)) throw new RuntimeException("A new mode is found for same trip.");
@@ -74,8 +75,8 @@ public class OnRoadExposureTable {
         private Id<Person> personId;
         private String mode;
 
-        private final Map<Double,Map<String,Double>> time2Emissions = new HashMap<>();
-        private final Map<Id<Link>,Map<String,Double>> link2Emissions = new HashMap<>();
+        private final Map<Double,Map<Pollutant,Double>> time2Emissions = new HashMap<>();
+        private final Map<Id<Link>,Map<Pollutant,Double>> link2Emissions = new HashMap<>();
 //        Table<Double,Id<Link>, Map<String,Double>> time2link2emissions = HashBasedTable.create();
 
         OnRoadTripExposureInfo(Id<Person> person, String mode) {
@@ -83,17 +84,25 @@ public class OnRoadExposureTable {
             this.mode = mode;
         }
 
-        void addInhaledMass(double time, Id<Link> linkId, Map<String, Double> inhaledMass){
+        void addInhaledMass(double time, Id<Link> linkId, Map<Pollutant, Double> inhaledMass){
             {
-                Map<String, Double> soFar = this.time2Emissions.get(time);
+                Map<Pollutant, Double> soFar = this.time2Emissions.get(time);
                 if (soFar==null) this.time2Emissions.put(time, inhaledMass);
-                else this.time2Emissions.put(time, MapUtils.mergeMaps(inhaledMass, soFar));
+                else {
+                    Map<Pollutant, Double> outMap = new HashMap<>(inhaledMass);
+                    soFar.forEach((k,v) -> outMap.merge(k,v,Double::sum));
+                    this.time2Emissions.put(time, outMap);
+                }
             }
 
             {
-                Map<String, Double> soFar = this.link2Emissions.get(linkId);
+                Map<Pollutant, Double> soFar = this.link2Emissions.get(linkId);
                 if (soFar==null) this.link2Emissions.put(linkId, inhaledMass);
-                else this.link2Emissions.put(linkId, MapUtils.mergeMaps(inhaledMass, soFar));
+                else {
+                    Map<Pollutant, Double> outMap = new HashMap<>(inhaledMass);
+                    soFar.forEach((k,v) -> outMap.merge(k,v,Double::sum));
+                    this.link2Emissions.put(linkId, outMap);
+                }
             }
         }
 
@@ -105,7 +114,7 @@ public class OnRoadExposureTable {
             return mode;
         }
 
-        public Map<Id<Link>, Map<String, Double>> getLink2Emissions() {
+        public Map<Id<Link>, Map<Pollutant, Double>> getLink2Emissions() {
             return link2Emissions;
         }
     }
@@ -114,65 +123,87 @@ public class OnRoadExposureTable {
         this.personInfo.clear();
     }
 
-    public Map<String, Double> getTotalInhaledMass(){
+    public Map<Pollutant, Double> getTotalInhaledMass(){
         LOG.info("Computing total inhaled mass ...");
-        Map<String, Double> out = new HashMap<>();
+        Map<Pollutant, Double> out = new HashMap<>();
         for (List<OnRoadTripExposureInfo> infoList : this.personInfo.values()){
             for (OnRoadTripExposureInfo info : infoList) {
-                out = MapUtils.mergeMaps(out, MapUtils.valueMapSum(info.link2Emissions));
+                valueMapSum(info.link2Emissions).forEach((k,v) -> out.merge(k,v, Double::sum));
             }
         }
         return out;
     }
 
-    public Map<Id<Person>, Map<String, Double>> getPersonToInhaledMass(){
+    private Map<Pollutant, Double> valueMapSum(Map<Id<Link>, Map<Pollutant, Double>> inMap) {
+        return inMap.values()
+                .stream()
+                .flatMap(m -> m.entrySet().stream())
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingDouble(Map.Entry::getValue)));
+    }
+
+    public Map<Id<Person>, Map<Pollutant, Double>> getPersonToInhaledMass(){
         LOG.info("Computing total inhaled mass for each person ...");
-        Map<Id<Person>, Map<String, Double>> out = new HashMap<>();
+        Map<Id<Person>, Map<Pollutant, Double>> out = new HashMap<>();
         for (List<OnRoadTripExposureInfo>  infoList : this.personInfo.values()){
             for (OnRoadTripExposureInfo info : infoList) {
-                Map<String, Double> tempSum = out.get(info.personId);
-                if (tempSum == null) tempSum = new HashMap<>();
-                tempSum = MapUtils.mergeMaps(tempSum,
-                        MapUtils.valueMapSum(info.link2Emissions));
-                out.put(info.personId, tempSum);
+                Map<Pollutant, Double> tempSum = out.get(info.personId);
+                if (tempSum == null) {
+                    tempSum = new HashMap<>();
+                }
+                final Map<Pollutant, Double> finalMap = new HashMap<>(tempSum);
+                valueMapSum(info.link2Emissions).forEach((k,v) -> finalMap.merge(k,v,Double::sum));
+                out.put(info.personId, finalMap);
             }
         }
         return out;
     }
 
-    public Map<String, Map<String,Double>> getModeToInhaledMass(){
+    public Map<String, Map<Pollutant,Double>> getModeToInhaledMass(){
         LOG.info("Computing total inhaled mass for each mode ...");
-        Map<String, Map<String, Double>> out = new HashMap<>();
+        Map<String, Map<Pollutant, Double>> out = new HashMap<>();
         for (List<OnRoadTripExposureInfo>  infoList : this.personInfo.values()){
             for (OnRoadTripExposureInfo info : infoList) {
-                Map<String, Double> tempOut = out.get(info.mode);
-                if (tempOut == null) tempOut = new HashMap<>();
-                tempOut = MapUtils.mergeMaps(tempOut, MapUtils.valueMapSum(info.link2Emissions));
+                final Map<Pollutant, Double> tempOut = out.getOrDefault(info.mode, new HashMap<>());
+                valueMapSum(info.link2Emissions).forEach((k,v) -> tempOut.merge(k,v,Double::sum));
                 out.put(info.mode, tempOut);
             }
         }
         return out;
     }
 
-    public Map<Id<Link>,Map<String,Double>> getLinkToInhaledMass(){
+    public Map<Id<Link>,Map<Pollutant,Double>> getLinkToInhaledMass(){
         LOG.info("Computing total inhaled mass for each link ...");
-        Map<Id<Link>, Map<String,Double>> outMap = new HashMap<>();
+        Map<Id<Link>, Map<Pollutant,Double>> outMap = new HashMap<>();
         for (List<OnRoadTripExposureInfo>  infoList : this.personInfo.values()){
             for (OnRoadTripExposureInfo info : infoList) {
-                outMap = MapUtils.mergeMultiMaps(outMap, info.link2Emissions);
+                outMap = mergeMultiMaps(outMap, info.link2Emissions);
             }
         }
         return outMap;
     }
 
-    public Map<Double,Map<String,Double>> getTimeToInhaledMass() {
+    public Map<Double,Map<Pollutant,Double>> getTimeToInhaledMass() {
         LOG.info("Computing total inhaled mass in each time bin ...");
-        Map<Double, Map<String,Double>> outMap = new HashMap<>();
+        Map<Double, Map<Pollutant,Double>> outMap = new HashMap<>();
         for (List<OnRoadTripExposureInfo>  infoList : this.personInfo.values()){
             for (OnRoadTripExposureInfo info : infoList) {
-                outMap = MapUtils.mergeMultiMaps(outMap, info.time2Emissions);
+                outMap = mergeMultiMaps(outMap, info.time2Emissions);
             }
         }
+        return outMap;
+    }
+
+    public static <T> Map<T, Map<Pollutant, Double>> mergeMultiMaps(final Map<T, Map<Pollutant, Double>> m1, final Map<T, Map<Pollutant, Double>> m2) {
+        if(m1==null || m2 ==null) throw new NullPointerException("Either of the maps is null. Aborting ...");
+        Map<T, Map<Pollutant, Double>> outMap = new HashMap<>(m1);
+        m2.forEach(  (k,v) ->  outMap.merge( k, v, OnRoadExposureTable::mergeMaps) );
+        return outMap;
+    }
+
+    public static Map<Pollutant, Double> mergeMaps(final Map<Pollutant, Double> m1, final Map<Pollutant, Double> m2) {
+        if(m1==null || m2 ==null) throw new NullPointerException("Either of the maps is null. Aborting ...");
+        Map<Pollutant, Double> outMap = new HashMap<>(m1);
+        m2.forEach((k,v) -> outMap.merge(k, v, Double::sum));
         return outMap;
     }
 
