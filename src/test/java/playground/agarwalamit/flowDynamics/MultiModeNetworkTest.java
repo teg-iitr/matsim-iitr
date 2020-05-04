@@ -138,9 +138,6 @@ public class MultiModeNetworkTest {
 
         config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
 
-        // reset all mode routing params.
-        config.plansCalcRoute().getOrCreateModeRoutingParams("xxx").setTeleportedModeFreespeedFactor(1.);
-
         config.controler().setOutputDirectory(helper.getOutputDirectory());
 
         config.controler().setLastIteration(0);

@@ -113,7 +113,7 @@ public class VehicleInPrepareForSimTest {
         config.qsim().setVehiclesSource(this.vehicleSource);
 
         // reset all mode routing params.
-        config.plansCalcRoute().getOrCreateModeRoutingParams("xxx").setTeleportedModeFreespeedFactor(1.);
+//        config.plansCalcRoute().getOrCreateModeRoutingParams("xxx").setTeleportedModeFreespeedFactor(1.);
 
         StrategyConfigGroup.StrategySettings strategySettings = new StrategyConfigGroup.StrategySettings();
         if (this.modeChoice) {

@@ -103,7 +103,6 @@ public class NetworkRouteForUncongestedModeTest {
 		}
 		config.qsim().setMainModes(Arrays.asList("car"));
 		config.plansCalcRoute().setNetworkModes(Arrays.asList("car","ride"));
-		config.plansCalcRoute().getOrCreateModeRoutingParams("PT").setTeleportedModeSpeed (20/3.6);
 
 		{
 			StrategySettings reRoute = new StrategySettings();
