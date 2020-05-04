@@ -66,7 +66,7 @@ public class ModeChoiceObjectiveFunctionTest {
 			ModeChoiceObjectiveFunction objective = new ModeChoiceObjectiveFunction(distriInfo);
 
 			final Config config = ConfigUtils.createConfig();
-			config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+			config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
 			Scenario scenario = ScenarioUtils.createScenario(config);
 			Population pop = scenario.getPopulation();
 			PopulationFactory pf = pop.getFactory();
