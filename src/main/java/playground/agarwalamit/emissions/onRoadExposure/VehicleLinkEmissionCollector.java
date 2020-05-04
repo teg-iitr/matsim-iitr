@@ -64,7 +64,7 @@ public class VehicleLinkEmissionCollector {
 
     void addEmissions(Map<Pollutant, Double> map, double linkLength) {
         this.emissions.forEach((key, value) -> this.emissions.put(key,
-                value + map.get(key) / linkLength));
+                value + map.getOrDefault(key,0.) / linkLength));
     }
 
     Map<Pollutant, Double> getInhaledMass(OnRoadExposureConfigGroup config) {
