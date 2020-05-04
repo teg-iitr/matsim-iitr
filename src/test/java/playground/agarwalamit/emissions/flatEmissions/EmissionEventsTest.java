@@ -261,7 +261,7 @@ public class EmissionEventsTest {
     }
 
     private class MyWarmEmissionEventHandler implements WarmEmissionEventHandler{
-        List<WarmEmissionEvent> list = new ArrayList<>();
+        List<WarmEmissionEvent> list;
         MyWarmEmissionEventHandler (List<WarmEmissionEvent> warmEmissionEventList) {
             this.list = warmEmissionEventList;
         }
