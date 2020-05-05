@@ -54,7 +54,7 @@ public class PlanPrepForDest {
         initialisePlanGeneration(population,ChandigarhConstants.origin_link_1A,88,ChandigarhConstants.Unknown_Destinations_1A_1C_1E);
         initialisePlanGeneration(population,ChandigarhConstants.origin_link_1C,14,ChandigarhConstants.Unknown_Destinations_1A_1C_1E);
         initialisePlanGeneration(population,ChandigarhConstants.origin_link_1E,57,ChandigarhConstants.Unknown_Destinations_1A_1C_1E);
-        
+        initialisePlanGeneration(population,ChandigarhConstants.origin_link_2C,57,ChandigarhConstants.Unknown_Destinations_1A_1C_1E);
         new PopulationWriter(population).write(out_plans);
 	}
 	private static void initialisePlanGeneration(Population population,String id,int no,List<String> destinations) {
