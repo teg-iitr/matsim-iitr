@@ -24,7 +24,7 @@ public class PlansPrep {
         String [] startLinks = new String [] {"3346","422","2280","3337","3300","2395","3502","631"} ;
         for (String link : startLinks) {
             Activity firstAct = population.getFactory().createActivityFromLinkId("start",Id.createLinkId(link));
-            firstAct.setEndTime(06*3600+ 3600 *  MatsimRandom.getRandom().nextDouble());
+            firstAct.setEndTime(6.*3600+ 3600 *  MatsimRandom.getRandom().nextDouble());
 
             for (int i =0; i<100; i ++){
                 Person person = population.getFactory().createPerson(Id.createPersonId(population.getPersons().size()));
