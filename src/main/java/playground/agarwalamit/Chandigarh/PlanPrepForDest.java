@@ -1,9 +1,5 @@
 package playground.agarwalamit.Chandigarh;
-
-
-import java.util.ArrayList;
 import java.util.List;
-
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -51,10 +47,16 @@ public class PlanPrepForDest {
 		Scenario scenario = LoadMyScenarios.loadScenarioFromNetwork(out_network);
         Population population = scenario.getPopulation();
       //plans for unknown 2a
-        initialisePlanGeneration(population,ChandigarhConstants.origin_link_1A,88,ChandigarhConstants.Unknown_Destinations_1A_1C_1E);
-        initialisePlanGeneration(population,ChandigarhConstants.origin_link_1C,14,ChandigarhConstants.Unknown_Destinations_1A_1C_1E);
-        initialisePlanGeneration(population,ChandigarhConstants.origin_link_1E,57,ChandigarhConstants.Unknown_Destinations_1A_1C_1E);
-        initialisePlanGeneration(population,ChandigarhConstants.origin_link_2C,57,ChandigarhConstants.Unknown_Destinations_1A_1C_1E);
+        initialisePlanGeneration(population,ChandigarhConstants.link_1A,88,ChandigarhConstants.Unknown_Destinations_1A_1C_1E);
+        initialisePlanGeneration(population,ChandigarhConstants.link_1C,14,ChandigarhConstants.Unknown_Destinations_1A_1C_1E);
+        initialisePlanGeneration(population,ChandigarhConstants.link_1E,57,ChandigarhConstants.Unknown_Destinations_1A_1C_1E);
+        initialisePlanGeneration(population,ChandigarhConstants.link_2C,19,List.of(ChandigarhConstants.link_3B,ChandigarhConstants.link_3D));
+        initialisePlanGeneration(population,ChandigarhConstants.link_2C,34,List.of(ChandigarhConstants.link_2F));
+        initialisePlanGeneration(population,ChandigarhConstants.link_2E,74,List.of(ChandigarhConstants.link_2F));
+        initialisePlanGeneration(population,ChandigarhConstants.link_2E,22,List.of(ChandigarhConstants.link_2F));
+        initialisePlanGeneration(population,ChandigarhConstants.link_3C,83,ChandigarhConstants.Unknown_Destinations_3C_3E_4F);
+        initialisePlanGeneration(population,ChandigarhConstants.link_3E,66,ChandigarhConstants.Unknown_Destinations_3C_3E_4F);
+        initialisePlanGeneration(population,ChandigarhConstants.link_4F,142,ChandigarhConstants.Unknown_Destinations_3C_3E_4F);
         new PopulationWriter(population).write(out_plans);
 	}
 	private static void initialisePlanGeneration(Population population,String id,int no,List<String> destinations) {
