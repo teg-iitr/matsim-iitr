@@ -11,7 +11,7 @@ import java.util.List;
 
 public class PlansPrep {
     private final String out_network = "C:/Users/Amit Agarwal/Google Drive/iitr_amit.ce.iitr/projects/chandigarh_satyajit/inputs/chandigarh_matsim_net_insideZone_fixed.xml.gz";
-    private final String out_plans = "C:/Users/Amit Agarwal/Google Drive/iitr_amit.ce.iitr/projects/chandigarh_satyajit/inputs/chandigarh_matsim_plans.xml.gz";
+    private final String out_plans = "C:/Users/Amit Agarwal/Google Drive/iitr_amit.ce.iitr/projects/chandigarh_satyajit/inputs/chandigarh_matsim_plans_test.xml.gz";
 
     public static void main(String[] args) {
         new PlansPrep().run();
@@ -21,7 +21,7 @@ public class PlansPrep {
         Scenario scenario = LoadMyScenarios.loadScenarioFromNetwork(out_network);
         Population population = scenario.getPopulation();
 
-        // 100 persons: starting from 1A, 1C, 1E, 2C, 2E, 3C, 3E, 4A
+        // 100 persons: starting from 1A, 1C, 1E, 2C, 2E, 3C, 3E, 4F
        List<String> startLinks = List.of(ChandigarhConstants.link_1A, ChandigarhConstants.link_1C, ChandigarhConstants.link_1E,
                ChandigarhConstants.link_2C, ChandigarhConstants.link_2E, ChandigarhConstants.link_3C, ChandigarhConstants.link_3E, ChandigarhConstants.link_4F);
         for (String link : startLinks) {
@@ -49,70 +49,71 @@ public class PlansPrep {
     private String getDestinationLinkIdFrom1A(String link, int number){
         // there could be any other distribution rather than uniform distribution
         switch (link) {
-            case "3346" : //2B, 2D, 3B, 3D, 4A
-                if (number < 20 ) return "3359"; //2B
-                else if (number < 40 )  return "1303-1676"; //2D
-                else if (number < 60 )  return "2374"; //3B
-                else if (number < 80 )  return "3494"; //3D
-                else if (number < 100 )  return "3379"; //4A
+//            starting from 1A, 1C, 1E, 2C, 2E, 3C, 3E, 4F
+            case ChandigarhConstants.link_1A : //2B, 2D, 3B, 3D, 4A
+                if (number < 20 ) return ChandigarhConstants.link_2B; //2B
+                else if (number < 40 )  return ChandigarhConstants.link_2D; //2D
+                else if (number < 60 )  return ChandigarhConstants.link_3B; //3B
+                else if (number < 80 )  return ChandigarhConstants.link_3D; //3D
+                else if (number < 100 )  return ChandigarhConstants.link_4A; //4A
                 else throw new RuntimeException("Unknown destination for origin '1A'.");
 
-            case "422": //2B, 2D, 3B, 3D, 4A
-                if (number < 20 ) return "3359";
-                else if (number < 40 )  return "1303-1676";
-                else if (number < 60 )  return "2374";
-                else if (number < 80 )  return "3494";
-                else if (number < 100 )  return "3379";
+            case ChandigarhConstants.link_1C: //2B, 2D, 3B, 3D, 4A
+                if (number < 20 ) return ChandigarhConstants.link_2B; //2B
+                else if (number < 40 )  return ChandigarhConstants.link_2D; //2D
+                else if (number < 60 )  return ChandigarhConstants.link_3B; //3B
+                else if (number < 80 )  return ChandigarhConstants.link_3D; //3D
+                else if (number < 100 )  return ChandigarhConstants.link_4A; //4A
                 else throw new RuntimeException("Unknown destination for origin '1C'.");
 
-            case "2280": //2B, 2D, 3B, 3D, 4A
-                if (number < 20 ) return "3359";
-                else if (number < 40 )  return "1303-1676";
-                else if (number < 60 )  return "2374";
-                else if (number < 80 )  return "3494";
-                else if (number < 100 )  return "3379";
+            case ChandigarhConstants.link_1E: //2B, 2D, 3B, 3D, 4A
+                if (number < 20 ) return ChandigarhConstants.link_2B; //2B
+                else if (number < 40 )  return ChandigarhConstants.link_2D; //2D
+                else if (number < 60 )  return ChandigarhConstants.link_3B; //3B
+                else if (number < 80 )  return ChandigarhConstants.link_3D; //3D
+                else if (number < 100 )  return ChandigarhConstants.link_4A; //4A
                 else throw new RuntimeException("Unknown destination for origin '1E'.");
 
-            case "3337": //1B 1D 1F 3B 3D 4A
-                if (number < 16 )  return "538-531"; //1B
-                else if (number < 32 )  return "2282"; //1D
-                else if (number < 48 )  return "3354"; //1F
-                else if (number < 64 )  return "2374"; //3B
-                else if (number < 80 )  return "3494"; //3D
-                else if (number < 100 )  return "3379"; // 4A
+            case ChandigarhConstants.link_2C: //1B 1D 1F 3B 3D 4A
+                if (number < 16 )  return ChandigarhConstants.link_1B; //1B
+                else if (number < 32 )  return ChandigarhConstants.link_1D; //1D
+                else if (number < 48 )  return ChandigarhConstants.link_1F; //1F
+                else if (number < 64 )  return ChandigarhConstants.link_3B; //3B
+                else if (number < 80 )  return ChandigarhConstants.link_3D; //3D
+                else if (number < 100 )  return ChandigarhConstants.link_4A; // 4A
                 else throw new RuntimeException("Unknown destination for origin '2C'.");
 
-            case "3300": //1B 1D 1F 3B 3D 4A
-                if (number < 16 )  return "538-531"; //1B
-                else if (number < 32 )  return "2282"; //1D
-                else if (number < 48 )  return "3354"; //1F
-                else if (number < 64 )  return "2374"; //3B
-                else if (number < 80 )  return "3494"; //3D
-                else if (number < 100 )  return "3379"; // 4A
+            case ChandigarhConstants.link_2E: //1B 1D 1F 3B 3D 4A
+                if (number < 16 )  return ChandigarhConstants.link_1B; //1B
+                else if (number < 32 )  return ChandigarhConstants.link_1D; //1D
+                else if (number < 48 )  return ChandigarhConstants.link_1F; //1F
+                else if (number < 64 )  return ChandigarhConstants.link_3B; //3B
+                else if (number < 80 )  return ChandigarhConstants.link_3D; //3D
+                else if (number < 100 )  return ChandigarhConstants.link_4A; // 4A
                 else throw new RuntimeException("Unknown destination for origin '2E'.");
 
-            case "2395" : //1B 1D 1F 2B 2D
-                if (number < 20 )  return "538-531"; //1B
-                else if (number < 40 )  return "2282"; //1D
-                else if (number < 60 )  return "3354"; //1F
-                else if (number < 80 ) return "3359"; //2B
-                else if (number < 100 )  return "1303-1676"; //2D
+            case ChandigarhConstants.link_3C : //1B 1D 1F 2B 2D
+                if (number < 20 )  return ChandigarhConstants.link_1B; //1B
+                else if (number < 40 )  return ChandigarhConstants.link_1D; //1D
+                else if (number < 60 )  return ChandigarhConstants.link_1F; //1F
+                else if (number < 80 ) return ChandigarhConstants.link_2B; //2B
+                else if (number < 100 )  return ChandigarhConstants.link_2D; //2D
                 else throw new RuntimeException("Unknown destination for origin '3C'.");
 
-            case "3502":
-                if (number < 20 )  return "538-531"; //1B
-                else if (number < 40 )  return "2282"; //1D
-                else if (number < 60 )  return "3354"; //1F
-                else if (number < 80 ) return "3359"; //2B
-                else if (number < 100 )  return "1303-1676"; //2D
+            case ChandigarhConstants.link_3E:
+                if (number < 20 )  return ChandigarhConstants.link_1B; //1B
+                else if (number < 40 )  return ChandigarhConstants.link_1D; //1D
+                else if (number < 60 )  return ChandigarhConstants.link_1F; //1F
+                else if (number < 80 ) return ChandigarhConstants.link_2B; //2B
+                else if (number < 100 )  return ChandigarhConstants.link_2D; //2D
                 else throw new RuntimeException("Unknown destination for origin '3E'.");
 
-            case "631":
-                if (number < 20 )  return "538-531"; //1B
-                else if (number < 40 )  return "2282"; //1D
-                else if (number < 60 )  return "3354"; //1F
-                else if (number < 80 ) return "3359"; //2B
-                else if (number < 100 )  return "1303-1676"; //2D
+            case ChandigarhConstants.link_4F:
+                if (number < 20 )  return ChandigarhConstants.link_1B; //1B
+                else if (number < 40 )  return ChandigarhConstants.link_1D; //1D
+                else if (number < 60 )  return ChandigarhConstants.link_1F; //1F
+                else if (number < 80 ) return ChandigarhConstants.link_2B; //2B
+                else if (number < 100 )  return ChandigarhConstants.link_2D; //2D
                 else throw new RuntimeException("Unknown destination for origin '4F'.");
         }
         throw new RuntimeException("Unknown destination.");
