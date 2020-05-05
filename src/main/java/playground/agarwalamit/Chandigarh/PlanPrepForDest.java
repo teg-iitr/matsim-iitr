@@ -3,19 +3,17 @@ import java.util.List;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.Population;
-import org.matsim.api.core.v01.population.PopulationWriter;
+import org.matsim.api.core.v01.population.*;
 import org.matsim.core.gbl.MatsimRandom;
 
+import org.matsim.core.population.PopulationUtils;
 import playground.agarwalamit.utils.LoadMyScenarios;
 
 public class PlanPrepForDest {
 	private final String out_network = "C:\\Users\\DELL\\Desktop\\Matsim input data\\inputs/chandigarh_matsim_net_insideZone.xml.gz";
 	private final String out_plans="C:\\Users\\DELL\\Desktop\\Matsim input data\\plans.xml";
 
+	private Population population;
 	
 //	public class DestData	{
 //		String destID;
@@ -46,33 +44,41 @@ public class PlanPrepForDest {
 	
 	private void generatePlans() {
 		Scenario scenario = LoadMyScenarios.loadScenarioFromNetwork(out_network);
-        Population population = scenario.getPopulation();
+        population = scenario.getPopulation();
       //plans for unknown 2a
-        initialisePlanGeneration(population,ChandigarhConstants.link_1A,88,ChandigarhConstants.Unknown_Destinations_1A_1C_1E);
-        initialisePlanGeneration(population,ChandigarhConstants.link_1C,14,ChandigarhConstants.Unknown_Destinations_1A_1C_1E);
-        initialisePlanGeneration(population,ChandigarhConstants.link_1E,57,ChandigarhConstants.Unknown_Destinations_1A_1C_1E);
-        initialisePlanGeneration(population,ChandigarhConstants.link_2C,19,List.of(ChandigarhConstants.link_3B,ChandigarhConstants.link_3D));
-        initialisePlanGeneration(population,ChandigarhConstants.link_2C,34,List.of(ChandigarhConstants.link_2F));
-        initialisePlanGeneration(population,ChandigarhConstants.link_2E,74,List.of(ChandigarhConstants.link_2F));
-        initialisePlanGeneration(population,ChandigarhConstants.link_2E,22,List.of(ChandigarhConstants.link_2F));
-        initialisePlanGeneration(population,ChandigarhConstants.link_3C,83,ChandigarhConstants.Unknown_Destinations_3C_3E_4F);
-        initialisePlanGeneration(population,ChandigarhConstants.link_3E,66,ChandigarhConstants.Unknown_Destinations_3C_3E_4F);
-        initialisePlanGeneration(population,ChandigarhConstants.link_4F,142,ChandigarhConstants.Unknown_Destinations_3C_3E_4F);
+        generatePlans(ChandigarhConstants.link_1A,88,ChandigarhConstants.Unknown_Destinations_1A_1C_1E);
+        generatePlans(ChandigarhConstants.link_1C,14,ChandigarhConstants.Unknown_Destinations_1A_1C_1E);
+        generatePlans(ChandigarhConstants.link_1E,57,ChandigarhConstants.Unknown_Destinations_1A_1C_1E);
+
+        generatePlans(ChandigarhConstants.link_2C,19,List.of(ChandigarhConstants.link_3B,ChandigarhConstants.link_3D));
+
+        generatePlans(ChandigarhConstants.link_2C,34,List.of(ChandigarhConstants.link_2F));
+        generatePlans(ChandigarhConstants.link_2E,74,List.of(ChandigarhConstants.link_2F));
+        generatePlans(ChandigarhConstants.link_2E,22,List.of(ChandigarhConstants.link_2F));
+
+        generatePlans(ChandigarhConstants.link_3C,83,ChandigarhConstants.Unknown_Destinations_3C_3E_4F);
+        generatePlans(ChandigarhConstants.link_3E,66,ChandigarhConstants.Unknown_Destinations_3C_3E_4F);
+        generatePlans(ChandigarhConstants.link_4F,142,ChandigarhConstants.Unknown_Destinations_3C_3E_4F);
+
         new PopulationWriter(population).write(out_plans);
 	}
-	private static void initialisePlanGeneration(Population population,String id,int no,List<String> destinations) {
-		for (int i =0; i<no; i ++){
+	private void generatePlans(String startLinkId, int numberOfVehicles, List<String> destinations) {
+		for (int i =0; i<numberOfVehicles; i ++){
             Person person = population.getFactory().createPerson(Id.createPersonId(population.getPersons().size()));
             Plan plan = population.getFactory().createPlan();
+            Activity firstAct = population.getFactory().createActivityFromLinkId(ChandigarhConstants.start_act,Id.createLinkId(startLinkId));
+            firstAct.setEndTime(10.*3600+ 900 *  MatsimRandom.getRandom().nextDouble());
+            plan.addActivity(firstAct);
+            plan.addLeg(population.getFactory().createLeg(TransportMode.car));
+
               for(String destLink:destinations)	{
-            	Activity firstAct = population.getFactory().createActivityFromLinkId("start",Id.createLinkId(id));
-                firstAct.setEndTime(10.*3600+ 900 *  MatsimRandom.getRandom().nextDouble());
-                plan.addActivity(firstAct);
-                plan.addLeg(population.getFactory().createLeg(TransportMode.car));
-                Activity secondAct = population.getFactory().createActivityFromLinkId("end",Id.createLinkId(destLink));
-                plan.addActivity(secondAct);	
-            }
-            person.addPlan(plan);
+                  Plan newPlan = population.getFactory().createPlan();
+                  PopulationUtils.copyFromTo(plan, newPlan);
+                  Activity secondAct = population.getFactory().createActivityFromLinkId(ChandigarhConstants.end_act, Id.createLinkId(destLink));
+                  plan.addActivity(secondAct);
+                  person.addPlan(plan); // this must be inside destinations links loop, otherwise ONLY one plan will be generated.
+              }
+
             population.addPerson(person);
         }
 	}
