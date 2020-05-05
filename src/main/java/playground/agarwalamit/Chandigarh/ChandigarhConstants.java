@@ -33,7 +33,8 @@ public class ChandigarhConstants {
     public static final String link_1F = "3354"; 
 
     public static final List<String> Unknown_Destinations_1A_1C_1E = List.of(link_2B, link_2D, link_3B, link_3D, link_4A);
-    public static final List<String> Unknown_Destinations_2C_2E = List.of(link_1B, link_1D, link_1F,  link_3B, link_3D, link_4A);
+    public static final List<String> Unknown_Destinations_2C_2E_towards_3A = List.of( link_3B, link_3D, link_4A);
+    static final List<String> Unknown_Destinations_2C_2E_towards_2F= List.of(link_1B, link_1D, link_1F);
     public static final List<String> Unknown_Destinations_3C_3E_4F = List.of(link_1B, link_1D, link_1F, link_2B, link_2D);
 
     public static final String link_2A = "4192";

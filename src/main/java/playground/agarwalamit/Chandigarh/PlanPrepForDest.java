@@ -45,16 +45,17 @@ public class PlanPrepForDest {
 	private void generatePlans() {
 		Scenario scenario = LoadMyScenarios.loadScenarioFromNetwork(out_network);
         population = scenario.getPopulation();
-      //plans for unknown 2a
+
+      //plans for unknown destinations
         generatePlans(ChandigarhConstants.link_1A,88,ChandigarhConstants.Unknown_Destinations_1A_1C_1E);
         generatePlans(ChandigarhConstants.link_1C,14,ChandigarhConstants.Unknown_Destinations_1A_1C_1E);
         generatePlans(ChandigarhConstants.link_1E,57,ChandigarhConstants.Unknown_Destinations_1A_1C_1E);
 
-        generatePlans(ChandigarhConstants.link_2C,19,List.of(ChandigarhConstants.link_3B,ChandigarhConstants.link_3D));
+        generatePlans(ChandigarhConstants.link_2C,19,ChandigarhConstants.Unknown_Destinations_2C_2E_towards_3A);
+        generatePlans(ChandigarhConstants.link_2C,34,ChandigarhConstants.Unknown_Destinations_2C_2E_towards_2F);
 
-        generatePlans(ChandigarhConstants.link_2C,34,List.of(ChandigarhConstants.link_2F));
-        generatePlans(ChandigarhConstants.link_2E,74,List.of(ChandigarhConstants.link_2F));
-        generatePlans(ChandigarhConstants.link_2E,22,List.of(ChandigarhConstants.link_2F));
+        generatePlans(ChandigarhConstants.link_2E,74, ChandigarhConstants.Unknown_Destinations_2C_2E_towards_3A);
+        generatePlans(ChandigarhConstants.link_2E,22,ChandigarhConstants.Unknown_Destinations_2C_2E_towards_2F);
 
         generatePlans(ChandigarhConstants.link_3C,83,ChandigarhConstants.Unknown_Destinations_3C_3E_4F);
         generatePlans(ChandigarhConstants.link_3E,66,ChandigarhConstants.Unknown_Destinations_3C_3E_4F);
@@ -63,7 +64,7 @@ public class PlanPrepForDest {
         new PopulationWriter(population).write(out_plans);
 	}
 	private void generatePlans(String startLinkId, int numberOfVehicles, List<String> destinations) {
-		for (int i =0; i<numberOfVehicles; i ++){
+		for (int i =0; i<numberOfVehicles; i++){
             Person person = population.getFactory().createPerson(Id.createPersonId(population.getPersons().size()));
             Plan plan = population.getFactory().createPlan();
             Activity firstAct = population.getFactory().createActivityFromLinkId(ChandigarhConstants.start_act,Id.createLinkId(startLinkId));
