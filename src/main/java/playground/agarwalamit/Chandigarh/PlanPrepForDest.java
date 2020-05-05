@@ -10,7 +10,7 @@ import org.matsim.core.population.PopulationUtils;
 import playground.agarwalamit.utils.LoadMyScenarios;
 
 public class PlanPrepForDest {
-	private final String out_network = "C:\\Users\\DELL\\Desktop\\Matsim input data\\inputs/chandigarh_matsim_net_insideZone.xml.gz";
+	private final String out_network = "C:\\Users\\DELL\\Desktop\\Matsim input data\\inputs/chandigarh_matsim_net_insideZone_fixed.xml.gz";
 	private final String out_plans="C:\\Users\\DELL\\Desktop\\Matsim input data\\plans.xml";
 
 	private Population population;
@@ -67,7 +67,7 @@ public class PlanPrepForDest {
 		for (int i =0; i<numberOfVehicles; i++){
             Person person = population.getFactory().createPerson(Id.createPersonId(population.getPersons().size()));
             Plan plan = population.getFactory().createPlan();
-            Activity firstAct = population.getFactory().createActivityFromLinkId(ChandigarhConstants.start_act,Id.createLinkId(startLinkId));
+            Activity firstAct = population.getFactory().createActivityFromLinkId(ChandigarhConstants.start_act_type,Id.createLinkId(startLinkId));
             firstAct.setEndTime(10.*3600+ 900 *  MatsimRandom.getRandom().nextDouble());
             plan.addActivity(firstAct);
             plan.addLeg(population.getFactory().createLeg(TransportMode.car));
@@ -75,7 +75,7 @@ public class PlanPrepForDest {
               for(String destLink:destinations)	{
                   Plan newPlan = population.getFactory().createPlan();
                   PopulationUtils.copyFromTo(plan, newPlan);
-                  Activity secondAct = population.getFactory().createActivityFromLinkId(ChandigarhConstants.end_act, Id.createLinkId(destLink));
+                  Activity secondAct = population.getFactory().createActivityFromLinkId(ChandigarhConstants.end_act_type, Id.createLinkId(destLink));
                   plan.addActivity(secondAct);
                   person.addPlan(plan); // this must be inside destinations links loop, otherwise ONLY one plan will be generated.
               }

@@ -27,7 +27,7 @@ public class NetworkPrep {
     public static void main (String args []) {
         String matsim_net = "C:/Users/Amit Agarwal/Google Drive/iitr_amit.ce.iitr/projects/chandigarh_satyajit/inputs/chandigarh_matsim_net.xml.gz";
         {
-            String osm_netw = "C:/Users/Amit Agarwal/Google Drive/iitr_amit.ce.iitr/projects/chandigarh_satyajit/chandigarh_signalMap.osm";
+            String osm_netw = "C:/Users/Amit Agarwal/Google Drive/iitr_amit.ce.iitr/projects/chandigarh_satyajit/chandigarh_signalMap_fixed.osm";
 
             Scenario sc = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 
@@ -40,7 +40,7 @@ public class NetworkPrep {
             new NetworkWriter(sc.getNetwork()).write(matsim_net);
         }
         {
-            String out_network = "C:/Users/Amit Agarwal/Google Drive/iitr_amit.ce.iitr/projects/chandigarh_satyajit/inputs/chandigarh_matsim_net_insideZone.xml.gz";
+            String out_network = "C:/Users/Amit Agarwal/Google Drive/iitr_amit.ce.iitr/projects/chandigarh_satyajit/inputs/chandigarh_matsim_net_insideZone_fixed.xml.gz";
 
             Scenario sc = LoadMyScenarios.loadScenarioFromNetwork(matsim_net);
 
@@ -50,7 +50,8 @@ public class NetworkPrep {
                     "6330013306","6324702735","1425481134","6324702738","6329877435","6324702733","4833915521","4833915080",
                     "4833915118","4833915522","4833915083","4833915079","6163999707","5560188517","4833915525","4833915073",
                     "6474868668","4830855727","1425480821","1428119350","1428119365","4830811224","1425481037","1425480713",
-                    "6241167504");
+                    "6241167504","4833915084","3896472377","-101867","-101866","-101865","-101864","-101863","-101862","-101861",
+                    "-101852","-101853","-101854","-101855","-101856","-101857","-101858","-101859");
 
             List<Link> links_to_remove =
                     sc.getNetwork().getLinks().values().stream().filter(l -> !(
@@ -59,8 +60,8 @@ public class NetworkPrep {
             links_to_remove.forEach(l-> sc.getNetwork().removeLink(l.getId()));
 
             // manually remove links
-            List<String> remove_links = List.of("983","984","3356","3357","233","234","2749","2750","979","980","900","901",
-                    "60","569","568","567","770","771","1586","1587","59","566","3553","3506","3561","4198","4197","3554","4182","2211");
+            List<String> remove_links = List.of("990","991","911","912","570","569","4222","3581","1598","1599","4221");
+
             remove_links.forEach(l -> sc.getNetwork().removeLink(Id.createLinkId(l)));
 
             // remove with zero in- out-links
