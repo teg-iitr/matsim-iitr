@@ -3,10 +3,12 @@ package playground.agarwalamit.Chandigarh;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.*;
 import org.matsim.core.gbl.MatsimRandom;
 import playground.agarwalamit.utils.LoadMyScenarios;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class PlansPrep {
     private final String out_network = "C:/Users/Amit Agarwal/Google Drive/iitr_amit.ce.iitr/projects/chandigarh_satyajit/inputs/chandigarh_matsim_net_insideZone.xml.gz";
@@ -21,9 +23,10 @@ public class PlansPrep {
         Population population = scenario.getPopulation();
 
         // 100 persons: starting from 1A, 1C, 1E, 2C, 2E, 3C, 3E, 4A
-        String [] startLinks = new String [] {"3346","422","2280","3337","3300","2395","3502","631"} ;
+       List<String> startLinks = List.of(ChandigarhConstants.link_1A, ChandigarhConstants.link_1C, ChandigarhConstants.link_1E,
+               ChandigarhConstants.link_2C, ChandigarhConstants.link_2E, ChandigarhConstants.link_3C, ChandigarhConstants.link_3E, ChandigarhConstants.link_4F);
         for (String link : startLinks) {
-            Activity firstAct = population.getFactory().createActivityFromLinkId("start",Id.createLinkId(link));
+            Activity firstAct = population.getFactory().createActivityFromLinkId(ChandigarhConstants.start_act,Id.createLinkId(link));
             firstAct.setEndTime(6.*3600+ 3600 *  MatsimRandom.getRandom().nextDouble());
 
             for (int i =0; i<100; i ++){
@@ -31,7 +34,7 @@ public class PlansPrep {
                 Plan plan = population.getFactory().createPlan();
                 plan.addActivity(firstAct);
                 plan.addLeg(population.getFactory().createLeg(TransportMode.car));
-                Activity secondAct = population.getFactory().createActivityFromLinkId("end",Id.createLinkId(getDestinationLinkIdFrom1A(link, i)));
+                Activity secondAct = population.getFactory().createActivityFromLinkId(ChandigarhConstants.end_act,Id.createLinkId(getDestinationLinkIdFrom1A(link, i)));
                 plan.addActivity(secondAct);
                 person.addPlan(plan);
                 population.addPerson(person);
