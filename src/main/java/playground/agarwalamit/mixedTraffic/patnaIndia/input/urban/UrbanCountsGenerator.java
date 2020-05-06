@@ -101,7 +101,7 @@ public class UrbanCountsGenerator {
  				line = reader.readLine();	
 			}
 		} catch (IOException e) {
-			throw new RuntimeException("Data is not written. Reason :"+e);
+			throw new RuntimeException("Data is not Read. Reason :"+e);
 		}
 	}
 }
