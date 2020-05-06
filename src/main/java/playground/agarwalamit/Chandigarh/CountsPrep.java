@@ -52,7 +52,7 @@ public class CountsPrep {
                     double additional_count = Double.parseDouble( parts[labels.indexOf("additional_count")]);
                     count.createVolume(time, actual_count+additional_count);
                     for (var i=1; i <=24 ; i++) {
-                        if (i==1) continue;
+                        if (i==11) continue;
                         count.createVolume(i, 0.);
                     }
                 }
