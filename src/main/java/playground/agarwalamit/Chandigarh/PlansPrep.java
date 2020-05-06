@@ -26,7 +26,7 @@ public class PlansPrep {
                ChandigarhConstants.link_2C, ChandigarhConstants.link_2E, ChandigarhConstants.link_3C, ChandigarhConstants.link_3E, ChandigarhConstants.link_4F);
         for (String link : startLinks) {
             Activity firstAct = population.getFactory().createActivityFromLinkId(ChandigarhConstants.start_act_type,Id.createLinkId(link));
-            firstAct.setEndTime(6.*3600+ 3600 *  MatsimRandom.getRandom().nextDouble());
+            firstAct.setEndTime(10.*3600+ 900 *  MatsimRandom.getRandom().nextDouble());
 
             for (int i =0; i<100; i ++){
                 Person person = population.getFactory().createPerson(Id.createPersonId(population.getPersons().size()));

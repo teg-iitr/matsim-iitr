@@ -27,9 +27,11 @@ public class RunControler {
         config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
         config.controler().setDumpDataAtEnd(true);
         config.counts().setInputFile(countsFile);
+        config.counts().setWriteCountsInterval(5);
+        config.counts().setOutputFormat("all");
 
         PlanCalcScoreConfigGroup.ActivityParams startAct = new PlanCalcScoreConfigGroup.ActivityParams(ChandigarhConstants.start_act_type);
-        startAct.setTypicalDuration(06*3600.);
+        startAct.setTypicalDuration(6*3600.);
         PlanCalcScoreConfigGroup.ActivityParams endAct = new PlanCalcScoreConfigGroup.ActivityParams(ChandigarhConstants.end_act_type);
         endAct.setTypicalDuration(16*3600.);
         config.planCalcScore().addActivityParams(startAct);
