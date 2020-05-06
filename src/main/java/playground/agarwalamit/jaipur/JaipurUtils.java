@@ -1,4 +1,4 @@
-package playground.agarwalamit.mixedTraffic.jaipur;
+package playground.agarwalamit.jaipur;
 
 
 /**

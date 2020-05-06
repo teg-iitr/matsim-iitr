@@ -1,4 +1,4 @@
-package playground.agarwalamit.Delhi_Trilokpuri;
+package playground.agarwalamit.Delhi;
 
 public class DemandPrep {
 
