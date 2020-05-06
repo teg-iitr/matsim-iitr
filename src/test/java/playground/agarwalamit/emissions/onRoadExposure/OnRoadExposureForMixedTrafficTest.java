@@ -258,7 +258,8 @@ public class OnRoadExposureForMixedTrafficTest {
         ecg.setAverageWarmEmissionFactorsFile(averageFleetWarmEmissionFactorsFile);
         ecg.setAverageColdEmissionFactorsFile(averageFleetColdEmissionFactorsFile);
 
-        ecg.setUsingDetailedEmissionCalculation(isUsingDetailedEmissionCalculation);
+//        ecg.setUsingDetailedEmissionCalculation(isUsingDetailedEmissionCalculation);
+        ecg.setDetailedVsAverageLookupBehavior(EmissionsConfigGroup.DetailedVsAverageLookupBehavior.onlyTryDetailedElseAbort);
         ecg.setDetailedWarmEmissionFactorsFile(detailedWarmEmissionFactorsFile);
         ecg.setDetailedColdEmissionFactorsFile(detailedColdEmissionFactorsFile);
         config.addModule(ecg);

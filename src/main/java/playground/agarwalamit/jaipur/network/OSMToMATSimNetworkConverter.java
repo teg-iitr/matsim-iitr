@@ -67,6 +67,5 @@ public class OSMToMATSimNetworkConverter {
             else if (geometry.contains(MGC.coord2Point(coord)) && hierarchyLevel<=6) return true;
             return false;
         }
-
     }
 }

@@ -290,7 +290,8 @@ public class EmissionEventsTest {
         ecg.setDetailedWarmEmissionFactorsFile(inputFilesDir + "/EFA_HOT_SubSegm_2005detailed.txt");
         ecg.setDetailedColdEmissionFactorsFile(inputFilesDir + "/EFA_ColdStart_SubSegm_2005detailed.txt");
 
-        ecg.setUsingDetailedEmissionCalculation(true);
+//        ecg.setUsingDetailedEmissionCalculation(true);
+        ecg.setDetailedVsAverageLookupBehavior(EmissionsConfigGroup.DetailedVsAverageLookupBehavior.onlyTryDetailedElseAbort);
 //        ecg.setEmissionEfficiencyFactor(1.0);
         ecg.setConsideringCO2Costs(true);
         ecg.setEmissionCostMultiplicationFactor(1.0);
