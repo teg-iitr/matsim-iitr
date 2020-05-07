@@ -44,14 +44,6 @@
 			<releases><enabled>true</enabled></releases>
 		</repository>
 		<!--OSM contrib uses this repo which I had to add here.-->
-		<repository>
-			<id>topobyte</id>
-			<url>https://mvn.topobyte.de/</url>
-		</repository>
-		<repository>
-			<id>slimjars</id>
-			<url>http://mvn.slimjars.com/</url>
-		</repository>
 		<!--<repository>-->
 			<!--&lt;!&ndash; Geotools is not on Maven central &ndash;&gt;-->
 			<!--<id>osgeo</id>-->
@@ -135,6 +127,11 @@
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>signals</artifactId>
+			<version>${matsim.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.matsim.contrib</groupId>
+			<artifactId>osm</artifactId>
 			<version>${matsim.version}</version>
 		</dependency>
 		<dependency>

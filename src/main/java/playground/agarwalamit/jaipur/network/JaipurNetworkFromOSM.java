@@ -1,5 +1,6 @@
-package playground.agarwalamit.Delhi;
+package playground.jaipur.network;
 
+import java.util.Collection;
 import org.locationtech.jts.geom.Geometry;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Scenario;
@@ -13,17 +14,25 @@ import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.OsmNetworkReader;
+import org.matsim.core.utils.io.OsmNetworkReader.OsmFilter;
 import org.opengis.feature.simple.SimpleFeature;
 import playground.agarwalamit.jaipur.JaipurUtils;
 import playground.agarwalamit.utils.geometry.GeometryUtils;
 
-import java.util.Collection;
+/**
+ *
+ * @author Amit
+ *
+ */
+public class JaipurNetworkFromOSM {
 
-public class DelhiRoadNetwork {
+    /**
+     * following files are available at https://github.com/amit2011/jaipur-data
+     */
+    private static final String boundaryShapeFile = "..\\..\\jaipur-data\\shapeFile\\arcGIS\\jaipur_boundary\\District_Boundary.shp";
+    private static final String inputOSMFile = "..\\..\\jaipur-data\\osm\\extracted\\jaipur_bb-box.osm";
 
-    private static final String boundaryShapeFile = "C:/Users/Amit Agarwal/Google Drive/iitr_amit.ce.iitr/projects/data/shapeFiles/Delhi/datameet/Delhi_Boundary-SHP/Delhi_Boundary.shp";
-    private static final String inputOSMFile = "C:/Users/Amit Agarwal/Downloads/Delhi_OSM/Delhi_OSM-all_map.osm";
-    private static final String matsimNetworkFile = "C:/Users/Amit Agarwal/Downloads/Delhi_OSM/Delhi_net_insideDistrictBoundary.xml.gz";
+    private static final String matsimNetworkFile = "..\\..\\jaipur-data\\matsimFiles\\jaipur_net_insideDistrictBoundary.xml.gz";
 
     public static void main(String[] args) {
 
@@ -32,32 +41,31 @@ public class DelhiRoadNetwork {
 
         Network network = scenario.getNetwork();
 
-        CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation(TransformationFactory.WGS84, "EPSG:32643");
+        CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation(TransformationFactory.WGS84, JaipurUtils.EPSG);
 
         //TODO use bicycle OSM reader instead.
         OsmNetworkReader reader = new OsmNetworkReader(network, transformation);
-        //filter is creating some issues. Need to check.
-//        reader.addOsmFilter(new DelhiOSMFilter(boundaryShapeFile));
+        reader.addOsmFilter(new JaipurOSMFilter(boundaryShapeFile));
         reader.parse(inputOSMFile);
 
         new NetworkWriter(network).write(matsimNetworkFile);
+
     }
 
-    static class DelhiOSMFilter implements OsmNetworkReader.OsmFilter {
+    static class JaipurOSMFilter implements OsmFilter {
 
         private final Geometry geometry;
 
-        DelhiOSMFilter(String shapeFile){
+        JaipurOSMFilter (String shapeFile){
             Collection<SimpleFeature> features = ShapeFileReader.getAllFeatures(shapeFile);
             geometry = GeometryUtils.getGeometryFromListOfFeatures(features);
         }
 
         @Override
         public boolean coordInFilter(Coord coord, int hierarchyLevel) {
-            if (hierarchyLevel<=4) return true; //keep all roads upto level 4.
-            else return ( geometry.contains(MGC.coord2Point(coord)) && hierarchyLevel<=6 );
+            if (hierarchyLevel<=4) return true; //keep all
+            else if (geometry.contains(MGC.coord2Point(coord)) && hierarchyLevel<=6) return true;
+            return false;
         }
-
     }
-
 }
