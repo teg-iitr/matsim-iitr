@@ -31,9 +31,9 @@ import org.matsim.core.scoring.functions.ScoringParameters;
 
 import javax.inject.Inject;
 public class CadytsInt{
-	private static final String network = "C:\\Users\\DELL\\git\\matsim-iitr-main\\test\\input\\playground\\agarwalamit\\ModalCountsCadytsIT\\network.xml";
-    private static final String plans = "C:\\Users\\DELL\\git\\matsim-iitr-main\\test\\input\\playground\\agarwalamit\\ModalCountsCadytsIT\\plans.xml";
-    private static final String countsFile = "C:\\Users\\DELL\\git\\matsim-iitr-main\\test\\input\\playground\\agarwalamit\\ModalCountsCadytsIT\\countsCarBike.xml";
+	private static final String network = "C:\\Users\\DELL\\Downloads\\inputs/chandigarh_matsim_net_insideZone_fixed.xml.gz";
+    private static final String plans = "C:\\Users\\DELL\\Downloads\\inputs/chandigarh_matsim_plans_test.xml.gz";
+    private static final String countsFile = "C:\\Users\\DELL\\Downloads\\inputs/chandigarh_matsim_counts.xml.gz";
     private static final String output = "C:\\Users\\DELL\\Desktop\\output";
     
 	public static void main(String [] args) {	
@@ -54,10 +54,10 @@ public class CadytsInt{
         config.planCalcScore().addActivityParams(startAct);
         config.planCalcScore().addActivityParams(endAct);
 
-//        StrategyConfigGroup.StrategySettings reRoute = new StrategyConfigGroup.StrategySettings();
-//        reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute); // though, this must not have any effect.
-//        reRoute.setWeight(0.3);
-//        config.strategy().addStrategySettings(reRoute);
+        StrategyConfigGroup.StrategySettings reRoute = new StrategyConfigGroup.StrategySettings();
+        reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute); // though, this must not have any effect.
+        reRoute.setWeight(0.3);
+        config.strategy().addStrategySettings(reRoute);
 
 		final Scenario scenario = ScenarioUtils.loadScenario(config) ;
 		scenario.getNetwork().getLinks().values().stream().filter(l->l.getCapacity()<=600.).forEach(l->l.setCapacity(1500.));
