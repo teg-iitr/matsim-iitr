@@ -7,6 +7,7 @@ import java.util.TreeMap;
 import floetteroed.opdyts.ObjectiveFunction;
 import floetteroed.opdyts.SimulatorState;
 import org.apache.log4j.Logger;
+import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.DefaultActivityTypes;
@@ -31,14 +32,18 @@ import org.matsim.core.controler.corelisteners.ControlerDefaultCoreListenersModu
 import org.matsim.core.scenario.ScenarioByInstanceModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
+import org.matsim.testcases.MatsimTestUtils;
 
 public class ModeChoiceObjectiveFunctionTest {
 	private static final Logger log = Logger.getLogger(ModeChoiceObjectiveFunctionTest.class ) ;
+
+	@Rule
+	public final MatsimTestUtils helper = new MatsimTestUtils();
 	
 	@Test
 	public void test() throws Exception {
 		
-		PrintStream writer = IOUtils.getPrintStream(IOUtils.getFileUrl("results.txt"));
+		PrintStream writer = IOUtils.getPrintStream(IOUtils.getFileUrl(helper.getOutputDirectory()+"results.txt"));
 		
 		for ( int abc=1 ; abc < 99 ; abc ++ ) {
 			
