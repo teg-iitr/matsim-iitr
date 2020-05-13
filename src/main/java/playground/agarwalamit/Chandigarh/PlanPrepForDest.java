@@ -10,8 +10,8 @@ import org.matsim.core.population.PopulationUtils;
 import playground.agarwalamit.utils.LoadMyScenarios;
 
 public class PlanPrepForDest {
-	private final String out_network = "C:\\Users\\DELL\\Desktop\\Matsim input data\\inputs/chandigarh_matsim_net_insideZone_fixed.xml.gz";
-	private final String out_plans="C:\\Users\\DELL\\Desktop\\Matsim input data\\plans.xml";
+	private final String out_network = "C:/Users/Amit Agarwal/Google Drive/iitr_amit.ce.iitr/projects/chandigarh_satyajit/inputs/chandigarh_matsim_net_insideZone_fixed.xml.gz";
+	private final String out_plans="C:/Users/Amit Agarwal/Google Drive/iitr_amit.ce.iitr/projects/chandigarh_satyajit/inputs/chandigarh_matsim_plans_4Cadyts.xml.gz";
 
 	private Population population;
 	
@@ -76,8 +76,8 @@ public class PlanPrepForDest {
                   Plan newPlan = population.getFactory().createPlan();
                   PopulationUtils.copyFromTo(plan, newPlan);
                   Activity secondAct = population.getFactory().createActivityFromLinkId(ChandigarhConstants.end_act_type, Id.createLinkId(destLink));
-                  plan.addActivity(secondAct);
-                  person.addPlan(plan); // this must be inside destinations links loop, otherwise ONLY one plan will be generated.
+                  newPlan.addActivity(secondAct);
+                  person.addPlan(newPlan); // this must be inside destinations links loop, otherwise ONLY one plan will be generated.
               }
 
             population.addPerson(person);
