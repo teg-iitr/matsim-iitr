@@ -39,11 +39,18 @@ import java.util.*;
 public class PatnaControler {
 
     public static void main(String[] args) {
-        String outputDir =  "../../patna/output/bau/";
+
+        String outputDir =  "../../patna/output/";
         String inputConfig = "../../patna/input/configBaseCaseCtd_June2020.xml";
+        String runCase = "bau";
+        if(args.length>0) {
+            outputDir = args[0];
+            inputConfig = args[1];
+            runCase = args[2];
+        }
 
         Config config = ConfigUtils.loadConfig(inputConfig);
-        config.controler().setOutputDirectory(outputDir);
+        config.controler().setOutputDirectory(outputDir+runCase);
 
         //==
         // after calibration;  departure time is fixed for urban; check if time choice is not present
@@ -66,7 +73,7 @@ public class PatnaControler {
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
 
-        String vehiclesFile = "../../patna/input/output_vehicles.xml.gz";
+        String vehiclesFile = new File(outputDir).getParentFile().getAbsolutePath()+"/input/output_vehicles.xml.gz";
         // following is required to extract only vehicle types and not vehicle info. Amit Nov 2016
         VehicleUtils.addVehiclesToScenarioFromVehicleFile(vehiclesFile, scenario);
 
