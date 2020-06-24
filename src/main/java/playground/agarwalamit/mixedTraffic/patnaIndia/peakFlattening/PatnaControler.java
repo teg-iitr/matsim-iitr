@@ -49,18 +49,10 @@ public class PatnaControler {
             runCase = args[2];
         }
 
-        Config config = ConfigUtils.loadConfig(inputConfig);
-        config.controler().setOutputDirectory(outputDir+runCase);
+        outputDir = outputDir+runCase;
 
-        //==
-        // after calibration;  departure time is fixed for urban; check if time choice is not present
-        Collection<StrategyConfigGroup.StrategySettings> strategySettings = config.strategy().getStrategySettings();
-        for(StrategyConfigGroup.StrategySettings ss : strategySettings){ // departure time is fixed now.
-            if ( ss.getStrategyName().equals(DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator.toString()) ) {
-                throw new RuntimeException("Time mutation should not be used; fixed departure time must be used after cadyts calibration.");
-            }
-        }
-        //==
+        Config config = ConfigUtils.loadConfig(inputConfig);
+        config.controler().setOutputDirectory(outputDir);
 
         config.vehicles().setVehiclesFile(null); // vehicle types are added from vehicle file later.
         config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
@@ -139,6 +131,10 @@ public class PatnaControler {
         ModalShareFromEvents msc = new ModalShareFromEvents(outputEventsFile, userGroup, new PatnaPersonFilter());
         msc.run();
         msc.writeResults(outputDir+"/analysis/modalShareFromEvents_"+userGroup+".txt");
+
+        ActivityDepartureAnalyzer analyzer = new ActivityDepartureAnalyzer(outputEventsFile);
+        analyzer.run();
+        analyzer.writeResults(outputDir+"/analysis/activityDepartureCoutners.txt");
 
         StatsWriter.run(outputDir);
     }
