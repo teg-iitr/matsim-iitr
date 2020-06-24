@@ -65,7 +65,7 @@ public class PatnaControler {
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
 
-        String vehiclesFile = new File(outputDir).getParentFile().getAbsolutePath()+"/input/output_vehicles.xml.gz";
+        String vehiclesFile = new File(outputDir).getParentFile().getParentFile().getAbsolutePath()+"/input/output_vehicles.xml.gz";
         // following is required to extract only vehicle types and not vehicle info. Amit Nov 2016
         VehicleUtils.addVehiclesToScenarioFromVehicleFile(vehiclesFile, scenario);
 

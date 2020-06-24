@@ -19,17 +19,21 @@ public class ActivityDepartureHandler implements ActivityStartEventHandler, Pers
         }
     });
     private final Map<Id<Person>,Integer> personId2DepartureTimeBin = new HashMap<>();
+    private final Map<Id<Person>, String> personId2TripPurpose = new HashMap<>();
     private final double timebinsize = 3600.;
 
     @Override
     public void handleEvent(ActivityStartEvent event) {
-        Integer timeBin = personId2DepartureTimeBin.remove(event.getPersonId());
-        if (! event.getActType().equals("home")) {
-            if ( timeBin == null) throw  new RuntimeException("Person Id "+event.getPersonId()+ " is not departed yet. Aborting...");
-            Tuple<String, Integer> ad = new Tuple<>(event.getActType(), timeBin);
-            int countSoFar = acts.getOrDefault(ad,0);
-            acts.put(ad, countSoFar+1);
+        if (personId2TripPurpose.get(event.getPersonId()) == null){
+            // first act start is actual trip purpose for urban
+            personId2TripPurpose.put(event.getPersonId(), event.getActType());
         }
+
+        Integer timeBin = personId2DepartureTimeBin.remove(event.getPersonId());
+        if ( timeBin == null) throw  new RuntimeException("Person Id "+event.getPersonId()+ " is not departed yet. Aborting...");
+        Tuple<String, Integer> ad = new Tuple<>(personId2TripPurpose.get(event.getPersonId()), timeBin);
+        int countSoFar = acts.getOrDefault(ad,0);
+        acts.put(ad, countSoFar+1);
     }
 
     @Override
