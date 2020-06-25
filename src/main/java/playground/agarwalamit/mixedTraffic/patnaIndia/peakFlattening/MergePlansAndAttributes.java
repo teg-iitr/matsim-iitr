@@ -1,10 +1,13 @@
 package playground.agarwalamit.mixedTraffic.patnaIndia.peakFlattening;
 
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.scenario.ScenarioUtils;
+import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 
 public class MergePlansAndAttributes {
 
@@ -19,8 +22,13 @@ public class MergePlansAndAttributes {
         config.plans().setInputFile(inputPlansFile);
         config.plans().setInsistingOnUsingDeprecatedPersonAttributeFile(true);
         config.plans().setInputPersonAttributeFile(inputAttributesFile);
-
         Scenario scenario = ScenarioUtils.loadScenario(config);
+
+        for (Person person : scenario.getPopulation().getPersons().values()) {
+            String ug =  (String) person.getAttributes().removeAttribute(PatnaUtils.SUBPOP_ATTRIBUTE);
+            PopulationUtils.putSubpopulation(person, ug);
+        }
+
         new PopulationWriter(scenario.getPopulation()).write(outputPlanFile);
 
     }
