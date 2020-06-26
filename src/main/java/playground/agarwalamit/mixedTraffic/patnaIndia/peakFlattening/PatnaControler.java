@@ -11,7 +11,6 @@ import org.matsim.core.config.groups.*;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
-import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.ScoringFunctionFactory;
@@ -43,10 +42,15 @@ public class PatnaControler {
         String outputDir =  "../../patna/output/";
         String inputConfig = "../../patna/input/configBaseCaseCtd_June2020.xml";
         String runCase = "bau";
+        String filterWorkTrips = "work";
+        String wardFile = "";
+
         if(args.length>0) {
             outputDir = args[0];
             inputConfig = args[1];
             runCase = args[2];
+            wardFile = args[3];
+            filterWorkTrips = args[4];
         }
 
         outputDir = outputDir+runCase;
@@ -64,6 +68,11 @@ public class PatnaControler {
         config.vspExperimental().setVspDefaultsCheckingLevel(VspExperimentalConfigGroup.VspDefaultsCheckingLevel.warn);
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
+
+        if(filterWorkTrips!=null) {
+            FilterDemandBasedOnTripPurpose filterDemandBasedOnTripPurpose = new FilterDemandBasedOnTripPurpose(scenario.getPopulation(),wardFile,"work");
+            filterDemandBasedOnTripPurpose.process(0.5); // work on alternate days...
+        }
 
         String vehiclesFile = new File(outputDir).getParentFile().getParentFile().getAbsolutePath()+"/input/output_vehicles.xml.gz";
         // following is required to extract only vehicle types and not vehicle info. Amit Nov 2016

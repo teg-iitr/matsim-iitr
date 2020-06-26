@@ -6,21 +6,18 @@ import org.matsim.api.core.v01.events.PersonDepartureEvent;
 import org.matsim.api.core.v01.events.handler.ActivityStartEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.utils.collections.Tuple;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class ActivityDepartureHandler implements ActivityStartEventHandler, PersonDepartureEventHandler {
 
-    private final SortedMap<Tuple<String, Integer>, Integer> acts = new TreeMap<>(new Comparator<Tuple<String, Integer>>() {
-        @Override
-        public int compare(Tuple<String, Integer> o1, Tuple<String, Integer> o2) {
-            return o1.getFirst().compareTo(o2.getFirst()) + o1.getSecond().compareTo(o2.getSecond());
-        }
-    });
+    private final SortedMap<String, SortedMap<Integer, Integer>> acts = new TreeMap<>();
     private final Map<Id<Person>,Integer> personId2DepartureTimeBin = new HashMap<>();
     private final Map<Id<Person>, String> personId2TripPurpose = new HashMap<>();
     private final double timebinsize = 3600.;
+    private final Integer hours = 24;
 
     @Override
     public void handleEvent(ActivityStartEvent event) {
@@ -28,12 +25,17 @@ public class ActivityDepartureHandler implements ActivityStartEventHandler, Pers
             // first act start is actual trip purpose for urban
             personId2TripPurpose.put(event.getPersonId(), event.getActType());
         }
+        SortedMap<Integer, Integer> timebin2count = acts.get(event.getActType());
+        if(timebin2count==null) {
+            timebin2count = IntStream.rangeClosed(1, 24).boxed().collect(Collectors.toMap(i -> i, i -> 0, (a, b) -> b, TreeMap::new));
+            acts.put(event.getActType(),timebin2count);
+        }
 
         Integer timeBin = personId2DepartureTimeBin.remove(event.getPersonId());
         if ( timeBin == null) throw  new RuntimeException("Person Id "+event.getPersonId()+ " is not departed yet. Aborting...");
-        Tuple<String, Integer> ad = new Tuple<>(personId2TripPurpose.get(event.getPersonId()), timeBin);
-        int countSoFar = acts.getOrDefault(ad,0);
-        acts.put(ad, countSoFar+1);
+
+        int countSoFar = timebin2count.getOrDefault(timeBin,0); // getOrDefault for timeBin>24h
+        timebin2count.put(timeBin, countSoFar+1);
     }
 
     @Override
@@ -49,7 +51,7 @@ public class ActivityDepartureHandler implements ActivityStartEventHandler, Pers
         this.acts.clear();
     }
 
-    public SortedMap<Tuple<String, Integer>, Integer> getActivityDepartureCounter(){
+    public SortedMap<String, SortedMap<Integer, Integer>> getActivityDepartureCounter(){
         return this.acts;
     }
 }

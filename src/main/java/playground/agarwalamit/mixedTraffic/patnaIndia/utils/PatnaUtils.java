@@ -40,6 +40,7 @@ public final class PatnaUtils {
 
 	public static final String INPUT_FILES_DIR = FileUtils.SHARED_SVN+"/projects/patnaIndia/inputs/";
 	public static final String ZONE_FILE = PatnaUtils.INPUT_FILES_DIR+"/raw/others/wardFile/Wards.shp";
+	public static final String WARD_TAG_SHAPE_FILE = "ID1";
 
 	public static final String INCOME_ATTRIBUTE = "monthlyIncome";
 	public static final String TRANSPORT_COST_ATTRIBUTE = "dailyTransportCost";
