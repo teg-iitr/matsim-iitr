@@ -42,9 +42,10 @@ public class PatnaControler {
 
         String outputDir =  "../../patna/output/";
         String inputConfig = "../../patna/input/configBaseCaseCtd_June2020.xml";
-        String runCase = "work_half_trips";
-        String filterWorkTrips = "true";
+        String runCase = "discounted_pt_trips";
+        String filterWorkTrips = "false";
         String wardFile = "C:/Users/Amit Agarwal/Google Drive/iitr_gmail_drive/project_data/patna/wardFile/Wards.shp";
+        String discountPTInOffPeakHour = "true";
 
         if(args.length>0) {
             outputDir = args[0];
@@ -52,6 +53,7 @@ public class PatnaControler {
             runCase = args[2];
             wardFile = args[3];
             filterWorkTrips = args[4];
+            discountPTInOffPeakHour = args[5];
         }
 
         outputDir = outputDir+runCase;
@@ -102,6 +104,21 @@ public class PatnaControler {
         });
 
         // adding pt fare system based on distance
+        if(Boolean.valueOf(discountPTInOffPeakHour)) {
+            controler.addOverridingModule(new AbstractModule() {
+                @Override
+                public void install() {
+                    this.addEventHandlerBinding().to(DiscountedPTFareHandler.class);
+                }
+            });
+        } else {
+            controler.addOverridingModule(new AbstractModule() {
+                @Override
+                public void install() {
+                    this.addEventHandlerBinding().to(PtFareEventHandler.class);
+                }
+            });
+        }
         controler.addOverridingModule(new AbstractModule() {
             @Override
             public void install() {
