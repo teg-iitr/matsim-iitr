@@ -1,5 +1,6 @@
 package playground.agarwalamit.mixedTraffic.patnaIndia.peakFlattening;
 
+import org.apache.xpath.operations.Bool;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Network;
@@ -41,9 +42,9 @@ public class PatnaControler {
 
         String outputDir =  "../../patna/output/";
         String inputConfig = "../../patna/input/configBaseCaseCtd_June2020.xml";
-        String runCase = "bau";
-        String filterWorkTrips = "work";
-        String wardFile = "";
+        String runCase = "work_half_trips";
+        String filterWorkTrips = "true";
+        String wardFile = "C:/Users/Amit Agarwal/Google Drive/iitr_gmail_drive/project_data/patna/wardFile/Wards.shp";
 
         if(args.length>0) {
             outputDir = args[0];
@@ -69,7 +70,7 @@ public class PatnaControler {
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
 
-        if(filterWorkTrips!=null) {
+        if(Boolean.valueOf(filterWorkTrips)) {
             FilterDemandBasedOnTripPurpose filterDemandBasedOnTripPurpose = new FilterDemandBasedOnTripPurpose(scenario.getPopulation(),wardFile,"work");
             filterDemandBasedOnTripPurpose.process(0.5); // work on alternate days...
         }
