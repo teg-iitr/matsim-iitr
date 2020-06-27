@@ -18,6 +18,7 @@ import org.matsim.core.scoring.ScoringFunctionFactory;
 import org.matsim.core.scoring.SumScoringFunction;
 import org.matsim.core.scoring.functions.*;
 import playground.agarwalamit.analysis.StatsWriter;
+import playground.agarwalamit.analysis.activity.departureArrival.FilteredDepartureTimeAnalyzer;
 import playground.agarwalamit.analysis.modalShare.ModalShareFromEvents;
 import playground.agarwalamit.analysis.tripTime.ModalTravelTimeAnalyzer;
 import playground.agarwalamit.mixedTraffic.patnaIndia.router.FreeSpeedTravelTimeForBike;
@@ -45,7 +46,7 @@ public class PatnaControler {
         String runCase = "discounted_pt_trips";
         String filterWorkTrips = "false";
         String wardFile = "C:/Users/Amit Agarwal/Google Drive/iitr_gmail_drive/project_data/patna/wardFile/Wards.shp";
-        String discountPTInOffPeakHour = "true";
+        String ptDiscountFractionOffPkHr = "0.2";
 
         if(args.length>0) {
             outputDir = args[0];
@@ -53,7 +54,7 @@ public class PatnaControler {
             runCase = args[2];
             wardFile = args[3];
             filterWorkTrips = args[4];
-            discountPTInOffPeakHour = args[5];
+            ptDiscountFractionOffPkHr = args[5];
         }
 
         outputDir = outputDir+runCase;
@@ -104,21 +105,14 @@ public class PatnaControler {
         });
 
         // adding pt fare system based on distance
-        if(Boolean.valueOf(discountPTInOffPeakHour)) {
-            controler.addOverridingModule(new AbstractModule() {
-                @Override
-                public void install() {
-                    this.addEventHandlerBinding().to(DiscountedPTFareHandler.class);
-                }
-            });
-        } else {
-            controler.addOverridingModule(new AbstractModule() {
-                @Override
-                public void install() {
-                    this.addEventHandlerBinding().to(PtFareEventHandler.class);
-                }
-            });
-        }
+        final DiscountedPTFareHandler discountedPTFareHandler = new DiscountedPTFareHandler(Double.parseDouble(ptDiscountFractionOffPkHr));
+        controler.addOverridingModule(new AbstractModule() {
+            @Override
+            public void install() {
+                this.addEventHandlerBinding().toInstance(discountedPTFareHandler);
+            }
+        });
+
         controler.addOverridingModule(new AbstractModule() {
             @Override
             public void install() {
@@ -162,6 +156,10 @@ public class PatnaControler {
         ActivityDepartureAnalyzer analyzer = new ActivityDepartureAnalyzer(outputEventsFile);
         analyzer.run();
         analyzer.writeResults(outputDir+"/analysis/activityDepartureCoutners.txt");
+
+        FilteredDepartureTimeAnalyzer lmtdd = new FilteredDepartureTimeAnalyzer(outputEventsFile, 3600.);
+        lmtdd.run();
+        lmtdd.writeResults(outputDir+"/analysis/departureCounts"+".txt");
 
         StatsWriter.run(outputDir);
     }

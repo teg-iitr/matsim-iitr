@@ -49,8 +49,16 @@ public class DiscountedPTFareHandler implements PersonDepartureEventHandler, Tel
     private final Map<Id<Person>,String> person2mode = new HashMap<>();
     //peak is 7 to 10 and 15 to 18; in the form of 1 to 24.
     private final List<Integer> discountedHours = List.of(7,11,15,19); // i.e. 6 to 7, 10 to 11, 14-15 and 18 to 19
-    private final double discount = 0.1; //10%
+    private final double discount ; //10%
     private final double timebinsize = 3600.;
+
+    DiscountedPTFareHandler(double discountOffPkHr){
+        discount = discountOffPkHr;
+    }
+
+    DiscountedPTFareHandler(){
+        this(0.1);
+    }
 
     @Inject
     private EventsManager events;
@@ -74,7 +82,7 @@ public class DiscountedPTFareHandler implements PersonDepartureEventHandler, Tel
         if (discountedHours.contains(timebin)) {
            amount2pay = amount2pay*(1.-discount);
         }
-        
+
         Event moneyEvent = new PersonMoneyEvent(event.getTime(), event.getPersonId(), amount2pay, "ptFare","operator");
         events.processEvent(moneyEvent);
     }
