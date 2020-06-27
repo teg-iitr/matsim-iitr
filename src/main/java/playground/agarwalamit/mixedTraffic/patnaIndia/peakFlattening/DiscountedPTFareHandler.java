@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.events.Event;
@@ -46,6 +47,8 @@ import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 
 public class DiscountedPTFareHandler implements PersonDepartureEventHandler, TeleportationArrivalEventHandler{
 
+    public static final Logger logger = Logger.getLogger(DiscountedPTFareHandler.class);
+
     private final Map<Id<Person>,String> person2mode = new HashMap<>();
     //peak is 7 to 10 and 15 to 18; in the form of 1 to 24.
     private final List<Integer> discountedHours = List.of(7,11,15,19); // i.e. 6 to 7, 10 to 11, 14-15 and 18 to 19
@@ -54,6 +57,7 @@ public class DiscountedPTFareHandler implements PersonDepartureEventHandler, Tel
 
     DiscountedPTFareHandler(double discountOffPkHr){
         discount = discountOffPkHr;
+        logger.info("Reducing the PT fare by "+discount+" factor for hours "+discountedHours);
     }
 
     DiscountedPTFareHandler(){

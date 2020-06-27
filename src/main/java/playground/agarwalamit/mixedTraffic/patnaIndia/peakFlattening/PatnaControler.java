@@ -1,5 +1,6 @@
 package playground.agarwalamit.mixedTraffic.patnaIndia.peakFlattening;
 
+import org.apache.log4j.Logger;
 import org.apache.xpath.operations.Bool;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -39,6 +40,8 @@ import java.util.*;
 
 public class PatnaControler {
 
+    public static final Logger logger = Logger.getLogger(PatnaControler.class);
+
     public static void main(String[] args) {
 
         String outputDir =  "../../patna/output/";
@@ -61,6 +64,7 @@ public class PatnaControler {
 
         Config config = ConfigUtils.loadConfig(inputConfig);
         config.controler().setOutputDirectory(outputDir);
+        config.controler().setRunId(runCase);
 
         config.vehicles().setVehiclesFile(null); // vehicle types are added from vehicle file later.
         config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
@@ -74,6 +78,7 @@ public class PatnaControler {
         Scenario scenario = ScenarioUtils.loadScenario(config);
 
         if(Boolean.valueOf(filterWorkTrips)) {
+            logger.info("Filtering work trips with removal probability of 0.5");
             FilterDemandBasedOnTripPurpose filterDemandBasedOnTripPurpose = new FilterDemandBasedOnTripPurpose(scenario.getPopulation(),wardFile,"work");
             filterDemandBasedOnTripPurpose.process(0.5); // work on alternate days...
         }
