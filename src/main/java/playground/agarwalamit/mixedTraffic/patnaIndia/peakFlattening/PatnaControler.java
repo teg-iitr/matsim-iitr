@@ -18,6 +18,7 @@ import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.ScoringFunctionFactory;
 import org.matsim.core.scoring.SumScoringFunction;
 import org.matsim.core.scoring.functions.*;
+import org.matsim.core.utils.collections.Tuple;
 import playground.agarwalamit.analysis.StatsWriter;
 import playground.agarwalamit.analysis.activity.departureArrival.FilteredDepartureTimeAnalyzer;
 import playground.agarwalamit.analysis.modalShare.ModalShareFromEvents;
@@ -50,6 +51,7 @@ public class PatnaControler {
         String filterWorkTrips = "false";
         String wardFile = "C:/Users/Amit Agarwal/Google Drive/iitr_gmail_drive/project_data/patna/wardFile/Wards.shp";
         String ptDiscountFractionOffPkHr = "0.2";
+        String adjustEducationalTripDepartureTimes = "true";
 
         if(args.length>0) {
             outputDir = args[0];
@@ -58,6 +60,7 @@ public class PatnaControler {
             wardFile = args[3];
             filterWorkTrips = args[4];
             ptDiscountFractionOffPkHr = args[5];
+            adjustEducationalTripDepartureTimes = args[6];
         }
 
         outputDir = outputDir+runCase;
@@ -77,10 +80,15 @@ public class PatnaControler {
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
 
-        if(Boolean.valueOf(filterWorkTrips)) {
+        if(Boolean.parseBoolean(filterWorkTrips)) {
             logger.info("Filtering work trips with removal probability of 0.5");
             FilterDemandBasedOnTripPurpose filterDemandBasedOnTripPurpose = new FilterDemandBasedOnTripPurpose(scenario.getPopulation(),wardFile,"work");
-            filterDemandBasedOnTripPurpose.process(0.5); // work on alternate days...
+            filterDemandBasedOnTripPurpose.removePersons(0.5); // work on alternate days...
+        }
+        if(Boolean.parseBoolean(adjustEducationalTripDepartureTimes)) {
+            logger.info("Shifting departure time of educational trips with probability of 0.5. Half of the trips will be departed between 6 to 7 and rest of the trips between 12 to 13.");
+            FilterDemandBasedOnTripPurpose filterDemandBasedOnTripPurpose = new FilterDemandBasedOnTripPurpose(scenario.getPopulation(), wardFile, "educational");
+            filterDemandBasedOnTripPurpose.shiftDepartureTime(0.5, new Tuple<>(6*3600., 5400), new Tuple<>(12*3600., 5400)); //adjusting time between 6 to 7:30 and 12 to 13:30
         }
 
         String vehiclesFile = new File(outputDir).getParentFile().getParentFile().getAbsolutePath()+"/input/output_vehicles.xml.gz";
