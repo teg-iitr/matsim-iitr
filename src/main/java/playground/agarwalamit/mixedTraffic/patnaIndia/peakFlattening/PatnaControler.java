@@ -147,7 +147,7 @@ public class PatnaControler {
         FileUtils.deleteIntermediateIterations(outputDir,firstIt,lastIt);
 
         new File(outputDir+"/analysis/").mkdir();
-        String outputEventsFile = outputDir+"/output_events.xml.gz";
+        String outputEventsFile = outputDir+"/"+runCase+".output_events.xml.gz";
         // write some default analysis
         String userGroup = PatnaPersonFilter.PatnaUserGroup.urban.toString();
         ModalTravelTimeAnalyzer mtta = new ModalTravelTimeAnalyzer(outputEventsFile, userGroup, new PatnaPersonFilter());

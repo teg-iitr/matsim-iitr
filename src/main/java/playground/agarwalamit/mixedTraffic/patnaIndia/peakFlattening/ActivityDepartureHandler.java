@@ -25,7 +25,10 @@ public class ActivityDepartureHandler implements ActivityStartEventHandler, Pers
             // first act start is actual trip purpose for urban
             personId2TripPurpose.put(event.getPersonId(), event.getActType());
         }
-        SortedMap<Integer, Integer> timebin2count = acts.get(event.getActType());
+
+        String actType = personId2TripPurpose.get(event.getPersonId());
+
+        SortedMap<Integer, Integer> timebin2count = acts.get(actType);
         if(timebin2count==null) {
             timebin2count = IntStream.rangeClosed(1, 24).boxed().collect(Collectors.toMap(i -> i, i -> 0, (a, b) -> b, TreeMap::new));
             acts.put(event.getActType(),timebin2count);
