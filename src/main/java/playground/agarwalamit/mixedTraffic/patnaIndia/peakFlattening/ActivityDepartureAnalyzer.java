@@ -20,7 +20,7 @@ public class ActivityDepartureAnalyzer {
 
     public static void main(String[] args) {
 
-        String runCases [] = new String[] {"run2020_1","run2020_2"};
+        String runCases [] = new String[] {"run2020_1","run2020_2","run2020_3","run2020_4","run2020_5"};
         String dir = "../../patna/output/";
         for (String run : runCases) {
             String eventsFile = dir+"/"+run+"/"+run+".output_events.xml.gz";

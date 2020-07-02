@@ -19,6 +19,7 @@ import org.matsim.core.scoring.ScoringFunctionFactory;
 import org.matsim.core.scoring.SumScoringFunction;
 import org.matsim.core.scoring.functions.*;
 import org.matsim.core.utils.collections.Tuple;
+import org.matsim.core.utils.io.IOUtils;
 import playground.agarwalamit.analysis.StatsWriter;
 import playground.agarwalamit.analysis.activity.departureArrival.FilteredDepartureTimeAnalyzer;
 import playground.agarwalamit.analysis.modalShare.ModalShareFromEvents;
@@ -28,6 +29,7 @@ import playground.agarwalamit.mixedTraffic.patnaIndia.scoring.PtFareEventHandler
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.agarwalamit.utils.FileUtils;
+import playground.agarwalamit.utils.MapUtils;
 import playground.agarwalamit.utils.VehicleUtils;
 import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
@@ -36,7 +38,9 @@ import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTrav
 import playground.vsp.cadyts.multiModeCadyts.MultiModeCountsControlerListener;
 
 import javax.inject.Inject;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 public class PatnaControler {
@@ -162,9 +166,7 @@ public class PatnaControler {
         mtta.run();
         mtta.writeResults(outputDir+"/analysis/modalTravelTime_"+userGroup+".txt");
 
-        ModalShareFromEvents msc = new ModalShareFromEvents(outputEventsFile, userGroup, new PatnaPersonFilter());
-        msc.run();
-        msc.writeResults(outputDir+"/analysis/modalShareFromEvents_"+userGroup+".txt");
+        writeModalShare(userGroup, scenario.getConfig().controler());
 
         ActivityDepartureAnalyzer analyzer = new ActivityDepartureAnalyzer(outputEventsFile);
         analyzer.run();
@@ -174,7 +176,60 @@ public class PatnaControler {
         lmtdd.run();
         lmtdd.writeResults(outputDir+"/analysis/departureCounts"+".txt");
 
-        StatsWriter.run(outputDir);
+        StatsWriter.run(outputDir, runCase);
+    }
+
+    private static void writeModalShare(String userGroup, ControlerConfigGroup controlerConfigGroup){
+        String outputDir = controlerConfigGroup.getOutputDirectory();
+        String runCase = controlerConfigGroup.getRunId();
+
+        int firstIteration = controlerConfigGroup.getFirstIteration();
+        String firstIterationEventsFile = outputDir+"/ITERS/it."+ firstIteration +"/"+runCase+"."+ firstIteration +"events.xml.gz";
+        String outputEventsFile = outputDir+"/"+runCase+".output_events.xml.gz";
+
+        ModalShareFromEvents msc_firstItEvents = new ModalShareFromEvents(firstIterationEventsFile, userGroup, new PatnaPersonFilter());
+        msc_firstItEvents.run();
+
+        ModalShareFromEvents msc_outputEvents = new ModalShareFromEvents(outputEventsFile, userGroup, new PatnaPersonFilter());
+        msc_outputEvents.run();
+
+        BufferedWriter writer = IOUtils.getBufferedWriter(outputDir+"/analysis/modalShareFromEvents_"+userGroup+".txt");
+        try {
+            writer.write("iteration\t");
+            for(String str:msc_firstItEvents.getModeToNumberOfLegs().keySet()){
+                writer.write(str+"\t");
+            }
+            writer.write("total \t");
+            writer.newLine();
+
+            writeResutls(msc_firstItEvents, writer, firstIteration);
+
+            writeResutls(msc_outputEvents, writer, controlerConfigGroup.getLastIteration());
+
+            writer.close();
+        } catch (Exception e) {
+            throw new RuntimeException("Data can not be written to file. Reason - "+e);
+        }
+    }
+
+    private static void writeResutls(ModalShareFromEvents msc_outputEvents, BufferedWriter writer, int iteration) {
+        try{
+            writer.write(iteration + "\t");
+            for (String str : msc_outputEvents.getModeToNumberOfLegs().keySet()) { // write Absolute No Of Legs
+                writer.write(msc_outputEvents.getModeToNumberOfLegs().get(str) + "\t");
+            }
+            writer.write(MapUtils.intValueSum(msc_outputEvents.getModeToNumberOfLegs()) + "\t");
+            writer.newLine();
+
+            writer.write(iteration + "\t");
+            for (String str : msc_outputEvents.getModeToPercentOfLegs().keySet()) { // write percentage no of legs
+                writer.write(msc_outputEvents.getModeToPercentOfLegs().get(str) + "\t");
+            }
+            writer.write(MapUtils.doubleValueSum(msc_outputEvents.getModeToPercentOfLegs()) + "\t");
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Data can not be written to file. Reason - "+e);
+        }
     }
 
     public static void addScoringFunction(final Controler controler){

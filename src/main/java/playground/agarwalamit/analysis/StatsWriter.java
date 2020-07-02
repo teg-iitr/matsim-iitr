@@ -35,15 +35,17 @@ import playground.agarwalamit.utils.LoadMyScenarios;
 public class StatsWriter {
 	
 	public static void main(String[] args) {
-		StatsWriter.run("../../../../repos/runs-svn/patnaIndia/run108/calibration/c2/");
+		StatsWriter.run("../../../../repos/runs-svn/patnaIndia/run108/calibration/c2/", null);
 	}
 
-	public static void run (final String filesDir) {
+	public static void run (final String filesDir, String runCase) {
 		
 //		String filesDir = "../../../../repos/runs-svn/patnaIndia/run108/calibration/congestionFree/";
-		String eventsFile = filesDir+"/output_events.xml.gz";
-		String plansFile = filesDir+"/output_plans.xml.gz";
-		String networkFile = filesDir+"/output_network.xml.gz";
+		if (runCase == null) runCase ="";
+
+		String eventsFile = filesDir+"/"+runCase+".output_events.xml.gz";
+		String plansFile = filesDir+"/"+runCase+".output_plans.xml.gz";
+		String networkFile = filesDir+"/"+runCase+".output_network.xml.gz";
 		Scenario scenario = LoadMyScenarios.loadScenarioFromPlansAndNetwork(plansFile, networkFile);
 		
 		EventsManager events = EventsUtils.createEventsManager();
