@@ -5,8 +5,7 @@ import org.apache.xpath.operations.Bool;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Population;
+import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.*;
@@ -51,11 +50,12 @@ public class PatnaControler {
 
         String outputDir =  "../../patna/output/";
         String inputConfig = "../../patna/input/configBaseCaseCtd_June2020.xml";
-        String runCase = "discounted_pt_trips";
+        String runCase = "calib_stayHomePlans";
         String filterWorkTrips = "false";
         String wardFile = "C:/Users/Amit Agarwal/Google Drive/iitr_gmail_drive/project_data/patna/wardFile/Wards.shp";
         String ptDiscountFractionOffPkHr = "0.2";
-        String adjustEducationalTripDepartureTimes = "true";
+        String adjustEducationalTripDepartureTimes = "false"; // this needs to better work out
+        String addStayHomePlansForCalibration = "true";
 
         if(args.length>0) {
             outputDir = args[0];
@@ -65,7 +65,9 @@ public class PatnaControler {
             filterWorkTrips = args[4];
             ptDiscountFractionOffPkHr = args[5];
             adjustEducationalTripDepartureTimes = args[6];
+            addStayHomePlansForCalibration = args[7];
         }
+
 
         outputDir = outputDir+runCase;
 
@@ -83,6 +85,20 @@ public class PatnaControler {
         config.vspExperimental().setVspDefaultsCheckingLevel(VspExperimentalConfigGroup.VspDefaultsCheckingLevel.warn);
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
+        PatnaPersonFilter patnaPersonFilter = new PatnaPersonFilter();
+        if(Boolean.parseBoolean(addStayHomePlansForCalibration)){
+            scenario.getPopulation().getPersons().values().stream().filter(p->
+                    patnaPersonFilter.getUserGroupAsStringFromPersonId(p.getId()).equals(PatnaPersonFilter.PatnaUserGroup.urban.toString())).forEach(p->{
+                Plan plan = scenario.getPopulation().getFactory().createPlan();
+                Activity startAct = (Activity) p.getSelectedPlan().getPlanElements().get(0);//home
+                plan.addActivity(startAct);
+                Activity secondAct = (Activity) p.getSelectedPlan().getPlanElements().get(2);//work/ education/ ...
+                secondAct.setCoord(startAct.getCoord());
+                secondAct.setLinkId(startAct.getLinkId());
+                plan.addActivity(secondAct);
+                p.addPlan(plan);
+            });
+        }
 
         if(Boolean.parseBoolean(filterWorkTrips)) {
             logger.info("Filtering work trips with removal probability of 0.5");
@@ -162,7 +178,8 @@ public class PatnaControler {
         String outputEventsFile = outputDir+"/"+runCase+".output_events.xml.gz";
         // write some default analysis
         String userGroup = PatnaPersonFilter.PatnaUserGroup.urban.toString();
-        ModalTravelTimeAnalyzer mtta = new ModalTravelTimeAnalyzer(outputEventsFile, userGroup, new PatnaPersonFilter());
+
+        ModalTravelTimeAnalyzer mtta = new ModalTravelTimeAnalyzer(outputEventsFile, userGroup, patnaPersonFilter);
         mtta.run();
         mtta.writeResults(outputDir+"/analysis/modalTravelTime_"+userGroup+".txt");
 
@@ -184,7 +201,7 @@ public class PatnaControler {
         String runCase = controlerConfigGroup.getRunId();
 
         int firstIteration = controlerConfigGroup.getFirstIteration();
-        String firstIterationEventsFile = outputDir+"/ITERS/it."+ firstIteration +"/"+runCase+"."+ firstIteration +"events.xml.gz";
+        String firstIterationEventsFile = outputDir+"/ITERS/it."+ firstIteration +"/"+runCase+"."+ firstIteration +".events.xml.gz";
         String outputEventsFile = outputDir+"/"+runCase+".output_events.xml.gz";
 
         ModalShareFromEvents msc_firstItEvents = new ModalShareFromEvents(firstIterationEventsFile, userGroup, new PatnaPersonFilter());
@@ -203,7 +220,7 @@ public class PatnaControler {
             writer.newLine();
 
             writeResutls(msc_firstItEvents, writer, firstIteration);
-
+            writer.write("\n");
             writeResutls(msc_outputEvents, writer, controlerConfigGroup.getLastIteration());
 
             writer.close();
@@ -232,7 +249,7 @@ public class PatnaControler {
         }
     }
 
-    public static void addScoringFunction(final Controler controler){
+    private static void addScoringFunction(final Controler controler){
         // scoring function
         controler.setScoringFunctionFactory(new ScoringFunctionFactory() {
             final ScoringParametersForPerson parameters = new SubpopulationScoringParameters( controler.getScenario() );

@@ -166,7 +166,7 @@ public class JointCalibrationControler {
 		msc.run();
 		msc.writeResults(OUTPUT_DIR+"/analysis/modalShareFromEvents_"+userGroup+".txt");
 
-		StatsWriter.run(OUTPUT_DIR);
+		StatsWriter.run(OUTPUT_DIR,null);
 	}
 
 	private static void addScoringFunction(final Controler controler, final Config config){

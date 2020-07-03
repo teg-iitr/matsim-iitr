@@ -229,7 +229,7 @@ public class PatnaPolicyControler {
 		msc.run();
 		msc.writeResults(outputDir+"/analysis/modalShareFromEvents_"+userGroup+".txt");
 
-		StatsWriter.run(outputDir);
+		StatsWriter.run(outputDir, null);
 	}
 
 	public static void addScoringFunction(final Controler controler){
