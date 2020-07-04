@@ -91,12 +91,17 @@ public class PatnaControler {
                     patnaPersonFilter.getUserGroupAsStringFromPersonId(p.getId()).equals(PatnaPersonFilter.PatnaUserGroup.urban.toString())).forEach(p->{
                 Plan plan = scenario.getPopulation().getFactory().createPlan();
                 Activity startAct = (Activity) p.getSelectedPlan().getPlanElements().get(0);//home
+                startAct.setEndTime(36*3600.);
                 plan.addActivity(startAct);
-                Activity secondAct = (Activity) p.getSelectedPlan().getPlanElements().get(2);//work/ education/ ...
-                secondAct.setCoord(startAct.getCoord());
-                secondAct.setLinkId(startAct.getLinkId());
-                plan.addActivity(secondAct);
                 p.addPlan(plan);
+                p.setSelectedPlan(plan);
+//                Activity secondAct = (Activity) p.getSelectedPlan().getPlanElements().get(2);//work/ education/ ...
+//                secondAct.setCoord(startAct.getCoord());
+//                secondAct.setLinkId(startAct.getLinkId());
+//                plan.addActivity(secondAct);
+//                Activity lastAct = (Activity) p.getSelectedPlan().getPlanElements().get(4);// back-home
+//                plan.addActivity(lastAct);
+
             });
         }
 
