@@ -3,32 +3,20 @@ package playground.agarwalamit.mixedTraffic.patnaIndia.peakFlattening;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.*;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
-import org.matsim.core.population.algorithms.PlanAlgorithm;
-import org.matsim.core.replanning.PlanStrategy;
-import org.matsim.core.replanning.PlanStrategyImpl;
-import org.matsim.core.replanning.modules.AbstractMultithreadedModule;
-import org.matsim.core.replanning.modules.ReRoute;
-import org.matsim.core.replanning.selectors.RandomPlanSelector;
-import org.matsim.core.router.TripRouter;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.scoring.ScoringFunction;
-import org.matsim.core.scoring.ScoringFunctionFactory;
-import org.matsim.core.scoring.SumScoringFunction;
-import org.matsim.core.scoring.functions.*;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.io.IOUtils;
 import playground.agarwalamit.analysis.StatsWriter;
 import playground.agarwalamit.analysis.activity.departureArrival.FilteredDepartureTimeAnalyzer;
 import playground.agarwalamit.analysis.modalShare.ModalShareFromEvents;
 import playground.agarwalamit.analysis.tripTime.ModalTravelTimeAnalyzer;
+import playground.agarwalamit.mixedTraffic.patnaIndia.policies.PatnaPolicyControler;
 import playground.agarwalamit.mixedTraffic.patnaIndia.router.FreeSpeedTravelTimeForBike;
 import playground.agarwalamit.mixedTraffic.patnaIndia.scoring.PtFareEventHandler;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter;
@@ -42,8 +30,6 @@ import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTi
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
 import playground.vsp.cadyts.multiModeCadyts.MultiModeCountsControlerListener;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.util.*;
@@ -63,6 +49,7 @@ public class PatnaControler {
         String ptDiscountFractionOffPkHr = "0.2";
         String adjustEducationalTripDepartureTimes = "false"; // this needs to better work out
         String addStayHomePlansForCalibration = "true";
+        double WFHPenaltyFactor = 0.1;
 
         if(args.length>0) {
             outputDir = args[0];
@@ -73,6 +60,7 @@ public class PatnaControler {
             ptDiscountFractionOffPkHr = args[5];
             adjustEducationalTripDepartureTimes = args[6];
             addStayHomePlansForCalibration = args[7];
+            WFHPenaltyFactor = Double.parseDouble(args[8]);
         }
 
         outputDir = outputDir+runCase;
@@ -151,7 +139,7 @@ public class PatnaControler {
         mp.setMonetaryDistanceRate(0.0);
 
         // add income dependent scoring function factory
-        addScoringFunction(controler);
+        PatnaPolicyControler.addScoringFunction(controler);
 
         controler.addOverridingModule(new AbstractModule() {
             @Override
@@ -161,41 +149,20 @@ public class PatnaControler {
         });
 
         if(Boolean.parseBoolean(addStayHomePlansForCalibration)){
+            List<String> actTypes = List.of("work","educational");
             //work-from-home-strategy
             String wfh_name = "WorkFromHome";
-            controler.addOverridingModule(new WorkFromHomeModule(wfh_name, wfh_walk));
+            controler.addOverridingModule(new WorkFromHomeModule(wfh_name, wfh_walk, actTypes));
 
-//            scenario.getPopulation().getPersons().values().stream()
-//                    .filter(p->
-//                    patnaPersonFilter.getUserGroupAsStringFromPersonId(p.getId()).equals(PatnaPersonFilter.PatnaUserGroup.urban.toString()))
-//                    .forEach(p->{
-//                        Activity secondAct = (Activity) p.getSelectedPlan().getPlanElements().get(2);//work/ education/ ...
-//                        if (secondAct.getType().equalsIgnoreCase("work") || secondAct.getType().equalsIgnoreCase("educational")) {
-//                            Plan plan = scenario.getPopulation().getFactory().createPlan();
-//                            Activity startAct = (Activity) p.getSelectedPlan().getPlanElements().get(0);//home
-//                            plan.addActivity(startAct);
-//                            plan.addLeg(scenario.getPopulation().getFactory().createLeg(wfh_walk));
-//
-//                            secondAct.setCoord(startAct.getCoord());
-//                            secondAct.setLinkId(startAct.getLinkId());
-//                            plan.addActivity(secondAct);
-//                            plan.addLeg(scenario.getPopulation().getFactory().createLeg(wfh_walk));
-//                            Activity lastAct = (Activity) p.getSelectedPlan().getPlanElements().get(4);// back-home
-//                            plan.addActivity(lastAct);
-//                            p.addPlan(plan);
-////                p.setSelectedPlan(plan);
-//                        }
-//            });
-            scenario.getConfig().plansCalcRoute().getOrCreateModeRoutingParams(wfh_walk).setBeelineDistanceFactor(1.0);
-            scenario.getConfig().plansCalcRoute().getOrCreateModeRoutingParams(wfh_walk).setTeleportedModeSpeed(5.0/3.6);
-            scenario.getConfig().planCalcScore().getOrCreateModeParams(wfh_walk).setConstant(0.);
-            scenario.getConfig().planCalcScore().getOrCreateModeParams(wfh_walk).setMarginalUtilityOfTraveling(0.);
-
-//            StrategyConfigGroup.StrategySettings wfh = new StrategyConfigGroup.StrategySettings();
-//            wfh.setStrategyName(wfh_name);
-//            wfh.setSubpopulation(PatnaPersonFilter.PatnaUserGroup.urban.toString());
-//            wfh.setWeight(0.15);
-//            scenario.getConfig().strategy().addStrategySettings(wfh);
+            if (WFHPenaltyFactor!=0.) {
+                WFHPricing wfhPricing = new WFHPricing(WFHPenaltyFactor, wfh_walk, actTypes );
+                controler.addOverridingModule(new AbstractModule() {
+                    @Override
+                    public void install() {
+                        addEventHandlerBinding().toInstance(wfhPricing);
+                    }
+                });
+            }
         }
 
         controler.run();
@@ -275,48 +242,5 @@ public class PatnaControler {
         catch (Exception e) {
             throw new RuntimeException("Data can not be written to file. Reason - "+e);
         }
-    }
-
-    private static void addScoringFunction(final Controler controler){
-        // scoring function
-        controler.setScoringFunctionFactory(new ScoringFunctionFactory() {
-            final ScoringParametersForPerson parameters = new SubpopulationScoringParameters( controler.getScenario() );
-            @Inject
-            Network network;
-            @Inject
-            Population population;
-            @Inject
-            PlanCalcScoreConfigGroup planCalcScoreConfigGroup; // to modify the util parameters
-            @Inject
-            ScenarioConfigGroup scenarioConfig;
-            @Override
-            public ScoringFunction createNewScoringFunction(Person person) {
-                final ScoringParameters params = parameters.getScoringParameters( person );
-
-                SumScoringFunction sumScoringFunction = new SumScoringFunction();
-                sumScoringFunction.addScoringFunction(new CharyparNagelActivityScoring(params)) ;
-                sumScoringFunction.addScoringFunction(new CharyparNagelAgentStuckScoring(params));
-
-                Double ratioOfInc = 1.0;
-
-                if ( PatnaPersonFilter.isPersonBelongsToUrban(person.getId())) { // inc is not available for commuters and through traffic
-                    Double monthlyInc = (Double) person.getAttributes().getAttribute(PatnaUtils.INCOME_ATTRIBUTE);
-                    Double avgInc = PatnaUtils.MEADIAM_INCOME;
-                    ratioOfInc = avgInc/monthlyInc;
-                }
-
-                planCalcScoreConfigGroup.setMarginalUtilityOfMoney(ratioOfInc );
-
-                PlanCalcScoreConfigGroup.ScoringParameterSet scoringParameterSet = planCalcScoreConfigGroup.getScoringParameters( null ); // parameters set is same for all subPopulations
-
-                ScoringParameters.Builder builder = new ScoringParameters.Builder(
-                        planCalcScoreConfigGroup, scoringParameterSet, scenarioConfig);
-                final ScoringParameters modifiedParams = builder.build();
-
-                sumScoringFunction.addScoringFunction(new CharyparNagelLegScoring(modifiedParams, network));
-                sumScoringFunction.addScoringFunction(new CharyparNagelMoneyScoring(modifiedParams));
-                return sumScoringFunction;
-            }
-        });
     }
 }

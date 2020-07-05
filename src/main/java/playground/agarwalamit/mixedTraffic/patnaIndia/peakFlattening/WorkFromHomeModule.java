@@ -22,10 +22,12 @@ import java.util.List;
 public class WorkFromHomeModule extends AbstractModule {
         private final String wfhStrategyName;
         private final String wfhMode;
+        private final List<String> actTypes;
 
-        public WorkFromHomeModule(String wfhStrategyName, String wfhMode) {
+        public WorkFromHomeModule(String wfhStrategyName, String wfhMode, List<String> actTypes) {
             this.wfhStrategyName = wfhStrategyName;
             this.wfhMode = wfhMode;
+            this.actTypes = actTypes;
         }
 
         @Override
@@ -39,7 +41,7 @@ public class WorkFromHomeModule extends AbstractModule {
                 @Override
                 public PlanStrategy get() {
                     final PlanStrategyImpl.Builder builder = new PlanStrategyImpl.Builder(new RandomPlanSelector<>());
-                    builder.addStrategyModule(new WorkFromHome(sc.getConfig().global(), List.of("work","educational"), wfhMode));
+                    builder.addStrategyModule(new WorkFromHome(sc.getConfig().global(), actTypes, wfhMode));
                     builder.addStrategyModule(new ReRoute(sc, tripRouterProvider));
                     return builder.build();
                 }
