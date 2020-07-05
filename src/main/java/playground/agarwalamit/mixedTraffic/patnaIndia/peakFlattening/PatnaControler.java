@@ -1,7 +1,6 @@
 package playground.agarwalamit.mixedTraffic.patnaIndia.peakFlattening;
 
 import org.apache.log4j.Logger;
-import org.apache.xpath.operations.Bool;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Network;
@@ -12,6 +11,13 @@ import org.matsim.core.config.groups.*;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
+import org.matsim.core.population.algorithms.PlanAlgorithm;
+import org.matsim.core.replanning.PlanStrategy;
+import org.matsim.core.replanning.PlanStrategyImpl;
+import org.matsim.core.replanning.modules.AbstractMultithreadedModule;
+import org.matsim.core.replanning.modules.ReRoute;
+import org.matsim.core.replanning.selectors.RandomPlanSelector;
+import org.matsim.core.router.TripRouter;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.ScoringFunctionFactory;
@@ -37,14 +43,15 @@ import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTrav
 import playground.vsp.cadyts.multiModeCadyts.MultiModeCountsControlerListener;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 public class PatnaControler {
 
     public static final Logger logger = Logger.getLogger(PatnaControler.class);
+    private static final String wfh_walk = "WFHwalk";
 
     public static void main(String[] args) {
 
@@ -68,7 +75,6 @@ public class PatnaControler {
             addStayHomePlansForCalibration = args[7];
         }
 
-
         outputDir = outputDir+runCase;
 
         Config config = ConfigUtils.loadConfig(inputConfig);
@@ -86,24 +92,6 @@ public class PatnaControler {
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
         PatnaPersonFilter patnaPersonFilter = new PatnaPersonFilter();
-        if(Boolean.parseBoolean(addStayHomePlansForCalibration)){
-            scenario.getPopulation().getPersons().values().stream().filter(p->
-                    patnaPersonFilter.getUserGroupAsStringFromPersonId(p.getId()).equals(PatnaPersonFilter.PatnaUserGroup.urban.toString())).forEach(p->{
-                Plan plan = scenario.getPopulation().getFactory().createPlan();
-                Activity startAct = (Activity) p.getSelectedPlan().getPlanElements().get(0);//home
-                startAct.setEndTime(36*3600.);
-                plan.addActivity(startAct);
-                p.addPlan(plan);
-                p.setSelectedPlan(plan);
-//                Activity secondAct = (Activity) p.getSelectedPlan().getPlanElements().get(2);//work/ education/ ...
-//                secondAct.setCoord(startAct.getCoord());
-//                secondAct.setLinkId(startAct.getLinkId());
-//                plan.addActivity(secondAct);
-//                Activity lastAct = (Activity) p.getSelectedPlan().getPlanElements().get(4);// back-home
-//                plan.addActivity(lastAct);
-
-            });
-        }
 
         if(Boolean.parseBoolean(filterWorkTrips)) {
             logger.info("Filtering work trips with removal probability of 0.5");
@@ -172,6 +160,44 @@ public class PatnaControler {
             }
         });
 
+        if(Boolean.parseBoolean(addStayHomePlansForCalibration)){
+            //work-from-home-strategy
+            String wfh_name = "WorkFromHome";
+            controler.addOverridingModule(new WorkFromHomeModule(wfh_name, wfh_walk));
+
+//            scenario.getPopulation().getPersons().values().stream()
+//                    .filter(p->
+//                    patnaPersonFilter.getUserGroupAsStringFromPersonId(p.getId()).equals(PatnaPersonFilter.PatnaUserGroup.urban.toString()))
+//                    .forEach(p->{
+//                        Activity secondAct = (Activity) p.getSelectedPlan().getPlanElements().get(2);//work/ education/ ...
+//                        if (secondAct.getType().equalsIgnoreCase("work") || secondAct.getType().equalsIgnoreCase("educational")) {
+//                            Plan plan = scenario.getPopulation().getFactory().createPlan();
+//                            Activity startAct = (Activity) p.getSelectedPlan().getPlanElements().get(0);//home
+//                            plan.addActivity(startAct);
+//                            plan.addLeg(scenario.getPopulation().getFactory().createLeg(wfh_walk));
+//
+//                            secondAct.setCoord(startAct.getCoord());
+//                            secondAct.setLinkId(startAct.getLinkId());
+//                            plan.addActivity(secondAct);
+//                            plan.addLeg(scenario.getPopulation().getFactory().createLeg(wfh_walk));
+//                            Activity lastAct = (Activity) p.getSelectedPlan().getPlanElements().get(4);// back-home
+//                            plan.addActivity(lastAct);
+//                            p.addPlan(plan);
+////                p.setSelectedPlan(plan);
+//                        }
+//            });
+            scenario.getConfig().plansCalcRoute().getOrCreateModeRoutingParams(wfh_walk).setBeelineDistanceFactor(1.0);
+            scenario.getConfig().plansCalcRoute().getOrCreateModeRoutingParams(wfh_walk).setTeleportedModeSpeed(5.0/3.6);
+            scenario.getConfig().planCalcScore().getOrCreateModeParams(wfh_walk).setConstant(0.);
+            scenario.getConfig().planCalcScore().getOrCreateModeParams(wfh_walk).setMarginalUtilityOfTraveling(0.);
+
+//            StrategyConfigGroup.StrategySettings wfh = new StrategyConfigGroup.StrategySettings();
+//            wfh.setStrategyName(wfh_name);
+//            wfh.setSubpopulation(PatnaPersonFilter.PatnaUserGroup.urban.toString());
+//            wfh.setWeight(0.15);
+//            scenario.getConfig().strategy().addStrategySettings(wfh);
+        }
+
         controler.run();
 
         // delete unnecessary iterations folder here.
@@ -215,20 +241,9 @@ public class PatnaControler {
         ModalShareFromEvents msc_outputEvents = new ModalShareFromEvents(outputEventsFile, userGroup, new PatnaPersonFilter());
         msc_outputEvents.run();
 
-        BufferedWriter writer = IOUtils.getBufferedWriter(outputDir+"/analysis/modalShareFromEvents_"+userGroup+".txt");
-        try {
-            writer.write("iteration\t");
-            for(String str:msc_firstItEvents.getModeToNumberOfLegs().keySet()){
-                writer.write(str+"\t");
-            }
-            writer.write("total \t");
-            writer.newLine();
-
+        try(BufferedWriter writer = IOUtils.getBufferedWriter(outputDir+"/analysis/modalShareFromEvents_"+userGroup+".txt")) {
             writeResutls(msc_firstItEvents, writer, firstIteration);
-            writer.write("\n");
             writeResutls(msc_outputEvents, writer, controlerConfigGroup.getLastIteration());
-
-            writer.close();
         } catch (Exception e) {
             throw new RuntimeException("Data can not be written to file. Reason - "+e);
         }
@@ -236,6 +251,13 @@ public class PatnaControler {
 
     private static void writeResutls(ModalShareFromEvents msc_outputEvents, BufferedWriter writer, int iteration) {
         try{
+            writer.write("iteration\t");
+            for(String str:msc_outputEvents.getModeToNumberOfLegs().keySet()){
+                writer.write(str+"\t");
+            }
+            writer.write("total \t");
+            writer.newLine();
+
             writer.write(iteration + "\t");
             for (String str : msc_outputEvents.getModeToNumberOfLegs().keySet()) { // write Absolute No Of Legs
                 writer.write(msc_outputEvents.getModeToNumberOfLegs().get(str) + "\t");
@@ -248,6 +270,7 @@ public class PatnaControler {
                 writer.write(msc_outputEvents.getModeToPercentOfLegs().get(str) + "\t");
             }
             writer.write(MapUtils.doubleValueSum(msc_outputEvents.getModeToPercentOfLegs()) + "\t");
+            writer.newLine();
         }
         catch (Exception e) {
             throw new RuntimeException("Data can not be written to file. Reason - "+e);
@@ -296,5 +319,4 @@ public class PatnaControler {
             }
         });
     }
-
 }
