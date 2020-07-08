@@ -1,6 +1,8 @@
 package playground.agarwalamit.mixedTraffic.patnaIndia.covidWork;
 
 import org.apache.log4j.Logger;
+import org.hisrc.w3c.atom.v_1_0.Link;
+import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.*;
@@ -14,6 +16,8 @@ import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.io.IOUtils;
+import org.matsim.core.utils.misc.OptionalTime;
+import org.matsim.core.utils.misc.Time;
 import playground.agarwalamit.analysis.StatsWriter;
 import playground.agarwalamit.analysis.activity.departureArrival.FilteredDepartureTimeAnalyzer;
 import playground.agarwalamit.analysis.modalShare.ModalShareFromEvents;
@@ -163,25 +167,26 @@ public class PatnaControler {
                     .forEach(p->{
                         p.getPlans().stream().forEach(plan -> plan.setType("non-WFH_"+( (Leg)plan.getPlanElements().get(1)).getMode()) );
 
-                        Activity act = ((Activity)p.getSelectedPlan().getPlanElements().get(2));
-                        if (actTypes.contains(act.getType())) {
+                        Activity secondAc = ((Activity)p.getSelectedPlan().getPlanElements().get(2));
+                        if (actTypes.contains(secondAc.getType())) {
+                            Activity firstAct = null ; // for location
                             Plan plan = scenario.getPopulation().getFactory().createPlan();
                             plan.setType("WFH");
-                            {
-                                Activity wfhAct = scenario.getPopulation().getFactory().createActivityFromLinkId(wfh_name,act.getLinkId());
-                                wfhAct.setCoord(act.getCoord());
-                                wfhAct.setFacilityId(act.getFacilityId());
-                                wfhAct.setEndTime(23.0*3600.);
-                                plan.addActivity(wfhAct);
-                            }
-                            {
-                                Activity wfhAct = scenario.getPopulation().getFactory().createActivityFromLinkId(wfh_name+"2",act.getLinkId());
-                                wfhAct.setCoord(act.getCoord());
-                                wfhAct.setFacilityId(act.getFacilityId());
-                                wfhAct.setEndTime(24.0*3600.-1);
-                                plan.addActivity(wfhAct);
-                            }
 
+                            for (PlanElement pe : p.getSelectedPlan().getPlanElements()) {
+                                if (pe instanceof Activity) {
+                                    Activity act = ((Activity)pe);
+                                    if(firstAct==null) firstAct = act;
+
+                                    Activity wfhAct = scenario.getPopulation().getFactory().createActivityFromLinkId(wfh_name+"_"+act.getType(), firstAct.getLinkId());
+                                    wfhAct.setCoord(firstAct.getCoord());
+                                    wfhAct.setFacilityId(firstAct.getFacilityId());
+                                    if (act.getEndTime().isDefined()) {
+                                        wfhAct.setEndTime(act.getEndTime().seconds());
+                                    }
+                                    plan.addActivity(wfhAct);
+                                }
+                            }
                             p.addPlan(plan);
                             p.setSelectedPlan(plan);
                         }

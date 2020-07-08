@@ -10,6 +10,7 @@ import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.controler.events.IterationEndsEvent;
 import org.matsim.core.controler.listener.IterationEndsListener;
+import org.matsim.core.utils.misc.Time;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -109,7 +110,7 @@ public class WFHPricing implements ActivityStartEventHandler, ActivityEndEventHa
             } else if (Double.isInfinite(startTime) && Double.isFinite(endTime)) { // e.g. home
                 return endTime - 0.;
             } else if (Double.isInfinite(endTime) && Double.isFinite(startTime)) { // last act
-                return 24*3600. - startTime;
+                return Time.MIDNIGHT - startTime;
             } else throw new RuntimeException("Start and end times are infinite.");
         }
     }
