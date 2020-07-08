@@ -52,6 +52,10 @@ public class ModalShareFromPlans implements ModalShare{
 	public ModalShareFromPlans (final String plansFile) {
 		this(LoadMyScenarios.loadScenarioFromPlans(plansFile).getPopulation(),null,null);
 	}
+
+	public ModalShareFromPlans (final String plansFile, final String userGroup, final PersonFilter personFilter) {
+		this(LoadMyScenarios.loadScenarioFromPlans(plansFile).getPopulation(),userGroup,personFilter);
+	}
 	
 	public ModalShareFromPlans (final Population pop, final String userGroup, final PersonFilter personFilter) {
 		this.pop = pop;
