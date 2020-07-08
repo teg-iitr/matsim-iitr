@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author amit
@@ -57,13 +58,11 @@ public class WFHCounterControlerListner implements IterationEndsListener, Shutdo
     public void notifyIterationEnds(IterationEndsEvent event) {
         if (this.personFilter==null){
 
-            List<Double> scores = new ArrayList<>();
-            for(Person person: population.getPersons().values()) {
-                Plan plan = person.getSelectedPlan();
-                if (isWFHPlan(plan)) {
-                    scores.add(plan.getScore());
-                }
-            }
+            List<Double> scores = population.getPersons().values().stream()
+                    .map(HasPlansAndId::getSelectedPlan)
+                    .filter(this::isWFHPlan)
+                    .map(BasicPlan::getScore)
+                    .collect(Collectors.toList());
 
             write(event.getIteration(), null, scores);
 
@@ -71,11 +70,9 @@ public class WFHCounterControlerListner implements IterationEndsListener, Shutdo
             SortedMap<String, List<Double>> userGroup2Score = new TreeMap<>();
             this.personFilter.getUserGroupsAsStrings().forEach(ug-> userGroup2Score.put(ug, new ArrayList<>()));
 
-            for (Person person : this.population.getPersons().values()) {
-                if (isWFHPlan(person.getSelectedPlan())) {
-                    userGroup2Score.get(this.personFilter.getUserGroupAsStringFromPersonId(person.getId())).add(person.getSelectedPlan().getScore());
-                }
-            }
+            this.population.getPersons().values().stream()
+                    .filter(person -> isWFHPlan(person.getSelectedPlan()))
+                    .forEach(person -> userGroup2Score.get(this.personFilter.getUserGroupAsStringFromPersonId(person.getId())).add(person.getSelectedPlan().getScore()));
 
             userGroup2Score.entrySet().stream().forEach(e -> write(event.getIteration(), e.getKey(), e.getValue()));
         }
@@ -85,7 +82,7 @@ public class WFHCounterControlerListner implements IterationEndsListener, Shutdo
         if (scores.size()==0) return;
 
         double counter = scores.size();
-        double avgScore = scores.stream().mapToDouble(i -> i).average().orElse(0.) / counter;
+        double avgScore = scores.stream().mapToDouble(i -> i).average().orElse(0.) ;
         double maxScore = Collections.max(scores);
         double minScore = Collections.min(scores);
 
