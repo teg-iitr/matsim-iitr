@@ -5,13 +5,13 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.*;
 import org.matsim.api.core.v01.events.handler.ActivityEndEventHandler;
 import org.matsim.api.core.v01.events.handler.ActivityStartEventHandler;
-import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+import org.matsim.core.controler.events.IterationEndsEvent;
+import org.matsim.core.controler.listener.IterationEndsListener;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,54 +19,98 @@ import java.util.Map;
  *
  * @author amit
  */
-public class WFHPricing implements ActivityStartEventHandler, ActivityEndEventHandler, PersonDepartureEventHandler {
+public class WFHPricing implements ActivityStartEventHandler, ActivityEndEventHandler, IterationEndsListener {
 
     private final String TYPE = "PENALTY_WORKING_HOME";
     private final String PARTNER = "SELF";
-    private final Map<Id<Person>,Double> personId2ActStartTime = new HashMap<>();
+    private final Map<Id<Person>,PersonActInfo> personsActInfo = new HashMap<>();
     private final double factor;
-    private final String WFHMode;
-    private final List<String> actTypes;
 
     @Inject
     private PlanCalcScoreConfigGroup planCalcScoreConfigGroup;
     @Inject
     private EventsManager events;
+    @Inject
+    private WFHActivity wfhActivity;
 
-    public WFHPricing(double factor, String WFHMode, List<String> actTypes){
+    public WFHPricing(double factor){
         this.factor = factor;
-        this.WFHMode = WFHMode;
-        this.actTypes = actTypes;
     }
 
     @Override
     public void reset(int iteration) {
-        this.personId2ActStartTime.clear();
+        this.personsActInfo.clear();
     }
 
     @Override
     public void handleEvent(ActivityEndEvent event) {
-        if (personId2ActStartTime.get(event.getPersonId())!=null && (this.actTypes.contains(event.getActType())) ){
-            double actDuration = event.getTime() - personId2ActStartTime.remove(event.getPersonId());
-            double amount2Pay = - (actDuration/3600.) * planCalcScoreConfigGroup.getPerforming_utils_hr() * factor;
+        if(this.wfhActivity.isWFHActivity(event.getActType())) {
+            this.personsActInfo.putIfAbsent(event.getPersonId(), new PersonActInfo(event.getPersonId()));
 
-            Event moneyEvent = new PersonMoneyEvent(event.getTime(), event.getPersonId(), amount2Pay, TYPE, PARTNER);
-            events.processEvent(moneyEvent);
+            PersonActInfo personActInfo = this.personsActInfo.get(event.getPersonId());
+            personActInfo.acts.putIfAbsent(event.getActType(), new ActInfo(event.getActType())) ;
+            ActInfo actInfo = personActInfo.acts.get(event.getActType());
+            actInfo.endTime = event.getTime();
         }
     }
 
     @Override
     public void handleEvent(ActivityStartEvent event) {
-        if (personId2ActStartTime.get(event.getPersonId())!=null && (this.actTypes.contains(event.getActType())) ){
-            personId2ActStartTime.put(event.getPersonId(), event.getTime());
+        if(this.wfhActivity.isWFHActivity(event.getActType())) {
+            this.personsActInfo.putIfAbsent(event.getPersonId(), new PersonActInfo(event.getPersonId()));
+
+            PersonActInfo personActInfo = this.personsActInfo.get(event.getPersonId());
+            personActInfo.acts.putIfAbsent(event.getActType(), new ActInfo(event.getActType())) ;
+            ActInfo actInfo = personActInfo.acts.get(event.getActType());
+            actInfo.startTime = event.getTime();
+        }
+    }
+
+    private void handleActsAndThrowMoneyEvents(){
+        for (PersonActInfo personActInfo: this.personsActInfo.values()) {
+            Map<String, ActInfo> actInfo = personActInfo.acts;
+            double penatlySum = 0;
+            for (ActInfo act : actInfo.values()) {
+                penatlySum += -(act.getDuration()/3600.) * planCalcScoreConfigGroup.getPerforming_utils_hr() * factor;
+            }
+            Event moneyEvent = new PersonMoneyEvent(24.0*3600., personActInfo.personId, penatlySum, TYPE, PARTNER);
+            events.processEvent(moneyEvent);
         }
     }
 
     @Override
-    public void handleEvent(PersonDepartureEvent event) {
-        //register here if the travel mode is WFHWalk
-        if (event.getLegMode().equalsIgnoreCase(this.WFHMode)){
-            personId2ActStartTime.put(event.getPersonId(), 0.);
+    public void notifyIterationEnds(IterationEndsEvent event) {
+        handleActsAndThrowMoneyEvents();
+    }
+
+    private class PersonActInfo {
+        Id<Person> personId;
+        Map<String, ActInfo> acts;
+
+        PersonActInfo(Id<Person> personId) {
+            this.personId = personId;
+            acts = new HashMap<>();
+        }
+    }
+
+    private class ActInfo {
+        String actType;
+
+        ActInfo(String type) {
+            this.actType = type;
+        }
+
+        double startTime = Double.NEGATIVE_INFINITY;
+        double endTime = Double.NEGATIVE_INFINITY;
+
+        double getDuration(){
+            if (Double.isFinite(startTime) && Double.isFinite(endTime)) {
+                return endTime - startTime;
+            } else if (Double.isInfinite(startTime) && Double.isFinite(endTime)) { // e.g. home
+                return endTime - 0.;
+            } else if (Double.isInfinite(endTime) && Double.isFinite(startTime)) { // last act
+                return 24*3600. - startTime;
+            } else throw new RuntimeException("Start and end times are infinite.");
         }
     }
 }

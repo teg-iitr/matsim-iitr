@@ -104,11 +104,11 @@ public class WFHCounterControlerListner implements IterationEndsListener, Shutdo
         for (PlanElement planElement : plan.getPlanElements()){
             if (planElement instanceof Leg) {
                 if (wfhAct) {
-                    LOGGER.warn("In a plan, a "+this.wfhActivity.getWfhActivityNamePrefix()+" is found which has a leg mode in it.");
+                    LOGGER.warn("In a plan, a work-from-home activity is found which also has a leg mode in it.");
                 }
             } else if (planElement instanceof Activity){
 
-                if (((Activity)planElement).getType().startsWith(this.wfhActivity.getWfhActivityNamePrefix())) {
+                if ( this.wfhActivity.isWFHActivity(((Activity)planElement).getType())) {
                     wfhAct= true;
                 }
             } else {

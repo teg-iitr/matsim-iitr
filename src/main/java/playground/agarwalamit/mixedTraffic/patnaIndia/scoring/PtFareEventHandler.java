@@ -63,7 +63,7 @@ public class PtFareEventHandler implements PersonDepartureEventHandler, Teleport
 		double fare = getPTFareFromDistance(dist);
 		double amount2pay = -fare;
 		
-		Event moneyEvent = new PersonMoneyEvent(event.getTime(), event.getPersonId(), amount2pay);
+		Event moneyEvent = new PersonMoneyEvent(event.getTime(), event.getPersonId(), amount2pay, "PT-Fare", "Operator");
 		events.processEvent(moneyEvent);
 	}
 	

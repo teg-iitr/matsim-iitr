@@ -18,7 +18,6 @@ import playground.agarwalamit.analysis.StatsWriter;
 import playground.agarwalamit.analysis.activity.departureArrival.FilteredDepartureTimeAnalyzer;
 import playground.agarwalamit.analysis.modalShare.ModalShareFromEvents;
 import playground.agarwalamit.analysis.modalShare.ModalShareFromPlans;
-import playground.agarwalamit.analysis.tripTime.ModalTravelTimeAnalyzer;
 import playground.agarwalamit.mixedTraffic.patnaIndia.policies.PatnaPolicyControler;
 import playground.agarwalamit.mixedTraffic.patnaIndia.router.FreeSpeedTravelTimeForBike;
 import playground.agarwalamit.mixedTraffic.patnaIndia.scoring.PtFareEventHandler;
@@ -39,7 +38,7 @@ import java.util.*;
 public class PatnaControler {
 
     public static final Logger logger = Logger.getLogger(PatnaControler.class);
-    private static final String wfh_walk = "WFHwalk";
+//    private static final String wfh_walk = "WFHwalk";
 
     public static void main(String[] args) {
 
@@ -51,7 +50,7 @@ public class PatnaControler {
         String ptDiscountFractionOffPkHr = "0.0";
         String adjustEducationalTripDepartureTimes = "false"; // this needs to better work out
         String addStayHomePlansForCalibration = "true";
-        double WFHPenaltyFactor = 0.1;
+        double WFHPenaltyFactor = 0.5;
 
         if(args.length>0) {
             outputDir = args[0];
@@ -188,26 +187,25 @@ public class PatnaControler {
                         }
                     });
 
-//            if (WFHPenaltyFactor!=0.) {
-//                WFHPricing wfhPricing = new WFHPricing(WFHPenaltyFactor, wfh_walk, actTypes );
-//                controler.addOverridingModule(new AbstractModule() {
-//                    @Override
-//                    public void install() {
-//                        addEventHandlerBinding().toInstance(wfhPricing);
-//                    }
-//                });
-//            }
-
+            if (WFHPenaltyFactor!=0.) {
+                WFHPricing wfhPricing = new WFHPricing(WFHPenaltyFactor);
+                controler.addOverridingModule(new AbstractModule() {
+                    @Override
+                    public void install() {
+                        addEventHandlerBinding().toInstance(wfhPricing);
+                        addControlerListenerBinding().toInstance(wfhPricing);
+                    }
+                });
+            }
 
             controler.addOverridingModule(new AbstractModule() {
                 @Override
                 public void install() {
-                    this.bind(WFHActivity.class).toInstance(new WFHActivity(wfh_name));
+                    this.bind(WFHActivity.class).toInstance(actType -> actType.startsWith(wfh_name));
                     this.bind(PersonFilter.class).toInstance(patnaPersonFilter);
                     this.addControlerListenerBinding().to(WFHCounterControlerListner.class);
                 }
             });
-
         }
 
         controler.run();
@@ -228,7 +226,7 @@ public class PatnaControler {
 //
 //        writeModalShareFromEvents(userGroup, scenario.getConfig().controler());
 
-        ModalShareFromPlans modalShareFromPlans = new ModalShareFromPlans(outputDir+runCase+".output_experienced_plans.xml.gz", userGroup, patnaPersonFilter);
+        ModalShareFromPlans modalShareFromPlans = new ModalShareFromPlans(outputDir+"/"+runCase+".output_experienced_plans.xml.gz", userGroup, patnaPersonFilter);
         modalShareFromPlans.run();
 
         modalShareFromPlans.writeResults(outputDir+"/analysis/urbanModalShare_outputExpPlans.txt");
