@@ -1,6 +1,7 @@
 package playground.agarwalamit.mixedTraffic.patnaIndia.covidWork;
 
 import com.google.inject.Inject;
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.*;
 import org.matsim.api.core.v01.events.handler.ActivityEndEventHandler;
@@ -8,26 +9,34 @@ import org.matsim.api.core.v01.events.handler.ActivityStartEventHandler;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.controler.events.AfterMobsimEvent;
 import org.matsim.core.controler.events.IterationEndsEvent;
 import org.matsim.core.controler.listener.AfterMobsimListener;
 import org.matsim.core.controler.listener.IterationEndsListener;
+import org.matsim.core.utils.io.IOUtils;
 import org.matsim.core.utils.misc.Time;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A linear penalty for work from home assuming that the working at home is not as good as in office. I think, ideally, it should be factored in with maringal utility of performing.
+ * A linear penalty for work from home assuming that the working at home is not as good as in office.
+ * I think, ideally, it should be factored in with maringal utility of performing.
  *
  * @author amit
  */
 public class WFHPricing implements ActivityStartEventHandler, ActivityEndEventHandler, AfterMobsimListener {
 
+    private final static Logger LOGGER = Logger.getLogger(WFHPricing.class);
+
     private final String TYPE = "PENALTY_WORKING_HOME";
     private final String PARTNER = "SELF";
     private final Map<Id<Person>,PersonActInfo> personsActInfo = new HashMap<>();
     private final double factor;
+    private BufferedWriter out;
 
     @Inject
     private PlanCalcScoreConfigGroup planCalcScoreConfigGroup;
@@ -35,8 +44,11 @@ public class WFHPricing implements ActivityStartEventHandler, ActivityEndEventHa
     private EventsManager events;
     @Inject
     private WFHActivity wfhActivity;
+    @Inject
+    private OutputDirectoryHierarchy controlerIO;
 
     public WFHPricing(double factor){
+        LOGGER.info("The WFH factor is "+ factor);
         this.factor = factor;
     }
 
@@ -74,7 +86,15 @@ public class WFHPricing implements ActivityStartEventHandler, ActivityEndEventHa
             Map<String, ActInfo> actInfo = personActInfo.acts;
             double penatlySum = 0;
             for (ActInfo act : actInfo.values()) {
-                penatlySum += -(act.getDuration()/3600.) * planCalcScoreConfigGroup.getPerforming_utils_hr() * factor;
+                double dur = act.getDuration();
+                double util_perf = planCalcScoreConfigGroup.getPerforming_utils_hr();
+                double ps = -(dur/3600.) * util_perf * factor;
+                try {
+                    this.out.write(personActInfo.personId+"\t"+act.actType+"\t"+dur+"\t"+util_perf+"\t"+ps+"\n");
+                } catch (IOException e) {
+                    throw new RuntimeException("Data is not written. "+e);
+                }
+                penatlySum += ps;
             }
             Event moneyEvent = new PersonMoneyEvent(24.0*3600., personActInfo.personId, penatlySum, TYPE, PARTNER);
             events.processEvent(moneyEvent);
@@ -83,7 +103,15 @@ public class WFHPricing implements ActivityStartEventHandler, ActivityEndEventHa
 
     @Override
     public void notifyAfterMobsim(AfterMobsimEvent event) {
-        handleActsAndThrowMoneyEvents();
+        this.out = IOUtils.getAppendingBufferedWriter(controlerIO.getIterationFilename(event.getIteration(), "_wfh_penalty"));
+       try {
+           this.out.write("personId\tact\tduration\tutil_performing\tpenalty\n");
+           handleActsAndThrowMoneyEvents();
+           this.out.close();
+       } catch (IOException e) {
+           throw new RuntimeException("Data is not written. "+e);
+       }
+
     }
 
     private class PersonActInfo {
@@ -109,7 +137,10 @@ public class WFHPricing implements ActivityStartEventHandler, ActivityEndEventHa
         double getDuration(){
             // wrapping of first and last acts are not important in linear penalty
             if (Double.isFinite(startTime) && Double.isFinite(endTime)) {
-                return endTime - startTime;
+                if (endTime > startTime) return endTime - startTime;
+                else {//wrapping up
+                    return endTime - 0. + Time.MIDNIGHT - startTime;
+                }
             } else if (Double.isInfinite(startTime) && Double.isFinite(endTime)) { // e.g. home
                 return endTime - 0.;
             } else if (Double.isInfinite(endTime) && Double.isFinite(startTime)) { // last act
