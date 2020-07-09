@@ -8,7 +8,9 @@ import org.matsim.api.core.v01.events.handler.ActivityStartEventHandler;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+import org.matsim.core.controler.events.AfterMobsimEvent;
 import org.matsim.core.controler.events.IterationEndsEvent;
+import org.matsim.core.controler.listener.AfterMobsimListener;
 import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.utils.misc.Time;
 
@@ -20,7 +22,7 @@ import java.util.Map;
  *
  * @author amit
  */
-public class WFHPricing implements ActivityStartEventHandler, ActivityEndEventHandler, IterationEndsListener {
+public class WFHPricing implements ActivityStartEventHandler, ActivityEndEventHandler, AfterMobsimListener {
 
     private final String TYPE = "PENALTY_WORKING_HOME";
     private final String PARTNER = "SELF";
@@ -80,7 +82,7 @@ public class WFHPricing implements ActivityStartEventHandler, ActivityEndEventHa
     }
 
     @Override
-    public void notifyIterationEnds(IterationEndsEvent event) {
+    public void notifyAfterMobsim(AfterMobsimEvent event) {
         handleActsAndThrowMoneyEvents();
     }
 
@@ -105,6 +107,7 @@ public class WFHPricing implements ActivityStartEventHandler, ActivityEndEventHa
         double endTime = Double.NEGATIVE_INFINITY;
 
         double getDuration(){
+            // wrapping of first and last acts are not important in linear penalty
             if (Double.isFinite(startTime) && Double.isFinite(endTime)) {
                 return endTime - startTime;
             } else if (Double.isInfinite(startTime) && Double.isFinite(endTime)) { // e.g. home
