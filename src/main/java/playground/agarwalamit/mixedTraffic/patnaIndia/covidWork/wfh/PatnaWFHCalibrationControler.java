@@ -1,8 +1,6 @@
-package playground.agarwalamit.mixedTraffic.patnaIndia.covidWork;
+package playground.agarwalamit.mixedTraffic.patnaIndia.covidWork.wfh;
 
 import org.apache.log4j.Logger;
-import org.hisrc.w3c.atom.v_1_0.Link;
-import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.*;
@@ -14,34 +12,28 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.utils.collections.Tuple;
-import org.matsim.core.utils.io.IOUtils;
-import org.matsim.core.utils.misc.OptionalTime;
-import org.matsim.core.utils.misc.Time;
 import playground.agarwalamit.analysis.StatsWriter;
 import playground.agarwalamit.analysis.activity.departureArrival.FilteredDepartureTimeAnalyzer;
-import playground.agarwalamit.analysis.modalShare.ModalShareFromEvents;
 import playground.agarwalamit.analysis.modalShare.ModalShareFromPlans;
+import playground.agarwalamit.mixedTraffic.patnaIndia.covidWork.ActivityDepartureAnalyzer;
+import playground.agarwalamit.mixedTraffic.patnaIndia.covidWork.MyChangeTripMode;
 import playground.agarwalamit.mixedTraffic.patnaIndia.policies.PatnaPolicyControler;
 import playground.agarwalamit.mixedTraffic.patnaIndia.router.FreeSpeedTravelTimeForBike;
 import playground.agarwalamit.mixedTraffic.patnaIndia.scoring.PtFareEventHandler;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.agarwalamit.utils.FileUtils;
-import playground.agarwalamit.utils.MapUtils;
 import playground.agarwalamit.utils.PersonFilter;
 import playground.agarwalamit.utils.VehicleUtils;
-
-import java.io.BufferedWriter;
 import java.io.File;
 import java.util.*;
 /**
  * @author amit
  */
 
-public class PatnaControler {
+public class PatnaWFHCalibrationControler {
 
-    public static final Logger logger = Logger.getLogger(PatnaControler.class);
+    public static final Logger logger = Logger.getLogger(PatnaWFHCalibrationControler.class);
 //    private static final String wfh_walk = "WFHwalk";
 
     public static void main(String[] args) {
@@ -49,10 +41,6 @@ public class PatnaControler {
         String outputDir =  "../../patna/output/";
         String inputConfig = "../../patna/input/configBaseCaseCtd_June2020.xml";
         String runCase = "calib_stayHomePlans";
-        String filterWorkTrips = "false";
-        String wardFile = "C:/Users/Amit Agarwal/Google Drive/iitr_gmail_drive/project_data/patna/wardFile/Wards.shp";
-        String ptDiscountFractionOffPkHr = "0.0";
-        String adjustEducationalTripDepartureTimes = "false"; // this needs to better work out
         String addStayHomePlansForCalibration = "true";
         double WFHPenaltyFactor = 0.5;
 
@@ -60,10 +48,6 @@ public class PatnaControler {
             outputDir = args[0];
             inputConfig = args[1];
             runCase = args[2];
-            wardFile = args[3];
-            filterWorkTrips = args[4];
-            ptDiscountFractionOffPkHr = args[5];
-            adjustEducationalTripDepartureTimes = args[6];
             addStayHomePlansForCalibration = args[7];
             WFHPenaltyFactor = Double.parseDouble(args[8]);
         }
@@ -86,17 +70,6 @@ public class PatnaControler {
         Scenario scenario = ScenarioUtils.loadScenario(config);
         PatnaPersonFilter patnaPersonFilter = new PatnaPersonFilter();
 
-        if(Boolean.parseBoolean(filterWorkTrips)) {
-            logger.info("Filtering work trips with removal probability of 0.5");
-            FilterDemandBasedOnTripPurpose filterDemandBasedOnTripPurpose = new FilterDemandBasedOnTripPurpose(scenario.getPopulation(),wardFile,"work");
-            filterDemandBasedOnTripPurpose.removePersons(0.5); // work on alternate days...
-        }
-        if(Boolean.parseBoolean(adjustEducationalTripDepartureTimes)) {
-            logger.info("Shifting departure time of educational trips with probability of 0.5. Half of the trips will be departed between 6 to 7 and rest of the trips between 12 to 13.");
-            FilterDemandBasedOnTripPurpose filterDemandBasedOnTripPurpose = new FilterDemandBasedOnTripPurpose(scenario.getPopulation(), wardFile, "educational");
-            filterDemandBasedOnTripPurpose.shiftDepartureTime(0.5, new Tuple<>(6*3600., 5400), new Tuple<>(12*3600., 5400)); //adjusting time between 6 to 7:30 and 12 to 13:30
-        }
-
         String vehiclesFile = new File(outputDir).getParentFile().getParentFile().getAbsolutePath()+"/input/output_vehicles.xml.gz";
         // following is required to extract only vehicle types and not vehicle info. Amit Nov 2016
         VehicleUtils.addVehiclesToScenarioFromVehicleFile(vehiclesFile, scenario);
@@ -109,30 +82,6 @@ public class PatnaControler {
 
         controler.getConfig().controler().setDumpDataAtEnd(true);
         controler.getConfig().strategy().setMaxAgentPlanMemorySize(10);
-
-//        controler.addOverridingModule(new AbstractModule() { // plotting modal share over iterations
-//            @Override
-//            public void install() {
-//                this.bind(ModalShareEventHandler.class);
-//                this.addControlerListenerBinding().to(ModalShareControlerListener.class);
-//
-//                this.bind(ModalTripTravelTimeHandler.class);
-//                this.addControlerListenerBinding().to(ModalTravelTimeControlerListener.class);
-//
-//                this.addControlerListenerBinding().to(MultiModeCountsControlerListener.class);
-//            }
-//        });
-
-        // adding pt fare system based on distance
-        if (Double.parseDouble(ptDiscountFractionOffPkHr)!=0.){
-            final DiscountedPTFareHandler discountedPTFareHandler = new DiscountedPTFareHandler(Double.parseDouble(ptDiscountFractionOffPkHr));
-            controler.addOverridingModule(new AbstractModule() {
-                @Override
-                public void install() {
-                    this.addEventHandlerBinding().toInstance(discountedPTFareHandler);
-                }
-            });
-        }
 
         controler.addOverridingModule(new AbstractModule() {
             @Override
@@ -160,7 +109,6 @@ public class PatnaControler {
             List<String> actTypes = List.of("work","educational");
             //work-from-home-strategy
             String wfh_name = "WorkFromHome";
-//            controler.addOverridingModule(new WorkFromHomeModule(wfh_name, wfh_walk, actTypes));
             scenario.getPopulation().getPersons().values()
                     .stream()
                     .filter(p->patnaPersonFilter.getUserGroupAsStringFromPersonId(p.getId()).equals(PatnaPersonFilter.PatnaUserGroup.urban.toString()))
@@ -171,7 +119,7 @@ public class PatnaControler {
                         if (actTypes.contains(secondAc.getType())) {
                             Activity firstAct = null ; // for location
                             Plan plan = scenario.getPopulation().getFactory().createPlan();
-                            plan.setType("WFH");
+                            plan.setType(WFHActivity.WFH_PLAN_TYPE);
 
                             for (PlanElement pe : p.getSelectedPlan().getPlanElements()) {
                                 if (pe instanceof Activity) {
@@ -225,12 +173,6 @@ public class PatnaControler {
         // write some default analysis
         String userGroup = PatnaPersonFilter.PatnaUserGroup.urban.toString();
 
-//        ModalTravelTimeAnalyzer mtta = new ModalTravelTimeAnalyzer(outputEventsFile, userGroup, patnaPersonFilter);
-//        mtta.run();
-//        mtta.writeResults(outputDir+"/analysis/modalTravelTime_"+userGroup+".txt");
-//
-//        writeModalShareFromEvents(userGroup, scenario.getConfig().controler());
-
         ModalShareFromPlans modalShareFromPlans = new ModalShareFromPlans(outputDir+"/"+runCase+".output_experienced_plans.xml.gz", userGroup, patnaPersonFilter);
         modalShareFromPlans.run();
 
@@ -245,55 +187,5 @@ public class PatnaControler {
         lmtdd.writeResults(outputDir+"/analysis/departureCounts"+".txt");
 
         StatsWriter.run(outputDir, runCase);
-    }
-
-    public static void writeModalShareFromEvents(String userGroup, ControlerConfigGroup controlerConfigGroup){
-        String outputDir = controlerConfigGroup.getOutputDirectory();
-        String runCase = controlerConfigGroup.getRunId();
-
-        int firstIteration = controlerConfigGroup.getFirstIteration();
-        String firstIterationEventsFile = outputDir+"/ITERS/it."+ firstIteration +"/"+runCase+"."+ firstIteration +".events.xml.gz";
-        String outputEventsFile = outputDir+"/"+runCase+".output_events.xml.gz";
-
-        ModalShareFromEvents msc_firstItEvents = new ModalShareFromEvents(firstIterationEventsFile, userGroup, new PatnaPersonFilter());
-        msc_firstItEvents.run();
-
-        ModalShareFromEvents msc_outputEvents = new ModalShareFromEvents(outputEventsFile, userGroup, new PatnaPersonFilter());
-        msc_outputEvents.run();
-
-        try(BufferedWriter writer = IOUtils.getBufferedWriter(outputDir+"/analysis/modalShareFromEvents_"+userGroup+".txt")) {
-            writeResutls(msc_firstItEvents, writer, firstIteration);
-            writeResutls(msc_outputEvents, writer, controlerConfigGroup.getLastIteration());
-        } catch (Exception e) {
-            throw new RuntimeException("Data can not be written to file. Reason - "+e);
-        }
-    }
-
-    public static void writeResutls(ModalShareFromEvents msc_outputEvents, BufferedWriter writer, int iteration) {
-        try{
-            writer.write("iteration\t");
-            for(String str:msc_outputEvents.getModeToNumberOfLegs().keySet()){
-                writer.write(str+"\t");
-            }
-            writer.write("total \t");
-            writer.newLine();
-
-            writer.write(iteration + "\t");
-            for (String str : msc_outputEvents.getModeToNumberOfLegs().keySet()) { // write Absolute No Of Legs
-                writer.write(msc_outputEvents.getModeToNumberOfLegs().get(str) + "\t");
-            }
-            writer.write(MapUtils.intValueSum(msc_outputEvents.getModeToNumberOfLegs()) + "\t");
-            writer.newLine();
-
-            writer.write(iteration + "\t");
-            for (String str : msc_outputEvents.getModeToPercentOfLegs().keySet()) { // write percentage no of legs
-                writer.write(msc_outputEvents.getModeToPercentOfLegs().get(str) + "\t");
-            }
-            writer.write(MapUtils.doubleValueSum(msc_outputEvents.getModeToPercentOfLegs()) + "\t");
-            writer.newLine();
-        }
-        catch (Exception e) {
-            throw new RuntimeException("Data can not be written to file. Reason - "+e);
-        }
     }
 }

@@ -1,4 +1,4 @@
-package playground.agarwalamit.mixedTraffic.patnaIndia.covidWork;
+package playground.agarwalamit.mixedTraffic.patnaIndia.covidWork.wfh;
 
 import org.apache.log4j.Logger;;
 import org.matsim.api.core.v01.population.*;
@@ -99,23 +99,27 @@ public class WFHCounterControlerListner implements IterationEndsListener, Shutdo
     }
 
     private boolean isWFHPlan(Plan plan) {
-        // no plea element should have leg
-        boolean wfhAct = false;
-        for (PlanElement planElement : plan.getPlanElements()){
-            if (planElement instanceof Leg) {
-                if (wfhAct) {
-                    LOGGER.warn("In a plan, a work-from-home activity is found which also has a leg mode in it.");
-                }
-            } else if (planElement instanceof Activity){
+        // no plen element should have leg
+        if (plan.getType()!= null) {
+            return WFHActivity.isWFHPlan(plan.getType());
+        } else {
+            boolean wfhAct = false;
+            for (PlanElement planElement : plan.getPlanElements()){
+                if (planElement instanceof Leg) {
+                    if (wfhAct) {
+                        LOGGER.warn("In a plan, a work-from-home activity is found which also has a leg mode in it.");
+                    }
+                } else if (planElement instanceof Activity){
 
-                if ( this.wfhActivity.isWFHActivity(((Activity)planElement).getType())) {
-                    wfhAct= true;
+                    if ( this.wfhActivity.isWFHActivity(((Activity)planElement).getType())) {
+                        wfhAct= true;
+                    }
+                } else {
+                    throw new RuntimeException("Unrecognized plan element... "+planElement);
                 }
-            } else {
-                throw new RuntimeException("Unrecognized plan element... "+planElement);
             }
+            return wfhAct;
         }
-        return wfhAct;
     }
 
     @Override

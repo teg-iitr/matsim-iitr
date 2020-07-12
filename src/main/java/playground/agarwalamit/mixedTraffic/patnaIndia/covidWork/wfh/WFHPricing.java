@@ -1,4 +1,4 @@
-package playground.agarwalamit.mixedTraffic.patnaIndia.covidWork;
+package playground.agarwalamit.mixedTraffic.patnaIndia.covidWork.wfh;
 
 import com.google.inject.Inject;
 import org.apache.log4j.Logger;
@@ -11,9 +11,7 @@ import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.controler.events.AfterMobsimEvent;
-import org.matsim.core.controler.events.IterationEndsEvent;
 import org.matsim.core.controler.listener.AfterMobsimListener;
-import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.core.utils.misc.Time;
 

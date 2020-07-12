@@ -1,4 +1,4 @@
-package playground.agarwalamit.mixedTraffic.patnaIndia.covidWork;
+package playground.agarwalamit.mixedTraffic.patnaIndia.covidWork.wfh;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Activity;
