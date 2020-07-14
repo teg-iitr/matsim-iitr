@@ -1,8 +1,12 @@
 package playground.agarwalamit.mixedTraffic.patnaIndia.covidWork;
 
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.scenario.ScenarioUtils;
 import playground.agarwalamit.analysis.StatsWriter;
 import playground.agarwalamit.analysis.activity.departureArrival.FilteredDepartureTimeAnalyzer;
+import playground.agarwalamit.analysis.congestion.ExperiencedDelayAnalyzer;
 import playground.agarwalamit.analysis.modalShare.ModalShareFromEvents;
 import playground.agarwalamit.analysis.modalShare.ModalShareFromPlans;
 import playground.agarwalamit.analysis.tripTime.ModalTravelTimeAnalyzer;
@@ -15,14 +19,22 @@ import playground.agarwalamit.utils.LoadMyScenarios;
 public class ModeAnalysis {
 
     public static void main(String[] args) {
-        String outputDir = "C:/Users/Amit Agarwal/Documents/patna/calib/";
-        String runCases [] = new String [] {"calb2020_holes_WFH_39"};
+        String outputDir = "C:/Users/Amit Agarwal/Documents/patna/";
+        String runCases [] = new String [] {"run2020_4"};
 
         for (String rc : runCases) {
             String outputExperiencedPlans = outputDir+"/"+rc+"/"+rc+".output_experienced_plans.xml.gz";
+            String networkFile = outputDir+"/"+rc+"/"+rc+".output_network.xml.gz";
+            String configFile = outputDir+"/"+rc+"/"+rc+".output_config.xml";
+            String vehiclesFile = outputDir+"/"+rc+"/"+rc+".output_vehicles.xml.gz";
             String eventsFile = outputDir+"/"+rc+"/"+rc+".output_events.xml.gz";
 
-//            Scenario scenario = LoadMyScenarios.loadScenarioFromPlans(outputExperiencedPlans);
+            Config config = ConfigUtils.loadConfig(configFile);
+            config.plans().setInputFile(outputExperiencedPlans);
+            config.network().setInputFile(networkFile);
+            config.vehicles().setVehiclesFile(vehiclesFile);
+
+            Scenario scenario = ScenarioUtils.loadScenario(config);
 
 //            ModalShareFromEvents msc_firstItEvents = new ModalShareFromEvents(eventsFile, PatnaPersonFilter.PatnaUserGroup.urban.toString(), new PatnaPersonFilter());
 //            msc_firstItEvents.run();
@@ -43,12 +55,15 @@ public class ModeAnalysis {
 
 //            StatsWriter.run(outputDir+"/"+rc+"/", rc);
 
-            ModalTravelTimeAnalyzer mtta = new ModalTravelTimeAnalyzer(eventsFile,  PatnaPersonFilter.PatnaUserGroup.urban.toString(), new PatnaPersonFilter());
-            mtta.run();
+//            ModalTravelTimeAnalyzer mtta = new ModalTravelTimeAnalyzer(eventsFile,  PatnaPersonFilter.PatnaUserGroup.urban.toString(), new PatnaPersonFilter());
+//            mtta.run();
+
+            ExperiencedDelayAnalyzer experiencedDelayAnalyzer = new ExperiencedDelayAnalyzer(eventsFile, scenario,
+                    36, PatnaPersonFilter.PatnaUserGroup.urban.toString(), new PatnaPersonFilter());
+            experiencedDelayAnalyzer.run();
+            experiencedDelayAnalyzer.writeResults(outputDir+"/analysis/timebin2delay.txt");
+            experiencedDelayAnalyzer.writePersonTripInfo(outputDir+"/analysis/personTripTimeDelayInfo.txt");
         }
-
-
-
 
     }
 }

@@ -84,13 +84,11 @@ public class ExperiencedDelayAnalyzer {
 	
 	public void writeResults(String outputFile) {
 		SortedMap<Double, Double> data = getTimeBin2Delay();
-		BufferedWriter writer = IOUtils.getBufferedWriter(outputFile);
-		try {
-			writer.write("\timebin \t delayInMin \n");
+		try (BufferedWriter writer = IOUtils.getBufferedWriter(outputFile)){
+			writer.write("\ttimebin\tdelayInMin\n");
 			for(double d : data.keySet()){
 				writer.write(d+"\t"+(data.get(d)/60)+"\n");
 			}
-			writer.close();
 		} catch (IOException e) {
 			throw new RuntimeException("Data is not written to file. Reason "+ e);
 		}
@@ -139,8 +137,8 @@ public class ExperiencedDelayAnalyzer {
 		try (BufferedWriter writer = IOUtils.getBufferedWriter(outputFile)){
 			writer.write("personId\tdepartureTime\ttravelMode\ttravelTime\tdelay\n");
 			for (ExperiencedDelayHandler.PersonDelayInfo v : this.congestionHandler.getPersonId2TripInfo().values()) {
-				writer.write(v.getPersonId() + "\t");
 				for (ExperiencedDelayHandler.TripDelayInfo tdI : v.getTripInfo()){
+					writer.write(v.getPersonId() + "\t");
 					writer.write(tdI.getDepartureTime()+"\t");
 					writer.write(tdI.getTravelMode()+"\t");
 					writer.write(tdI.getTravelTime()+"\t");

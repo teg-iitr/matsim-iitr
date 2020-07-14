@@ -138,6 +138,8 @@ PersonDepartureEventHandler, PersonArrivalEventHandler, VehicleEntersTrafficEven
 
 	@Override
 	public void handleEvent(PersonDepartureEvent event) {
+		if( ! mode2Speed.containsKey(event.getLegMode())) return;
+
 		Id<Link> linkId = event.getLinkId();
 		Id<Person> personId = event.getPersonId();
 		
@@ -150,8 +152,6 @@ PersonDepartureEventHandler, PersonArrivalEventHandler, VehicleEntersTrafficEven
 			throw new RuntimeException("Person is already on the link. Cannot happen.");
 		} 
 
-		if( ! mode2Speed.containsKey(event.getLegMode())) return;
-		
 		Map<Id<Person>, Double> personId2LinkEnterTime = this.linkId2PersonIdLinkEnterTime.get(linkId);
 		double derivedLinkEnterTime = event.getTime()+1-this.linkId2FreeSpeedLinkTravelTime.get(linkId).get(event.getLegMode());
 		personId2LinkEnterTime.put(personId, derivedLinkEnterTime);
@@ -218,7 +218,11 @@ PersonDepartureEventHandler, PersonArrivalEventHandler, VehicleEntersTrafficEven
 
 	@Override
 	public void handleEvent(PersonArrivalEvent event) {
+
+		if( ! mode2Speed.containsKey(event.getLegMode())) return;
+
 		if(this.transitDriverPersons.remove(event.getPersonId())) return;
+
 		this.linkId2PersonIdLinkEnterTime.get(event.getLinkId()).remove(event.getPersonId());
 
 		this.personId2DelayInfo.get(event.getPersonId()).getCurrentTripDelay().setTravelTime(event.getTime());
