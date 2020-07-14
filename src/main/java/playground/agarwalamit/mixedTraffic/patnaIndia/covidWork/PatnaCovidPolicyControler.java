@@ -18,6 +18,7 @@ import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.io.IOUtils;
 import playground.agarwalamit.analysis.StatsWriter;
 import playground.agarwalamit.analysis.activity.departureArrival.FilteredDepartureTimeAnalyzer;
+import playground.agarwalamit.analysis.congestion.ExperiencedDelayAnalyzer;
 import playground.agarwalamit.analysis.modalShare.ModalShareFromEvents;
 import playground.agarwalamit.analysis.modalShare.ModalShareFromPlans;
 import playground.agarwalamit.analysis.tripTime.ModalTravelTimeAnalyzer;
@@ -26,6 +27,7 @@ import playground.agarwalamit.mixedTraffic.patnaIndia.scoring.PtFareEventHandler
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.agarwalamit.utils.FileUtils;
+import playground.agarwalamit.utils.LoadMyScenarios;
 import playground.agarwalamit.utils.MapUtils;
 import playground.agarwalamit.utils.VehicleUtils;
 import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
@@ -65,7 +67,6 @@ public class PatnaCovidPolicyControler {
             filterWorkTrips = args[4];
             ptDiscountFractionOffPkHr = args[5];
             adjustEducationalTripDepartureTimes = args[6];
-
         }
 
         outputDir = outputDir+runCase;
@@ -167,6 +168,12 @@ public class PatnaCovidPolicyControler {
         String outputEventsFile = outputDir+"/"+runCase+".output_events.xml.gz";
         // write some default analysis
         String userGroup = PatnaPersonFilter.PatnaUserGroup.urban.toString();
+
+        ExperiencedDelayAnalyzer experiencedDelayAnalyzer = new ExperiencedDelayAnalyzer(outputEventsFile, scenario,
+                (int) (scenario.getConfig().qsim().getEndTime().seconds()/3600.), userGroup, patnaPersonFilter);
+        experiencedDelayAnalyzer.run();
+        experiencedDelayAnalyzer.writeResults(outputDir+"/analysis/timebin2delay.txt");
+        experiencedDelayAnalyzer.writePersonTripInfo(outputDir+"/analysis/personTripTimeDelayInfo.txt");
 
         ModalTravelTimeAnalyzer mtta = new ModalTravelTimeAnalyzer(outputEventsFile, userGroup, patnaPersonFilter);
         mtta.run();

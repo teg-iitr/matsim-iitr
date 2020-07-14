@@ -134,4 +134,21 @@ public class ExperiencedDelayAnalyzer {
 		if(implV3.getTotalDelay()/3600. !=this.congestionHandler.getTotalDelayInHours())
 			throw new RuntimeException("Total Delays are not equal using two methods; values are "+implV3.getTotalDelay()/3600+","+this.congestionHandler.getTotalDelayInHours());
 	}
+
+	public void writePersonTripInfo(String outputFile){
+		try (BufferedWriter writer = IOUtils.getBufferedWriter(outputFile)){
+			writer.write("personId\tdepartureTime\ttravelMode\ttravelTime\tdelay\n");
+			for (ExperiencedDelayHandler.PersonDelayInfo v : this.congestionHandler.getPersonId2TripInfo().values()) {
+				writer.write(v.getPersonId() + "\t");
+				for (ExperiencedDelayHandler.TripDelayInfo tdI : v.getTripInfo()){
+					writer.write(tdI.getDepartureTime()+"\t");
+					writer.write(tdI.getTravelMode()+"\t");
+					writer.write(tdI.getTravelTime()+"\t");
+					writer.write(tdI.getDelay()+"\n");
+				}
+			}
+		} catch (IOException e) {
+			throw new RuntimeException("Data is not written to file. Reason "+ e);
+		}
+	}
 }

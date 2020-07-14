@@ -123,8 +123,6 @@ PersonDepartureEventHandler, PersonArrivalEventHandler, VehicleEntersTrafficEven
 	}
 	
 	private boolean isHandlingEvent(Id<Person> personId, Id<Link> linkId){
-		boolean isHandlingEvent = false;
-
 		if (this.af!=null) { // area filtering
 			Link link = network.getLinks().get(linkId);
 			if(! this.af.isLinkInsideShape(link)) return false;
@@ -143,7 +141,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler, VehicleEntersTrafficEven
 				return true;
 			}
 		}
-		return isHandlingEvent;
+		return false;
 	}
 
 	@Override
@@ -167,6 +165,10 @@ PersonDepartureEventHandler, PersonArrivalEventHandler, VehicleEntersTrafficEven
 		return delegate.getTime2linkIdLeaveCount();
 	}
 
+	public Map<Id<Person>, ExperiencedDelayHandler.PersonDelayInfo> getPersonId2TripInfo(){
+		return this.delegate.getPersonId2TripInfo();
+	}
+
 	@Override
 	public void handleEvent(VehicleLeavesTrafficEvent event) {
 		veh2DriverDelegate.handleEvent(event);
@@ -183,4 +185,5 @@ PersonDepartureEventHandler, PersonArrivalEventHandler, VehicleEntersTrafficEven
 	public void handleEvent(TransitDriverStartsEvent event) {
 		delegate.handleEvent(event);
 	}
+
 }

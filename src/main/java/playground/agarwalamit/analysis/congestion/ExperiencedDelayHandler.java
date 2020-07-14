@@ -67,6 +67,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler, VehicleEntersTrafficEven
 	private final Map<Id<Link>, Map<Id<Person>, Double>> linkId2PersonIdLinkEnterTime = new HashMap<>();
 	private final Map<Id<Link>, Map<String,Double>> linkId2FreeSpeedLinkTravelTime = new HashMap<>();
 	private final Map<Double, Map<Id<Link>, Integer>> timebin2LinkIdLeaveCount = new HashMap<>();
+	private final Map<Id<Person>, PersonDelayInfo> personId2DelayInfo = new HashMap<>();
 	private double totalDelay;
 	private double warnCount = 0;
 	
@@ -91,15 +92,15 @@ PersonDepartureEventHandler, PersonArrivalEventHandler, VehicleEntersTrafficEven
 		if (mode2Speed.isEmpty()) {
 			mode2Speed.put(TransportMode.car, Double.MAX_VALUE);
 		}
-		
+
 		for (Link link : network.getLinks().values()) {
 			this.linkId2PersonIdLinkEnterTime.put(link.getId(), new HashMap<>());
 			Map<String,Double> mode2freeSpeedTime = new HashMap<>();
 			for (String mode : mode2Speed.keySet()) {
-				Double freeSpeedLinkTravelTime = Double.valueOf( Math.floor(link.getLength()/ Math.min( link.getFreespeed(), mode2Speed.get(mode)) ) + 1 );
+				Double freeSpeedLinkTravelTime = Math.floor(link.getLength() / Math.min(link.getFreespeed(), mode2Speed.get(mode))) + 1;
 				mode2freeSpeedTime.put(mode, freeSpeedLinkTravelTime);
 			}
-			this.linkId2FreeSpeedLinkTravelTime.put(link.getId(), mode2freeSpeedTime);	
+			this.linkId2FreeSpeedLinkTravelTime.put(link.getId(), mode2freeSpeedTime);
 		}
 
 		for(int i =0;i<noOfTimeBins;i++){
@@ -109,14 +110,14 @@ PersonDepartureEventHandler, PersonArrivalEventHandler, VehicleEntersTrafficEven
 
 			for(Person person : scenario.getPopulation().getPersons().values()){
 				Map<Id<Person>, Double>	delayForPerson = this.timebin2PersonId2Delay.get(this.timeBinSize*(i+1));
-				delayForPerson.put(person.getId(), Double.valueOf(0.));
+				delayForPerson.put(person.getId(), 0.);
 			}
 
 			for(Link link : network.getLinks().values()) {
 				Map<Id<Link>, Double>	delayOnLink = this.timebin2LinkId2Delay.get(this.timeBinSize*(i+1));
-				delayOnLink.put(link.getId(), Double.valueOf(0.));
+				delayOnLink.put(link.getId(), 0.);
 				Map<Id<Link>, Integer> countOnLink = this.timebin2LinkIdLeaveCount.get(this.timeBinSize*(i+1));
-				countOnLink.put(link.getId(), Integer.valueOf(0));
+				countOnLink.put(link.getId(), 0);
 			}
 		}
 	}
@@ -132,6 +133,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler, VehicleEntersTrafficEven
 		this.transitDriverPersons.clear();
 		LOG.info("Resetting linkLeave counter to " + this.timebin2LinkIdLeaveCount);
 		this.personId2Mode.clear();
+		this.personId2DelayInfo.clear();
 	}
 
 	@Override
@@ -154,11 +156,14 @@ PersonDepartureEventHandler, PersonArrivalEventHandler, VehicleEntersTrafficEven
 		double derivedLinkEnterTime = event.getTime()+1-this.linkId2FreeSpeedLinkTravelTime.get(linkId).get(event.getLegMode());
 		personId2LinkEnterTime.put(personId, derivedLinkEnterTime);
 		this.linkId2PersonIdLinkEnterTime.put(linkId, personId2LinkEnterTime);
+
+		this.personId2DelayInfo.putIfAbsent(event.getPersonId(), new PersonDelayInfo(event.getPersonId()));
+		this.personId2DelayInfo.get(event.getPersonId()).getTripInfo().add(new TripDelayInfo(event.getLegMode(), event.getTime()));
 	}
 
 	@Override
 	public void handleEvent(LinkLeaveEvent event) {
-		Double time = event.getTime(); 
+		double time = event.getTime();
 		if(time ==0.0) time = this.timeBinSize;
 		double endOfTimeInterval = 0.0;
 		endOfTimeInterval = Math.ceil(time/this.timeBinSize)*this.timeBinSize;
@@ -169,8 +174,7 @@ PersonDepartureEventHandler, PersonArrivalEventHandler, VehicleEntersTrafficEven
 		
 		if (this.transitDriverPersons.contains(personId)) return;
 
-		double actualTravelTime = event.getTime()-this.linkId2PersonIdLinkEnterTime.get(linkId).get(personId);
-		this.linkId2PersonIdLinkEnterTime.get(linkId).remove(personId);
+		double actualTravelTime = event.getTime()-this.linkId2PersonIdLinkEnterTime.get(linkId).remove(personId);
 		double freeSpeedTime = this.linkId2FreeSpeedLinkTravelTime.get(linkId).get(personId2Mode.get(personId));
 
 		double currentDelay =	actualTravelTime-freeSpeedTime;
@@ -181,13 +185,15 @@ PersonDepartureEventHandler, PersonArrivalEventHandler, VehicleEntersTrafficEven
 		Map<Id<Link>, Double> delayOnLink = this.timebin2LinkId2Delay.get(endOfTimeInterval);
 		Map<Id<Link>, Integer> countTotal = this.timebin2LinkIdLeaveCount.get(endOfTimeInterval);
 
-		delayForPerson.put(personId, Double.valueOf(currentDelay+delayForPerson.get(personId)));
+		delayForPerson.put(personId, currentDelay + delayForPerson.get(personId));
 
-		delayOnLink.put(linkId, Double.valueOf(currentDelay+delayOnLink.get(linkId)));
+		delayOnLink.put(linkId, currentDelay + delayOnLink.get(linkId));
+
+		this.personId2DelayInfo.get(personId).getCurrentTripDelay().addDelay(currentDelay);
 
 		double countsSoFar = countTotal.get(linkId);
 		double newValue = countsSoFar + 1.;
-		countTotal.put(linkId, Integer.valueOf((int) newValue));
+		countTotal.put(linkId, (int) newValue);
 	}
 
 	@Override
@@ -214,6 +220,8 @@ PersonDepartureEventHandler, PersonArrivalEventHandler, VehicleEntersTrafficEven
 	public void handleEvent(PersonArrivalEvent event) {
 		if(this.transitDriverPersons.remove(event.getPersonId())) return;
 		this.linkId2PersonIdLinkEnterTime.get(event.getLinkId()).remove(event.getPersonId());
+
+		this.personId2DelayInfo.get(event.getPersonId()).getCurrentTripDelay().setTravelTime(event.getTime());
 	}
 
 	public SortedMap<Double, Map<Id<Person>, Double>> getDelayPerPersonAndTimeInterval(){
@@ -245,5 +253,67 @@ PersonDepartureEventHandler, PersonArrivalEventHandler, VehicleEntersTrafficEven
 	@Override
 	public void handleEvent(TransitDriverStartsEvent event) {
 		transitDriverPersons.add(event.getDriverId());
+	}
+
+	public Map<Id<Person>, PersonDelayInfo> getPersonId2TripInfo(){
+		return this.personId2DelayInfo;
+	}
+
+	public static class PersonDelayInfo {
+		private final Id<Person> pId;
+		final List<TripDelayInfo> tripInfo;
+		public PersonDelayInfo(Id<Person> personId){
+			this.pId = personId;
+			this.tripInfo = new ArrayList<>();
+		}
+
+		public List<TripDelayInfo> getTripInfo(){
+			return this.tripInfo;
+		}
+
+		TripDelayInfo getCurrentTripDelay(){
+			return this.tripInfo.get(this.tripInfo.size()-1);
+		}
+
+		public Id<Person> getPersonId(){
+			return this.pId;
+		}
+	}
+
+	public static class TripDelayInfo {
+		final String travelMode;
+		final double departureTime;
+
+		double travelTime = 0.;
+		double delay = 0;
+
+		public TripDelayInfo(String travelMode, double departureTime) {
+			this.travelMode = travelMode;
+			this.departureTime = departureTime;
+		}
+
+		void setTravelTime(double arrivalTime) {
+			this.travelTime = arrivalTime - this.departureTime;
+		}
+
+		void addDelay(double delayPerLink){
+			this.delay+=delayPerLink;
+		}
+
+		public double getDepartureTime(){
+			return this.departureTime;
+		}
+
+		public double getDelay(){
+			return this.delay;
+		}
+
+		public double getTravelTime(){
+			return this.travelTime;
+		}
+
+		public String getTravelMode(){
+			return this.travelMode;
+		}
 	}
 }

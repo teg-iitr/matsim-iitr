@@ -5,6 +5,7 @@ import playground.agarwalamit.analysis.StatsWriter;
 import playground.agarwalamit.analysis.activity.departureArrival.FilteredDepartureTimeAnalyzer;
 import playground.agarwalamit.analysis.modalShare.ModalShareFromEvents;
 import playground.agarwalamit.analysis.modalShare.ModalShareFromPlans;
+import playground.agarwalamit.analysis.tripTime.ModalTravelTimeAnalyzer;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter;
 import playground.agarwalamit.utils.LoadMyScenarios;
 /**
@@ -40,7 +41,10 @@ public class ModeAnalysis {
 //            lmtdd.run();
 //            lmtdd.writeResults(outputDir+"/"+rc+"/analysis/departureCounts"+".txt");
 
-            StatsWriter.run(outputDir+"/"+rc+"/", rc);
+//            StatsWriter.run(outputDir+"/"+rc+"/", rc);
+
+            ModalTravelTimeAnalyzer mtta = new ModalTravelTimeAnalyzer(eventsFile,  PatnaPersonFilter.PatnaUserGroup.urban.toString(), new PatnaPersonFilter());
+            mtta.run();
         }
 
 
