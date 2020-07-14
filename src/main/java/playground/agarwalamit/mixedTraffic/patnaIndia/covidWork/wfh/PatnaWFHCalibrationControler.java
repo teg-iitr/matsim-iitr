@@ -14,9 +14,9 @@ import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import playground.agarwalamit.analysis.StatsWriter;
 import playground.agarwalamit.analysis.activity.departureArrival.FilteredDepartureTimeAnalyzer;
-import playground.agarwalamit.analysis.modalShare.ModalShareFromPlans;
 import playground.agarwalamit.mixedTraffic.patnaIndia.covidWork.ActivityDepartureAnalyzer;
 import playground.agarwalamit.mixedTraffic.patnaIndia.covidWork.MyChangeTripMode;
+import playground.agarwalamit.mixedTraffic.patnaIndia.covidWork.PatnaCovidPolicyControler;
 import playground.agarwalamit.mixedTraffic.patnaIndia.policies.PatnaPolicyControler;
 import playground.agarwalamit.mixedTraffic.patnaIndia.router.FreeSpeedTravelTimeForBike;
 import playground.agarwalamit.mixedTraffic.patnaIndia.scoring.PtFareEventHandler;
@@ -48,8 +48,8 @@ public class PatnaWFHCalibrationControler {
             outputDir = args[0];
             inputConfig = args[1];
             runCase = args[2];
-            addStayHomePlansForCalibration = args[7];
-            WFHPenaltyFactor = Double.parseDouble(args[8]);
+            addStayHomePlansForCalibration = args[3];//7
+            WFHPenaltyFactor = Double.parseDouble(args[4]);//8
         }
 
         outputDir = outputDir+runCase;
@@ -173,10 +173,11 @@ public class PatnaWFHCalibrationControler {
         // write some default analysis
         String userGroup = PatnaPersonFilter.PatnaUserGroup.urban.toString();
 
-        ModalShareFromPlans modalShareFromPlans = new ModalShareFromPlans(outputDir+"/"+runCase+".output_experienced_plans.xml.gz", userGroup, patnaPersonFilter);
-        modalShareFromPlans.run();
+        PatnaCovidPolicyControler.writeModalShareFromEvents(userGroup, scenario.getConfig().controler());
 
-        modalShareFromPlans.writeResults(outputDir+"/analysis/urbanModalShare_outputExpPlans.txt");
+//        ModalShareFromPlans modalShareFromPlans = new ModalShareFromPlans(outputDir+"/"+runCase+".output_experienced_plans.xml.gz", userGroup, patnaPersonFilter);
+//        modalShareFromPlans.run();
+//        modalShareFromPlans.writeResults(outputDir+"/analysis/urbanModalShare_outputExpPlans.txt");
 
         ActivityDepartureAnalyzer analyzer = new ActivityDepartureAnalyzer(outputEventsFile);
         analyzer.run();

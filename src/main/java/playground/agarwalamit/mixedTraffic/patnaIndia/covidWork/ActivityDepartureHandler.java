@@ -38,10 +38,13 @@ public class ActivityDepartureHandler implements ActivityStartEventHandler, Pers
         }
 
         Integer timeBin = personId2DepartureTimeBin.remove(event.getPersonId());
-        if ( timeBin == null) throw  new RuntimeException("Person Id "+event.getPersonId()+ " is not departed yet. Aborting...");
-
-        int countSoFar = timebin2count.getOrDefault(timeBin,0); // getOrDefault for timeBin>24h
-        timebin2count.put(timeBin, countSoFar+1);
+        if ( timeBin == null) {
+            // person wont depart for work-home-type plans.
+//            throw  new RuntimeException("Person Id "+event.getPersonId()+ " is not departed yet. Aborting...");
+        } else {
+            int countSoFar = timebin2count.getOrDefault(timeBin,0); // getOrDefault for timeBin>24h
+            timebin2count.put(timeBin, countSoFar+1);
+        }
     }
 
     @Override

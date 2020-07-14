@@ -3,10 +3,6 @@ package playground.agarwalamit.mixedTraffic.patnaIndia.covidWork;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.ControlerConfigGroup;
@@ -25,16 +21,12 @@ import playground.agarwalamit.analysis.activity.departureArrival.FilteredDepartu
 import playground.agarwalamit.analysis.modalShare.ModalShareFromEvents;
 import playground.agarwalamit.analysis.modalShare.ModalShareFromPlans;
 import playground.agarwalamit.analysis.tripTime.ModalTravelTimeAnalyzer;
-import playground.agarwalamit.mixedTraffic.patnaIndia.covidWork.wfh.WFHActivity;
-import playground.agarwalamit.mixedTraffic.patnaIndia.covidWork.wfh.WFHCounterControlerListner;
-import playground.agarwalamit.mixedTraffic.patnaIndia.covidWork.wfh.WFHPricing;
 import playground.agarwalamit.mixedTraffic.patnaIndia.router.FreeSpeedTravelTimeForBike;
 import playground.agarwalamit.mixedTraffic.patnaIndia.scoring.PtFareEventHandler;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.agarwalamit.utils.FileUtils;
 import playground.agarwalamit.utils.MapUtils;
-import playground.agarwalamit.utils.PersonFilter;
 import playground.agarwalamit.utils.VehicleUtils;
 import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
@@ -45,15 +37,14 @@ import playground.vsp.cadyts.multiModeCadyts.MultiModeCountsControlerListener;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.util.HashSet;
-import java.util.List;
 
 /**
  * @author amit
  */
 
-public class PatnaPolicyControler {
+public class PatnaCovidPolicyControler {
 
-    public static final Logger logger = Logger.getLogger(PatnaPolicyControler.class);
+    public static final Logger logger = Logger.getLogger(PatnaCovidPolicyControler.class);
 //    private static final String wfh_walk = "WFHwalk";
 
     public static void main(String[] args) {
