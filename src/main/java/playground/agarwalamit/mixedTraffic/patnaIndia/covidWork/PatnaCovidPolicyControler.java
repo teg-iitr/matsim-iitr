@@ -39,6 +39,7 @@ import playground.vsp.cadyts.multiModeCadyts.MultiModeCountsControlerListener;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.util.HashSet;
+import java.util.stream.Collectors;
 
 /**
  * @author amit
@@ -58,6 +59,7 @@ public class PatnaCovidPolicyControler {
         String wardFile = "C:/Users/Amit Agarwal/Google Drive/iitr_gmail_drive/project_data/patna/wardFile/Wards.shp";
         String ptDiscountFractionOffPkHr = "0.0";
         String adjustEducationalTripDepartureTimes = "false"; // this needs to better work out
+        boolean addBikeTrack = false;
 
         if(args.length>0) {
             outputDir = args[0];
@@ -67,6 +69,7 @@ public class PatnaCovidPolicyControler {
             filterWorkTrips = args[4];
             ptDiscountFractionOffPkHr = args[5];
             adjustEducationalTripDepartureTimes = args[6];
+            addBikeTrack = Boolean.parseBoolean(args[7]);
         }
 
         outputDir = outputDir+runCase;
@@ -84,7 +87,17 @@ public class PatnaCovidPolicyControler {
         config.travelTimeCalculator().setAnalyzedModes((new HashSet<>(PatnaUtils.ALL_MAIN_MODES)));
         config.vspExperimental().setVspDefaultsCheckingLevel(VspExperimentalConfigGroup.VspDefaultsCheckingLevel.warn);
 
+        if( addBikeTrack) config.network().setInputFile("networkWithOptimizedConnectors_halfLength.xml");
+
         Scenario scenario = ScenarioUtils.loadScenario(config);
+
+        if ( addBikeTrack ) {
+            // remove the connectors on which freespeed is only 0.01 m/s
+            scenario.getNetwork().getLinks().values().stream().filter(
+                    link -> link.getId().toString().startsWith(PatnaUtils.BIKE_TRACK_CONNECTOR_PREFIX) && link.getFreespeed() == 0.01
+            ).collect(Collectors.toList()).forEach(link -> scenario.getNetwork().removeLink(link.getId()));
+        }
+
         PatnaPersonFilter patnaPersonFilter = new PatnaPersonFilter();
 
         if(Boolean.parseBoolean(filterWorkTrips)) {
@@ -95,7 +108,7 @@ public class PatnaCovidPolicyControler {
         if(Boolean.parseBoolean(adjustEducationalTripDepartureTimes)) {
             logger.info("Shifting departure time of educational trips with probability of 0.5. Half of the trips will be departed between 6 to 7 and rest of the trips between 12 to 13.");
             FilterDemandBasedOnTripPurpose filterDemandBasedOnTripPurpose = new FilterDemandBasedOnTripPurpose(scenario.getPopulation(), wardFile, "educational");
-            filterDemandBasedOnTripPurpose.shiftDepartureTime(0.5, new Tuple<>(6*3600., 5400), new Tuple<>(12*3600., 5400)); //adjusting time between 6 to 7:30 and 12 to 13:30
+            filterDemandBasedOnTripPurpose.shiftDepartureTime(0.5, new Tuple<>(5*3600., 7200), new Tuple<>(12*3600., 7200)); //adjusting time between 6 to 7:30 and 12 to 13:30
         }
 
         String vehiclesFile = new File(outputDir).getParentFile().getParentFile().getAbsolutePath()+"/input/output_vehicles.xml.gz";
@@ -170,7 +183,7 @@ public class PatnaCovidPolicyControler {
         String userGroup = PatnaPersonFilter.PatnaUserGroup.urban.toString();
 
         ExperiencedDelayAnalyzer experiencedDelayAnalyzer = new ExperiencedDelayAnalyzer(outputEventsFile, scenario,
-                (int) (scenario.getConfig().qsim().getEndTime().seconds()/3600.), userGroup, patnaPersonFilter);
+                (int) (scenario.getConfig().qsim().getEndTime().seconds()/3600.));
         experiencedDelayAnalyzer.run();
         experiencedDelayAnalyzer.writeResults(outputDir+"/analysis/timebin2delay.txt");
         experiencedDelayAnalyzer.writePersonTripInfo(outputDir+"/analysis/personTripTimeDelayInfo.txt");

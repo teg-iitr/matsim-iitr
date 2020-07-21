@@ -12,8 +12,8 @@ import java.util.List;
 public class WFHPlansCleaner {
 
     public static void main(String[] args) {
-        String plansFile = "C:/Users/Amit Agarwal/Documents/patna/calib/calb2020_holes_WFH_62/calb2020_holes_WFH_62.output_plans.xml.gz";
-        String outputPlans = "C:/Users/Amit Agarwal/Documents/patna/input/run62_WFH_calibrated_output_Plans.xml.gz";
+        String plansFile = "C:/Users/Amit Agarwal/Documents/patna/calib/calb2020_holes_WFH_77/calb2020_holes_WFH_77.output_plans.xml.gz";
+        String outputPlans = "C:/Users/Amit Agarwal/Documents/patna/input/run77_WFH_calibrated_output_Plans.xml.gz";
         Scenario scenario = LoadMyScenarios.loadScenarioFromPlans(plansFile);
         new WFHPlansCleaner().process(scenario.getPopulation());
 

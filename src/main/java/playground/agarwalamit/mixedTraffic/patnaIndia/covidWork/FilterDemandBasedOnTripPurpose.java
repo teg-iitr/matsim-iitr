@@ -72,7 +72,10 @@ public class FilterDemandBasedOnTripPurpose {
             ShiftPersonDepartureTime(morningShiftStart_RandomPeriod, personsMorningShift);
             ShiftPersonDepartureTime(afternoonShiftStart_RandomPeriod, personsAfternoonShift);
 
-            logger.info("Ward "+wardNumber+" had "+persons.size()+" persons of which "+personsMorningShift.size()+" persons are departing between 6 to 7:30 and "+personsAfternoonShift.size()+" are departing between 12 to 13:30.");
+            logger.info("Ward "+wardNumber+" had "+persons.size()+" persons of which "+personsMorningShift.size()+" persons are departing between "
+                    +morningShiftStart_RandomPeriod.getFirst()+" to "+morningShiftStart_RandomPeriod.getFirst()+morningShiftStart_RandomPeriod.getSecond()/3600.
+                    +" and "+personsAfternoonShift.size()+" are departing between "+afternoonShiftStart_RandomPeriod.getSecond()
+                    +" to "+afternoonShiftStart_RandomPeriod.getFirst()+afternoonShiftStart_RandomPeriod.getSecond()/3600.+".");
         }
     }
 
@@ -83,7 +86,7 @@ public class FilterDemandBasedOnTripPurpose {
                 Activity home = ((Activity) plan.getPlanElements().get(0));
                 //TODO one can think of excluding persons who are departing before 6.
                 Activity purpose = ((Activity) plan.getPlanElements().get(2)); //education
-                double duration = purpose.getEndTime().seconds() - home.getEndTime().seconds();
+                double duration = Math.max(purpose.getEndTime().seconds() - home.getEndTime().seconds(), 6.*3600.); //duration capped by 6 hours
                 double newActEndTime = afternoonShiftStart_RandomPeriod.getFirst() + random.nextInt(afternoonShiftStart_RandomPeriod.getSecond());
                 home.setEndTime(newActEndTime);
                 purpose.setEndTime(newActEndTime + duration);
