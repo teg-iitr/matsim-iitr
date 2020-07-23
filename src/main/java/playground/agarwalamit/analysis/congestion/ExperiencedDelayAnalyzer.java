@@ -85,7 +85,7 @@ public class ExperiencedDelayAnalyzer {
 	public void writeResults(String outputFile) {
 		SortedMap<Double, Double> data = getTimeBin2Delay();
 		try (BufferedWriter writer = IOUtils.getBufferedWriter(outputFile)){
-			writer.write("\ttimebin\tdelayInMin\n");
+			writer.write("timebin\tdelayInMin\n");
 			for(double d : data.keySet()){
 				writer.write(d+"\t"+(data.get(d)/60)+"\n");
 			}

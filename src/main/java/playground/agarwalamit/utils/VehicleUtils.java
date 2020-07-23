@@ -40,7 +40,7 @@ public final class VehicleUtils {
         new MatsimVehicleReader(vehs).readFile(vehiclesFile);
 
         for(VehicleType vt : vehs.getVehicleTypes().values()) {
-
+            vt.setNetworkMode(vt.getId().toString());
             scenario.getVehicles().addVehicleType(vt);
         }
     }

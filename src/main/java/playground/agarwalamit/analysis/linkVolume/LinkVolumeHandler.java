@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.google.inject.internal.asm.$ByteVector;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.LinkLeaveEvent;
@@ -38,6 +40,7 @@ import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
 import playground.agarwalamit.mixedTraffic.MixedTrafficVehiclesUtils;
+import playground.agarwalamit.utils.PersonFilter;
 
 /**
  * @author amit
@@ -53,23 +56,37 @@ public class LinkVolumeHandler implements LinkLeaveEventHandler, VehicleEntersTr
 	private final Map<Id<Person>, String> person2mode = new HashMap<>();
 	private final Map<String,Double> mode2pcu = new HashMap<>();
 	
-	public LinkVolumeHandler () {
-		this(null);
+	public 	LinkVolumeHandler () {
+		this(null, null, null);
 	}
-	
-	public LinkVolumeHandler (final String VehiclesFile) {
+
+	private final PersonFilter personFilter;
+	private final String userGroup2Filter;
+
+	public LinkVolumeHandler(PersonFilter personFilter,String userGroup2Filter, String vehiclesFile){
+		this.personFilter = personFilter;
+		this.userGroup2Filter = userGroup2Filter;
+
+		if (this.personFilter!=null && this.userGroup2Filter==null) {
+			throw new RuntimeException("No person filter is assigned.");
+		}
+
 		LOG.info("Starting volume count on links.");
 		reset(0);
-		if (VehiclesFile!=null) {
+		if (vehiclesFile!=null) {
 			Vehicles vehs = VehicleUtils.createVehiclesContainer();
 //			VehicleReaderV1 vr = new VehicleReaderV1(vehs);
 			MatsimVehicleReader vr = new MatsimVehicleReader(vehs);
-			vr.readFile(VehiclesFile);
+			vr.readFile(vehiclesFile);
 
 			vehs.getVehicleTypes().values().forEach(
 					vehicleType -> mode2pcu.put(vehicleType.getId().toString(), vehicleType.getPcuEquivalents())
 			);
 		}
+	}
+	
+	public LinkVolumeHandler (final String vehiclesFile) {
+		this(null, null, vehiclesFile);
 	}
 	
 	@Override
@@ -83,14 +100,23 @@ public class LinkVolumeHandler implements LinkLeaveEventHandler, VehicleEntersTr
 	private int getSlot(final double time){
 		return (int)time/3600;
 	}
+
 	@Override
 	public void handleEvent(LinkLeaveEvent event) {
-		String mode = person2mode.get( this.delegate.getDriverOfVehicle(event.getVehicleId()) );
+		Id<Person> personId = this.delegate.getDriverOfVehicle(event.getVehicleId());
+
+		if(this.personFilter!=null && !this.personFilter.getUserGroupAsStringFromPersonId(personId).equals(this.userGroup2Filter)) {
+			return;
+		}
+
+		String mode = person2mode.get( personId );
 		if(mode==null) {
 			throw new RuntimeException("No mode found for person "+ this.delegate.getDriverOfVehicle(event.getVehicleId()) +" while leaving link. Event : "+event.toString()+". Should not happen.");
 		}
-		double pcu = mode2pcu.isEmpty() ? MixedTrafficVehiclesUtils.getPCU(mode) : mode2pcu.get(mode);
-		
+		double pcu;
+		mode2pcu.putIfAbsent(mode,  MixedTrafficVehiclesUtils.getPCU(mode));
+		pcu = mode2pcu.get(mode);
+
 		int slotInt = getSlot(event.getTime());
 		Map<Integer, Double> volsTime = new HashMap<>();
 		Map<Integer, Double> pcuVolsTime = new HashMap<>();

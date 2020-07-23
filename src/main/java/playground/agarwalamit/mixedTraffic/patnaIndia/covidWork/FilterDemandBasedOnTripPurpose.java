@@ -51,7 +51,7 @@ public class FilterDemandBasedOnTripPurpose {
 //        filterDemandBasedOnTripPurpose.removePersons(removalProbability);
 
         FilterDemandBasedOnTripPurpose filterDemandBasedOnTripPurpose = new FilterDemandBasedOnTripPurpose(plansFile, wardFile, "educational");
-        filterDemandBasedOnTripPurpose.shiftDepartureTime(0.5, new Tuple<>(6*3600.,5400), new Tuple<>(12*3600.,5400)); //adjusting time between 6 to 7 and 12 to 13
+        filterDemandBasedOnTripPurpose.shiftDepartureTime(0.5, new Tuple<>(5*3600.,5400), new Tuple<>(12*3600.,5400)); //adjusting time between 6 to 7 and 12 to 13
     }
 
     public void shiftDepartureTime(double shiftingProbability, Tuple<Double, Integer> morningShiftStart_RandomPeriod, Tuple<Double, Integer> afternoonShiftStart_RandomPeriod){

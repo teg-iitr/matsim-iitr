@@ -54,7 +54,7 @@ public class PatnaCovidPolicyControler {
 
         String outputDir =  "../../patna/output/";
         String inputConfig = "../../patna/input/configBaseCaseCtd_June2020.xml";
-        String runCase = "calib_stayHomePlans";
+        String runCase = "somte_test";
         String filterWorkTrips = "false";
         String wardFile = "C:/Users/Amit Agarwal/Google Drive/iitr_gmail_drive/project_data/patna/wardFile/Wards.shp";
         String ptDiscountFractionOffPkHr = "0.0";
@@ -108,7 +108,7 @@ public class PatnaCovidPolicyControler {
         if(Boolean.parseBoolean(adjustEducationalTripDepartureTimes)) {
             logger.info("Shifting departure time of educational trips with probability of 0.5. Half of the trips will be departed between 6 to 7 and rest of the trips between 12 to 13.");
             FilterDemandBasedOnTripPurpose filterDemandBasedOnTripPurpose = new FilterDemandBasedOnTripPurpose(scenario.getPopulation(), wardFile, "educational");
-            filterDemandBasedOnTripPurpose.shiftDepartureTime(0.5, new Tuple<>(5*3600., 7200), new Tuple<>(12*3600., 7200)); //adjusting time between 6 to 7:30 and 12 to 13:30
+            filterDemandBasedOnTripPurpose.shiftDepartureTime(0.5, new Tuple<>(5*3600., 3600*3), new Tuple<>(12*3600., 3600*3)); //adjusting time between 6 to 7:30 and 12 to 13:30
         }
 
         String vehiclesFile = new File(outputDir).getParentFile().getParentFile().getAbsolutePath()+"/input/output_vehicles.xml.gz";
@@ -183,29 +183,29 @@ public class PatnaCovidPolicyControler {
         String userGroup = PatnaPersonFilter.PatnaUserGroup.urban.toString();
 
         ExperiencedDelayAnalyzer experiencedDelayAnalyzer = new ExperiencedDelayAnalyzer(outputEventsFile, scenario,
-                (int) (scenario.getConfig().qsim().getEndTime().seconds()/3600.));
+                (int) (scenario.getConfig().qsim().getEndTime().seconds()/3600.),userGroup, patnaPersonFilter);
         experiencedDelayAnalyzer.run();
-        experiencedDelayAnalyzer.writeResults(outputDir+"/analysis/timebin2delay.txt");
-        experiencedDelayAnalyzer.writePersonTripInfo(outputDir+"/analysis/personTripTimeDelayInfo.txt");
+        experiencedDelayAnalyzer.writeResults(outputDir+"/analysis/"+runCase+"_timebin2delay.txt");
+        experiencedDelayAnalyzer.writePersonTripInfo(outputDir+"/analysis/"+runCase+"_personTripTimeDelayInfo.txt");
 
         ModalTravelTimeAnalyzer mtta = new ModalTravelTimeAnalyzer(outputEventsFile, userGroup, patnaPersonFilter);
         mtta.run();
-        mtta.writeResults(outputDir+"/analysis/modalTravelTime_"+userGroup+".txt");
+        mtta.writeResults(outputDir+"/analysis/"+runCase+"_modalTravelTime_"+userGroup+".txt");
 
         writeModalShareFromEvents(userGroup, scenario.getConfig().controler());
 
         ModalShareFromPlans modalShareFromPlans = new ModalShareFromPlans(outputDir+"/"+runCase+".output_experienced_plans.xml.gz", userGroup, patnaPersonFilter);
         modalShareFromPlans.run();
 
-        modalShareFromPlans.writeResults(outputDir+"/analysis/urbanModalShare_outputExpPlans.txt");
+        modalShareFromPlans.writeResults(outputDir+"/analysis/"+runCase+"_urbanModalShare_outputExpPlans.txt");
 
         ActivityDepartureAnalyzer analyzer = new ActivityDepartureAnalyzer(outputEventsFile);
         analyzer.run();
-        analyzer.writeResults(outputDir+"/analysis/activityDepartureCoutners.txt");
+        analyzer.writeResults(outputDir+"/analysis/"+runCase+"_activityDepartureCoutners.txt");
 
         FilteredDepartureTimeAnalyzer lmtdd = new FilteredDepartureTimeAnalyzer(outputEventsFile, 3600.);
         lmtdd.run();
-        lmtdd.writeResults(outputDir+"/analysis/departureCounts"+".txt");
+        lmtdd.writeResults(outputDir+"/analysis/"+runCase+"_departureCounts"+".txt");
 
         StatsWriter.run(outputDir, runCase);
     }

@@ -19,8 +19,8 @@ import playground.agarwalamit.utils.LoadMyScenarios;
 public class ModeAnalysis {
 
     public static void main(String[] args) {
-        String outputDir = "C:/Users/Amit Agarwal/Documents/patna/";
-        String runCases [] = new String [] {"run2020_4"};
+        String outputDir = "C:/Users/Amit Agarwal/Documents/patna/policy/";
+        String runCases [] = new String [] {"run2020_9"};
 
         for (String rc : runCases) {
             String outputExperiencedPlans = outputDir+"/"+rc+"/"+rc+".output_experienced_plans.xml.gz";
@@ -59,10 +59,10 @@ public class ModeAnalysis {
 //            mtta.run();
 
             ExperiencedDelayAnalyzer experiencedDelayAnalyzer = new ExperiencedDelayAnalyzer(eventsFile, scenario,
-                    36, PatnaPersonFilter.PatnaUserGroup.urban.toString(), new PatnaPersonFilter());
+                    30, PatnaPersonFilter.PatnaUserGroup.urban.toString(), new PatnaPersonFilter());
             experiencedDelayAnalyzer.run();
-            experiencedDelayAnalyzer.writeResults(outputDir+"/analysis/timebin2delay.txt");
-            experiencedDelayAnalyzer.writePersonTripInfo(outputDir+"/analysis/personTripTimeDelayInfo.txt");
+            experiencedDelayAnalyzer.writeResults(outputDir+"/"+rc+"/analysis/"+rc+"_timebin2delay.txt");
+            experiencedDelayAnalyzer.writePersonTripInfo(outputDir+"/"+rc+"/analysis/"+rc+"_personTripTimeDelayInfo.txt");
         }
 
     }

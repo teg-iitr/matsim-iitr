@@ -51,13 +51,14 @@ public class DiscountedPTFareHandler implements PersonDepartureEventHandler, Tel
 
     private final Map<Id<Person>,String> person2mode = new HashMap<>();
     //peak is 7 to 10 and 15 to 18; in the form of 1 to 24.
-    private final List<Integer> discountedHours = List.of(7,11,15,19); // i.e. 6 to 7, 10 to 11, 14-15 and 18 to 19
+    private final List<Integer> discountedHours_1 = List.of(7,11,15,19); // i.e. 6 to 7, 10 to 11, 14-15 and 18 to 19
+    private final List<Integer> discountedHours_2 = List.of(6,12,14,20); // i.e. 5 to 6, 11 to 12, 13-14 and 19 to 20
     private final double discount ; //10%
     private final double timebinsize = 3600.;
 
     DiscountedPTFareHandler(double discountOffPkHr){
         discount = discountOffPkHr;
-        logger.info("Reducing the PT fare by "+discount+" factor for hours "+discountedHours);
+        logger.info("Reducing the PT fare by "+discount+" factor for hours "+ discountedHours_1);
     }
 
     DiscountedPTFareHandler(){
@@ -83,8 +84,10 @@ public class DiscountedPTFareHandler implements PersonDepartureEventHandler, Tel
         int timebin = (int)  Math.ceil(event.getTime()/timebinsize);
         if(timebin==0) timebin=1;
 
-        if (discountedHours.contains(timebin)) {
+        if (discountedHours_1.contains(timebin)) { // e.g. close to peak hour 10%
            amount2pay = amount2pay*(1.-discount);
+        } else if (discountedHours_2.contains(timebin)) { // next time bin, 20% discount
+            amount2pay = amount2pay* (1 - 2*discount );
         }
 
         Event moneyEvent = new PersonMoneyEvent(event.getTime(), event.getPersonId(), amount2pay, "ptFare","operator");
