@@ -137,24 +137,16 @@ public class PatnaCovidPolicyControler {
             }
         });
 
-        // adding pt fare system based on distance
-        if (Double.parseDouble(ptDiscountFractionOffPkHr)!=0.){
-            final DiscountedPTFareHandler discountedPTFareHandler = new DiscountedPTFareHandler(Double.parseDouble(ptDiscountFractionOffPkHr));
-            controler.addOverridingModule(new AbstractModule() {
-                @Override
-                public void install() {
-                    this.addEventHandlerBinding().toInstance(discountedPTFareHandler);
-                }
-            });
-        }
-
+        // adding pt fare system based on distance; a value of zero would result in normal PT fare system.
+        final DiscountedPTFareHandler discountedPTFareHandler = new DiscountedPTFareHandler(Double.parseDouble(ptDiscountFractionOffPkHr));
         controler.addOverridingModule(new AbstractModule() {
             @Override
             public void install() {
-                this.addEventHandlerBinding().to(PtFareEventHandler.class);
-                this.addPlanStrategyBinding(DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode).toProvider(MyChangeTripMode.class);
+                this.addEventHandlerBinding().toInstance(discountedPTFareHandler);
             }
         });
+
+
         // for above make sure that util_dist and monetary dist rate for pt are zero.
         PlanCalcScoreConfigGroup.ModeParams mp = controler.getConfig().planCalcScore().getModes().get("pt");
         mp.setMarginalUtilityOfDistance(0.0);
