@@ -18,9 +18,9 @@ public class PatnaLinkVolumePCUWriter {
 
     public static void main(String[] args) {
 
-        String outputDir = "C:/Users/Amit Agarwal/Documents/patna/policy/";
-        String baseCase = "run2020_1";
-        String policyCase = "run2020_9";
+        String outputDir = "C:\\Users\\Amit Agarwal\\Google Drive\\iitr_gmail_drive\\project_data\\patna\\results\\policy\\";
+        String baseCase = "run2020_17_bau";
+        String policyCase = "run2020_18";
 
         PatnaPersonFilter personFilter = new PatnaPersonFilter();
         String ug = PatnaPersonFilter.PatnaUserGroup.urban.toString();

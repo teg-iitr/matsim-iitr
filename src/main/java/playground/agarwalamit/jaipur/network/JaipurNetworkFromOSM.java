@@ -27,7 +27,7 @@ import playground.agarwalamit.utils.geometry.GeometryUtils;
 public class JaipurNetworkFromOSM {
 
     /**
-     * following files are available at https://github.com/amit2011/jaipur-data
+     * following files are available at https://github.com/teg-iitr/jaipur-data
      */
     private static final String boundaryShapeFile = "..\\..\\jaipur-data\\shapeFile\\arcGIS\\jaipur_boundary\\District_Boundary.shp";
     private static final String inputOSMFile = "..\\..\\jaipur-data\\osm\\extracted\\jaipur_bb-box.osm";

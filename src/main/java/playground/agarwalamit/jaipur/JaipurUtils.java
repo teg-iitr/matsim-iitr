@@ -8,7 +8,7 @@ package playground.agarwalamit.jaipur;
  */
 public final class JaipurUtils {
 	
-	public static final String EPSG = "EPSG:32643";
+	public static final String EPSG = "EPSG:32643"; // same is used for Delhi.
 	
 
 }
