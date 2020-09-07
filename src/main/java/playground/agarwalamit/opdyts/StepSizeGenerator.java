@@ -20,7 +20,10 @@
 package playground.agarwalamit.opdyts;
 
 import javax.inject.Inject;
-import org.matsim.contrib.opdyts.utils.OpdytsConfigGroup;
+
+import org.matsim.contrib.opdyts.OpdytsConfigGroup;
+import org.matsim.contrib.opdyts.experimental.OpdytsExperimentalConfigGroup;
+
 
 /**
  * It simply changes the step size based on transition number and a parameter ('beta') [0.5,1.0] (from GF).
@@ -34,8 +37,8 @@ public class StepSizeGenerator {
     private double beta = 1.0; // TODO: make it configurable via opdytsConfigGroup.
 
     @Inject
-    public StepSizeGenerator(OpdytsConfigGroup opdytsConfigGroup) {
-        this.stepSize = opdytsConfigGroup.getDecisionVariableStepSize();
+    public StepSizeGenerator(OpdytsExperimentalConfigGroup opdytsConfigGroup) {
+//        this.stepSize = opdytsConfigGroup.getDecisionVariableStepSize();
     }
 
     public double getStepSize(int opdytsTransition) {

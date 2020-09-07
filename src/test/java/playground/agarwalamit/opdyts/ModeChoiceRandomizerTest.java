@@ -19,13 +19,6 @@
 
 package playground.agarwalamit.opdyts;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.hamcrest.core.Is;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -33,13 +26,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.opdyts.utils.OpdytsConfigGroup;
+import org.matsim.contrib.opdyts.OpdytsConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
 import playground.agarwalamit.utils.NumberUtils;
+
+import java.util.*;
 
 /**
  * Created by amit on 27.11.17.
@@ -89,7 +84,7 @@ public class ModeChoiceRandomizerTest {
         }
 
         OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(config, OpdytsConfigGroup.class);
-        opdytsConfigGroup.setDecisionVariableStepSize(stepSize);
+//        opdytsConfigGroup.setDecisionVariableStepSize(stepSize);
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
         ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable(

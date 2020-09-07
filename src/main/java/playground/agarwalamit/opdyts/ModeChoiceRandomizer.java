@@ -19,20 +19,20 @@
 
 package playground.agarwalamit.opdyts;
 
+import floetteroed.opdyts.DecisionVariableRandomizer;
+import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
+import org.matsim.contrib.opdyts.OpdytsConfigGroup;
+import org.matsim.contrib.opdyts.experimental.OpdytsExperimentalConfigGroup;
+import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+import org.matsim.core.gbl.MatsimRandom;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
-import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.TransportMode;
-import org.matsim.contrib.opdyts.OpdytsIterationWrapper;
-import org.matsim.contrib.opdyts.utils.OpdytsConfigGroup;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
-import org.matsim.core.gbl.MatsimRandom;
-
-import floetteroed.opdyts.DecisionVariableRandomizer;
 
 /**
  * @author amit
@@ -57,19 +57,19 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
     private final String subPopName;
     private final OpdytsScenario opdytsScenario;
 
-    private final OpdytsConfigGroup opdytsConfigGroup;
+    private final OpdytsExperimentalConfigGroup opdytsConfigGroup;
     private final Collection<String> considerdModes ;
 
     private final ASCRandomizerStyle ascRandomizerStyle;
 
     private final StepSizeGenerator stepSizeGenerator;
-    private OpdytsIterationWrapper opdytsIterationWrapper;
+//    private OpdytsIterationWrapper opdytsIterationWrapper;
 
     public ModeChoiceRandomizer(final Scenario scenario, final RandomizedUtilityParametersChoser randomizedUtilityParametersChoser,
              final OpdytsScenario opdytsScenario, final String subPopName, final Collection<String> considerdModes, final ASCRandomizerStyle ascRandomizerStyle) {
 
         this.scenario = scenario;
-        this.opdytsConfigGroup = (OpdytsConfigGroup) scenario.getConfig().getModules().get(OpdytsConfigGroup.GROUP_NAME);
+        this.opdytsConfigGroup = (OpdytsExperimentalConfigGroup) scenario.getConfig().getModules().get(OpdytsExperimentalConfigGroup.GROUP_NAME);
 
 //        this.rnd = new Random(opdytsConfigGroup.getRandomSeedToRandomizeDecisionVariable());
         //        this.rnd = new Random(4711);
@@ -104,13 +104,13 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
         this(scenario,randomizedUtilityParametersChoser, opdytsScenario, subPopName, considerdModes, ASCRandomizerStyle.grid_randomVariation);
     }
 
-    public void updateStepSizeEveryIteration(OpdytsIterationWrapper opdytsIterationWrapper) {
-        this.opdytsIterationWrapper = opdytsIterationWrapper;
-        log.warn("The step size will be updated based on the opdyts iteration number (e.g. stepSize * (1/ItNr)).");
-    }
+//    public void updateStepSizeEveryIteration(OpdytsIterationWrapper opdytsIterationWrapper) {
+//        this.opdytsIterationWrapper = opdytsIterationWrapper;
+//        log.warn("The step size will be updated based on the opdyts iteration number (e.g. stepSize * (1/ItNr)).");
+//    }
 
     @Override
-	public List<ModeChoiceDecisionVariable> newRandomVariations(ModeChoiceDecisionVariable decisionVariable) {
+	public List<ModeChoiceDecisionVariable> newRandomVariations(ModeChoiceDecisionVariable decisionVariable, int iteration) {
         List<ModeChoiceDecisionVariable> result ;
 
         final PlanCalcScoreConfigGroup oldScoringConfig = decisionVariable.getScoreConfig();
@@ -158,10 +158,10 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
         return result;
     }
 
-    private double getStepSize(){
-        if (this.opdytsIterationWrapper==null) return this.opdytsConfigGroup.getDecisionVariableStepSize();
-        else return this.stepSizeGenerator.getStepSize(this.opdytsIterationWrapper.getIteration());
-    }
+//    private double getStepSize(){
+//        if (this.opdytsIterationWrapper==null) return this.opdytsConfigGroup.getDecisionVariableStepSize();
+//        else return this.stepSizeGenerator.getStepSize(this.opdytsIterationWrapper.getIteration());
+//    }
 
     private void createGridCombinations(final PlanCalcScoreConfigGroup.ScoringParameterSet oldParameterSet, final List<PlanCalcScoreConfigGroup> allCombinations, final List<String> remainingModes, final double randomVariationOfStepSize) {
         // create combinations with one mode and call createGridCombinations again
@@ -174,13 +174,15 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
             } else {
                 PlanCalcScoreConfigGroup.ModeParams sourceModeParam = copyOfModeParam(oldParameterSet.getModes().get(mode));
                 {// positive: since this mode is never updated before, update existing one only
-                    double newASC =  sourceModeParam.getConstant() + getStepSize() * randomVariationOfStepSize;
+//                    double newASC =  sourceModeParam.getConstant() + getStepSize() * randomVariationOfStepSize;
+                    double newASC =  sourceModeParam.getConstant() + opdytsConfigGroup.getDecisionVariableStepSize();
                     allCombinations.parallelStream().forEach(e -> e.getOrCreateScoringParameters(this.subPopName).getOrCreateModeParams(mode).setConstant(newASC) );
                 }
                 { // negative: since this mode is already updated above, first copy existing ones, update values and then add them to main collection
                     List<PlanCalcScoreConfigGroup> tempCombinations = new ArrayList<>();
                     allCombinations.parallelStream().forEach(e -> tempCombinations.add(copyOfPlanCalcScore(e.getScoringParameters(this.subPopName))));
-                    double newASC =  sourceModeParam.getConstant() - getStepSize() * randomVariationOfStepSize;
+                    double newASC =  sourceModeParam.getConstant() + opdytsConfigGroup.getDecisionVariableStepSize();
+//                            - getStepSize() * randomVariationOfStepSize;
                     tempCombinations.parallelStream().forEach(e -> e.getOrCreateScoringParameters(this.subPopName).getOrCreateModeParams(mode).setConstant(newASC) );
                     allCombinations.addAll(tempCombinations);
                 }
@@ -197,14 +199,16 @@ public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<Mo
             { // positive
                 PlanCalcScoreConfigGroup configGroupWithStartingModeParams = copyOfPlanCalcScore(oldParameterSet);
                 PlanCalcScoreConfigGroup.ModeParams sourceModeParam = configGroupWithStartingModeParams.getOrCreateScoringParameters(this.subPopName).getModes().get(mode);
-                double newASC =  sourceModeParam.getConstant() + getStepSize() * randomVariationOfStepSize;
+                double newASC =  sourceModeParam.getConstant() + opdytsConfigGroup.getDecisionVariableStepSize() ;
+//                        + getStepSize() * randomVariationOfStepSize;
                 sourceModeParam.setConstant(newASC);
                 allCombinations.add(configGroupWithStartingModeParams);
             }
             { // negative
                 PlanCalcScoreConfigGroup configGroupWithStartingModeParams = copyOfPlanCalcScore(oldParameterSet);
                 PlanCalcScoreConfigGroup.ModeParams sourceModeParam = configGroupWithStartingModeParams.getOrCreateScoringParameters(this.subPopName).getModes().get(mode);
-                double newASC =  sourceModeParam.getConstant() - getStepSize() *  randomVariationOfStepSize;
+                double newASC =  sourceModeParam.getConstant() + opdytsConfigGroup.getDecisionVariableStepSize();
+//                        - getStepSize() *  randomVariationOfStepSize;
                 sourceModeParam.setConstant(newASC);
                 allCombinations.add(configGroupWithStartingModeParams);
             }

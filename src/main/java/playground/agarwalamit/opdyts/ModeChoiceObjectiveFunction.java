@@ -19,27 +19,17 @@
 
 package playground.agarwalamit.opdyts;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 import com.google.inject.Inject;
-import floetteroed.opdyts.ObjectiveFunction;
-import floetteroed.opdyts.SimulatorState;
 import org.apache.log4j.Logger;
 import org.matsim.analysis.TransportPlanningMainModeIdentifier;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.api.core.v01.population.*;
 import org.matsim.contrib.analysis.kai.DataMap;
 import org.matsim.contrib.analysis.kai.Databins;
-import org.matsim.contrib.opdyts.MATSimState;
+import org.matsim.contrib.opdyts.microstate.MATSimState;
+import org.matsim.contrib.opdyts.objectivefunction.MATSimObjectiveFunction;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.router.MainModeIdentifier;
@@ -48,12 +38,14 @@ import org.matsim.core.router.TripStructureUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
 import playground.agarwalamit.opdyts.equil.EquilMixedTrafficObjectiveFunctionPenalty;
 
+import java.util.*;
+
 /**
  *
  * @author Kai Nagel based on Gunnar Flötteröd
  *
  */
-public class ModeChoiceObjectiveFunction implements ObjectiveFunction {
+public class ModeChoiceObjectiveFunction implements MATSimObjectiveFunction<MATSimState> {
     private static final Logger log = Logger.getLogger( ModeChoiceObjectiveFunction.class );
 
     private final MainModeIdentifier mainModeIdentifier ;
@@ -139,7 +131,7 @@ public class ModeChoiceObjectiveFunction implements ObjectiveFunction {
     }
 
     @Override
-    public double value(SimulatorState state) {
+    public double value(MATSimState state) {
 
         resetContainers();
 

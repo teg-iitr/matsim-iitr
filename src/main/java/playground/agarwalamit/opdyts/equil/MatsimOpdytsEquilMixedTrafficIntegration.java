@@ -19,23 +19,17 @@
 
 package playground.agarwalamit.opdyts.equil;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
 import com.google.common.io.Files;
 import floetteroed.opdyts.DecisionVariableRandomizer;
 import floetteroed.opdyts.ObjectiveFunction;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.analysis.kai.KaiAnalysisListener;
-import org.matsim.contrib.opdyts.MATSimSimulator2;
-import org.matsim.contrib.opdyts.MATSimStateFactoryImpl;
-import org.matsim.contrib.opdyts.useCases.modeChoice.EveryIterationScoringParameters;
-import org.matsim.contrib.opdyts.utils.MATSimOpdytsControler;
-import org.matsim.contrib.opdyts.utils.OpdytsConfigGroup;
+import org.matsim.contrib.opdyts.MATSimOpdytsRunner;
+import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.utils.EveryIterationScoringParameters;
+import org.matsim.contrib.opdyts.experimental.OpdytsExperimentalConfigGroup;
+import org.matsim.contrib.opdyts.microstate.MATSimState;
+import org.matsim.contrib.opdyts.microstate.MATSimStateFactoryImpl;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.VspExperimentalConfigGroup;
@@ -46,13 +40,20 @@ import org.matsim.core.controler.listener.ShutdownListener;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.functions.ScoringParametersForPerson;
 import org.matsim.core.utils.io.IOUtils;
-import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
-import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
 import playground.agarwalamit.opdyts.*;
 import playground.agarwalamit.opdyts.analysis.OpdytsModalStatsControlerListener;
 import playground.agarwalamit.opdyts.plots.BestSolutionVsDecisionVariableChart;
 import playground.agarwalamit.opdyts.plots.OpdytsConvergenceChart;
 import playground.agarwalamit.utils.FileUtils;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
 /**
  * @author amit
@@ -95,7 +96,7 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 
 		OUT_DIR += ascRandomizeStyle+"/";
 
-		Config config = ConfigUtils.loadConfig(configFile, new OpdytsConfigGroup());
+		Config config = ConfigUtils.loadConfig(configFile, new OpdytsExperimentalConfigGroup());
 		config.plans().setInputFile(relaxedPlans);
 		config.vspExperimental().setVspDefaultsCheckingLevel(VspExperimentalConfigGroup.VspDefaultsCheckingLevel.warn); // must be warn, since opdyts override few things
 		config.controler().setOutputDirectory(OUT_DIR);
@@ -104,12 +105,12 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 		int randomSeed = new Random().nextInt(9999);
 		config.global().setRandomSeed(randomSeed);
 
-		OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(config, OpdytsConfigGroup.GROUP_NAME, OpdytsConfigGroup.class ) ;
-		opdytsConfigGroup.setOutputDirectory(OUT_DIR);
+		OpdytsExperimentalConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(config, OpdytsExperimentalConfigGroup.GROUP_NAME, OpdytsExperimentalConfigGroup.class ) ;
+//		opdytsConfigGroup.setOutputDirectory(OUT_DIR);
 		opdytsConfigGroup.setDecisionVariableStepSize(stepSize);
-		opdytsConfigGroup.setNumberOfIterationsForConvergence(iterations2Convergence);
-		opdytsConfigGroup.setSelfTuningWeight(selfTuningWt);
-		opdytsConfigGroup.setWarmUpIterations(warmUpItrs);
+//		opdytsConfigGroup.setNumberOfIterationsForConvergence(iterations2Convergence);
+//		opdytsConfigGroup.setSelfTuningWeight(selfTuningWt);
+//		opdytsConfigGroup.setWarmUpIterations(warmUpItrs);
 
 		List<String> modes2consider = Arrays.asList("car","bicycle");
 
@@ -124,7 +125,7 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 		OpdytsModalStatsControlerListener stasControlerListner = new OpdytsModalStatsControlerListener(modes2consider,distanceDistribution);
 
 		// following is the  entry point to start a matsim controler together with opdyts
-		MATSimSimulator2<ModeChoiceDecisionVariable> simulator = new MATSimSimulator2<>(new MATSimStateFactoryImpl<>(), scenario);
+		MATSimOpdytsRunner<ModeChoiceDecisionVariable, MATSimState> simulator = new MATSimOpdytsRunner<>(scenario, new MATSimStateFactoryImpl<>());
 
 		String finalOUT_DIR = OUT_DIR;
 		simulator.addOverridingModule(new AbstractModule() {
@@ -187,7 +188,7 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 
 		// this is the objective Function which returns the value for given SimulatorState
 		// in my case, this will be the distance based modal split
-		ObjectiveFunction objectiveFunction = new ModeChoiceObjectiveFunction(distanceDistribution);
+		ModeChoiceObjectiveFunction objectiveFunction = new ModeChoiceObjectiveFunction(distanceDistribution);
 
 		// randomize the decision variables (for e.g.\ utility parameters for modes)
 		DecisionVariableRandomizer<ModeChoiceDecisionVariable> decisionVariableRandomizer = new ModeChoiceRandomizer(scenario,
@@ -196,8 +197,10 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 		// what would be the decision variables to optimize the objective function.
 		ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable(scenario.getConfig().planCalcScore(),scenario, modes2consider, EQUIL_MIXEDTRAFFIC);
 
-		MATSimOpdytsControler<ModeChoiceDecisionVariable> opdytsControler = new MATSimOpdytsControler<>(scenario);
-		opdytsControler.addNetworkModeOccupancyAnalyzr(simulator);
-		opdytsControler.run(simulator, decisionVariableRandomizer,  initialDecisionVariable, objectiveFunction);
+//		MATSimOpdytsControler<ModeChoiceDecisionVariable> opdytsControler = new MATSimOpdytsControler<>(scenario);
+//		opdytsControler.addNetworkModeOccupancyAnalyzr(simulator);
+		simulator.run(
+//				simulator,
+				decisionVariableRandomizer,  initialDecisionVariable, objectiveFunction);
 	}
 }

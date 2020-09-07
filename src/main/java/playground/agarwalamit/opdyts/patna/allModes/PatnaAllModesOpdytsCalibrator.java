@@ -19,19 +19,13 @@
 
 package playground.agarwalamit.opdyts.patna.allModes;
 
-import java.io.File;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Random;
-import java.util.Set;
 import floetteroed.opdyts.DecisionVariableRandomizer;
-import floetteroed.opdyts.ObjectiveFunction;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.opdyts.MATSimSimulator2;
-import org.matsim.contrib.opdyts.MATSimStateFactoryImpl;
-import org.matsim.contrib.opdyts.useCases.modeChoice.EveryIterationScoringParameters;
-import org.matsim.contrib.opdyts.utils.MATSimOpdytsControler;
-import org.matsim.contrib.opdyts.utils.OpdytsConfigGroup;
+import org.matsim.contrib.opdyts.MATSimOpdytsRunner;
+import org.matsim.contrib.opdyts.OpdytsConfigGroup;
+import org.matsim.contrib.opdyts.buildingblocks.decisionvariables.utils.EveryIterationScoringParameters;
+import org.matsim.contrib.opdyts.microstate.MATSimState;
+import org.matsim.contrib.opdyts.microstate.MATSimStateFactoryImpl;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
@@ -40,27 +34,25 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.functions.ScoringParametersForPerson;
+import playground.agarwalamit.clustering.ClusterAlgorithm;
+import playground.agarwalamit.clustering.ClusterUtils;
+import playground.agarwalamit.mixedTraffic.patnaIndia.scoring.PtFareEventHandler;
+import playground.agarwalamit.opdyts.*;
+import playground.agarwalamit.opdyts.ObjectiveFunctionEvaluator.ObjectiveFunctionType;
+import playground.agarwalamit.opdyts.analysis.OpdytsModalStatsControlerListener;
+import playground.agarwalamit.opdyts.patna.PatnaOneBinDistanceDistribution;
+import playground.agarwalamit.opdyts.teleportationModes.Zone;
+import playground.agarwalamit.utils.FileUtils;
 import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
-import playground.agarwalamit.clustering.ClusterAlgorithm;
-import playground.agarwalamit.clustering.ClusterUtils;
-import playground.agarwalamit.mixedTraffic.patnaIndia.scoring.PtFareEventHandler;
-import playground.agarwalamit.opdyts.DistanceDistribution;
-import playground.agarwalamit.opdyts.ModeChoiceDecisionVariable;
-import playground.agarwalamit.opdyts.ModeChoiceObjectiveFunction;
-import playground.agarwalamit.opdyts.ModeChoiceRandomizer;
-import playground.agarwalamit.opdyts.ObjectiveFunctionEvaluator;
-import playground.agarwalamit.opdyts.ObjectiveFunctionEvaluator.ObjectiveFunctionType;
-import playground.agarwalamit.opdyts.OpdytsModeChoiceUtils;
-import playground.agarwalamit.opdyts.OpdytsScenario;
-import playground.agarwalamit.opdyts.RandomizedUtilityParametersChoser;
-import playground.agarwalamit.opdyts.analysis.OpdytsModalStatsControlerListener;
-import playground.agarwalamit.opdyts.patna.PatnaOneBinDistanceDistribution;
-import playground.agarwalamit.opdyts.teleportationModes.TeleportationODCoordAnalyzer;
-import playground.agarwalamit.opdyts.teleportationModes.Zone;
-import playground.agarwalamit.utils.FileUtils;
+
+import java.io.File;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Random;
+import java.util.Set;
 
 /**
  * @author amit
@@ -129,10 +121,10 @@ public class PatnaAllModesOpdytsCalibrator {
 		config.strategy().setFractionOfIterationsToDisableInnovation(Double.POSITIVE_INFINITY);
 
 		OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(config, OpdytsConfigGroup.GROUP_NAME, OpdytsConfigGroup.class ) ;
-		opdytsConfigGroup.setOutputDirectory(OUT_DIR);
-		opdytsConfigGroup.setDecisionVariableStepSize(stepSize);
+//		opdytsConfigGroup.setOutputDirectory(OUT_DIR);
+//		opdytsConfigGroup.setDecisionVariableStepSize(stepSize);
 		opdytsConfigGroup.setNumberOfIterationsForConvergence(iterations2Convergence);
-		opdytsConfigGroup.setSelfTuningWeight(selfTuningWt);
+//		opdytsConfigGroup.setSelfTuningWeight(selfTuningWt);
 		opdytsConfigGroup.setWarmUpIterations(warmUpItrs);
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
@@ -151,13 +143,13 @@ public class PatnaAllModesOpdytsCalibrator {
 
 		//****************************** mainly opdyts settings ******************************
 
-		MATSimOpdytsControler<ModeChoiceDecisionVariable> opdytsControler = new MATSimOpdytsControler<ModeChoiceDecisionVariable>(scenario);
+		MATSimOpdytsRunner<ModeChoiceDecisionVariable, MATSimState> opdytsControler = new MATSimOpdytsRunner<>(scenario, new MATSimStateFactoryImpl<>());
 
 		DistanceDistribution referenceStudyDistri = new PatnaOneBinDistanceDistribution(PATNA_1_PCT);
 		OpdytsModalStatsControlerListener stasControlerListner = new OpdytsModalStatsControlerListener(allModes, referenceStudyDistri);
 
 		// following is the  entry point to start a matsim controler together with opdyts
-		MATSimSimulator2<ModeChoiceDecisionVariable> simulator = new MATSimSimulator2<>(new MATSimStateFactoryImpl<>(), scenario);
+//		MATSimSimulator2<ModeChoiceDecisionVariable> simulator = new MATSimSimulator2<>(new MATSimStateFactoryImpl<>(), scenario);
 
 		// getting zone info
 		String path = new File(configFile).getParentFile().getAbsolutePath();
@@ -180,10 +172,10 @@ public class PatnaAllModesOpdytsCalibrator {
 				default:throw new RuntimeException("not implemented yet.");
 		}
 		Set<Zone> relevantZones = patnaZoneIdentifier.getZones();
-		simulator.addSimulationStateAnalyzer(new TeleportationODCoordAnalyzer.Provider(opdytsControler.getTimeDiscretization(), teleportationModes, relevantZones, scenario));
+//		simulator.addSimulationStateAnalyzer(new TeleportationODCoordAnalyzer.Provider(opdytsControler.getTimeDiscretization(), teleportationModes, relevantZones, scenario));
 
 		String finalOUT_DIR = OUT_DIR;
-		simulator.addOverridingModule(new AbstractModule() {
+		opdytsControler.addOverridingModule(new AbstractModule() {
 
 			@Override
 			public void install() {
@@ -210,7 +202,7 @@ public class PatnaAllModesOpdytsCalibrator {
 
 		// this is the objective Function which returns the value for given SimulatorState
 		// in my case, this will be the distance based modal split
-		ObjectiveFunction objectiveFunction = new ModeChoiceObjectiveFunction(referenceStudyDistri); // in this, the method argument (SimulatorStat) is not used.
+		ModeChoiceObjectiveFunction objectiveFunction = new ModeChoiceObjectiveFunction(referenceStudyDistri); // in this, the method argument (SimulatorStat) is not used.
 
 		// randomize the decision variables (for e.g.\ utility parameters for modes)
 		DecisionVariableRandomizer<ModeChoiceDecisionVariable> decisionVariableRandomizer = new ModeChoiceRandomizer(scenario,
@@ -219,7 +211,9 @@ public class PatnaAllModesOpdytsCalibrator {
 		// what would be the decision variables to optimize the objective function.
 		ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable(scenario.getConfig().planCalcScore(),scenario, allModes, PATNA_1_PCT);
 
-		opdytsControler.addNetworkModeOccupancyAnalyzr(simulator);
-		opdytsControler.run(simulator, decisionVariableRandomizer, initialDecisionVariable, objectiveFunction);
+//		opdytsControler.addNetworkModeOccupancyAnalyzr(simulator);
+		opdytsControler.run(
+				//simulator,
+				decisionVariableRandomizer, initialDecisionVariable, objectiveFunction);
 	}
 }
