@@ -1,6 +1,6 @@
 package playground.agarwalamit.mixedTraffic.patnaIndia.covidWork.wfh;
 
-import org.apache.log4j.Logger;;
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.groups.ControlerConfigGroup;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
