@@ -52,6 +52,12 @@
 			<id>slimjars</id>
 			<url>http://mvn.slimjars.com/</url>
 		</repository>
+		<repository>
+			<id>matsim-vsp-vsp-playgrounds</id>
+			<url>https://packagecloud.io/matsim-vsp/vsp-playgrounds/maven2</url>
+		</repository>
+
+
 		<!--<repository>-->
 			<!--&lt;!&ndash; Geotools is not on Maven central &ndash;&gt;-->
 			<!--<id>osgeo</id>-->
@@ -152,10 +158,15 @@
 			<artifactId>osm</artifactId>
 			<version>${matsim.version}</version>
 		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>com.github.matsim-org</groupId>-->
+<!--			<artifactId>Opdyts-MATSim-Integration</artifactId>-->
+<!--			<version>0.0.1-aa6d8cd2f3-1</version>-->
+<!--		</dependency>-->
 		<dependency>
-			<groupId>com.github.matsim-org</groupId>
-			<artifactId>Opdyts-MATSim-Integration</artifactId>
-			<version>0.0.1-aa6d8cd2f3-1</version>
+			<groupId>org.matsim.vsp.vsp-playgrounds</groupId>
+			<artifactId>gunnar</artifactId>
+			<version>0.11.0-SNAPSHOT</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.spark/spark-core -->
 		<!-- <dependency> -->

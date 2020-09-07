@@ -13,7 +13,9 @@ package playground.agarwalamit.Delhi.pt;
  * </li>
  * <li>Next steps are:
  * <li>Merge the two MATSIm transit schedules.</li>
- * <li>Add the departure times</li>
+ * <li>Add the departure times to metro lines.</li>
+ * <li>Fix the stops whose position doesn't make sense.</li>
+ * <li>Generate Transit Vehicles.</li>
  * <li>The linkref IDs are missing from stop facilities which appears to be the reason for missing connections in VIA.</li>
  * </li>
  */
