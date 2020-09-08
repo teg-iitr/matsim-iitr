@@ -49,13 +49,12 @@ public class FuelWastageCalculator {
         int iterationsForEachCase = 50;
 
         for (int i = 0; i < iterationsForEachCase ; i++) { //car
-            FuelConsumptionValues fuelConsumptionValues = new FuelConsumptionValues();
-            fuelConsumptionValues.addFuelConsumptionValues(
-                    IdlingUtils.VehicleClass.Car,
-                    initializer_reignition+i*increment_reignition,
-                    initializer_idling+i*increment_idling);
-
             for (int j = 0; j < iterationsForEachCase ; j++) { //MTW
+                FuelConsumptionValues fuelConsumptionValues = new FuelConsumptionValues();
+                fuelConsumptionValues.addFuelConsumptionValues(
+                        IdlingUtils.VehicleClass.Car,
+                        initializer_reignition+i*increment_reignition,
+                        initializer_idling+i*increment_idling);
                 fuelConsumptionValues.addFuelConsumptionValues(
                         IdlingUtils.VehicleClass.MTW,
                         initializer_reignition+j*increment_reignition,
