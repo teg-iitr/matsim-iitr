@@ -138,6 +138,18 @@ public final class LoadMyScenarios {
 		config.plans().setInputFile(plansFile);
         return ScenarioUtils.loadScenario(config);
 	}
+
+	/**
+	 * Returns scenario containing only plans file location.
+	 */
+	public static Scenario loadScenarioFromPlansAndAttributes(String plansFile, String personAttributesFile) {
+		Config config = new Config();
+		config.addCoreModules();
+		config.plans().setInputFile(plansFile);
+		config.plans().setInsistingOnUsingDeprecatedPersonAttributeFile(true);
+		config.plans().setInputPersonAttributeFile(personAttributesFile);
+		return ScenarioUtils.loadScenario(config);
+	}
 	
 	/**
 	 * Returns scenario from plans and config.
