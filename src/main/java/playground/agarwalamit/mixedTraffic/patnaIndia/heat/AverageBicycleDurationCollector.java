@@ -14,6 +14,7 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
+import org.matsim.core.events.handler.EventHandler;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.io.IOUtils;
 import playground.agarwalamit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter;
@@ -43,34 +44,36 @@ public class AverageBicycleDurationCollector
     public final SortedMap<Double, Double> income2AvgCyclingDur = new TreeMap<>();
 
     public static void main(String[] args) {
-//        String runCase = "BT-b";
-        String runCase = "bau";
-        String outFile = "C:/Users/Amit/Documents/git-repos/workingPapers/iitr/2020/papers/economicBenefitsCycling/graphics/"+runCase+"_incomeAvgCyclingDuration.txt";
-        String plansFile  = "C:\\Users\\Amit\\Documents\\repos\\runs-svn\\patnaIndia\\run108\\jointDemand\\policies\\0.15pcu\\"+runCase+"\\output_plans.xml.gz"; // for income per person
-        String attributesFile  = "C:\\Users\\Amit\\Documents\\repos\\runs-svn\\patnaIndia\\run108\\jointDemand\\policies\\0.15pcu\\"+runCase+"\\output_personAttributes.xml.gz"; // for income per person
-        String eventsFile  = "C:\\Users\\Amit\\Documents\\repos\\runs-svn\\patnaIndia\\run108\\jointDemand\\policies\\0.15pcu\\"+runCase+"\\output_events.xml.gz"; // for income per person
+        String parentPath = "C:\\Users\\Amit\\Google Drive\\iitr_gmail_drive\\project_data\\patna\\0.15pcu_TUB-work\\sensitivity\\";
 
-        AverageBicycleDurationCollector cyclingDurationTripCollector = new AverageBicycleDurationCollector();
+        String [] runCases = {"makeBSHLength_25pct","makeBSHLength_33.33pct","makeBSHLength_50pct","makeBSHLength_66.66pct","makeBSHLength_75pct","makeBSHLength_90pct","makeBSHLength_100pct"};
 
-        EventsManager eventsManager = EventsUtils.createEventsManager();
-        eventsManager.addHandler(cyclingDurationTripCollector);
-        new MatsimEventsReader(eventsManager).readFile(eventsFile);
+        for (String runCase : runCases){
+            String plansFile  = parentPath+runCase+"\\output_plans.xml.gz";
+            String attributesFile  = parentPath+runCase+"\\output_personAttributes.xml.gz"; // for income per person; required for older MATSim files
+            String eventsFile  = parentPath+runCase+"\\output_events.xml.gz";
 
-        Scenario scenario = LoadMyScenarios.loadScenarioFromPlansAndAttributes(plansFile,attributesFile);
-        cyclingDurationTripCollector.processData(scenario);
-        SortedMap<Double, Double> out = cyclingDurationTripCollector.income2AvgCyclingDur;
+            String outFile = "C:/Users/Amit/Documents/git-repos/workingPapers/iitr/2020/papers/economicBenefitsCycling/graphics/"+runCase+"_incomeAvgCyclingDuration.txt";
 
-        try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
-            writer.write("income\taverageCyclingDurationSec\n");
-            for (double inc : out.keySet()){
-                writer.write(inc+"\t"+out.get(inc)+"\n");
+            AverageBicycleDurationCollector cyclingDurationTripCollector = new AverageBicycleDurationCollector();
+            EventsManager eventsManager = EventsUtils.createEventsManager();
+            eventsManager.addHandler(cyclingDurationTripCollector);
+            new MatsimEventsReader(eventsManager).readFile(eventsFile);
 
+            Scenario scenario = LoadMyScenarios.loadScenarioFromPlansAndAttributes(plansFile,attributesFile);
+            cyclingDurationTripCollector.processData(scenario);
+            SortedMap<Double, Double> out = cyclingDurationTripCollector.income2AvgCyclingDur;
+
+            try (BufferedWriter writer = IOUtils.getBufferedWriter(outFile)) {
+                writer.write("income\taverageCyclingDurationSec\n");
+                for (double inc : out.keySet()){
+                    writer.write(inc+"\t"+out.get(inc)+"\n");
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("Data is not written. Reason "+e);
             }
-        } catch (IOException e) {
-            throw new RuntimeException("Data is not written. Reason "+e);
         }
     }
-
 
     @Override
     public void handleEvent(PersonArrivalEvent personArrivalEvent) {
