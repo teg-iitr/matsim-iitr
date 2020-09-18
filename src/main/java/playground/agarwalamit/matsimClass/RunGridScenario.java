@@ -9,6 +9,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.ConfigWriter;
 import org.matsim.core.config.groups.ChangeModeConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.config.groups.QSimConfigGroup.LinkDynamics;
@@ -18,6 +19,7 @@ import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.vehicles.MatsimVehicleWriter;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.Vehicles;
 
@@ -31,8 +33,10 @@ public class RunGridScenario {
         Scenario scenario = ScenarioUtils.loadScenario(config);
         rgs.addVehicleTypes(scenario);
 
-        org.matsim.core.controler.Controler controler = new org.matsim.core.controler.Controler(scenario);
-        controler.run();
+        new ConfigWriter(config).write("C:\\Users\\Amit\\Google Drive\\iitr_gmail_drive\\project_data\\matsim_grid\\grid_config.xml");
+        new MatsimVehicleWriter(scenario.getVehicles()).writeFile("C:\\Users\\Amit\\Google Drive\\iitr_gmail_drive\\project_data\\matsim_grid\\grid_vehicles.xml.gz");
+//        org.matsim.core.controler.Controler controler = new org.matsim.core.controler.Controler(scenario);
+//        controler.run();
     }
 
     void addVehicleTypes(Scenario scenario){
@@ -59,13 +63,13 @@ public class RunGridScenario {
 
     Config prepareConfig() {
 
-        String net = "C:\\Users\\Amit Agarwal\\Downloads\\gridNetwork\\input\\gridNet.xml.gz";
-        String plans = "C:\\Users\\Amit Agarwal\\Downloads\\gridNetwork\\input\\plans.xml";
+        String net = "C:\\\\Users\\\\Amit\\\\Google Drive\\\\iitr_gmail_drive\\\\project_data\\\\matsim_grid\\\\gridNet.xml.gz";
+//        String plans = "C:\\Users\\Amit Agarwal\\Downloads\\gridNetwork\\input\\plans.xml";
 
         Collection<String> mainModes = Arrays.asList(TransportMode.car,"bicycle","motorcycle");
 
         Config config = ConfigUtils.createConfig();
-        config.plans().setInputFile(plans);
+//        config.plans().setInputFile(plans);
         config.network().setInputFile(net);
 
         config.controler().setOutputDirectory("C:/Users/Amit Agarwal/Downloads/gridNetwork/output/");

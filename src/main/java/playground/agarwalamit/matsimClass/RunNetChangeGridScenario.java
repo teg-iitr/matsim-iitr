@@ -1,7 +1,6 @@
 package playground.agarwalamit.matsimClass;
 
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.accessibility.utils.NetworkUtil;
 import org.matsim.core.config.Config;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.network.NetworkChangeEvent;

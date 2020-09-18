@@ -14,19 +14,23 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Created by Amit.
+ */
+
 public class GridNetwork {
 
     public static final double LengthOfGrid = 10000.0;
 
-    GridNetwork () {
+    public GridNetwork() {
         Scenario scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
         network = scenario.getNetwork();
         networkFactory = network.getFactory();
     }
 
-    private Network network;
-    private Map<Coord, Id<Node>> coordToNodeId = new HashMap<>();
-    private NetworkFactory networkFactory;
+    private final Network network;
+    private final Map<Coord, Id<Node>> coordToNodeId = new HashMap<>();
+    private final NetworkFactory networkFactory;
 
     public static void main(String[] args) {
         new GridNetwork().run();
@@ -83,7 +87,7 @@ public class GridNetwork {
             createLinks(new Coord(LengthOfGrid*i/10,8*LengthOfGrid/10), new Coord[] {new Coord(0,LengthOfGrid/10)},
                     LengthOfGrid/5, 1);
         }
-        new NetworkWriter(network).write("C:\\\\Users\\\\Amit Agarwal\\\\Downloads\\\\gridNetwork\\\\input\\\\gridNet.xml.gz");
+        new NetworkWriter(network).write("C:\\Users\\Amit\\Google Drive\\iitr_gmail_drive\\project_data\\matsim_grid\\gridNet.xml.gz");
     }
 
     private void createLinks(Coord initialCoord, Coord[] increaments, double lengthToMove, double numberOfLanes){
