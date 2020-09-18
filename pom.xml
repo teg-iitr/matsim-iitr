@@ -118,6 +118,8 @@
 			<artifactId>evacuation-gui</artifactId>
 			<version>-SNAPSHOT</version>
 		</dependency>
+
+		
 		<!-- <dependency>
 			<groupId>com.vividsolutions</groupId>
 			<artifactId>jts</artifactId>
@@ -138,7 +140,14 @@
 			<artifactId>drt</artifactId>
 			<version>${matsim.version}</version>
 		</dependency>
-		<dependency>
+		
+	<dependency>
+		<groupId>org.matsim.contrib</groupId>
+        <artifactId>carsharing</artifactId>
+        <version>${matsim.version}</version>
+     </dependency>
+     	
+	<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>vsp</artifactId>
 			<version>${matsim.version}</version>
