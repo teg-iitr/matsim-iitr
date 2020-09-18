@@ -1,4 +1,4 @@
-package playground.amit.matsimClass;
+package playground.amit.gridNet;
 
 import java.util.Arrays;
 import java.util.Collection;

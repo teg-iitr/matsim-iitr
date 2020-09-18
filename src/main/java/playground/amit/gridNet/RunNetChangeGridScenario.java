@@ -1,4 +1,4 @@
-package playground.amit.matsimClass;
+package playground.amit.gridNet;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
