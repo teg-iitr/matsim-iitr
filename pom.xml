@@ -159,11 +159,6 @@
 		</dependency>
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
-			<artifactId>carsharing</artifactId>
-			<version>${matsim.version}</version>
-		</dependency>carsharing
-		<dependency>
-			<groupId>org.matsim.contrib</groupId>
 			<artifactId>signals</artifactId>
 			<version>${matsim.version}</version>
 		</dependency>
