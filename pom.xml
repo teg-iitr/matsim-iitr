@@ -141,11 +141,11 @@
 			<version>${matsim.version}</version>
 		</dependency>
 		
-	<dependency>
-		<groupId>org.matsim.contrib</groupId>
-        <artifactId>carsharing</artifactId>
-        <version>${matsim.version}</version>
-     </dependency>
+<!--	<dependency>-->
+<!--		<groupId>org.matsim.contrib</groupId>-->
+<!--        <artifactId>carsharing</artifactId>-->
+<!--        <version>${matsim.version}</version>-->
+<!--     </dependency>-->
      	
 	<dependency>
 			<groupId>org.matsim.contrib</groupId>
