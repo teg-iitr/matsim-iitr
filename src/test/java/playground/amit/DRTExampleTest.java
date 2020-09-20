@@ -1,5 +1,6 @@
 package playground.amit;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.contrib.drt.run.MultiModeDrtConfigGroup;
@@ -21,7 +22,7 @@ public class DRTExampleTest {
     @Rule
     public MatsimTestUtils utils = new MatsimTestUtils();
 
-    @Test
+    @Test@Ignore
     public void testRunDrtExample() {
         URL configUrl = IOUtils.extendUrl(ExamplesUtils.getTestScenarioURL("dvrp-grid"), "one_shared_taxi_config.xml");
         RunOneSharedTaxiExample.run(configUrl, true, 1);

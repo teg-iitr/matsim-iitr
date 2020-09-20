@@ -21,6 +21,7 @@ import java.util.Set;
 public class GridNetwork {
 
     public static final double LengthOfGrid = 10000.0;
+    public static final String NETWORK_FILE = "C:\\Users\\Amit\\Google Drive\\iitr_gmail_drive\\project_data\\matsim_grid\\gridNet.xml.gz";
 
     public GridNetwork() {
         Scenario scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
@@ -87,7 +88,7 @@ public class GridNetwork {
             createLinks(new Coord(LengthOfGrid*i/10,8*LengthOfGrid/10), new Coord[] {new Coord(0,LengthOfGrid/10)},
                     LengthOfGrid/5, 1);
         }
-        new NetworkWriter(network).write("C:\\Users\\Amit\\Google Drive\\iitr_gmail_drive\\project_data\\matsim_grid\\gridNet.xml.gz");
+        new NetworkWriter(network).write(GridNetwork.NETWORK_FILE);
     }
 
     private void createLinks(Coord initialCoord, Coord[] increaments, double lengthToMove, double numberOfLanes){

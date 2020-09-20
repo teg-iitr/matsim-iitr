@@ -63,14 +63,14 @@ public class RunGridScenario {
 
     Config prepareConfig() {
 
-        String net = "C:\\\\Users\\\\Amit\\\\Google Drive\\\\iitr_gmail_drive\\\\project_data\\\\matsim_grid\\\\gridNet.xml.gz";
+//        String net = "C:\\\\Users\\\\Amit\\\\Google Drive\\\\iitr_gmail_drive\\\\project_data\\\\matsim_grid\\\\gridNet.xml.gz";
 //        String plans = "C:\\Users\\Amit Agarwal\\Downloads\\gridNetwork\\input\\plans.xml";
 
         Collection<String> mainModes = Arrays.asList(TransportMode.car,"bicycle","motorcycle");
 
         Config config = ConfigUtils.createConfig();
-//        config.plans().setInputFile(plans);
-        config.network().setInputFile(net);
+        config.plans().setInputFile(GridPlans.GRID_PLANS);
+        config.network().setInputFile(GridNetwork.NETWORK_FILE);
 
         config.controler().setOutputDirectory("C:/Users/Amit Agarwal/Downloads/gridNetwork/output/");
         config.controler().setLastIteration(40);
@@ -127,7 +127,7 @@ public class RunGridScenario {
         }
         {
             ActivityParams ap = new ActivityParams("work");
-            ap.setTypicalDuration(9*3600.);
+            ap.setTypicalDuration(8*3600.);
             config.planCalcScore().addActivityParams(ap);
         }
         {
@@ -137,12 +137,17 @@ public class RunGridScenario {
         }
         {
             ActivityParams ap = new ActivityParams("leisure");
-            ap.setTypicalDuration(4*3600.);
+            ap.setTypicalDuration(3*3600.);
             config.planCalcScore().addActivityParams(ap);
         }
         {
-            ActivityParams ap = new ActivityParams("other");
-            ap.setTypicalDuration(6*3600.);
+            ActivityParams ap = new ActivityParams("social");
+            ap.setTypicalDuration(3*3600.);
+            config.planCalcScore().addActivityParams(ap);
+        }
+        {
+            ActivityParams ap = new ActivityParams("shopping");
+            ap.setTypicalDuration(1*3600.);
             config.planCalcScore().addActivityParams(ap);
         }
         return config;
