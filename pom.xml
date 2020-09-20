@@ -116,7 +116,7 @@
 		<dependency>
 			<groupId>com.github.matsim-org</groupId>
 			<artifactId>evacuation-gui</artifactId>
-			<version>-SNAPSHOT</version>
+			<version>-5a05baa049-1</version>
 		</dependency>
 
 		
@@ -135,11 +135,6 @@
 		<artifactId>cadytsIntegration</artifactId>
 		<version>${matsim.version}</version>
 	</dependency>
-		<dependency>
-			<groupId>org.matsim.contrib</groupId>
-			<artifactId>drt</artifactId>
-			<version>${matsim.version}</version>
-		</dependency>
 		
 <!--	<dependency>-->
 <!--		<groupId>org.matsim.contrib</groupId>-->
@@ -165,7 +160,7 @@
 		<dependency>
 			<groupId>org.matsim</groupId>
 			<artifactId>matsim-examples</artifactId>
-			<version>13.0-SNAPSHOT</version>
+			<version>${matsim.version}</version>
 			<scope>test</scope>
 		</dependency>
 <!--		<dependency>-->
@@ -194,7 +189,7 @@
 		<!-- <artifactId>spark-core_2.11</artifactId> -->
 		<!-- <version>2.2.1</version> -->
 		<!-- </dependency> -->
-		<!--following is required to avoid exception (trying to access com.google.common.base.Stopwatch.init 
+		<!--following is required to avoid exception (trying to access com.google.common.base.Stopwatch.init
 			which is not accessible anymore) -->
 		<!-- <dependency>
 			<groupId>com.google.guava</groupId>
