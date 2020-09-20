@@ -332,7 +332,7 @@ public class ExposurePricingIT {
 //		String packageInputDir = helper.getPackageInputDirectory();
 //		String inputFilesDir = packageInputDir.substring(0, packageInputDir.lastIndexOf('/') );
 //		inputFilesDir = inputFilesDir.substring(0, inputFilesDir.lastIndexOf('/') + 1);
-		String inputFilesDir = "./test/input/playground/agarwalamit/emissions/internalization/";
+		String inputFilesDir = "./test/input/playground/amit/emissions/internalization/";
 
 		String roadTypeMappingFile = inputFilesDir + "/roadTypeMapping.txt";
 		String emissionVehicleFile = inputFilesDir + "/equil_emissionVehicles_1pct.xml.gz";

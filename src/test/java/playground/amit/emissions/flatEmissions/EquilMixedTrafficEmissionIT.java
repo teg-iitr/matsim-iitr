@@ -311,7 +311,7 @@ public class EquilMixedTrafficEmissionIT {
 	}
 
 	private void emissionSettings(Scenario scenario){
-		String inputFilesDir = "./test/input/playground/agarwalamit/emissions/internalization/";
+		String inputFilesDir = "./test/input/playground/amit/emissions/internalization/";
 
 		String roadTypeMappingFile = inputFilesDir + "/roadTypeMapping.txt";
 		String emissionVehicleFile = inputFilesDir + "/equil_emissionVehicles_1pct.xml.gz";
