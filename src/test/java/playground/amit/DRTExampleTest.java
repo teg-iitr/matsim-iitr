@@ -16,7 +16,7 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 
 import java.net.URL;
 
-public class DRTExample {
+public class DRTExampleTest {
 
     @Rule
     public MatsimTestUtils utils = new MatsimTestUtils();
