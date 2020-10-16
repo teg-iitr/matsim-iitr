@@ -25,7 +25,7 @@ public class DRTExampleTest {
     @Test@Ignore
     public void testRunDrtExample() {
         URL configUrl = IOUtils.extendUrl(ExamplesUtils.getTestScenarioURL("dvrp-grid"), "one_shared_taxi_config.xml");
-        RunOneSharedTaxiExample.run(configUrl, true, 1);
+        RunOneSharedTaxiExample.run(configUrl, false, 1);
 
 //        URL configUrl = IOUtils.extendUrl(ExamplesUtils.getTestScenarioURL("mielec"), "mielec_stop_based_drt_config.xml");
 //        Config config = ConfigUtils.loadConfig(configUrl, new MultiModeDrtConfigGroup(), new DvrpConfigGroup(),

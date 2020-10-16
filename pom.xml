@@ -206,6 +206,12 @@
 			<artifactId>jsch</artifactId>
 			<version>0.1.55</version>
 		</dependency>
+		<!--java.lang.NoSuchMethodError: com.google.common.collect.ImmutableList.toImmutableList()Ljava/util/stream/Collector; (Guava version error)-->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>28.2-jre</version>
+		</dependency>
 		<!--<dependency>-->
 		<!--<groupId>org.matsim.vsp.vsp-playgrounds</groupId>-->
 		<!--<artifactId>vsp</artifactId>-->
