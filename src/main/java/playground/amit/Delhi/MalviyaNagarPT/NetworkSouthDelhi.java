@@ -19,7 +19,7 @@ import playground.amit.jaipur.JaipurUtils;
 import playground.amit.utils.geometry.GeometryUtils;
 
 public class NetworkSouthDelhi {
-		 private static final String boundaryShapeFile = "C:\\Users\\Nidhi\\Desktop\\MATSim Paper\\planet_SouthDelhi_shp\\shape\\roads.shp";
+		 private static final String roadShapeFile = "C:\\Users\\Nidhi\\Desktop\\MATSim Paper\\planet_SouthDelhi_shp\\shape\\roads.shp";
 		 private static final String inputPBFFile = "C:\\Users\\Nidhi\\Desktop\\MATSim Paper\\";
 		 private static final String matsimNetworkFile = "C:\\Users\\Nidhi\\Desktop\\MATSim Paper\\Planet_south_delhi_matsim.xml.gz";
 
@@ -29,7 +29,7 @@ public class NetworkSouthDelhi {
 		        CoordinateTransformation reverse_transformation = TransformationFactory
 		                .getCoordinateTransformation(JaipurUtils.EPSG, TransformationFactory.WGS84);
 
-		        Collection<SimpleFeature> features = ShapeFileReader.getAllFeatures(boundaryShapeFile);
+		        Collection<SimpleFeature> features = ShapeFileReader.getAllFeatures(roadShapeFile);
 		        Geometry geometry = GeometryUtils.getGeometryFromListOfFeatures(features); // --> WGS:84
 
 		        BiPredicate<Coord, Integer> includeLinkAtCoordWithHierarchy = (cord, hierarchyLevel) -> {
