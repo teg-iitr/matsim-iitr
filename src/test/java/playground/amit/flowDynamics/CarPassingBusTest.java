@@ -157,10 +157,17 @@ public class CarPassingBusTest {
 		TransitStopFacility stopFac;
 		TransitRouteStop stop;
 
-		stopFac = builder.createTransitStopFacility(Id.create("11", TransitStopFacility.class), new Coord(500, 0), false); stopFac.setLinkId(Id.create("1011", Link.class)); schedule.addStopFacility(stopFac);
-		stop = builder.createTransitRouteStop(stopFac, 0, 10); stopListA.add(stop);
-		stopFac = builder.createTransitStopFacility(Id.create("13", TransitStopFacility.class), new Coord(1500, 0), false); stopFac.setLinkId(Id.create("1213", Link.class)); schedule.addStopFacility(stopFac);
-		stop = builder.createTransitRouteStop(stopFac, 50, 60); stopListA.add(stop);
+		stopFac = builder.createTransitStopFacility(Id.create("11", TransitStopFacility.class), new Coord(500, 0), false);
+		stopFac.setLinkId(Id.create("1011", Link.class));
+		schedule.addStopFacility(stopFac);
+		stop = builder.createTransitRouteStop(stopFac, 0, 10);
+		stopListA.add(stop);
+
+		stopFac = builder.createTransitStopFacility(Id.create("13", TransitStopFacility.class), new Coord(1500, 0), false);
+		stopFac.setLinkId(Id.create("1213", Link.class));
+		schedule.addStopFacility(stopFac);
+		stop = builder.createTransitRouteStop(stopFac, 50, 60);
+		stopListA.add(stop);
 
 		// transit line A		
 		Link startLinkA = this.scenario.getNetwork().getLinks().get(Id.create("0110", Link.class));
@@ -174,7 +181,9 @@ public class CarPassingBusTest {
 
 		networkRouteA.setLinkIds(startLinkA.getId(), linkListA, endLinkA.getId());
 		TransitRoute tRouteA = builder.createTransitRoute(Id.create("A", TransitRoute.class), networkRouteA, stopListA, "bus");
-		TransitLine tLineA = builder.createTransitLine(Id.create("line A", TransitLine.class)); tLineA.addRoute(tRouteA); schedule.addTransitLine(tLineA);
+		TransitLine tLineA = builder.createTransitLine(Id.create("line A", TransitLine.class));
+		tLineA.addRoute(tRouteA);
+		schedule.addTransitLine(tLineA);
 
 		Departure dep = builder.createDeparture(Id.create("bus_1", Departure.class), 7*3600.0 );
 		dep.setVehicleId(Id.create("bus_1", Vehicle.class));
