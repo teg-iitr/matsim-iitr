@@ -37,9 +37,9 @@ public class DemandFromOD {
     public static void main(String[] args) {
 
         //String odMatrix = "C:/Users/Amit Agarwal/Google Drive/iitr_gmail_drive/project_data/delhiMalviyaNagar_PT/2016-10_MalviyaNagarODSurveyData.txt";
-        String odMatrix ="C:\\Users\\Nidhi\\Desktop\\MATSim Paper\\2016-10_MalviyaNagarODSurveyData.txt";
-        String coordinatesFile = "C:\\Users\\Nidhi\\Desktop\\MATSim Paper\\Book2.csv";
-        String out_plansOD="C:\\Users\\Nidhi\\Desktop\\MATSim Paper\\DemandOD.xml.gz";
+        String odMatrix ="C:\\Users\\Nidhi\\Desktop\\MalviyaNagar_PT\\Files\\2016-10_MalviyaNagarODSurveyData.txt";
+        String coordinatesFile = "C:\\Users\\Nidhi\\Desktop\\MalviyaNagar_PT\\Files\\Book2.csv";
+        String out_plansOD="C:\\Users\\Nidhi\\Desktop\\MalviyaNagar_PT\\Files\\DemandOD.xml.gz";
         Scenario scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
         Population population = scenario.getPopulation();
         PopulationFactory factory = scenario.getPopulation().getFactory();

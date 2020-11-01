@@ -19,9 +19,9 @@ import playground.amit.jaipur.JaipurUtils;
 import playground.amit.utils.geometry.GeometryUtils;
 
 public class NetworkSouthDelhi {
-		 private static final String roadShapeFile = "C:\\Users\\Nidhi\\Desktop\\MATSim Paper\\planet_SouthDelhi_shp\\shape\\roads.shp";
-		 private static final String inputPBFFile = "C:\\Users\\Nidhi\\Desktop\\MATSim Paper\\";
-		 private static final String matsimNetworkFile = "C:\\Users\\Nidhi\\Desktop\\MATSim Paper\\Planet_south_delhi_matsim.xml.gz";
+		 private static final String roadShapeFile = "C:\\Users\\Nidhi\\Desktop\\MalviyaNagar_PT\\Files\\planet_SouthDelhi_shp\\shape\\roads.shp";
+		 private static final String inputPBFFile = "C:\\Users\\Nidhi\\Desktop\\MalviyaNagar_PT\\Files\\";
+		 private static final String matsimNetworkFile = "C:\\Users\\Nidhi\\Desktop\\MalviyaNagar_PT\\Files\\Planet_south_delhi_matsim.xml.gz";
 
 		    public static void main(String[] args) {
 		        CoordinateTransformation transformation = TransformationFactory
@@ -33,14 +33,14 @@ public class NetworkSouthDelhi {
 		        Geometry geometry = GeometryUtils.getGeometryFromListOfFeatures(features); // --> WGS:84
 
 		        BiPredicate<Coord, Integer> includeLinkAtCoordWithHierarchy = (cord, hierarchyLevel) -> {
-		            //cord in EPSG:32643; so need to transform
+		            //cord in EPSG:32643
 		            if (hierarchyLevel<=4) return true; //keep all roads upto level 4.
 		            else return ( hierarchyLevel<=6 && geometry.contains(MGC.coord2Point(reverse_transformation.transform(cord))) );
 		        };
 
 		        Network network = new SupersonicOsmNetworkReader.Builder()
 		                .setCoordinateTransformation(transformation)
-		                .setIncludeLinkAtCoordWithHierarchy(includeLinkAtCoordWithHierarchy)
+//		                .setIncludeLinkAtCoordWithHierarchy(includeLinkAtCoordWithHierarchy)   // since for south delhi, no need to filter the network
 		                .build()
 		                .read(Paths.get(inputPBFFile).resolve("planet_77.183,28.513_77.247,28.55.osm.pbf"));
 
