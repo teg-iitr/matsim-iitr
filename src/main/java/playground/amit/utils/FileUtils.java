@@ -37,10 +37,8 @@ public final class FileUtils {
 
     public static final Logger LOGGER = Logger.getLogger(FileUtils.class);
 
-    public static final String RUNS_SVN = System.getProperty("user.name").equals("amit") ? "/Users/amit/Documents/repos/runs-svn/" : "../../runs-svn/";
-
-    public static final String SHARED_SVN = System.getProperty("user.name").equals("amit") ? "/Users/amit/Documents/repos/shared-svn/" : "../../shared-svn/";
-
+    public static final String RUNS_SVN = System.getProperty("user.name").equalsIgnoreCase("amit") ? "C:/Users/Amit Agarwal/Google Drive/iitr_gmail_drive/project_data/" : "../../runs-svn/";
+    public static final String SHARED_SVN = System.getProperty("user.name").equalsIgnoreCase("amit") ? "C:/Users/Amit Agarwal/Google Drive/iitr_gmail_drive/project_data/" : "../../shared-svn/";
     public static final String GNU_SCRIPT_DIR = "../agarwalamit/src/main/resources/gnuplot/";
 
     /*
@@ -52,6 +50,15 @@ public final class FileUtils {
             if (! new File(dirToDel).exists()) continue;
             Logger.getLogger(JointCalibrationControler.class).info("Deleting the directory "+dirToDel);
             IOUtils.deleteDirectoryRecursively(new File(dirToDel).toPath());
+        }
+    }
+
+    public static String getLocalGDrivePath(){
+        String userName = System.getProperty("user.name");
+        if(userName.equalsIgnoreCase("amit")){
+            return "C:/Users/Amit Agarwal/Google Drive/iitr_gmail_drive/";
+        } else{
+            throw new RuntimeException("No Google Drive Folder is defined for user "+userName);
         }
     }
 }
