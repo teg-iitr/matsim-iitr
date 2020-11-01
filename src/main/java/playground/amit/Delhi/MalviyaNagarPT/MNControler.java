@@ -10,43 +10,44 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.scenario.ScenarioUtils;
+import playground.amit.utils.FileUtils;
 
-public class ConfigODNew {
+public class MNControler {
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		Config config = ConfigUtils.createConfig();
-        config.network().setInputFile("C:\\Users\\Nidhi\\Desktop\\MATSim Paper\\Planet_south_delhi_matsim.xml.gz");
-        config.plans().setInputFile("C:\\Users\\Nidhi\\Desktop\\MATSim Paper\\DemandOD.xml.gz");
-        config.controler().setOutputDirectory("C:\\Users\\Nidhi\\Desktop\\Matsim Paper\\outputODNew");
+
+        config.network().setInputFile(FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/matsimFiles/south_delhi_matsim_network.xml.gz");
+        config.plans().setInputFile(  FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/matsimFiles/MN_transitDemand_2020-11-01.xml.gz" );
+        config.controler().setOutputDirectory("./output/");
+
         config.controler().setLastIteration(10);
         config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
         config.controler().setDumpDataAtEnd(true);
         
         PlanCalcScoreConfigGroup scoreConfigGroup= config.planCalcScore();
         //for all activities
-           ActivityParams originAct =new ActivityParams ("originAct");
-           originAct.setTypicalDuration(12*3600.);
-           scoreConfigGroup.addActivityParams(originAct);
-           
-           ActivityParams destAct =new ActivityParams ("destAct");
-           destAct.setTypicalDuration(9*3600.);
-           scoreConfigGroup.addActivityParams(destAct);
-           
+       ActivityParams originAct =new ActivityParams ("origin");
+       originAct.setTypicalDuration(12*3600.);
+       scoreConfigGroup.addActivityParams(originAct);
 
-            config.planCalcScore().addActivityParams(originAct);
-            config.planCalcScore().addActivityParams(destAct);
+       ActivityParams destAct =new ActivityParams ("destination");
+       destAct.setTypicalDuration(9*3600.);
+       scoreConfigGroup.addActivityParams(destAct);
+
+        config.planCalcScore().addActivityParams(originAct);
+        config.planCalcScore().addActivityParams(destAct);
 
         StrategyConfigGroup.StrategySettings reRoute = new StrategyConfigGroup.StrategySettings();
-        reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute); // though, this must not have any effect.
+        reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
         reRoute.setWeight(0.3);
         config.strategy().addStrategySettings(reRoute);
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
 
         // increase the capacity of tertiary links to 1500
-        scenario.getNetwork().getLinks().values().stream().filter(l->l.getCapacity()<=600.).forEach(l->l.setCapacity(1500.));
-        scenario.getNetwork().getLinks().values().stream().filter(l->l.getFreespeed()<=60./3.6).forEach(l->l.setFreespeed(60./3.6));
+//        scenario.getNetwork().getLinks().values().stream().filter(l->l.getCapacity()<=600.).forEach(l->l.setCapacity(1500.));
+//        scenario.getNetwork().getLinks().values().stream().filter(l->l.getFreespeed()<=60./3.6).forEach(l->l.setFreespeed(60./3.6));
 
         new Controler(scenario).run();
 

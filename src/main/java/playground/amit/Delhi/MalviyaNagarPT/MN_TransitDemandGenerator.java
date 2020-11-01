@@ -21,7 +21,7 @@ import java.util.Random;
 /**
  * Created by Amit on 25/10/2020
  */
-public class DemandFromOD {
+public class MN_TransitDemandGenerator {
 
 	public static final String toCoordinateSystem  = "EPSG:32643";
 
@@ -34,7 +34,7 @@ public class DemandFromOD {
 	private final Map<String, Coord> busStopToCoordinate = new HashMap<>();
 
 	public static void main(String[] args) {
-		new DemandFromOD().run();
+		new MN_TransitDemandGenerator().run();
 	}
 
 	public void run() {
@@ -42,7 +42,7 @@ public class DemandFromOD {
 		parseCoordinateFile(coordinatesFile);
 
 		String odMatrix = FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/2016-10_MalviyaNagarODSurveyData.txt";
-		String out_plansOD=FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/matsimFiles/MN_transitDemand_2020-11-01.xml.gz";
+		String out_plansOD = FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/matsimFiles/MN_transitDemand_2020-11-01.xml.gz";
 		Scenario scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
 		Population population = scenario.getPopulation();
 		PopulationFactory factory = scenario.getPopulation().getFactory();
