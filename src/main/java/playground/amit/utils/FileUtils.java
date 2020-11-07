@@ -57,7 +57,12 @@ public final class FileUtils {
         String userName = System.getProperty("user.name");
         if(userName.equalsIgnoreCase("amit")){
             return "C:/Users/Amit Agarwal/Google Drive/iitr_gmail_drive/";
-        } else{
+        }
+        else if (userName.equalsIgnoreCase("Nidhi")){
+            return "C:/Users/Nidhi/Documents/iitr_gmail_drive/";
+
+        }
+        else{
             throw new RuntimeException("No Google Drive Folder is defined for user "+userName);
         }
     }

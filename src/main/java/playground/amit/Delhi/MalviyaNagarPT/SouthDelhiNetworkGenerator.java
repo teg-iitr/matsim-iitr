@@ -8,11 +8,14 @@ import org.matsim.contrib.osm.networkReader.SupersonicOsmNetworkReader;
 import org.matsim.core.network.algorithms.NetworkCleaner;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
+import org.matsim.pt.transitSchedule.api.TransitScheduleWriter;
 
 import playground.amit.utils.FileUtils;
 
 public class SouthDelhiNetworkGenerator {
-//		 private static final String roadShapeFile = "C:\\Users\\Nidhi\\Desktop\\MalviyaNagar_PT\\Files\\planet_SouthDelhi_shp\\shape\\roads.shp";
+
+     	
+
 		 private static final String inputPBFFile = FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/planet_77.183,28.513_77.247,28.55.osm.pbf";
 		 private static final String matsimNetworkFile =  FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/matsimFiles/south_delhi_matsim_network.xml.gz";
 
