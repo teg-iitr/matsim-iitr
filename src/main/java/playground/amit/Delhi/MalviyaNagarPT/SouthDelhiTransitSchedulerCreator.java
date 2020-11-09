@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 public class SouthDelhiTransitSchedulerCreator {
 
     private final Map<String, List<String>> routeId2Stops = new HashMap<>();
-    private final Scenario scenario;
+    public static Scenario scenario;
     private final String coordinatesFile = FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/PT_stops_coordinates.csv";
 
    
@@ -47,7 +47,9 @@ public class SouthDelhiTransitSchedulerCreator {
 
           this.scenario = ScenarioUtils.loadScenario(config);
     }
+
     public static void main(String[] args) {
+
         new SouthDelhiTransitSchedulerCreator().run();
     }
 
@@ -74,60 +76,33 @@ public class SouthDelhiTransitSchedulerCreator {
             }
             //TODO do we really need to create networkRoute
 
+            //transit line 1
+
+            NetworkRoute networkRoute1 = this.scenario.getPopulation().getFactory().getRouteFactories().createRoute(NetworkRoute.class,  MN_Routes.startLink1.getId(), MN_Routes.endLink1.getId());
+            networkRoute1.setLinkIds(MN_Routes.startLink1.getId(), MN_Routes.getLinkList1(), MN_Routes.endLink1.getId());
+
+
+            //transit line 2
+
+            NetworkRoute networkRoute2 = this.scenario.getPopulation().getFactory().getRouteFactories().createRoute(NetworkRoute.class, MN_Routes.startLink2.getId(), MN_Routes.endLink2.getId());
+            networkRoute2.setLinkIds(MN_Routes.startLink2.getId(), MN_Routes.getLinkList2(), MN_Routes.endLink2.getId());
+
             //transit line 3
-            Link startLink3 = this.scenario.getNetwork().getLinks().get(Id.create("5145215660013f", Link.class));
-            Link endLink3 = this.scenario.getNetwork().getLinks().get(Id.create("5542886270001f", Link.class));
-            NetworkRoute networkRoute3 = this.scenario.getPopulation().getFactory().getRouteFactories().createRoute(NetworkRoute.class, startLink3.getId(), endLink3.getId());
-
-            ArrayList<Id<Link>> linkList3 = new ArrayList<>();
-            linkList3.add(Id.create("5823673530001f", Link.class));
-            linkList3.add(Id.create("5823673530003f", Link.class));
-            linkList3.add(Id.create("5823673530005f", Link.class));
-            linkList3.add(Id.create("5823673530006f", Link.class));
-            linkList3.add(Id.create("5823673530007f", Link.class));
-            linkList3.add(Id.create("6036480960000f", Link.class));
-            linkList3.add(Id.create("6837664700000f", Link.class));
-            linkList3.add(Id.create("6837664700001f",Link.class));
-            linkList3.add(Id.create("773639460000f",Link.class));
-            linkList3.add(Id.create("773639460007f",Link.class));
-            linkList3.add(Id.create("773639460008f",Link.class));
-            linkList3.add(Id.create("6897059630000f",Link.class));
-            linkList3.add(Id.create("5705260650001f",Link.class));
-            linkList3.add(Id.create("773639930002f",Link.class));
-            linkList3.add(Id.create("5145215680000f",Link.class));
-            linkList3.add(Id.create("5145215680001f",Link.class));
-            linkList3.add(Id.create("5145215680002f",Link.class));
-            linkList3.add(Id.create("5795078100002f",Link.class));
-            linkList3.add(Id.create("5705260610000f",Link.class));
-            linkList3.add(Id.create("5705260590000f",Link.class));
-            linkList3.add(Id.create("5618596580000f",Link.class));
-            linkList3.add(Id.create("5618596580003f",Link.class));
-            linkList3.add(Id.create("5618596560000f",Link.class));
-            linkList3.add(Id.create("5418873140000f",Link.class));
-            linkList3.add(Id.create("5418873140001f",Link.class));
-            linkList3.add(Id.create("5418873140001f",Link.class));
-            linkList3.add(Id.create("5418873140002f",Link.class));
-            linkList3.add(Id.create("5418873140004f",Link.class));
-            linkList3.add(Id.create("773640050001f",Link.class));
-            linkList3.add(Id.create("773640050003f",Link.class));
-            linkList3.add(Id.create("773640050005f",Link.class));
-            linkList3.add(Id.create("773640050007f",Link.class));
-            linkList3.add(Id.create("5577071660001f",Link.class));
-            linkList3.add(Id.create("5577071660003f",Link.class));
-            linkList3.add(Id.create("5551971890001f",Link.class));
-            linkList3.add(Id.create("5551971890003f",Link.class));
-            linkList3.add(Id.create("5551971890004f",Link.class));
-            linkList3.add(Id.create("5551971890005f",Link.class));
-            linkList3.add(Id.create("773639480003f",Link.class));
+            NetworkRoute networkRoute3 = this.scenario.getPopulation().getFactory().getRouteFactories().createRoute(NetworkRoute.class, MN_Routes.startLink3.getId(), MN_Routes.endLink3.getId());
+            networkRoute3.setLinkIds(MN_Routes.startLink3.getId(), MN_Routes.getLinkList3(), MN_Routes.endLink3.getId());
 
 
-            networkRoute3.setLinkIds(startLink3.getId(), linkList3, endLink3.getId());
-
-            TransitRoute route = factory.createTransitRoute(Id.create("route_3" + key, TransitRoute.class), networkRoute3, stopList, "bus");
-            transitLine.addRoute(route);
+            TransitRoute route_1 = factory.createTransitRoute(Id.create("route_1" + key, TransitRoute.class), networkRoute1, stopList, "bus");
+            TransitRoute route_2 = factory.createTransitRoute(Id.create("route_2" + key, TransitRoute.class), networkRoute2, stopList, "bus");
+            TransitRoute route_3 = factory.createTransitRoute(Id.create("route_3" + key, TransitRoute.class), networkRoute3, stopList, "bus");
+            transitLine.addRoute(route_1);
+            transitLine.addRoute(route_2);
+            transitLine.addRoute(route_3);
             Departure departure = factory.createDeparture(Id.create("dep_" + key, Departure.class), 8 * 3600.);
             departure.setVehicleId(Id.createVehicleId("bus_" + key));
-            route.addDeparture(departure);
+            route_1.addDeparture(departure);
+            route_2.addDeparture(departure);
+            route_3.addDeparture(departure);
             schedule.addTransitLine(transitLine);
 
         });
@@ -155,7 +130,7 @@ public class SouthDelhiTransitSchedulerCreator {
 //    }
 
        TransitScheduleWriter writeTransitSchedule = new TransitScheduleWriter(schedule);
-       writeTransitSchedule.writeFile(FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/matsimFiles/SouthDelhi_PT_Schedule.xml.gz");
+       writeTransitSchedule.writeFile(FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/matsimFiles/Test_SouthDelhi_PT_Schedule.xml.gz");
 }
 
     
