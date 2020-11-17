@@ -19,6 +19,8 @@ public class MNControler {
 
         config.network().setInputFile(FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/matsimFiles/south_delhi_matsim_network.xml.gz");
         config.plans().setInputFile(  FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/matsimFiles/MN_transitDemand_2020-11-01.xml.gz" );
+        config.transit().setTransitScheduleFile(FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/matsimFiles/Test_SouthDelhi_PT_Schedule.xml.gz" );
+//        config.transit().setUseTransit(true);
         config.controler().setOutputDirectory("./output/");
 
 

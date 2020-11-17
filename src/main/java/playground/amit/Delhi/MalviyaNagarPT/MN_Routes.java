@@ -28,8 +28,6 @@ public class MN_Routes {
         public static ArrayList<Id<Link>> linkList3 = new ArrayList<>();
 
         //transit line 1
-
-
         public static ArrayList<Id<Link>> getLinkList1() {
                 linkList1.add(Id.create("5823673530001f", Link.class));
                 linkList1.add(Id.create("5823673530003f", Link.class));
@@ -137,7 +135,6 @@ public class MN_Routes {
 
 
     //transit line 2
-
 
         public static ArrayList<Id<Link>> getLinkList2() {
                 linkList2.add(Id.create("773639480003f", Link.class));
