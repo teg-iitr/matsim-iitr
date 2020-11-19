@@ -68,7 +68,6 @@ public class SouthDelhiTransitSchedulerCreator {
                 TransitRouteStop transitRouteStop = factory.createTransitRouteStop(st, 0., 60.);
                 stopList.add(transitRouteStop);
             }
-            //TODO do we really need to create networkRoute
 
             //transit line 1
 
@@ -89,6 +88,7 @@ public class SouthDelhiTransitSchedulerCreator {
             TransitRoute route_1 = factory.createTransitRoute(Id.create("route_1" + key, TransitRoute.class), networkRoute1, stopList, "bus");
             TransitRoute route_2 = factory.createTransitRoute(Id.create("route_2" + key, TransitRoute.class), networkRoute2, stopList, "bus");
             TransitRoute route_3 = factory.createTransitRoute(Id.create("route_3" + key, TransitRoute.class), networkRoute3, stopList, "bus");
+            //FIX ME: with the following, you are adding all three different transit routes to only one transit line, which is not correct.
             transitLine.addRoute(route_1);
             transitLine.addRoute(route_2);
             transitLine.addRoute(route_3);
@@ -110,7 +110,7 @@ public class SouthDelhiTransitSchedulerCreator {
                     for (int i = 0; i < 12; i++) {
                         busVehicles[i]= vehFactory.createVehicle(Id.create("MN_bus"+i, Vehicle.class),vehType);
                         transitVehicles.addVehicle(busVehicles[i]);
-                        Departure dep = factory.createDeparture(Id.create("dep_bus" + i, Departure.class), 8 * 3600 + i * 600);
+                        Departure dep = factory.createDeparture(Id.create("dep_bus" + i, Departure.class), 8 * 3600 + i * 300);
                         dep.setVehicleId(busVehicles[i].getId());
                         route_1.addDeparture(dep);
                         route_2.addDeparture(dep);
