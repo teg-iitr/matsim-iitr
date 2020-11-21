@@ -17,15 +17,24 @@ import java.util.List;
 public final class MN_Routes {
 
         // FIX ME: you should rather have link IDs only (which are constants); Do not use any non-final variable from other classes here (Do not use SouthDelhiTransitSchedulerCreator.scenario)
-        public static final Link startLink1 = SouthDelhiTransitSchedulerCreator.scenario.getNetwork().getLinks().get(Id.create("5145215660013f", Link.class));
-        public static final Link endLink1 = SouthDelhiTransitSchedulerCreator.scenario.getNetwork().getLinks().get(Id.create("6888270010007f", Link.class));
+//        public static final Link startLink1 = SouthDelhiTransitSchedulerCreator.scenario.getNetwork().getLinks().get(Id.create("5145215660013f", Link.class));
+//        public static final Link endLink1 = SouthDelhiTransitSchedulerCreator.scenario.getNetwork().getLinks().get(Id.create("6888270010007f", Link.class));
+//
+//        public static  final Link startLink2 = SouthDelhiTransitSchedulerCreator.scenario.getNetwork().getLinks().get(Id.create("5542886270001f", Link.class));
+//        public static final Link endLink2 = SouthDelhiTransitSchedulerCreator.scenario.getNetwork().getLinks().get(Id.create("5714501110001f", Link.class));
+//
+//        public static Link startLink3 = SouthDelhiTransitSchedulerCreator.scenario.getNetwork().getLinks().get(Id.create("5145215660013f", Link.class));
+//        public static Link endLink3 = SouthDelhiTransitSchedulerCreator.scenario.getNetwork().getLinks().get(Id.create("5542886270001f", Link.class));
 
-        public static  final Link startLink2 = SouthDelhiTransitSchedulerCreator.scenario.getNetwork().getLinks().get(Id.create("5542886270001f", Link.class));
-        public static final Link endLink2 = SouthDelhiTransitSchedulerCreator.scenario.getNetwork().getLinks().get(Id.create("5714501110001f", Link.class));
+        public static final Id<Link>  startLink1 = Id.create("5145215660013f",Link.class);
+        public static final Id<Link>  endLink1 = Id.create("6888270010007f",Link.class);
+        public static final Id<Link>  startLink2 = Id.create("5542886270001f",Link.class);
+        public static final Id<Link>  endLink2 = Id.create("5714501110001f",Link.class);
+        public static final Id<Link>  startLink3 = Id.create("5145215660013f",Link.class);
+        public static final Id<Link>  endLink3 = Id.create("5542886270001f",Link.class);
 
-        public static Link startLink3 = SouthDelhiTransitSchedulerCreator.scenario.getNetwork().getLinks().get(Id.create("5145215660013f", Link.class));
-        public static Link endLink3 = SouthDelhiTransitSchedulerCreator.scenario.getNetwork().getLinks().get(Id.create("5542886270001f", Link.class));
 
+//        public static final List<Id<Link>> linkList1 = List.of(Id.create("5823673530001f", Link.class),Id.create("5823673530003f", Link.class));
         public static ArrayList<Id<Link>> linkList1 = new ArrayList<>();
         public static ArrayList<Id<Link>> linkList2 = new ArrayList<>();
         public static ArrayList<Id<Link>> linkList3 = new ArrayList<>();

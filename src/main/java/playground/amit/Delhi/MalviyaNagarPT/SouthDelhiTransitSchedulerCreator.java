@@ -29,7 +29,7 @@ public class SouthDelhiTransitSchedulerCreator {
     private final Map<String, List<String>> routeId2Stops = new HashMap<>();
     public static Scenario scenario;
     private final String coordinatesFile = FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/PT_stops_coordinates.csv";
-
+    private final String outputVehicleFile = FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/matsimFiles/OutputVehicles_MN_VR.xml.gz";
 
     public SouthDelhiTransitSchedulerCreator(){
         this.routeId2Stops.put("1", List.of("1","22","2","3","25","5","6","7","28","9","10","11"));
@@ -61,7 +61,10 @@ public class SouthDelhiTransitSchedulerCreator {
 
         //create routes
         this.routeId2Stops.forEach((key, value) -> {
-            TransitLine transitLine = factory.createTransitLine(Id.create("line_" + key, TransitLine.class));
+            TransitLine transitLine1 =factory.createTransitLine(Id.create("line_1" + key, TransitLine.class));
+            TransitLine transitLine2=factory.createTransitLine(Id.create("line_2" + key, TransitLine.class));
+            TransitLine transitLine3=factory.createTransitLine(Id.create("line_3" + key, TransitLine.class));
+
             List<TransitRouteStop> stopList = new ArrayList<>();
             for (String s : value) {
                 TransitStopFacility st = schedule.getFacilities().get(Id.create(s, TransitStopFacility.class));
@@ -71,27 +74,32 @@ public class SouthDelhiTransitSchedulerCreator {
 
             //transit line 1
 
-            NetworkRoute networkRoute1 = this.scenario.getPopulation().getFactory().getRouteFactories().createRoute(NetworkRoute.class,  MN_Routes.startLink1.getId(), MN_Routes.endLink1.getId());
-            networkRoute1.setLinkIds(MN_Routes.startLink1.getId(), MN_Routes.getLinkList1(), MN_Routes.endLink1.getId());
+
+            NetworkRoute networkRoute1 = this.scenario.getPopulation().getFactory().getRouteFactories().createRoute(NetworkRoute.class,  MN_Routes.startLink1, MN_Routes.endLink1 );
+            networkRoute1.setLinkIds(MN_Routes.startLink1, MN_Routes.getLinkList1(), MN_Routes.endLink1);
 
 
             //transit line 2
 
-            NetworkRoute networkRoute2 = this.scenario.getPopulation().getFactory().getRouteFactories().createRoute(NetworkRoute.class, MN_Routes.startLink2.getId(), MN_Routes.endLink2.getId());
-            networkRoute2.setLinkIds(MN_Routes.startLink2.getId(), MN_Routes.getLinkList2(), MN_Routes.endLink2.getId());
+            NetworkRoute networkRoute2 = this.scenario.getPopulation().getFactory().getRouteFactories().createRoute(NetworkRoute.class, MN_Routes.startLink2, MN_Routes.endLink2);
+            networkRoute2.setLinkIds(MN_Routes.startLink2, MN_Routes.getLinkList2(), MN_Routes.endLink2);
+
 
             //transit line 3
-            NetworkRoute networkRoute3 = this.scenario.getPopulation().getFactory().getRouteFactories().createRoute(NetworkRoute.class, MN_Routes.startLink3.getId(), MN_Routes.endLink3.getId());
-            networkRoute3.setLinkIds(MN_Routes.startLink3.getId(), MN_Routes.getLinkList3(), MN_Routes.endLink3.getId());
+            NetworkRoute networkRoute3 = this.scenario.getPopulation().getFactory().getRouteFactories().createRoute(NetworkRoute.class, MN_Routes.startLink3, MN_Routes.endLink3);
+            networkRoute3.setLinkIds(MN_Routes.startLink3, MN_Routes.getLinkList3(), MN_Routes.endLink3);
 
 
             TransitRoute route_1 = factory.createTransitRoute(Id.create("route_1" + key, TransitRoute.class), networkRoute1, stopList, "bus");
             TransitRoute route_2 = factory.createTransitRoute(Id.create("route_2" + key, TransitRoute.class), networkRoute2, stopList, "bus");
             TransitRoute route_3 = factory.createTransitRoute(Id.create("route_3" + key, TransitRoute.class), networkRoute3, stopList, "bus");
+
             //FIX ME: with the following, you are adding all three different transit routes to only one transit line, which is not correct.
-            transitLine.addRoute(route_1);
-            transitLine.addRoute(route_2);
-            transitLine.addRoute(route_3);
+
+            transitLine1.addRoute(route_1);
+            transitLine2.addRoute(route_2);
+            transitLine3.addRoute(route_3);
+
 
 
             // create vehicle types and vehicle
@@ -118,7 +126,16 @@ public class SouthDelhiTransitSchedulerCreator {
                     }
 
 
-            schedule.addTransitLine(transitLine);
+                    VehicleWriterV1 vehicleWriter = new VehicleWriterV1(transitVehicles);
+                    vehicleWriter.writeFile(outputVehicleFile);
+
+//            MatsimVehicleWriter vehicleWriter = new MatsimVehicleWriter(transitVehicles);
+//            vehicleWriter.writeFile(outputVehicleFile);
+
+
+            schedule.addTransitLine(transitLine1);
+            schedule.addTransitLine(transitLine2);
+            schedule.addTransitLine(transitLine3);
 
 
 
@@ -154,7 +171,7 @@ public class SouthDelhiTransitSchedulerCreator {
 
 
        TransitScheduleWriter writeTransitSchedule = new TransitScheduleWriter(schedule);
-       writeTransitSchedule.writeFile(FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/matsimFiles/Test_SouthDelhi_PT_Schedule.xml.gz");
+       writeTransitSchedule.writeFile(FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/matsimFiles/SouthDelhi_PT_Schedule.xml.gz");
 }
 
 

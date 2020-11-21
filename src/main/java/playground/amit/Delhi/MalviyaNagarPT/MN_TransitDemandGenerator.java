@@ -3,6 +3,7 @@ package playground.amit.Delhi.MalviyaNagarPT;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.MatsimRandom;
@@ -25,7 +26,7 @@ public class MN_TransitDemandGenerator {
 
 	public static final String toCoordinateSystem  = "EPSG:32643";
 
-	private final String mode = "car";
+	private final String mode = TransportMode.pt;
     private final double startTime = 8*3600.;
     private final double timebin = 2*3600.;
     private final Random random = MatsimRandom.getLocalInstance();
