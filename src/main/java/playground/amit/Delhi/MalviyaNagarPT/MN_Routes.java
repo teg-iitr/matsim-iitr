@@ -29,8 +29,10 @@ public final class MN_Routes {
 
         public static final Id<Link> startLink1 = Id.create("5145215660013f", Link.class);
         public static final Id<Link> endLink1 = Id.create("6888270010007f", Link.class);
+
         public static final Id<Link> startLink2 = Id.create("5542886270001f", Link.class);
         public static final Id<Link> endLink2 = Id.create("5714501110001f", Link.class);
+
         public static final Id<Link> startLink3 = Id.create("5145215660013f", Link.class);
         public static final Id<Link> endLink3 = Id.create("5542886270001f", Link.class);
 
