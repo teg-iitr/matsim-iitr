@@ -39,7 +39,7 @@ public class MN_TransitDemandGenerator {
 	}
 
 	public void run() {
-		String coordinatesFile = FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/PT_stops_coordinates.csv";
+		String coordinatesFile = FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/PT_stops_coordinates_links.csv";
 		parseCoordinateFile(coordinatesFile);
 
 		String odMatrix = FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/2016-10_MalviyaNagarODSurveyData.txt";

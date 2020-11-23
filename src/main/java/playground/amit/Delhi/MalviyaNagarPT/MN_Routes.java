@@ -262,44 +262,14 @@ public final class MN_Routes {
 
 
 
-        public static final List<Id<Link>> stopLinkId = List.of(Id.createLinkId("5823673530001f"), Id.createLinkId("5145215680000f"), Id.createLinkId("317565150006f"),
-                Id.createLinkId("1504018850006f"), Id.createLinkId("5705260710001f"), Id.createLinkId("317565100018f"), Id.createLinkId("5637147670004f"),
-                Id.createLinkId("5606511090002f"), Id.createLinkId("5831437080006f"), Id.createLinkId("6568056490001f"), Id.createLinkId("6888270010007f"), //11
-                Id.createLinkId("6140720190001f"), Id.createLinkId("6598332090009f"), Id.createLinkId("6044866480001f"), Id.createLinkId("5637147760010f"), //15
-                Id.createLinkId("5418873140000f"), Id.createLinkId("295304080021f"), Id.createLinkId("6866052960004f"), //18-need to edit the link
-                Id.createLinkId("5542886270001f"), Id.createLinkId("281215370005f"), Id.createLinkId("5714501110001f"), Id.createLinkId("6036480960000f"), //22-traffic signal
-                Id.createLinkId("1504018850002f"), Id.createLinkId("6156254680000f"), Id.createLinkId("317565150042f"), Id.createLinkId("773640050003f"),
-                Id.createLinkId("3120319040006f"), Id.createLinkId("1912048840014f"));
-//        public static final List<Id<Link>> stopLinkIdList = List.of(stopLinkId1);
-
-//        public static final Id<Link> stopLinkId1 = Id.create("5823673530001f", Link.class);
-//        public static final Id<Link> stopLinkId2 = Id.create("5145215680000f", Link.class);
-//        public static final Id<Link> stopLinkId3 = Id.create("317565150006f", Link.class);
-//        public static final Id<Link> stopLinkId4 = Id.create("1504018850006f", Link.class);
-//        public static final Id<Link> stopLinkId5 = Id.create("5705260710001f", Link.class);
-//        public static final Id<Link> stopLinkId6 = Id.create("317565100018f", Link.class);
-//        public static final Id<Link> stopLinkId7 = Id.create("5637147670004f", Link.class);
-//        public static final Id<Link> stopLinkId8 = Id.create("5606511090002f", Link.class);
-//        public static final Id<Link> stopLinkId9 = Id.create("5831437080006f", Link.class);
-//        public static final Id<Link> stopLinkId11 = Id.create("6568056490001f", Link.class);
-//        public static final Id<Link> stopLinkId12= Id.create("6140720190001f", Link.class);
-//        public static final Id<Link> stopLinkId13= Id.create("6598332090009f", Link.class);
-//        public static final Id<Link> stopLinkId14= Id.create("6044866480001f", Link.class);
-//        public static final Id<Link> stopLinkId15= Id.create("5637147760010f", Link.class);
-//        public static final Id<Link> stopLinkId16= Id.create("5418873140000f", Link.class);
-//        public static final Id<Link> stopLinkId17= Id.create("295304080021f", Link.class);
-//        public static final Id<Link> stopLinkId18= Id.create("6866052960004f", Link.class);
-//        public static final Id<Link> stopLinkId19= Id.create("5542886270001f", Link.class);
-//        public static final Id<Link> stopLinkId20= Id.create("281215370005f", Link.class);
-//        public static final Id<Link> stopLinkId21= Id.create("5714501110001f", Link.class);
-//        public static final Id<Link> stopLinkId22= Id.create("6036480960000f", Link.class);
-//        public static final Id<Link> stopLinkId23= Id.create("1504018850002f", Link.class);
-//        public static final Id<Link> stopLinkId24= Id.create("6156254680000f", Link.class);
-//        public static final Id<Link> stopLinkId25= Id.create("317565150042f", Link.class);
-//        public static final Id<Link> stopLinkId26= Id.create("773640050003f", Link.class);
-//        public static final Id<Link> stopLinkId27= Id.create("3120319040006f", Link.class);
-//        public static final Id<Link> stopLinkId28= Id.create("1912048840014f", Link.class);
-
+//        public static final List<Id<Link>> stopLinkId = List.of(Id.createLinkId("5823673530001f"), Id.createLinkId("5145215680000f"), Id.createLinkId("317565150006f"),
+//                Id.createLinkId("1504018850006f"), Id.createLinkId("5705260710001f"), Id.createLinkId("317565100018f"), Id.createLinkId("5637147670004f"),
+//                Id.createLinkId("5606511090002f"), Id.createLinkId("5831437080006f"), Id.createLinkId("6568056490001f"), Id.createLinkId("6888270010007f"), //11
+//                Id.createLinkId("6140720190001f"), Id.createLinkId("6598332090009f"), Id.createLinkId("6044866480001f"), Id.createLinkId("5637147760010f"), //15
+//                Id.createLinkId("5418873140000f"), Id.createLinkId("295304080021f"), Id.createLinkId("6866052960004f"), //18-need to edit the link
+//                Id.createLinkId("5542886270001f"), Id.createLinkId("281215370005f"), Id.createLinkId("5714501110001f"), Id.createLinkId("6036480960000f"), //22-traffic signal
+//                Id.createLinkId("1504018850002f"), Id.createLinkId("6156254680000f"), Id.createLinkId("317565150042f"), Id.createLinkId("773640050003f"),
+//                Id.createLinkId("3120319040006f"), Id.createLinkId("1912048840014f"));
 
 
 
