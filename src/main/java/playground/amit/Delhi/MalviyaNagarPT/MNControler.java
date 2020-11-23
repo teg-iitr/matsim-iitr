@@ -33,6 +33,7 @@ public class MNControler {
         config.transit().setUseTransit(true);
         Set<String> transitModes = new HashSet<>();
         transitModes.add("bus");
+
         config.transit().setTransitModes(transitModes);
         config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.defaultVehicle);
         config.controler().setOutputDirectory("./output/");

@@ -3,6 +3,7 @@ package playground.amit.Delhi.MalviyaNagarPT;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.population.routes.NetworkRoute;
@@ -16,10 +17,7 @@ import playground.amit.utils.FileUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Amit on 01/11/2020
@@ -52,12 +50,22 @@ public class SouthDelhiTransitSchedulerCreator {
         TransitScheduleFactory factory = schedule.getFactory();
 
         //create transitStops
+
         Map<String, Coord> busStopToCoordinate = getStopsCoordinates();
-        busStopToCoordinate.forEach((key, value) -> {
-            TransitStopFacility stop = factory.createTransitStopFacility(Id.create(key, TransitStopFacility.class), value, false);
+        List<Id<Link>> stopLinkIdList =MN_Routes.stopLinkId;
+        for (Map.Entry<String, Coord> entry : busStopToCoordinate.entrySet()) {
+            String k = entry.getKey();
+            Coord v = entry.getValue();
+            TransitStopFacility stop = factory.createTransitStopFacility(Id.create(k, TransitStopFacility.class), v, false);
             // TODO: not sure, if a link must also be added to the stop using stop.setLinkId(...).
+
+            int stopId = stop.getId().index();
+            stop.setLinkId(stopLinkIdList.get(stopId));
+
             schedule.addStopFacility(stop);
-        });
+
+        }
+
 
         //create routes
         this.routeId2Stops.forEach((key, value) -> {
