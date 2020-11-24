@@ -87,13 +87,13 @@ public class SouthDelhiTransitSchedulerCreator {
             NetworkRoute networkRoute;
             if (key.equals("1")) {
                 networkRoute = routeFactories.createRoute(NetworkRoute.class,  MN_Routes.startLink1, MN_Routes.endLink1 );
-                networkRoute.setLinkIds(MN_Routes.startLink1, MN_Routes.getLinkList1(), MN_Routes.endLink1);
+                networkRoute.setLinkIds(MN_Routes.startLink1, MN_Routes.linkList1, MN_Routes.endLink1);
             } else if (key.equals("2")){
                 networkRoute = routeFactories.createRoute(NetworkRoute.class,  MN_Routes.startLink2, MN_Routes.endLink2);
-                networkRoute.setLinkIds(MN_Routes.startLink2, MN_Routes.getLinkList2(), MN_Routes.endLink2);
+                networkRoute.setLinkIds(MN_Routes.startLink2, MN_Routes.linkList2 , MN_Routes.endLink2);
             } else if (key.equals("3")) {
                 networkRoute = routeFactories.createRoute(NetworkRoute.class,  MN_Routes.startLink3, MN_Routes.endLink3 );
-                networkRoute.setLinkIds(MN_Routes.startLink3, MN_Routes.getLinkList3(), MN_Routes.endLink3);
+                networkRoute.setLinkIds(MN_Routes.startLink3, MN_Routes.linkList3, MN_Routes.endLink3);
             } else {
                 throw new RuntimeException("Transit route ID "+ key+ "not found.");
             }
@@ -103,7 +103,6 @@ public class SouthDelhiTransitSchedulerCreator {
             Vehicle[] busVehicles = new Vehicle[12];
             for (int i = 0; i < 12; i++) {
            //NK  busVehicles[i]= vehFactory.createVehicle(Id.create("MN_bus"+i +key, Vehicle.class),vehType);
-
                 busVehicles[i]= vehFactory.createVehicle(Id.create("MN_bus"+i+"_line_"+key, Vehicle.class),vehType);
                 transitVehicles.addVehicle(busVehicles[i]);
                 Departure dep = factory.createDeparture(Id.create("dep_bus" + i+key, Departure.class), 8 * 3600 + i*300.);
