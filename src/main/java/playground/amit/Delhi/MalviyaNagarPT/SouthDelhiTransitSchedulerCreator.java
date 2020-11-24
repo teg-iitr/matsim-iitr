@@ -33,7 +33,7 @@ public class SouthDelhiTransitSchedulerCreator {
 
     public SouthDelhiTransitSchedulerCreator(){
         this.routeId2Stops.put("1", List.of("1","22","2","3","25","5","6","7","28","9","10","11"));
-        this.routeId2Stops.put("2",List.of("19","26","8","28","7","6","5","25","24","21"));
+        this.routeId2Stops.put("2",List.of("21", "24", "25","5", "6", "7", "28","8","26","19"));
         this.routeId2Stops.put("3",List.of("1","22","2","16","26","19"));
 
         Config config = ConfigUtils.createConfig();
@@ -74,7 +74,7 @@ public class SouthDelhiTransitSchedulerCreator {
 
         //create routes
         this.routeId2Stops.forEach((key, value) -> {
-            TransitLine transitLine1 =factory.createTransitLine(Id.create("line_" + key, TransitLine.class));
+            TransitLine transitLine =factory.createTransitLine(Id.create("line_" + key, TransitLine.class));
 
             List<TransitRouteStop> stopList = new ArrayList<>();
             for (String s : value) {
@@ -98,20 +98,30 @@ public class SouthDelhiTransitSchedulerCreator {
                 throw new RuntimeException("Transit route ID "+ key+ "not found.");
             }
 
-            TransitRoute route_1 = factory.createTransitRoute(Id.create("route_" + key, TransitRoute.class), networkRoute, stopList, "bus");
+            TransitRoute route = factory.createTransitRoute(Id.create("route_" + key, TransitRoute.class), networkRoute, stopList, "bus");
 
             Vehicle[] busVehicles = new Vehicle[12];
             for (int i = 0; i < 12; i++) {
 
                 busVehicles[i]= vehFactory.createVehicle(Id.create("MN_bus"+i+"_line_"+key, Vehicle.class),vehType);
                 transitVehicles.addVehicle(busVehicles[i]);
-                Departure dep = factory.createDeparture(Id.create("dep_bus" + i+key, Departure.class), 8 * 3600 + i*300.);
+                Departure dep;
+                if (key.equals("1")){
+                    dep = factory.createDeparture(Id.create("dep_bus" + i+ "_line_" + key, Departure.class), 8 * 3600 + i*600.);
+                } else if (key.equals("2")){
+                    dep = factory.createDeparture(Id.create("dep_bus" + i+ "_line_" + key, Departure.class), 8.5 * 3600 + i*600.);
+                } else if (key.equals("3")) {
+                    dep = factory.createDeparture(Id.create("dep_bus" + i+ "_line_" + key, Departure.class), 9 * 3600 + i*600.);
+                } else {
+                    throw new RuntimeException("Transit route ID "+ key+ "not found.");
+                }
+
                 dep.setVehicleId(busVehicles[i].getId());
-                route_1.addDeparture(dep);
+                route.addDeparture(dep);
             }
 
-            transitLine1.addRoute(route_1);
-            schedule.addTransitLine(transitLine1);
+            transitLine.addRoute(route);
+            schedule.addTransitLine(transitLine);
         });
 
         MatsimVehicleWriter vehicleWriter = new MatsimVehicleWriter(transitVehicles);
