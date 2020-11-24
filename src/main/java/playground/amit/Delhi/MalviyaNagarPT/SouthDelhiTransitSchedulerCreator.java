@@ -102,11 +102,10 @@ public class SouthDelhiTransitSchedulerCreator {
 
             Vehicle[] busVehicles = new Vehicle[12];
             for (int i = 0; i < 12; i++) {
-           //NK  busVehicles[i]= vehFactory.createVehicle(Id.create("MN_bus"+i +key, Vehicle.class),vehType);
+
                 busVehicles[i]= vehFactory.createVehicle(Id.create("MN_bus"+i+"_line_"+key, Vehicle.class),vehType);
                 transitVehicles.addVehicle(busVehicles[i]);
                 Departure dep = factory.createDeparture(Id.create("dep_bus" + i+key, Departure.class), 8 * 3600 + i*300.);
-           //AA     Departure dep = factory.createDeparture(Id.create("dep_bus" + i, Departure.class), 8 * 3600 + i*300.);
                 dep.setVehicleId(busVehicles[i].getId());
                 route_1.addDeparture(dep);
             }
