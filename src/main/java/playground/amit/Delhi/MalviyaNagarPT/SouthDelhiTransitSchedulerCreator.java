@@ -29,7 +29,7 @@ public class SouthDelhiTransitSchedulerCreator {
     private final Map<String, List<String>> routeId2Stops = new HashMap<>();
     public Scenario scenario;
     private final String coordinatesFile = FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/PT_stops_coordinates_links.csv";
-    private final String outputVehicleFile = FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/matsimFiles/OutputVehicles_MN.xml.gz";
+    private final String outputVehicleFile = FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/matsimFiles/TransitVehicles_MN.xml.gz";
 
     public SouthDelhiTransitSchedulerCreator(){
         this.routeId2Stops.put("1", List.of("1","22","2","3","25","5","6","7","28","9","10","11"));
@@ -65,6 +65,10 @@ public class SouthDelhiTransitSchedulerCreator {
         RouteFactories routeFactories = this.scenario.getPopulation().getFactory().getRouteFactories();
         Vehicles transitVehicles = VehicleUtils.createVehiclesContainer();
         VehiclesFactory vehFactory = transitVehicles.getFactory();
+        VehicleType vehType = vehFactory.createVehicleType(Id.create("bus_type", VehicleType.class));
+        vehType.getCapacity().setSeats(40);
+        vehType.getCapacity().setStandingRoom(10);
+        transitVehicles.addVehicleType(vehType);
 
         //create routes
         this.routeId2Stops.forEach((key, value) -> {
@@ -95,16 +99,13 @@ public class SouthDelhiTransitSchedulerCreator {
             TransitRoute route_1 = factory.createTransitRoute(Id.create("route_" + key, TransitRoute.class), networkRoute, stopList, "bus");
 
             // create vehicle types and vehicle
-            VehicleType vehType = vehFactory.createVehicleType(Id.create("bus_type", VehicleType.class));
-            vehType.getCapacity().setSeats(40);
-            vehType.getCapacity().setStandingRoom(10);
-            transitVehicles.addVehicleType(vehType);
+
 
             Vehicle[] busVehicles = new Vehicle[12];
             for (int i = 0; i < 12; i++) {
-                busVehicles[i]= vehFactory.createVehicle(Id.create("MN_bus"+i, Vehicle.class),vehType);
+                busVehicles[i]= vehFactory.createVehicle(Id.create("MN_bus"+i+key, Vehicle.class),vehType);
                 transitVehicles.addVehicle(busVehicles[i]);
-                Departure dep = factory.createDeparture(Id.create("dep_bus" + i, Departure.class), 8 * 3600 + i*300.);
+                Departure dep = factory.createDeparture(Id.create("dep_bus" + i+key, Departure.class), 8 * 3600 + i*300.);
                 dep.setVehicleId(busVehicles[i].getId());
                 route_1.addDeparture(dep);
             }
