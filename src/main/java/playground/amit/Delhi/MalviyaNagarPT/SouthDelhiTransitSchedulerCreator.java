@@ -66,6 +66,12 @@ public class SouthDelhiTransitSchedulerCreator {
         Vehicles transitVehicles = VehicleUtils.createVehiclesContainer();
         VehiclesFactory vehFactory = transitVehicles.getFactory();
 
+        // create vehicle types and vehicle
+        VehicleType vehType = vehFactory.createVehicleType(Id.create("bus_type", VehicleType.class));
+        vehType.getCapacity().setSeats(40);
+        vehType.getCapacity().setStandingRoom(10);
+        transitVehicles.addVehicleType(vehType);
+
         //create routes
         this.routeId2Stops.forEach((key, value) -> {
             TransitLine transitLine1 =factory.createTransitLine(Id.create("line_" + key, TransitLine.class));
@@ -79,13 +85,13 @@ public class SouthDelhiTransitSchedulerCreator {
 
             //transit route
             NetworkRoute networkRoute;
-            if (key=="1") {
+            if (key.equals("1")) {
                 networkRoute = routeFactories.createRoute(NetworkRoute.class,  MN_Routes.startLink1, MN_Routes.endLink1 );
                 networkRoute.setLinkIds(MN_Routes.startLink1, MN_Routes.getLinkList1(), MN_Routes.endLink1);
-            } else if (key=="2"){
+            } else if (key.equals("2")){
                 networkRoute = routeFactories.createRoute(NetworkRoute.class,  MN_Routes.startLink2, MN_Routes.endLink2);
                 networkRoute.setLinkIds(MN_Routes.startLink2, MN_Routes.getLinkList2(), MN_Routes.endLink2);
-            } else if (key =="3") {
+            } else if (key.equals("3")) {
                 networkRoute = routeFactories.createRoute(NetworkRoute.class,  MN_Routes.startLink3, MN_Routes.endLink3 );
                 networkRoute.setLinkIds(MN_Routes.startLink3, MN_Routes.getLinkList3(), MN_Routes.endLink3);
             } else {
@@ -94,15 +100,9 @@ public class SouthDelhiTransitSchedulerCreator {
 
             TransitRoute route_1 = factory.createTransitRoute(Id.create("route_" + key, TransitRoute.class), networkRoute, stopList, "bus");
 
-            // create vehicle types and vehicle
-            VehicleType vehType = vehFactory.createVehicleType(Id.create("bus_type", VehicleType.class));
-            vehType.getCapacity().setSeats(40);
-            vehType.getCapacity().setStandingRoom(10);
-            transitVehicles.addVehicleType(vehType);
-
             Vehicle[] busVehicles = new Vehicle[12];
             for (int i = 0; i < 12; i++) {
-                busVehicles[i]= vehFactory.createVehicle(Id.create("MN_bus"+i, Vehicle.class),vehType);
+                busVehicles[i]= vehFactory.createVehicle(Id.create("MN_bus"+i+"_line_"+key, Vehicle.class),vehType);
                 transitVehicles.addVehicle(busVehicles[i]);
                 Departure dep = factory.createDeparture(Id.create("dep_bus" + i, Departure.class), 8 * 3600 + i*300.);
                 dep.setVehicleId(busVehicles[i].getId());
@@ -119,8 +119,6 @@ public class SouthDelhiTransitSchedulerCreator {
        TransitScheduleWriter writeTransitSchedule = new TransitScheduleWriter(schedule);
        writeTransitSchedule.writeFile(FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/matsimFiles/SouthDelhi_PT_Schedule.xml.gz");
 }
-
-
 
     public Map<String, Tuple<Coord, String>> getStopsCoordinates() {
         Map<String, Tuple<Coord, String>> busStopToCoordLink = new HashMap<>();
