@@ -65,10 +65,6 @@ public class SouthDelhiTransitSchedulerCreator {
         RouteFactories routeFactories = this.scenario.getPopulation().getFactory().getRouteFactories();
         Vehicles transitVehicles = VehicleUtils.createVehiclesContainer();
         VehiclesFactory vehFactory = transitVehicles.getFactory();
-        VehicleType vehType = vehFactory.createVehicleType(Id.create("bus_type", VehicleType.class));
-        vehType.getCapacity().setSeats(40);
-        vehType.getCapacity().setStandingRoom(10);
-        transitVehicles.addVehicleType(vehType);
 
         // create vehicle types and vehicle
         VehicleType vehType = vehFactory.createVehicleType(Id.create("bus_type", VehicleType.class));
@@ -104,20 +100,14 @@ public class SouthDelhiTransitSchedulerCreator {
 
             TransitRoute route_1 = factory.createTransitRoute(Id.create("route_" + key, TransitRoute.class), networkRoute, stopList, "bus");
 
-<<<<<<< HEAD
-            // create vehicle types and vehicle
-
-
             Vehicle[] busVehicles = new Vehicle[12];
             for (int i = 0; i < 12; i++) {
-                busVehicles[i]= vehFactory.createVehicle(Id.create("MN_bus"+i+key, Vehicle.class),vehType);
-=======
-            Vehicle[] busVehicles = new Vehicle[12];
-            for (int i = 0; i < 12; i++) {
+           //NK  busVehicles[i]= vehFactory.createVehicle(Id.create("MN_bus"+i +key, Vehicle.class),vehType);
+
                 busVehicles[i]= vehFactory.createVehicle(Id.create("MN_bus"+i+"_line_"+key, Vehicle.class),vehType);
->>>>>>> refs/remotes/origin/master
                 transitVehicles.addVehicle(busVehicles[i]);
                 Departure dep = factory.createDeparture(Id.create("dep_bus" + i+key, Departure.class), 8 * 3600 + i*300.);
+           //AA     Departure dep = factory.createDeparture(Id.create("dep_bus" + i, Departure.class), 8 * 3600 + i*300.);
                 dep.setVehicleId(busVehicles[i].getId());
                 route_1.addDeparture(dep);
             }
