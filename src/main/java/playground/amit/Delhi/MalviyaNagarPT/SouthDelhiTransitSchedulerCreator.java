@@ -30,6 +30,7 @@ public class SouthDelhiTransitSchedulerCreator {
     public Scenario scenario;
     private final String coordinatesFile = FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/PT_stops_coordinates_links.csv";
     private final String outputVehicleFile = FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/matsimFiles/TransitVehicles_MN.xml.gz";
+    private final double ptSpeed_MPS = 20/3.6;
 
     public SouthDelhiTransitSchedulerCreator(){
         this.routeId2Stops.put("1", List.of("1","22","2","3","25","5","6","7","28","9","10","11"));
@@ -76,13 +77,6 @@ public class SouthDelhiTransitSchedulerCreator {
         this.routeId2Stops.forEach((key, value) -> {
             TransitLine transitLine =factory.createTransitLine(Id.create("line_" + key, TransitLine.class));
 
-            List<TransitRouteStop> stopList = new ArrayList<>();
-            for (String s : value) {
-                TransitStopFacility st = schedule.getFacilities().get(Id.create(s, TransitStopFacility.class));
-                TransitRouteStop transitRouteStop = factory.createTransitRouteStop(st, 0., 60.);
-                stopList.add(transitRouteStop);
-            }
-
             //transit route
             NetworkRoute networkRoute;
             if (key.equals("1")) {
@@ -96,6 +90,28 @@ public class SouthDelhiTransitSchedulerCreator {
                 networkRoute.setLinkIds(MN_Routes.startLink3, MN_Routes.linkList3, MN_Routes.endLink3);
             } else {
                 throw new RuntimeException("Transit route ID "+ key+ "not found.");
+            }
+
+            List<TransitRouteStop> stopList = new ArrayList<>();
+            for (String s : value) {
+                TransitStopFacility st = schedule.getFacilities().get(Id.create(s, TransitStopFacility.class));
+                //TODO assign arrival, departure offsets. Please check. AA Nov'20
+                double length = 0.;
+                Id<Link> stopLinkId = st.getLinkId();
+
+                for ( Id<Link> linkId: networkRoute.getLinkIds()){
+                    if (!linkId.equals(stopLinkId)) {
+                        double linkLength = this.scenario.getNetwork().getLinks().get(linkId).getLength();
+                        length += linkLength;
+                    } else {
+                        break;
+                    }
+                }
+
+                double timeOffset = length / ptSpeed_MPS;
+
+                TransitRouteStop transitRouteStop = factory.createTransitRouteStop(st, timeOffset, timeOffset+30);
+                stopList.add(transitRouteStop);
             }
 
             TransitRoute route = factory.createTransitRoute(Id.create("route_" + key, TransitRoute.class), networkRoute, stopList, "bus");
