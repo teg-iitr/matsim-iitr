@@ -24,18 +24,19 @@ import java.util.Set;
 public class MNControler {
 
 	public static void main(String[] args) {
-		Config config = ConfigUtils.createConfig();
+        Config config = ConfigUtils.createConfig();
 
         config.network().setInputFile(FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/matsimFiles/south_delhi_matsim_network.xml.gz");
+
         config.plans().setInputFile(  FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/matsimFiles/MN_transitDemand_2020-11-01.xml.gz" );
+
         config.transit().setTransitScheduleFile(FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/matsimFiles/SouthDelhi_PT_Schedule.xml.gz" );
         config.transit().setVehiclesFile(FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/matsimFiles/TransitVehicles_MN.xml.gz");
         config.transit().setUseTransit(true);
         Set<String> transitModes = new HashSet<>();
-        transitModes.add("bus");
-
+        transitModes.add("pt");
         config.transit().setTransitModes(transitModes);
-        config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.defaultVehicle);
+
         config.controler().setOutputDirectory("./output/");
 
         config.controler().setLastIteration(10);
@@ -59,6 +60,8 @@ public class MNControler {
            ptParams.setMarginalUtilityOfTraveling(-6);
            scoreConfigGroup.addModeParams(ptParams);
 
+       config.plansCalcRoute().removeModeRoutingParams("pt");
+
         StrategyConfigGroup.StrategySettings reRoute = new StrategyConfigGroup.StrategySettings();
         reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
         reRoute.setWeight(0.3);
@@ -67,7 +70,7 @@ public class MNControler {
         Scenario scenario = ScenarioUtils.loadScenario(config);
 
         Controler controler = new Controler(scenario);
-//        controler.addOverridingModule(new SwissRailRaptorModule());
+        controler.addOverridingModule(new SwissRailRaptorModule());
         controler.run();
 	}
 

@@ -158,9 +158,6 @@ public class SouthDelhiTransitSchedulerCreator {
        writeTransitSchedule.writeFile(FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/matsimFiles/SouthDelhi_PT_Schedule.xml.gz");
 }
 
-
-
-
     public Map<String, Tuple<Coord, String>> getStopsCoordinates() {
         Map<String, Tuple<Coord, String>> busStopToCoordLink = new HashMap<>();
         BufferedReader reader = IOUtils.getBufferedReader(coordinatesFile);
