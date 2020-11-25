@@ -53,7 +53,7 @@ public class SouthDelhiTransitSchedulerCreator {
     private void run(){
         TransitSchedule schedule = scenario.getTransitSchedule();
         TransitScheduleFactory factory = schedule.getFactory();
-
+//TO
         //create transitStops
         List<String> remove_stop= List.of("4", "12", "13","14","15","17","18","20","23","27");
         Map<String, Tuple<Coord, String>> busStopToCoordinate = getStopsCoordinates();
