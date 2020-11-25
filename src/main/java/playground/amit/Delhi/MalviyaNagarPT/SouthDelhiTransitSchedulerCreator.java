@@ -1,5 +1,6 @@
 package playground.amit.Delhi.MalviyaNagarPT;
 
+import com.google.common.collect.Iterables;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -54,15 +55,18 @@ public class SouthDelhiTransitSchedulerCreator {
         TransitScheduleFactory factory = schedule.getFactory();
 
         //create transitStops
-
+        List<String> remove_stop= List.of("4", "12", "13","14","15","17","18","20","23","27");
         Map<String, Tuple<Coord, String>> busStopToCoordinate = getStopsCoordinates();
         for (Map.Entry<String, Tuple<Coord, String>> entry : busStopToCoordinate.entrySet()) {
             String k = entry.getKey();
             Tuple<Coord, String> v = entry.getValue();
-            TransitStopFacility stop = factory.createTransitStopFacility(Id.create(k, TransitStopFacility.class), v.getFirst(), false);
-            stop.setLinkId(Id.createLinkId(v.getSecond()));
-            schedule.addStopFacility(stop);
+            if (!remove_stop.contains(k)) {
+                TransitStopFacility stop = factory.createTransitStopFacility(Id.create(k, TransitStopFacility.class), v.getFirst(), false);
+                stop.setLinkId(Id.createLinkId(v.getSecond()));
+                schedule.addStopFacility(stop);
+            }
         }
+
 
         RouteFactories routeFactories = this.scenario.getPopulation().getFactory().getRouteFactories();
         Vehicles transitVehicles = VehicleUtils.createVehiclesContainer();
@@ -77,7 +81,6 @@ public class SouthDelhiTransitSchedulerCreator {
         //create routes
         this.routeId2Stops.forEach((key, value) -> {
             TransitLine transitLine =factory.createTransitLine(Id.create("line_" + key, TransitLine.class));
-
 
             //transit route
             NetworkRoute networkRoute;
@@ -95,30 +98,34 @@ public class SouthDelhiTransitSchedulerCreator {
             }
 
 
-
-
+            //transit route stops
+            List<Id<Link>> allLinksInRoute = new ArrayList<>();
+            allLinksInRoute.add(networkRoute.getStartLinkId());
+            allLinksInRoute.addAll(networkRoute.getLinkIds());
+            allLinksInRoute.add(networkRoute.getEndLinkId());
             List<TransitRouteStop> stopList = new ArrayList<>();
             for (String s : value) {
                 TransitStopFacility st = schedule.getFacilities().get(Id.create(s, TransitStopFacility.class));
-                double length =0.;
-                Id<Link> stopLinkId =st.getLinkId();
-                for (Id<Link> linkId: networkRoute.getLinkIds()){
-                    if (!linkId.equals(stopLinkId)){
-                        double linkLength =this.scenario.getNetwork().getLinks().get(linkId).getLength();
-                        length+=linkLength;
-                    }else {
+                double length = 0.;
+                Id<Link> stopLinkId = st.getLinkId();
+                for (Id<Link> linkId : allLinksInRoute) {
+                    if (!linkId.equals(stopLinkId)) {
+                        double linkLength = this.scenario.getNetwork().getLinks().get(linkId).getLength();
+                        length += linkLength;
+                    } else {
                         break;
                     }
                 }
-                double timeOffset = length/ptSpeed_MPS;
+                double timeOffset = length / ptSpeed_MPS;
 
-                TransitRouteStop transitRouteStop = factory.createTransitRouteStop(st, timeOffset, timeOffset+30);
+                TransitRouteStop transitRouteStop  = factory.createTransitRouteStop(st, timeOffset, timeOffset + 30);
                 stopList.add(transitRouteStop);
             }
 
-
             TransitRoute route = factory.createTransitRoute(Id.create("route_" + key, TransitRoute.class), networkRoute, stopList, "bus");
 
+
+            //transit vehicles
             Vehicle[] busVehicles = new Vehicle[12];
             for (int i = 0; i < 12; i++) {
 
@@ -143,12 +150,16 @@ public class SouthDelhiTransitSchedulerCreator {
             schedule.addTransitLine(transitLine);
         });
 
+
         MatsimVehicleWriter vehicleWriter = new MatsimVehicleWriter(transitVehicles);
         vehicleWriter.writeFile(outputVehicleFile);
 
        TransitScheduleWriter writeTransitSchedule = new TransitScheduleWriter(schedule);
        writeTransitSchedule.writeFile(FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/matsimFiles/SouthDelhi_PT_Schedule.xml.gz");
 }
+
+
+
 
     public Map<String, Tuple<Coord, String>> getStopsCoordinates() {
         Map<String, Tuple<Coord, String>> busStopToCoordLink = new HashMap<>();

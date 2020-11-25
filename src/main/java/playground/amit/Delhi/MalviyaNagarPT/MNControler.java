@@ -43,19 +43,21 @@ public class MNControler {
         config.controler().setDumpDataAtEnd(true);
 
         PlanCalcScoreConfigGroup scoreConfigGroup= config.planCalcScore();
-        //for all activities
-       ActivityParams originAct =new ActivityParams ("origin");
-       originAct.setTypicalDuration(12*3600.);
-       scoreConfigGroup.addActivityParams(originAct);
 
-       ActivityParams destAct =new ActivityParams ("destination");
-       destAct.setTypicalDuration(9*3600.);
-       scoreConfigGroup.addActivityParams(destAct);
+           //for all activities
+           ActivityParams originAct =new ActivityParams ("origin");
+           originAct.setTypicalDuration(12*3600.);
+           scoreConfigGroup.addActivityParams(originAct);
 
-       PlanCalcScoreConfigGroup.ModeParams ptParams =  new PlanCalcScoreConfigGroup.ModeParams(TransportMode.pt);
-       ptParams.setConstant(0);
-       ptParams.setMarginalUtilityOfTraveling(-6);
-       scoreConfigGroup.addModeParams(ptParams);
+           ActivityParams destAct =new ActivityParams ("destination");
+           destAct.setTypicalDuration(9*3600.);
+           scoreConfigGroup.addActivityParams(destAct);
+
+           //for modes
+           PlanCalcScoreConfigGroup.ModeParams ptParams =  new PlanCalcScoreConfigGroup.ModeParams(TransportMode.pt);
+           ptParams.setConstant(0);
+           ptParams.setMarginalUtilityOfTraveling(-6);
+           scoreConfigGroup.addModeParams(ptParams);
 
         StrategyConfigGroup.StrategySettings reRoute = new StrategyConfigGroup.StrategySettings();
         reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
