@@ -132,7 +132,7 @@ public class ShapeFileToNetworkDelhi {
 					final double freespeed = freeSpeed;
 					final double capacity1 = capacity;
 					final double numLanes = numberOfLanes;
-					NetworkUtils.createAndAddLink(network,id, fromNode, toNode, length, freespeed, capacity1, numLanes );
+
 				}
 
 				if (!network.getLinks().containsKey(linkId2)) {
