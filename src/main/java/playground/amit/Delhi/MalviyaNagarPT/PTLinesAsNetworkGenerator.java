@@ -13,10 +13,8 @@ import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.io.IOUtils;
 import playground.amit.utils.FileUtils;
-
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.OutputStream;
 
 /**
  * Created by Amit on 28/11/2020
@@ -34,16 +32,15 @@ public class PTLinesAsNetworkGenerator {
     }
 
     public static void main(String[] args) {
-
         Config config = ConfigUtils.createConfig();
         Scenario scenario = ScenarioUtils.loadScenario(config);
         Network network = scenario.getNetwork();
+
         PTLinesAsNetworkGenerator ptLinesAsNetworkGenerator = new PTLinesAsNetworkGenerator(network);
         ptLinesAsNetworkGenerator.addNodes();
         ptLinesAsNetworkGenerator.addLinks();
 
         new NetworkWriter(network).write(outNet);
-
     }
 
     private void addLinks(){
@@ -82,11 +79,11 @@ public class PTLinesAsNetworkGenerator {
     }
 
     private void createLink(String fromNodeId, String toNodeId){
-        Node n1 = network.getNodes().get(Id.createNodeId(fromNodeId));
-        Node n22 = network.getNodes().get(Id.createNodeId(toNodeId));
+        Node fromNode = network.getNodes().get(Id.createNodeId(fromNodeId));
+        Node toNode = network.getNodes().get(Id.createNodeId(toNodeId));
 
-        Link link = networkFactory.createLink(Id.createLinkId(n1.getId()+"_"+n22.getId()), n1, n22);
-        link.setLength(NetworkUtils.getEuclideanDistance(n1.getCoord(), n22.getCoord()));
+        Link link = networkFactory.createLink(Id.createLinkId(fromNode.getId()+"_"+toNode.getId()), fromNode, toNode);
+        link.setLength(NetworkUtils.getEuclideanDistance(fromNode.getCoord(), toNode.getCoord()));
         link.setCapacity(1000.);
         link.setNumberOfLanes(1);
 

@@ -29,33 +29,32 @@ public class SouthDelhiTransitSchedulerCreator {
 
     private final Map<String, List<String>> routeId2Stops = new HashMap<>();
     public Scenario scenario;
-    private final String coordinatesFile = FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/PT_stops_coordinates_links.csv";
-    private final String outputVehicleFile = FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/matsimFiles/TransitVehicles_MN.xml.gz";
+    private final String coordinatesFile = FileUtils.getLocalGDrivePath() + "project_data/delhiMalviyaNagar_PT/PT_stops_coordinates_links.csv";
+    private final String outputVehicleFile = FileUtils.getLocalGDrivePath() + "project_data/delhiMalviyaNagar_PT/matsimFiles/TransitVehicles_MN.xml.gz";
     private static final double ptSpeed_MPS = 14.0;
 
 
-    public SouthDelhiTransitSchedulerCreator(){
-        this.routeId2Stops.put("1", List.of("1","22","2","3","25","5","6","7","28","9","10","11"));
-        this.routeId2Stops.put("2",List.of("21", "24", "25","5", "6", "7", "28","8","26","19"));
-        this.routeId2Stops.put("3",List.of("1","22","2","16","26","19"));
+    public SouthDelhiTransitSchedulerCreator() {
+        this.routeId2Stops.put("1", List.of("1", "22", "2", "3", "25", "5", "6", "7", "28", "9", "10", "11"));
+        this.routeId2Stops.put("2", List.of("21", "24", "25", "5", "6", "7", "28", "8", "26", "19"));
+        this.routeId2Stops.put("3", List.of("1", "22", "2", "16", "26", "19"));
 
         Config config = ConfigUtils.createConfig();
-        config.network().setInputFile(FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/matsimFiles/south_delhi_matsim_network.xml.gz");
+        config.network().setInputFile(FileUtils.getLocalGDrivePath() + "project_data/delhiMalviyaNagar_PT/matsimFiles/south_delhi_matsim_network.xml.gz");
 
-          this.scenario = ScenarioUtils.loadScenario(config);
+        this.scenario = ScenarioUtils.loadScenario(config);
     }
 
     public static void main(String[] args) {
-
         new SouthDelhiTransitSchedulerCreator().run();
     }
 
-    private void run(){
+    private void run() {
         TransitSchedule schedule = scenario.getTransitSchedule();
         TransitScheduleFactory factory = schedule.getFactory();
-//TO
+
         //create transitStops
-        List<String> remove_stop= List.of("4", "12", "13","14","15","17","18","20","23","27");
+        List<String> remove_stop = List.of("4", "12", "13", "14", "15", "17", "18", "20", "23", "27");
         Map<String, Tuple<Coord, String>> busStopToCoordinate = getStopsCoordinates();
         for (Map.Entry<String, Tuple<Coord, String>> entry : busStopToCoordinate.entrySet()) {
             String k = entry.getKey();
@@ -66,7 +65,6 @@ public class SouthDelhiTransitSchedulerCreator {
                 schedule.addStopFacility(stop);
             }
         }
-
 
         RouteFactories routeFactories = this.scenario.getPopulation().getFactory().getRouteFactories();
         Vehicles transitVehicles = VehicleUtils.createVehiclesContainer();
@@ -80,23 +78,22 @@ public class SouthDelhiTransitSchedulerCreator {
 
         //create routes
         this.routeId2Stops.forEach((key, value) -> {
-            TransitLine transitLine =factory.createTransitLine(Id.create("line_" + key, TransitLine.class));
+            TransitLine transitLine = factory.createTransitLine(Id.create("line_" + key, TransitLine.class));
 
             //transit route
             NetworkRoute networkRoute;
             if (key.equals("1")) {
-                networkRoute = routeFactories.createRoute(NetworkRoute.class,  MN_Routes.startLink1, MN_Routes.endLink1 );
+                networkRoute = routeFactories.createRoute(NetworkRoute.class, MN_Routes.startLink1, MN_Routes.endLink1);
                 networkRoute.setLinkIds(MN_Routes.startLink1, MN_Routes.linkList1, MN_Routes.endLink1);
-            } else if (key.equals("2")){
-                networkRoute = routeFactories.createRoute(NetworkRoute.class,  MN_Routes.startLink2, MN_Routes.endLink2);
-                networkRoute.setLinkIds(MN_Routes.startLink2, MN_Routes.linkList2 , MN_Routes.endLink2);
+            } else if (key.equals("2")) {
+                networkRoute = routeFactories.createRoute(NetworkRoute.class, MN_Routes.startLink2, MN_Routes.endLink2);
+                networkRoute.setLinkIds(MN_Routes.startLink2, MN_Routes.linkList2, MN_Routes.endLink2);
             } else if (key.equals("3")) {
-                networkRoute = routeFactories.createRoute(NetworkRoute.class,  MN_Routes.startLink3, MN_Routes.endLink3 );
+                networkRoute = routeFactories.createRoute(NetworkRoute.class, MN_Routes.startLink3, MN_Routes.endLink3);
                 networkRoute.setLinkIds(MN_Routes.startLink3, MN_Routes.linkList3, MN_Routes.endLink3);
             } else {
-                throw new RuntimeException("Transit route ID "+ key+ "not found.");
+                throw new RuntimeException("Transit route ID " + key + "not found.");
             }
-
 
             //transit route stops
             List<Id<Link>> allLinksInRoute = new ArrayList<>();
@@ -118,28 +115,27 @@ public class SouthDelhiTransitSchedulerCreator {
                 }
                 double timeOffset = length / ptSpeed_MPS;
 
-                TransitRouteStop transitRouteStop  = factory.createTransitRouteStop(st, timeOffset, timeOffset + 30);
+                TransitRouteStop transitRouteStop = factory.createTransitRouteStop(st, timeOffset, timeOffset + 30);
                 stopList.add(transitRouteStop);
             }
 
             TransitRoute route = factory.createTransitRoute(Id.create("route_" + key, TransitRoute.class), networkRoute, stopList, "bus");
 
-
             //transit vehicles
             Vehicle[] busVehicles = new Vehicle[12];
             for (int i = 0; i < 12; i++) {
 
-                busVehicles[i]= vehFactory.createVehicle(Id.create("MN_bus"+i+"_line_"+key, Vehicle.class),vehType);
+                busVehicles[i] = vehFactory.createVehicle(Id.create("MN_bus" + i + "_line_" + key, Vehicle.class), vehType);
                 transitVehicles.addVehicle(busVehicles[i]);
                 Departure dep;
-                if (key.equals("1")){
-                    dep = factory.createDeparture(Id.create("dep_bus" + i+ "_line_" + key, Departure.class), 8 * 3600 + i*600.);
-                } else if (key.equals("2")){
-                    dep = factory.createDeparture(Id.create("dep_bus" + i+ "_line_" + key, Departure.class), 8.5 * 3600 + i*600.);
+                if (key.equals("1")) {
+                    dep = factory.createDeparture(Id.create("dep_bus" + i + "_line_" + key, Departure.class), 8 * 3600 + i * 600.);
+                } else if (key.equals("2")) {
+                    dep = factory.createDeparture(Id.create("dep_bus" + i + "_line_" + key, Departure.class), 8.5 * 3600 + i * 600.);
                 } else if (key.equals("3")) {
-                    dep = factory.createDeparture(Id.create("dep_bus" + i+ "_line_" + key, Departure.class), 9 * 3600 + i*600.);
+                    dep = factory.createDeparture(Id.create("dep_bus" + i + "_line_" + key, Departure.class), 9 * 3600 + i * 600.);
                 } else {
-                    throw new RuntimeException("Transit route ID "+ key+ "not found.");
+                    throw new RuntimeException("Transit route ID " + key + "not found.");
                 }
 
                 dep.setVehicleId(busVehicles[i].getId());
@@ -150,13 +146,12 @@ public class SouthDelhiTransitSchedulerCreator {
             schedule.addTransitLine(transitLine);
         });
 
-
         MatsimVehicleWriter vehicleWriter = new MatsimVehicleWriter(transitVehicles);
         vehicleWriter.writeFile(outputVehicleFile);
 
-       TransitScheduleWriter writeTransitSchedule = new TransitScheduleWriter(schedule);
-       writeTransitSchedule.writeFile(FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/matsimFiles/SouthDelhi_PT_Schedule.xml.gz");
-}
+        TransitScheduleWriter writeTransitSchedule = new TransitScheduleWriter(schedule);
+        writeTransitSchedule.writeFile(FileUtils.getLocalGDrivePath() + "project_data/delhiMalviyaNagar_PT/matsimFiles/SouthDelhi_PT_Schedule.xml.gz");
+    }
 
     public Map<String, Tuple<Coord, String>> getStopsCoordinates() {
         Map<String, Tuple<Coord, String>> busStopToCoordLink = new HashMap<>();
@@ -165,11 +160,11 @@ public class SouthDelhiTransitSchedulerCreator {
         try {
             String line = reader.readLine();
             boolean isHeader = true;
-            while(line!=null) {
+            while (line != null) {
                 if (isHeader) {
                     isHeader = false;
                 } else {
-                    String [] parts = line.split(",");
+                    String[] parts = line.split(",");
                     String index = parts[0];
                     Coord cord = new Coord(Double.parseDouble(parts[2]), Double.parseDouble(parts[3]));
                     Coord transformCoord = ct.transform(cord);
@@ -179,10 +174,8 @@ public class SouthDelhiTransitSchedulerCreator {
                 line = reader.readLine();
             }
         } catch (IOException e) {
-            throw new RuntimeException("Data is not read. Reason "+e);
+            throw new RuntimeException("Data is not read. Reason " + e);
         }
         return busStopToCoordLink;
     }
-
-
 }

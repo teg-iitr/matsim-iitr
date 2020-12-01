@@ -20,8 +20,8 @@ public class TransitScheduleMVNagar {
     private static final String transit_schedule_OTD_Delhi = "C:/Users/Amit Agarwal/Google Drive/iitr_gmail_drive/project_data/delhi/matsimFiles/gtfs/fromDIMTS/transitSchedule.xml.gz";
     private static final String transit_network_OTD_Delhi = "C:/Users/Amit Agarwal/Google Drive/iitr_gmail_drive/project_data/delhi/matsimFiles/gtfs/fromDIMTS/transit_network.xml.gz";
 
-//    private static final List<String> linesToExtract = List.of("448","534","764");
-        private static final List<String> linesToExtract = List.of("XXX---406","XXX---89","XXX---97"); //764
+    //    private static final List<String> linesToExtract = List.of("448","534","764");
+    private static final List<String> linesToExtract = List.of("XXX---406", "XXX---89", "XXX---97"); //764
 
 
     public static void main(String[] args) {
@@ -40,8 +40,8 @@ public class TransitScheduleMVNagar {
         Scenario scenarioOut = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
         TransitSchedule transitSchedule = scenarioOut.getTransitSchedule();
 
-        for (TransitLine tl : scenarioIn.getTransitSchedule().getTransitLines().values()){
-            if(linesToExtract.contains(tl.getId().toString())) {
+        for (TransitLine tl : scenarioIn.getTransitSchedule().getTransitLines().values()) {
+            if (linesToExtract.contains(tl.getId().toString())) {
                 transitSchedule.addTransitLine(tl);
                 List<TransitStopFacility> tsfs = new ArrayList<>();
 
@@ -52,8 +52,8 @@ public class TransitScheduleMVNagar {
                         .flatMap(tr -> tr.getStops()
                                 .stream())
                         .map(TransitRouteStop::getStopFacility)
-                        .collect(Collectors.toList())){
-                    if ( ! transitSchedule.getFacilities().containsKey(tsf.getId())){
+                        .collect(Collectors.toList())) {
+                    if (!transitSchedule.getFacilities().containsKey(tsf.getId())) {
                         transitSchedule.addStopFacility(tsf);
                     }
                 }
