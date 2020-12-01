@@ -48,19 +48,26 @@ public class GenerateRandomizedPTRoutes {
         ptLinesAsNetworkGenerator.addNodes();
         ptLinesAsNetworkGenerator.addLinks();
 
+        GenerateRandomizedPTRoutes.createPerson(scenario, "1","11");
+        GenerateRandomizedPTRoutes.createPerson(scenario, "1","19");
+        GenerateRandomizedPTRoutes.createPerson(scenario, "19","21");
+    }
+
+    private static void createPerson(Scenario scenario, String originId, String destinationId){
         // generate a route between node1 and node11
         PopulationFactory populationFactory = scenario.getPopulation().getFactory();
-        Person person = populationFactory.createPerson(Id.createPersonId("person-WRT-route-purple"));
+        Person person = populationFactory.createPerson(Id.createPersonId("person-WRT-route-between-"+originId+"_"+destinationId));
+
         Plan plan = populationFactory.createPlan();
         person.addPlan(plan);
-        Activity origin = populationFactory.createActivityFromCoord("origin", network.getNodes().get(Id.createNodeId("1")).getCoord());
+        Activity origin = populationFactory.createActivityFromCoord("origin", scenario.getNetwork().getNodes().get(Id.createNodeId(originId)).getCoord());
         plan.addActivity(origin);
         origin.setEndTime(8 * 3600.);
 
         Leg leg = populationFactory.createLeg(TransportMode.car);
         plan.addLeg(leg);
 
-        Activity destination = populationFactory.createActivityFromCoord("origin", network.getNodes().get(Id.createNodeId("11")).getCoord());
+        Activity destination = populationFactory.createActivityFromCoord("origin", scenario.getNetwork().getNodes().get(Id.createNodeId(destinationId)).getCoord());
         plan.addActivity(destination);
 
         TripRouter.Builder builder = new TripRouter.Builder(scenario.getConfig());
@@ -132,6 +139,15 @@ public class GenerateRandomizedPTRoutes {
         link.setNumberOfLanes(1);
 
         network.addLink(link);
+
+        // link in opposite direaction
+        //TODO cannot have all reverse links too, program is stuck in the loop. Need to add only the required links.
+//        Link linkReverse = networkFactory.createLink(Id.createLinkId(toNode.getId() + "_" + fromNode.getId()), toNode, fromNode);
+//        linkReverse.setLength(link.getLength());
+//        linkReverse.setCapacity(1000.);
+//        linkReverse.setNumberOfLanes(1);
+//
+//        network.addLink(linkReverse);
     }
 
     private void addNodes() {
