@@ -36,7 +36,8 @@ public class SouthDelhiTransitSchedulerCreator {
 
     public SouthDelhiTransitSchedulerCreator() {
         this.routeId2Stops.put("1", List.of("1", "22", "2", "3", "25", "5", "6", "7", "28", "9", "10", "11"));
-        this.routeId2Stops.put("2", List.of("21", "24", "25", "5", "6", "7", "28", "8", "26", "19"));
+//        this.routeId2Stops.put("2_out", List.of("19", "26", "8", "28","7", "6", "5", "25", "24", "21"));
+        this.routeId2Stops.put("2", List.of("19A", "26A", "8A", "28A", "7A", "6A","5A","25A", "24A", "21A"));
         this.routeId2Stops.put("3", List.of("1", "22", "2", "16", "26", "19"));
 
         Config config = ConfigUtils.createConfig();
