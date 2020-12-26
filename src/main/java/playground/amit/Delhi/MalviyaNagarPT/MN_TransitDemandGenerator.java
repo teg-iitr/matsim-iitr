@@ -30,7 +30,7 @@ public class MN_TransitDemandGenerator {
     private final double startTime = 8*3600.;
     private final double timebin = 2*3600.;
     private final Random random = MatsimRandom.getLocalInstance();
-    private final int addBufferCloaseToPTDistance = 20;
+    private final int addBufferCloaseToPTDistance = 30;
 
 	private final Map<String, Coord> busStopToCoordinate = new HashMap<>();
 

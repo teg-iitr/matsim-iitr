@@ -14,6 +14,7 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.pt.config.TransitConfigGroup;
 import playground.amit.utils.FileUtils;
 
 import java.util.Arrays;
@@ -36,6 +37,13 @@ public class MNControler {
         Set<String> transitModes = new HashSet<>();
         transitModes.add("pt");
         config.transit().setTransitModes(transitModes);
+        config.transit().setBoardingAcceptance(TransitConfigGroup.BoardingAcceptance.checkStopOnly);
+
+//        Set<String> modeW = new HashSet<>();
+//        modeW.add("walk");
+//        config.qsim().setMainModes(modeW);
+
+
 
         config.controler().setOutputDirectory("./output/");
 
@@ -44,6 +52,9 @@ public class MNControler {
         config.controler().setDumpDataAtEnd(true);
 
         PlanCalcScoreConfigGroup scoreConfigGroup= config.planCalcScore();
+
+        QSimConfigGroup qsim =config.qsim();
+        qsim.setEndTime(12*3600.);
 
            //for all activities
            ActivityParams originAct =new ActivityParams ("origin");
@@ -56,16 +67,25 @@ public class MNControler {
 
            //for modes
            PlanCalcScoreConfigGroup.ModeParams ptParams =  new PlanCalcScoreConfigGroup.ModeParams(TransportMode.pt);
-           ptParams.setConstant(0);
+           ptParams.setConstant(-3);
            ptParams.setMarginalUtilityOfTraveling(-6);
            scoreConfigGroup.addModeParams(ptParams);
+           config.plansCalcRoute().removeModeRoutingParams("pt");
 
-       config.plansCalcRoute().removeModeRoutingParams("pt");
+
+//            PlanCalcScoreConfigGroup.ModeParams walkParams = new PlanCalcScoreConfigGroup.ModeParams(TransportMode.walk);
+//            walkParams.setConstant(-1);
+//            walkParams.setMarginalUtilityOfTraveling(-12);
+//            scoreConfigGroup.addModeParams(walkParams);
+//            config.plansCalcRoute().removeModeRoutingParams("walk");
+
 
         StrategyConfigGroup.StrategySettings reRoute = new StrategyConfigGroup.StrategySettings();
         reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
         reRoute.setWeight(0.3);
         config.strategy().addStrategySettings(reRoute);
+        StrategyConfigGroup strategy= config.strategy();
+//        strategy.setFractionOfIterationsToDisableInnovation(0.8);
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
 
