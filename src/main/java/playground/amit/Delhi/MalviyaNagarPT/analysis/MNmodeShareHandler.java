@@ -7,15 +7,17 @@ import org.matsim.api.core.v01.events.PersonStuckEvent;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonStuckEventHandler;
 import org.matsim.api.core.v01.population.Person;
+import playground.nidhi.practice.eventHandlingPract.analysis.StuckEventHandler;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 public class MNmodeShareHandler implements PersonDepartureEventHandler {
 
 //    private Map<String, Integer> mode2NumOfLegs = new HashMap<>();
-
-    private Map<Id<Person>,String> person2PtUsers = new HashMap<>();
-    private Map<Id<Person>,String> person2WalkUsers= new HashMap<>();
+private static final Logger log = Logger.getLogger(String.valueOf(StuckEventHandler.class));
+    private Map<Id<Person>,String> person2PtUsers;
+    private Map<Id<Person>,String> person2WalkUsers;
 
     private Map<String, Integer> stuckCnt = new HashMap<>();
 
@@ -27,6 +29,17 @@ public class MNmodeShareHandler implements PersonDepartureEventHandler {
     private int cntOfWalkTrips;
     private int getCntOfWalkStuck;
 
+    public MNmodeShareHandler(){
+        this.person2PtUsers= new HashMap<>();
+        this.person2WalkUsers = new HashMap<>();
+        log.info("initialized");
+    }
+
+    @Override
+    public void reset(int iteration) {
+        this.person2PtUsers= new HashMap<>();
+        this.person2WalkUsers = new HashMap<>();
+    }
 
     @Override
     public void handleEvent(PersonDepartureEvent event) {
@@ -48,6 +61,18 @@ public class MNmodeShareHandler implements PersonDepartureEventHandler {
                 this.cntOfWalkUsers = this.cntOfWalkUsers + 1;
             }
         }
+
+//        System.out.println(person2PtUsers);
+//        System.out.println(person2WalkUsers);
+
+        int totalTrips = this.cntOfPtTrips+this.cntOfWalkTrips;
+        double ptShare = 100. * (double) this.cntOfPtTrips / totalTrips;
+        double walkShare = 100. * (double) this.cntOfWalkTrips / totalTrips;
+        List<Double> modeShare_mn = new ArrayList<>();
+        modeShare_mn.add(ptShare);
+        modeShare_mn.add(walkShare);
+        System.out.println(modeShare_mn);
+
     }
 
 //    @Override
@@ -66,17 +91,9 @@ public class MNmodeShareHandler implements PersonDepartureEventHandler {
 //            this.cntOfPtStuck = 0;
 //    }
 
-    List<Double> modeShare(){
-        int totalTrips = this.cntOfPtTrips+this.cntOfWalkTrips;
-        double ptShare = 100. * (double) this.cntOfPtTrips / totalTrips;
-        double walkShare = 100. * (double) this.cntOfWalkTrips / totalTrips;
-        List<Double> modeShare_mn = new ArrayList<>();
-        modeShare_mn.add(ptShare);
-        modeShare_mn.add(walkShare);
-
-
-        return modeShare_mn;
-    }
+//    public void modeShare(){
+//
+//    }
 
 //    int getCntOfPtTrips() {
 //        return cntOfPtTrips;

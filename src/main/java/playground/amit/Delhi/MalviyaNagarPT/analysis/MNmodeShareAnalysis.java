@@ -12,11 +12,13 @@ public class MNmodeShareAnalysis {
         MNmodeShareHandler mnModeShareHandler = new MNmodeShareHandler();
         events.addHandler(mnModeShareHandler);
 
+        events.initProcessing();
         MatsimEventsReader reader = new MatsimEventsReader(events);
         reader.readFile(inputFile);
+        events.finishProcessing();
 
-        System.out.println(mnModeShareHandler.modeShare());
-
-        System.out.println("Events file read!");
+//        System.out.println(mnModeShareHandler.modeShare());
+//
+//        System.out.println("Events file read!");
     }
 }
