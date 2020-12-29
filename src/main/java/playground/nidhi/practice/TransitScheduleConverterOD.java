@@ -1,4 +1,4 @@
-package playground.nidhi.Practice;
+package playground.nidhi.practice;
 
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;

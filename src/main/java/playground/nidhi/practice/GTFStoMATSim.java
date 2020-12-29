@@ -1,7 +1,4 @@
-package playground.nidhi.Practice;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+package playground.nidhi.practice;
 
 
 //public enum RouteType {

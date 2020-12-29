@@ -1,14 +1,10 @@
-package playground.amit.Delhi.MalviyaNagarPT.analysis;
+package playground.nidhi.practice.eventHandlingPract.analysis;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.PersonStuckEvent;
 import org.matsim.api.core.v01.events.handler.PersonStuckEventHandler;
-import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.utils.io.IOUtils;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 

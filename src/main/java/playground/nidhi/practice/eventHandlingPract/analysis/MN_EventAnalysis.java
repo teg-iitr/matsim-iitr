@@ -1,9 +1,8 @@
-package playground.amit.Delhi.MalviyaNagarPT.analysis;
+package playground.nidhi.practice.eventHandlingPract.analysis;
 
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
-import playground.amit.utils.FileUtils;
 
 import java.io.IOException;
 
@@ -20,11 +19,10 @@ public class MN_EventAnalysis {
     events.addHandler(handler2);
 
     //create the reader and read the file
-		events.initProcessing();
 
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(inputFile);
-		events.finishProcessing();
+
 //		StuckEventHandler se = new StuckEventHandler();
 //		se.writeResults("C:\\Users\\Nidhi\\Documents\\iitr_gmail_drive\\project_data\\delhiMalviyaNagar_PT\\matsimFiles\\StuckEvent.txt");
 

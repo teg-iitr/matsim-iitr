@@ -37,13 +37,13 @@ public class MNControler {
         Set<String> transitModes = new HashSet<>();
         transitModes.add("pt");
         config.transit().setTransitModes(transitModes);
-        config.transit().setBoardingAcceptance(TransitConfigGroup.BoardingAcceptance.checkStopOnly);
 
 //        Set<String> modeW = new HashSet<>();
 //        modeW.add("walk");
 //        config.qsim().setMainModes(modeW);
 
 
+        config.transit().setBoardingAcceptance(TransitConfigGroup.BoardingAcceptance.checkStopOnly);
 
         config.controler().setOutputDirectory("./output/");
 
@@ -72,7 +72,7 @@ public class MNControler {
            scoreConfigGroup.addModeParams(ptParams);
            config.plansCalcRoute().removeModeRoutingParams("pt");
 
-
+//
 //            PlanCalcScoreConfigGroup.ModeParams walkParams = new PlanCalcScoreConfigGroup.ModeParams(TransportMode.walk);
 //            walkParams.setConstant(-1);
 //            walkParams.setMarginalUtilityOfTraveling(-12);

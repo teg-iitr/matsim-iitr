@@ -1,4 +1,4 @@
-package playground.nidhi.Practice;
+package playground.nidhi.practice;
 
 public class CoordOD {
 

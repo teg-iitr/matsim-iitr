@@ -1,4 +1,4 @@
-package playground.amit.Delhi.MalviyaNagarPT.analysis;
+package playground.nidhi.practice.eventHandlingPract.analysis;
 
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.LinkLeaveEvent;

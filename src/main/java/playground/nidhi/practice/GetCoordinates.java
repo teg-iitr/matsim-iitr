@@ -1,4 +1,4 @@
-package playground.nidhi.Practice;
+package playground.nidhi.practice;
 
 import java.util.Map;
 
