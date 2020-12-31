@@ -276,8 +276,18 @@ public class PatnaBikeTrackConnectionControler {
 			this.bikeConnectorControlerListener = bikeConnectorControlerListener;
 		}
 
+//		@Override
+//		public boolean continueIterations(int iteration) {
+//			return !this.bikeConnectorControlerListener.isTerminating();
+//		}
+
 		@Override
-		public boolean continueIterations(int iteration) {
+		public boolean mayTerminateAfterIteration(int i) {
+			return false;
+		}
+
+		@Override
+		public boolean doTerminate(int i) {
 			return !this.bikeConnectorControlerListener.isTerminating();
 		}
 	}
