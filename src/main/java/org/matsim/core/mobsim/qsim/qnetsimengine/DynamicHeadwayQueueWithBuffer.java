@@ -992,8 +992,9 @@ final class DynamicHeadwayQueueWithBuffer implements QLaneI, SignalizeableItem {
 	}
 
 	private double getFlowCapacityConsumptionInEquivalents(QVehicle vehicle) {
-		double flowEfficiency = flowEfficiencyCalculator.calculateFlowEfficiency(vehicle.getVehicle(), qLink.getLink());
-		return vehicle.getSizeInEquivalents() / flowEfficiency;
+		throw new RuntimeException("Check....");
+//		double flowEfficiency = flowEfficiencyCalculator.calculateFlowEfficiency(vehicle.getVehicle(), qLink.getLink());
+//		return vehicle.getSizeInEquivalents() / flowEfficiency;
 	}
 
 }
