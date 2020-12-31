@@ -33,10 +33,10 @@ public class StuckEventHandler implements PersonStuckEventHandler {
         this.agentsStuck.add(event.getPersonId());
     }
 
-    public Set<Id<Person>> getAgentsStuck() {
-        log.info("Returning " + this.agentsStuck.size() + " agent ids");
-        return this.agentsStuck;
-    }
+//    public Set<Id<Person>> getAgentsStuck() {
+//        log.info("Returning " + this.agentsStuck.size() + " agent ids");
+//        return this.agentsStuck;
+//    }
 
 
 }
