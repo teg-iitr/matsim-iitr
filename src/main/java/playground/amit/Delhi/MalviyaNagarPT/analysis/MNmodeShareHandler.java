@@ -1,11 +1,9 @@
 package playground.amit.Delhi.MalviyaNagarPT.analysis;
 
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.events.*;
 import org.matsim.api.core.v01.events.handler.*;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.router.StageActivityTypeIdentifier;
 
 import java.util.*;
 
@@ -14,26 +12,14 @@ public class MNmodeShareHandler implements PersonDepartureEventHandler, PersonAr
                                             ,ActivityEndEventHandler, TransitDriverStartsEventHandler {
 
 
-
     private final Map<Id<Person>, List<String>> person_Modes = new HashMap<>();
-    private final List<Id<Person>> driverId= new ArrayList<>();
-    private final String pt = TransportMode.pt;
-    private final String walk = TransportMode.walk;
+    private final List<Id<Person>> driverIds = new ArrayList<>();
 
-
-
-
-    private final Map<Id<Person>, String> person_MainMode = new HashMap<>();
-
-
-    int  cntOfPtTrips;
-    int cntOfWalkTrips;
 
     @Override
     public void reset(int iteration) {
-        this.person_MainMode.clear();
         this.person_Modes.clear();
-        this.driverId.clear();
+        this.driverIds.clear();
     }
 
 
@@ -41,9 +27,9 @@ public class MNmodeShareHandler implements PersonDepartureEventHandler, PersonAr
     public void handleEvent(PersonDepartureEvent event) {
     Id<Person> personId = event.getPersonId();
 
-//        if( driverId.remove(personId) ) {
-//            return;
-//        }
+        if( driverIds.remove(personId) ) {
+            return;
+        }
 
         if(person_Modes.get(personId) == null){
             List<String> leglist = new ArrayList<>();
@@ -55,21 +41,12 @@ public class MNmodeShareHandler implements PersonDepartureEventHandler, PersonAr
             person_Modes.put(personId,allModes);
         }
 
-        for(Map.Entry<Id<Person>, List<String>> persMod:person_Modes.entrySet()){
-            if (persMod.getValue().contains(pt)){
-                person_MainMode.put(event.getPersonId(), pt);
-            } else {
-                person_MainMode.put(event.getPersonId(), event.getLegMode());
-            }
-        }
-        cntOfPtTrips = Collections.frequency(person_MainMode.values(), pt);
-        cntOfWalkTrips= Collections.frequency(person_MainMode.values(), walk);
     }
 
 
     @Override
     public void handleEvent(TransitDriverStartsEvent event) {
-        driverId.add(event.getDriverId());
+        driverIds.add(event.getDriverId());
     }
 
     @Override
@@ -83,36 +60,49 @@ public class MNmodeShareHandler implements PersonDepartureEventHandler, PersonAr
     }
 
 
-
-
-
-
     @Override
     public void handleEvent(PersonArrivalEvent event) {
 
     }
 
 
-
-
-
-    public int getCntOfPtTrips() {
-        return cntOfPtTrips;
-    }
-
-    public int getCntOfWalkTrips() {
-        return cntOfWalkTrips;
-    }
-
-
     public Map<Id<Person>, List<String>> getPerson_Modes() {
+//        for (List<String> modes : person_Modes.values()) {
+//            if (modes.contains("pt")) {
+//                cntOfPtTrips += cntOfPtTrips;
+//            } else if (modes.contains("car")) {
+//            } else {
+//                cntOfWalkTrips += cntOfWalkTrips;
+//            }
+//        }
         return person_Modes;
     }
 
-    public Map<Id<Person>, String> getPerson_MainMode() {
-        return person_MainMode;
-    }
+//    public Map<Id<Person>, String> getPerson_MainMode() {
+//        for(Id<Person> pId : person_Modes.keySet()) {
+//            List<String> modes = person_Modes.get(pId);
+//        }
+//        for(List<String> modes : person_Modes.values()){
+//            if (modes.contains("pt")) {
+//
+//            }
+//        }
+//
+//        for(Map.Entry<Id<Person>, List<String>> persMod :person_Modes.entrySet()){
+//            if (persMod.getValue().contains(pt)){
+//                person_MainMode.put(persMod.getKey(), pt);
+//            } else if (persMod.getValue().contains(TransportMode.car)){
+//                person_MainMode.put(persMod.getKey(), TransportMode.car);
+//            }else{
+//                person_MainMode.put(persMod.getKey(), walk);
+//            }
+//        }
+//        return person_MainMode;
+//    }
 
+    public List<Id<Person>> getDriverIds() {
+        return driverIds;
+    }
 
 
 

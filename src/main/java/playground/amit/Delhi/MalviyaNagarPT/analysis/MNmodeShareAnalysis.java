@@ -7,6 +7,7 @@ import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -23,21 +24,26 @@ public class MNmodeShareAnalysis {
         reader.readFile(inputFile);
         events.finishProcessing();
 
+        int cntOfPtTrips= 0;
+        int cntOfWalkTrips =0;
 
-        System.out.println("Total number of person + driver= " + mnModeShareHandler.getPerson_MainMode().size());
-//        System.out.println(mnModeShareHandler.getPerson_MainMode());
-        int cntPt= mnModeShareHandler.getCntOfPtTrips();
-        int cntWalk=mnModeShareHandler.getCntOfWalkTrips();
-        System.out.println("Count of Pt trips= " + cntPt + ", Count of Walk trips= "+ cntWalk);
+        for (List<String> modes : mnModeShareHandler.getPerson_Modes().values()) {
+            if (modes.contains("pt")) {
+                cntOfPtTrips =cntOfPtTrips+1;
+            } else if (modes.contains("car")) {
+            } else {
+                cntOfWalkTrips = cntOfWalkTrips+1;
+            }
+        }
+        System.out.println(cntOfPtTrips);
+        System.out.println(cntOfWalkTrips);
 
 
-        int totalTrips=cntPt+cntWalk;
-        double ptShare = (double) 100 * cntPt/totalTrips;
-        double walkShare =(double) 100 * cntWalk/totalTrips;
+        int totalTrips=cntOfPtTrips+cntOfWalkTrips;
+        double ptShare =  100.0 * cntOfPtTrips/totalTrips;
+        double walkShare =100.0 * cntOfWalkTrips/totalTrips;
         System.out.println("Share of Pt trips= " + ptShare + ", Share of Walk trips= "+ walkShare);
 
-
-//
 
 
     }
