@@ -59,11 +59,17 @@ public class PlansIITR {
 
             Coord coordFromZone= homeCoord(num,addBuffertoGate);    //trips will be originated randomly within buffer distance
             Coord coordToZone=workCoordinate();
+            Coord coordToZone2= homeCoord(num2,addBuffertoGate);
 
+            List<Coord> twoGates = new ArrayList<>();
+            twoGates.add(coordFromZone);
+            twoGates.add(coordToZone2);
+            Coord randomCoord =getRandomElement(twoGates);
             Person person = factory.createPerson(Id.createPersonId(population.getPersons().size()));
             Plan plan = factory.createPlan();
 
-            Activity home = factory.createActivityFromCoord("origin", coordFromZone);
+
+            Activity home = factory.createActivityFromCoord("origin", randomCoord);
             home.setEndTime(getRandomEndTime(startTime, timebin));
             plan.addActivity(home);
 
@@ -77,7 +83,7 @@ public class PlansIITR {
             Leg leg2 = factory.createLeg(mode);
             plan.addLeg(leg2);
 
-            Activity home2 = factory.createActivityFromCoord("origin", coordFromZone);
+            Activity home2 = factory.createActivityFromCoord("origin", randomCoord);
             plan.addActivity(home2);
 
             person.addPlan(plan);
@@ -115,7 +121,6 @@ public class PlansIITR {
         Coord coord2 = ct.transform(gate2);
         gate2Coord.put("1",coord1);
         gate2Coord.put("2", coord2);
-//        System.out.println(gate2Coord);
         return gate2Coord;
     }
 
@@ -123,5 +128,7 @@ public class PlansIITR {
         return start + random.nextInt((int) timebin);
     }
 
-
+    private Coord getRandomElement(List<Coord> list){
+        return list.get(rand.nextInt(list.size()));
+    }
 }
