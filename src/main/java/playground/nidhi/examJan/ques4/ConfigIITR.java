@@ -9,8 +9,6 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.scenario.ScenarioUtils;
-import playground.amit.utils.FileUtils;
-
 import java.util.Arrays;
 
 public class ConfigIITR {
@@ -25,7 +23,7 @@ public class ConfigIITR {
         config.controler().setDumpDataAtEnd(true);
 
         QSimConfigGroup qsim =config.qsim();
-        qsim.setEndTime(14*3600.);
+//        qsim.setEndTime(14*3600.);
 
         qsim.setMainModes(Arrays.asList(TransportMode.car));
 
@@ -33,7 +31,7 @@ public class ConfigIITR {
         PlanCalcScoreConfigGroup scoreConfigGroup= config.planCalcScore();
         //for all activities
         PlanCalcScoreConfigGroup.ActivityParams home =new PlanCalcScoreConfigGroup.ActivityParams("origin");
-        home.setTypicalDuration(14*3600.);
+        home.setTypicalDuration(22*3600.);
         scoreConfigGroup.addActivityParams(home);
 
         PlanCalcScoreConfigGroup.ActivityParams work =new PlanCalcScoreConfigGroup.ActivityParams("destination");
