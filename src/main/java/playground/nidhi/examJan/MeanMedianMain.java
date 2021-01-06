@@ -2,20 +2,17 @@ package playground.nidhi.examJan;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class MeanMedianMain {
     public static void main(String[] args) {
         MeanMedian mn = new MeanMedian();
-        mn.getHouse2Membr();
+        mn.getHouse2Member();
 
         List<Double> income1 = mn.getIncome1();
         List<Double> income2 = mn.getIncome2();
         List<Double> income3 = mn.getIncome3();
 
-
         //For household 1
-
         int sum1 = 0;
         for (double i : income1) {
             sum1 += i;
@@ -99,10 +96,6 @@ public class MeanMedianMain {
             double x= (allIncome.get(middleAll-1) + allIncome.get(middleAll)) / 2.0;
             System.out.println( "Mean of income of all Household = " + x );
         }
-
-
-
-
 
             //end
         }

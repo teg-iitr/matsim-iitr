@@ -22,6 +22,7 @@ public class PlansIITR {
     private final Random random = MatsimRandom.getLocalInstance();
     private Network network ;
     public Scenario scenario;
+    private  Random rand = new Random();
 
 
     public PlansIITR() {
@@ -50,15 +51,15 @@ public class PlansIITR {
             Person person = factory.createPerson(Id.createPersonId(population.getPersons().size()));
             Plan plan = factory.createPlan();
 
-            Activity originAct = factory.createActivityFromCoord("origin", coordFromZone);
-            originAct.setEndTime(getRandomEndTime(startTime, timebin));
-            plan.addActivity(originAct);
+            Activity home = factory.createActivityFromCoord("origin", coordFromZone);
+            home.setEndTime(getRandomEndTime(startTime, timebin));
+            plan.addActivity(home);
 
             Leg leg = factory.createLeg(mode);
             plan.addLeg(leg);
 
-            Activity destAct = factory.createActivityFromCoord("destination", coordToZone);
-            plan.addActivity(destAct);
+            Activity work = factory.createActivityFromCoord("destination", coordToZone);
+            plan.addActivity(work);
 
             person.addPlan(plan);
             population.addPerson(person);
@@ -69,15 +70,15 @@ public class PlansIITR {
     private Coord homeCoord(){
         Collection<? extends Node> values = network.getNodes().values();
         ArrayList<Node> nodes = new ArrayList<>(values);
-//        int nodeIndex = (int) (Math.random() * nodes.size());
-        return nodes.get(0).getCoord();
+        int x = rand.nextInt(nodes.size());
+        return nodes.get(x).getCoord();
     }
 
     private Coord workCoordinate() {
         ArrayList<Node> nodes = new ArrayList<>(network.getNodes().values());
-        return nodes.get(2).getCoord();
+        int y = rand.nextInt(nodes.size());
+        return nodes.get(y).getCoord();
     }
-
 
     private double getRandomEndTime(double start, double timebin){
         return start + random.nextInt((int) timebin);

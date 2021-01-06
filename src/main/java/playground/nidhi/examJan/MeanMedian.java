@@ -8,27 +8,27 @@ import java.util.Map;
 public class MeanMedian {
 
 
-    private final Map<Integer, Map<List<String>, List<Double>>> house2Membr;
+    private final Map<Integer, Map<List<String>, List<Double>>> house2Member;
 
-    Map<List<String>, List<Double>> memberInfo1=new HashMap<>();
-    List<String> memberIDs1 = new ArrayList<>();
-    List<Double> income1= new ArrayList<>();
+    private final Map<List<String>, List<Double>> memberInfo1=new HashMap<>();
+    private final List<String> memberIDs1 = new ArrayList<>();
+    private final List<Double> income1= new ArrayList<>();
 
-    Map<List<String>, List<Double>> memberInfo2=new HashMap<>();
-    List<String> memberIDs2 = new ArrayList<>();
-    List<Double> income2= new ArrayList<>();
+    private final Map<List<String>, List<Double>> memberInfo2=new HashMap<>();
+    private final List<String> memberIDs2 = new ArrayList<>();
+    private final List<Double> income2= new ArrayList<>();
 
-    Map<List<String>, List<Double>> memberInfo3=new HashMap<>();
-    List<String> memberIDs3 = new ArrayList<>();
-    List<Double> income3= new ArrayList<>();
+    private final Map<List<String>, List<Double>> memberInfo3=new HashMap<>();
+    private final List<String> memberIDs3 = new ArrayList<>();
+    private final List<Double> income3= new ArrayList<>();
 
 
     public MeanMedian() {
-        house2Membr = new HashMap<>();
+        house2Member = new HashMap<>();
     }
 
 
-    public Map<Integer, Map<List<String>, List<Double>>> getHouse2Membr() {
+    public Map<Integer, Map<List<String>, List<Double>>> getHouse2Member() {
         int householdId1 = 1201;
         int householdId2 = 1202;
         int householdId3 = 1203;
@@ -60,13 +60,13 @@ public class MeanMedian {
         memberInfo2.put(memberIDs2,income2);
         memberInfo3.put(memberIDs3,income3);
 
-        house2Membr.put(householdId1,memberInfo1);
-        house2Membr.put(householdId2,memberInfo2 );
-        house2Membr.put(householdId3, memberInfo3);
+        house2Member.put(householdId1,memberInfo1);
+        house2Member.put(householdId2,memberInfo2 );
+        house2Member.put(householdId3, memberInfo3);
 
-        System.out.println(house2Membr);
+        System.out.println(house2Member);
         System.out.println();
-        return house2Membr;
+        return house2Member;
 
     }
 
