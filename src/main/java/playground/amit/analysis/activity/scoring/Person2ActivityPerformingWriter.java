@@ -222,10 +222,10 @@ public class Person2ActivityPerformingWriter {
 			throw new RuntimeException("not yet implemented");
 		}
 
-		@Override
-		public void addScore(double v) {
-			throw new RuntimeException("not yet implemented");
-		}
+//		@Override
+//		public void addScore(double v) {
+//			throw new RuntimeException("not yet implemented");
+//		}
 
 		@Override
 		public void agentStuck(double time) {
