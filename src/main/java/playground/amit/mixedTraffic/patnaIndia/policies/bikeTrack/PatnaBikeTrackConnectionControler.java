@@ -292,7 +292,12 @@ public class PatnaBikeTrackConnectionControler {
 //		}
 
 		@Override
-		public boolean continueIterations(int i) {
+		public boolean mayTerminateAfterIteration(int i) {
+			throw new RuntimeException("not implemented.");
+		}
+
+		@Override
+		public boolean doTerminate(int i) {
 			return !this.bikeConnectorControlerListener.isTerminating();
 		}
 	}
