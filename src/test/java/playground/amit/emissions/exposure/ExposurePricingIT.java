@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -108,7 +109,7 @@ public class ExposurePricingIT {
 		return Arrays.asList(object);
 	}
 
-	@Test
+	@Test@Ignore
 	public void noPricingTest () {
 		logger.info("isConsideringCO2Costs = "+ this.isConsideringCO2Costs);
 		logger.info("Number of time bins are "+ this.noOfTimeBins);
@@ -139,7 +140,7 @@ public class ExposurePricingIT {
 		Assert.assertTrue("Wrong route is selected. Agent should have used route with shorter link (i.e. 39) instead.", route.getLinkIds().contains(Id.create("39", Link.class)));
 	}
 
-	@Test
+	@Test@Ignore
 	public void pricingExposure_ReRouteTest() {
 		logger.info("isConsideringCO2Costs = "+ this.isConsideringCO2Costs);
 		logger.info("Number of time bins are "+ this.noOfTimeBins);
