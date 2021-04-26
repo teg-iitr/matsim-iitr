@@ -37,6 +37,7 @@ public class SpatialOverlap {
             else {
                 Segment seg = new Segment(prevStopTime.getStop(), c.getStop(), getTimeBin(prevStopTime.getDepartureTime()));
                 to.getSegment2counts().put(seg, 1);
+                prevStopTime = c;
             }
         }
         this.trip2tripOverlap.put(trip_id, to);
@@ -48,8 +49,8 @@ public class SpatialOverlap {
             TripOverlap current = this.trip2tripOverlap.get(tripId);
             Set<Segment> segs = current.getSegment2counts().keySet();
             for (Segment seg : segs) {
-                Integer cnt = verifiedSegments.getOrDefault(seg, 0);
-                if (cnt!=0) {
+                Integer cnt = verifiedSegments.getOrDefault(seg, 1);
+                if (cnt!=1) {
                     current.getSegment2counts().put(seg, cnt);
                 } else {
                     // go through all trips and all segments
