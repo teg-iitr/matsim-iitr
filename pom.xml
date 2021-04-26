@@ -16,16 +16,14 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-<!--		<matsim.version>13.0-SNAPSHOT</matsim.version>-->
 		<matsim.version>12.0</matsim.version>
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
 	</properties>
-
 	<repositories>
 		<repository>
 			<id>matsim</id>
-			<url>https://dl.bintray.com/matsim/matsim</url>
+			<url>https://repo.matsim.org/repository/matsim/</url>
 		</repository>
 		<repository>
 			<id>ojo-snapshots</id>
@@ -57,8 +55,6 @@
 			<id>matsim-vsp-vsp-playgrounds</id>
 			<url>https://packagecloud.io/matsim-vsp/vsp-playgrounds/maven2</url>
 		</repository>
-
-
 		<!--<repository>-->
 			<!--&lt;!&ndash; Geotools is not on Maven central &ndash;&gt;-->
 			<!--<id>osgeo</id>-->
@@ -119,18 +115,6 @@
 			<artifactId>evacuation-gui</artifactId>
 			<version>-5a05baa049-1</version>
 		</dependency>
-
-		
-		<!-- <dependency>
-			<groupId>com.vividsolutions</groupId>
-			<artifactId>jts</artifactId>
-			<version>1.13</version>
-		</dependency>
-		<dependency>
-			<groupId>org.locationtech.jts</groupId>
-			<artifactId>jts-core</artifactId>
-			<version>1.16.1</version>
-		</dependency> -->
 		<dependency>
 		<groupId>org.matsim.contrib</groupId>
 		<artifactId>cadytsIntegration</artifactId>
@@ -164,11 +148,6 @@
 			<version>${matsim.version}</version>
 			<scope>test</scope>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>org.matsim.contrib</groupId>-->
-<!--			<artifactId>minibus</artifactId>-->
-<!--			<version>${matsim.version}</version>-->
-<!--		</dependency>-->
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>osm</artifactId>
@@ -213,16 +192,11 @@
 			<artifactId>guava</artifactId>
 			<version>28.2-jre</version>
 		</dependency>
-		<!--<dependency>-->
-		<!--<groupId>org.matsim.vsp.vsp-playgrounds</groupId>-->
-		<!--<artifactId>vsp</artifactId>-->
-		<!--<version>0.11.0-SNAPSHOT</version>-->
-	<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>org.matsim.vsp.vsp-playgrounds</groupId>-->
-			<!--<artifactId>benjamin</artifactId>-->
-			<!--<version>0.11.0-SNAPSHOT</version>-->
-		<!--</dependency>-->
+		<dependency>
+			<groupId>com.github.matsim-org</groupId>
+			<artifactId>pt2matsim</artifactId>
+			<version>v20.8</version>
+		</dependency>
 	</dependencies>
 
 
