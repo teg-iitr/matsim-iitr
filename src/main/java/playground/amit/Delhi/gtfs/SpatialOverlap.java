@@ -43,8 +43,7 @@ public class SpatialOverlap {
     public void collectOverlaps() {
     	for ( String tripId : this.trip2tripOverlap.keySet() ) {
             TripOverlap current = this.trip2tripOverlap.get(tripId);
-            Set<Segment> segs = current.getSegment2counts().keySet();
-            for (Segment seg : segs) {
+            for (Segment seg : current.getSegment2counts().keySet()) {
                 Integer cnt = collectedSegments.getOrDefault(seg, 1);
                 current.getSegment2counts().put(seg, cnt);
             }
@@ -66,7 +65,7 @@ public class SpatialOverlap {
         Map<Segment, Integer> getSegment2counts() {
             return this.segment2counts;
         }
-        public Id<Trip> getTripId(){
+        Id<Trip> getTripId(){
             return this.tripId;
         }
     }

@@ -11,9 +11,9 @@ import org.matsim.pt2matsim.gtfs.lib.StopImpl;
  */
 public class Segment {
 
-    private Stop stopA;
-    private Stop stopB;
-    private int timebin;
+    private final Stop stopA;
+    private final Stop stopB;
+    private final int timebin;
 
     public Segment (Stop stopA, Stop stopB, int timebin){
         this.stopA = stopA;
@@ -21,19 +21,6 @@ public class Segment {
         this.timebin = timebin;
     }
     
-    public static void main(String[] args) {
-		
-    	Map<Segment, Integer> temp = new HashMap<>();
-    	temp.put(new Segment(new StopImpl("1", "A", 0, 0),new StopImpl("2", "B", 1, 1.0),23), 0);
-    	temp.put(new Segment(new StopImpl("1", "A", 0, 0),new StopImpl("2", "B", 1.0, 1),22), 1);
-    	temp.put(new Segment(new StopImpl("1", "A", 0, 0),new StopImpl("2", "B", 1, 1),23), 2);
-    	
-    	for (Segment seg : temp.keySet()) {
-    		System.out.println(seg);
-    		System.out.println(temp.get(seg));
-    	}
-	}
-
     @Override
     public boolean equals(Object obj) {
         if(this == obj) return true;
@@ -58,7 +45,7 @@ public class Segment {
     
     @Override
     public int hashCode() {
-    	int result = (int) (this.timebin ^ (this.timebin >>> 32));
+    	int result = this.timebin ^ this.timebin >>> 32;
         result = 31 * result + this.stopA.hashCode();
         result = 31 * result + this.stopB.hashCode();
         return result;
