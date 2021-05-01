@@ -16,7 +16,7 @@ public class SpatialOverlap {
     }
 
     private final double timebinSize;
-    private final Map<String, TripOverlap> trip2tripOverlap = new HashMap<>();
+    private final Map<String, TripOverlap> trip2tripOverlap = new LinkedHashMap<>();
     private final Map<Segment, Integer> collectedSegments = new HashMap<>();
 
     private int getTimeBin(double time_sec){
@@ -56,7 +56,7 @@ public class SpatialOverlap {
 
     public static class TripOverlap {
 
-        private final Map<Segment, Integer> segment2counts = new HashMap<>();
+        private final Map<Segment, Integer> segment2counts = new LinkedHashMap<>();
         private final Id<Trip> tripId;
 
         TripOverlap(Id<Trip> tripId) {
