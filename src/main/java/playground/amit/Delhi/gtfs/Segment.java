@@ -1,10 +1,7 @@
 package playground.amit.Delhi.gtfs;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import org.matsim.core.utils.collections.Tuple;
 import org.matsim.pt2matsim.gtfs.lib.Stop;
-import org.matsim.pt2matsim.gtfs.lib.StopImpl;
 
 /**
  * Created by Amit on 23/04/2021
@@ -15,12 +12,40 @@ public class Segment {
     private final Stop stopB;
     private final int timebin;
 
+    private double timeSpentOnSegment = Double.NaN;
+    private Tuple<Integer, Integer> stopSequence;
+    private double length;
+
     public Segment (Stop stopA, Stop stopB, int timebin){
         this.stopA = stopA;
         this.stopB = stopB;
         this.timebin = timebin;
     }
-    
+
+    public double getTimeSpentOnSegment() {
+        return timeSpentOnSegment;
+    }
+
+    public void setTimeSpentOnSegment(double timeSpentOnSegment) {
+        this.timeSpentOnSegment = timeSpentOnSegment;
+    }
+
+    public Tuple<Integer, Integer> getStopSequence() {
+        return stopSequence;
+    }
+
+    public void setStopSequence(Tuple<Integer, Integer> stopSequence) {
+        this.stopSequence = stopSequence;
+    }
+
+    public double getLength() {
+        return length;
+    }
+
+    public void setLength(double length) {
+        this.length = length;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if(this == obj) return true;

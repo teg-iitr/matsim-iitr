@@ -31,7 +31,7 @@ public class DelhiGTFSOverlapIdentifier {
         System.out.println("Writing overlaps to a file ...");
         BufferedWriter writer  = IOUtils.getBufferedWriter(outFile);
         try {
-        	writer.write("tripId\tstopA_lat\tstopA_lon\t_stopB_lat\tstopB_lon\ttimebin\toverlapcount\n");
+        	writer.write("tripId\tstopA_lat\tstopA_lon\t_stopB_lat\tstopB_lon\ttimebin\toverlapcount\tstopA_seq\tstopB_seq\ttimeSpentOnSegment_sec\tlegnthOfSegment_m\n");
         	for (TripOverlap to : trip2tripOverlap.values()) {
         		for (java.util.Map.Entry<Segment, Integer> val: to.getSegment2counts().entrySet()) {
         			writer.write(to.getTripId()+"\t");
@@ -40,7 +40,10 @@ public class DelhiGTFSOverlapIdentifier {
         			writer.write(val.getKey().getStopB().getLat()+"\t");
         			writer.write(val.getKey().getStopB().getLon()+"\t");
         			writer.write(val.getKey().getTimebin()+"\t");
-        			writer.write(val.getValue()+"\n");
+        			writer.write(val.getValue()+"\t");
+        			writer.write(val.getKey().getStopSequence().getFirst()+"\t"+val.getKey().getStopSequence().getSecond()+"\t");
+        			writer.write(val.getKey().getTimeSpentOnSegment()+"\t");
+        			writer.write(val.getKey().getLength()+"\n");
         		}
         	}
 			writer.close();
