@@ -14,9 +14,9 @@ import java.util.Map;
 public class DelhiGTFSOverlapIdentifier {
 
     private static final String GTFS_PATH = "..\\..\\repos\\sl-repos\\shared\\data\\project_data\\delhi\\gtfs_files\\18042021\\GTFS_DIMTS_18042021.zip";
-    private static final double timebinSize = 2*60.; // 2min
+    private static final double timebinSize = 24*60*60.; // 2min
 
-    private static final String outFile = "..\\..\\repos\\sl-repos\\shared\\data\\project_data\\delhi\\gtfs_files\\18042021\\GTFS_overlap2.txt";
+    private static final String outFile = "..\\..\\repos\\sl-repos\\shared\\data\\project_data\\delhi\\gtfs_files\\18042021\\GTFS_overlap_24h-timebin.txt";
     
     public static void main(String[] args) {
         GtfsFeed gtfsFeed = new GtfsFeedImpl(GTFS_PATH);
