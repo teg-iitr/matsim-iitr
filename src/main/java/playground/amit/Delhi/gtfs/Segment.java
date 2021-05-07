@@ -1,22 +1,21 @@
 package playground.amit.Delhi.gtfs;
 
 import org.matsim.core.utils.collections.Tuple;
-import org.matsim.pt2matsim.gtfs.lib.Stop;
 
 /**
  * Created by Amit on 23/04/2021
  */
 public class Segment {
 
-    private final Stop stopA;
-    private final Stop stopB;
+    private final MyStop stopA;
+    private final MyStop stopB;
     private final int timebin;
 
     private double timeSpentOnSegment = Double.NaN;
     private Tuple<Integer, Integer> stopSequence;
     private double length;
 
-    public Segment (Stop stopA, Stop stopB, int timebin){
+    public Segment (MyStop stopA, MyStop stopB, int timebin){
         this.stopA = stopA;
         this.stopB = stopB;
         this.timebin = timebin;
@@ -53,14 +52,16 @@ public class Segment {
 
         Segment seg = (Segment) obj;
 
-        return this.stopA.equals(seg.getStopA()) &&  this.stopB.equals(seg.getStopB()) && this.timebin==seg.getTimebin();
+        return (this.stopA.equals(seg.getStopA()) &&  this.stopB.equals(seg.getStopB())
+                || this.stopA.equals(seg.getStopB()) &&  this.stopB.equals(seg.getStopA()) )
+                && this.timebin==seg.getTimebin();
     }
     
-    public Stop getStopA() {
+    public MyStop getStopA() {
         return stopA;
     }
 
-    public Stop getStopB() {
+    public MyStop getStopB() {
         return stopB;
     }
 

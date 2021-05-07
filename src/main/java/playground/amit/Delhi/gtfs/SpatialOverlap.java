@@ -1,9 +1,6 @@
 package playground.amit.Delhi.gtfs;
 
-import org.geotools.geometry.jts.JTS;
-import org.geotools.referencing.GeodeticCalculator;
 import org.matsim.api.core.v01.Id;
-import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.pt2matsim.gtfs.lib.StopTime;
 import org.matsim.pt2matsim.gtfs.lib.Trip;
@@ -35,12 +32,14 @@ public class SpatialOverlap {
         for (StopTime c : stopTimes){
             if (prevStopTime==null) prevStopTime = c;
             else {
-                Segment seg = new Segment(prevStopTime.getStop(), c.getStop(), getTimeBin(prevStopTime.getDepartureTime()));
+                MyStop prevStop = (MyStop) prevStopTime.getStop();
+                MyStop stop = (MyStop) c.getStop();
+                Segment seg = new Segment(prevStop, stop, getTimeBin(prevStopTime.getDepartureTime()));
 
                 seg.setTimeSpentOnSegment(c.getArrivalTime()- prevStopTime.getDepartureTime());
                 seg.setStopSequence(new Tuple<>(prevStopTime.getSequencePosition(), c.getSequencePosition()));
-                seg.setLength(GeometryUtils.getGeoDaticDistance(prevStopTime.getStop().getLat(), prevStopTime.getStop().getLon(),
-                        c.getStop().getLat(), c.getStop().getLon()));
+                seg.setLength(GeometryUtils.getGeoDaticDistance(prevStop.getLat(), prevStop.getLon(),
+                        stop.getLat(), stop.getLon()));
 
                 to.getSegment2counts().put(seg, 1);
                 int cnt = this.collectedSegments.getOrDefault(seg, 0);

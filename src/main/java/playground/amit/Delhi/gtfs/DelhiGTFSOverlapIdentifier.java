@@ -22,8 +22,8 @@ public class DelhiGTFSOverlapIdentifier {
         GtfsFeed gtfsFeed = new GtfsFeedImpl(GTFS_PATH);
         SpatialOverlap spatialOverlap = new SpatialOverlap(timebinSize);
         // go through with trips because a trip is an instance of a vehicle
-        gtfsFeed.getTrips().forEach((key, value) -> spatialOverlap.add(key, value));
-        
+        gtfsFeed.getTrips().forEach(spatialOverlap::add);
+
         System.out.println("Evaluating overlaps...");
         spatialOverlap.collectOverlaps();
         Map<String, SpatialOverlap.TripOverlap> trip2tripOverlap = spatialOverlap.getTrip2tripOverlap();
