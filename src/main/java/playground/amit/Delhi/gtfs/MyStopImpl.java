@@ -11,13 +11,13 @@ import java.util.Collection;
 /**
  * Created by Amit on 07/05/2021.
  */
-public class MyStop implements Stop {
+public class MyStopImpl implements Stop {
 
     private final StopImpl delegate;
     private final double lon;
     private final double lat;
 
-    public MyStop(String id, String name, double lon, double lat) {
+    public MyStopImpl(String id, String name, double lon, double lat) {
         delegate = new StopImpl(id,name,lon,lat);
         this.lat = lat;
         this.lon= lon;
@@ -80,7 +80,7 @@ public class MyStop implements Stop {
         if(this == o) return true;
         if(o == null || getClass() != o.getClass()) return false;
 
-        MyStop stop = (MyStop) o;
+        MyStopImpl stop = (MyStopImpl) o;
 
         if(Double.compare(stop.getLon(), lon) != 0) return false;
         if(Double.compare(stop.getLat(), lat) != 0) return false;

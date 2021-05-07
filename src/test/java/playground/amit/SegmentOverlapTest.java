@@ -2,7 +2,8 @@ package playground.amit;
 
 import org.junit.Assert;
 import org.junit.Test;
-import playground.amit.Delhi.gtfs.MyStop;
+import org.matsim.pt2matsim.gtfs.lib.Stop;
+import playground.amit.Delhi.gtfs.MyStopImpl;
 import playground.amit.Delhi.gtfs.Segment;
 
 /**
@@ -14,8 +15,8 @@ public class SegmentOverlapTest {
     public void test() {
 
         // the stops must be same if lat, lon are same.
-        MyStop stop1 = new MyStop("1","stop1",0.0, 0.0);
-        MyStop stop2 = new MyStop("2","stop2",0.0, 0.0);
+        Stop stop1 = new MyStopImpl("1","stop1",0.0, 0.0);
+        Stop stop2 = new MyStopImpl("2","stop2",0.0, 0.0);
 
         Assert.assertEquals("The stops must be same.", stop1, stop2);
 
@@ -25,7 +26,7 @@ public class SegmentOverlapTest {
 
         Assert.assertEquals("The segments must be same.", seg1, seg2);
 
-        stop2 = new MyStop("2","stop2",1.0, 1.0);
+        stop2 = new MyStopImpl("2","stop2",1.0, 1.0);
         seg1  = new Segment(stop1, stop2, 0);
         seg2  = new Segment(stop1, stop2, 0);
         Assert.assertEquals("The segments must be same.", seg1, seg2);
@@ -38,7 +39,7 @@ public class SegmentOverlapTest {
         seg2 = new Segment(stop1, stop2, 1);
         Assert.assertFalse("The segments must not be same.", seg1.equals(seg2));
 
-        MyStop stop3 = new MyStop("2","stop2",2.0, 2.0);
+        Stop stop3 = new MyStopImpl("2","stop2",2.0, 2.0);
         seg2 = new Segment(stop2, stop3,0);
         Assert.assertFalse("The segments must not be same.", seg1.equals(seg2));
     }
