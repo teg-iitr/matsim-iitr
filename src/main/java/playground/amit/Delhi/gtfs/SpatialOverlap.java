@@ -3,6 +3,7 @@ package playground.amit.Delhi.gtfs;
 import org.matsim.api.core.v01.Id;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.pt2matsim.gtfs.lib.Stop;
+import org.matsim.pt2matsim.gtfs.lib.StopImpl;
 import org.matsim.pt2matsim.gtfs.lib.StopTime;
 import org.matsim.pt2matsim.gtfs.lib.Trip;
 import playground.amit.utils.geometry.GeometryUtils;
@@ -33,8 +34,8 @@ public class SpatialOverlap {
         for (StopTime c : stopTimes){
             if (prevStopTime==null) prevStopTime = c;
             else {
-                Stop prevStop = prevStopTime.getStop();
-                Stop stop = c.getStop();
+                Stop prevStop = wrapper(prevStopTime.getStop());
+                Stop stop = wrapper(c.getStop());
                 Segment seg = new Segment(prevStop,
                         stop, getTimeBin(prevStopTime.getDepartureTime()));
 
@@ -50,6 +51,10 @@ public class SpatialOverlap {
             }
         }
         this.trip2tripOverlap.put(trip_id, to);
+    }
+
+    private MyStopImpl wrapper(Stop stop){
+        return new MyStopImpl(stop.getId(), stop.getName(), stop.getLon(), stop.getLat());
     }
 
     public void collectOverlaps() {
