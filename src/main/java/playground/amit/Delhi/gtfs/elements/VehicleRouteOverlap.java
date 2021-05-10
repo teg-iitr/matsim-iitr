@@ -1,7 +1,7 @@
 package playground.amit.Delhi.gtfs.elements;
 
-import com.graphhopper.Trip;
 import org.matsim.api.core.v01.Id;
+import org.matsim.pt2matsim.gtfs.lib.Trip;
 import playground.amit.Delhi.gtfs.SigmoidFunction;
 
 import java.util.HashMap;

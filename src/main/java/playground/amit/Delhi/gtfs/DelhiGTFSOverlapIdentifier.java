@@ -24,7 +24,7 @@ public class DelhiGTFSOverlapIdentifier {
     private static final String outFilePath = "..\\..\\repos\\sl-repos\\shared\\data\\project_data\\delhi\\gtfs_files\\18042021\\";
 
 	public static void main(String[] args) {
-//		new DelhiGTFSOverlapIdentifier().segmentalOverlapCountsProbs();
+		new DelhiGTFSOverlapIdentifier().segmentalOverlapCountsProbs();
 		new DelhiGTFSOverlapIdentifier().routeProbs();
 	}
 
