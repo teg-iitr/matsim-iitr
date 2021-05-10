@@ -3,7 +3,6 @@ package playground.amit.Delhi.gtfs;
 import org.matsim.api.core.v01.Id;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.pt2matsim.gtfs.lib.Stop;
-import org.matsim.pt2matsim.gtfs.lib.StopImpl;
 import org.matsim.pt2matsim.gtfs.lib.StopTime;
 import org.matsim.pt2matsim.gtfs.lib.Trip;
 import playground.amit.utils.geometry.GeometryUtils;
@@ -21,7 +20,7 @@ public class SpatialOverlap {
 
     private final double timebinSize;
     private final Map<String, TripOverlap> trip2tripOverlap = new LinkedHashMap<>();
-    private final Map<Segment, Integer> collectedSegments = new HashMap<>();
+    private final Map<Segment, SegmentalOverlap> collectedSegments = new HashMap<>();
 
     private int getTimeBin(double time_sec){
         return (int) (time_sec/timebinSize);
@@ -44,9 +43,16 @@ public class SpatialOverlap {
                 seg.setLength(GeometryUtils.getGeoDaticDistance(prevStop.getLat(), prevStop.getLon(),
                         stop.getLat(), stop.getLon()));
 
-                to.getSegment2counts().put(seg, 1);
-                int cnt = this.collectedSegments.getOrDefault(seg, 0);
-                this.collectedSegments.put(seg, cnt+1); // cannot put back in TripOverlay already here because it's keep updating
+                to.getSegments().add(seg); // must be unique for the trip
+
+                SegmentalOverlap soverlap = this.collectedSegments.get(seg);
+                if (soverlap==null){
+                    soverlap = new SegmentalOverlap(seg);
+                    soverlap.self(trip_id, trip.getRoute().getId());
+                } else{
+                    soverlap.overlapWith(trip_id, trip.getRoute().getId());
+                }
+                this.collectedSegments.put(seg, soverlap); // cannot put back in TripOverlay already here because segments are keep updating
                 prevStopTime = c;
             }
         }
@@ -60,9 +66,12 @@ public class SpatialOverlap {
     public void collectOverlaps() {
     	for ( String tripId : this.trip2tripOverlap.keySet() ) {
             TripOverlap current = this.trip2tripOverlap.get(tripId);
-            for (Segment seg : current.getSegment2counts().keySet()) {
-                Integer cnt = collectedSegments.getOrDefault(seg, 1);
-                current.getSegment2counts().put(seg, cnt);
+            for (Segment seg : current.getSegments()) {
+                SegmentalOverlap so = this.collectedSegments.get(seg); //must noe be null
+                if (so == null){
+                    throw new RuntimeException("There must be segmental overlap against segment "+seg);
+                }
+                current.getSeg2overlaps().put(seg,so);
             }
     	}
     }
@@ -71,19 +80,63 @@ public class SpatialOverlap {
         return trip2tripOverlap;
     }
 
+    public static class SegmentalOverlap {
+        private final Segment segment;
+        private int counter = 0;
+
+        private Tuple<String, String> self_trip_routeId = null;
+        private Set<String> overlappingTripIds = new HashSet<>();
+        private Set<String> overlappingRouteIds = new HashSet<>();
+
+        public SegmentalOverlap (Segment segment){
+            this.segment = segment;
+        }
+
+        void overlapWith(String tripId, String routeId){
+            counter++;
+            this.overlappingTripIds.add(tripId);
+            this.overlappingRouteIds.add(routeId);
+        }
+        void self(String tripId, String routeId){
+            if (this.self_trip_routeId!=null) throw new RuntimeException("The 'self' must be called only once.");
+            this.self_trip_routeId = new Tuple<>(tripId, routeId);
+        }
+
+        public int getCount() {
+            return counter;
+        }
+
+        public Tuple<String, String> getSelf_trip_routeId() {
+            return self_trip_routeId;
+        }
+
+        public Set<String> getOverlappingTripIds() {
+            return overlappingTripIds;
+        }
+
+        public Set<String> getOverlappingRouteIds() {
+            return overlappingRouteIds;
+        }
+    }
+
     public static class TripOverlap {
 
-        private final Map<Segment, Integer> segment2counts = new LinkedHashMap<>();
+        private final List<Segment> segments = new ArrayList<>();
         private final Id<Trip> tripId;
+        private final Map<Segment, SegmentalOverlap> seg2overlaps = new LinkedHashMap<>();
 
         TripOverlap(Id<Trip> tripId) {
             this.tripId = tripId;
         }
-        Map<Segment, Integer> getSegment2counts() {
-            return this.segment2counts;
+        List<Segment> getSegments() {
+            return this.segments;
         }
         Id<Trip> getTripId(){
             return this.tripId;
+        }
+
+        public Map<Segment, SegmentalOverlap> getSeg2overlaps() {
+            return seg2overlaps;
         }
     }
 }

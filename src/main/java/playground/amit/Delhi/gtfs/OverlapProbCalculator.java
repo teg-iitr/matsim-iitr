@@ -48,8 +48,8 @@ public class OverlapProbCalculator {
                     SpatialOverlap.TripOverlap to = trip2tripOverlap.get(t);
                     for (SigmoidFunctionUtils.SigmoidFunction sg : SigmoidFunctionUtils.SigmoidFunction.values()) {
                         double prob = 1;
-                        for (java.util.Map.Entry<Segment, Integer> val: to.getSegment2counts().entrySet()){
-                            prob *= SigmoidFunctionUtils.getValue(sg,val.getValue());
+                        for (java.util.Map.Entry<Segment, SpatialOverlap.SegmentalOverlap> val: to.getSeg2overlaps().entrySet()){
+                            prob *= SigmoidFunctionUtils.getValue(sg,val.getValue().getCount());
                         }
                         writer.write(route.getId().toString()+"\t"+t+"\t"+sg.toString()+"\t"+prob+"\n");
                     }
@@ -80,19 +80,19 @@ public class OverlapProbCalculator {
                     "\tstopA_seq\tstopB_seq\ttimeSpentOnSegment_sec\tlegnthOfSegment_m" +
                     "\tlogisticSigmoidProb\tbipolarSigmoidProb\ttanhProb\talgebraicSigmoidProb\n");
             for (SpatialOverlap.TripOverlap to : trip2tripOverlap.values()) {
-                for (java.util.Map.Entry<Segment, Integer> val: to.getSegment2counts().entrySet()) {
+                for (java.util.Map.Entry<Segment, SpatialOverlap.SegmentalOverlap> val: to.getSeg2overlaps().entrySet()) {
                     writer.write(to.getTripId()+"\t");
                     writer.write(val.getKey().getStopA().getLat()+"\t");
                     writer.write(val.getKey().getStopA().getLon()+"\t");
                     writer.write(val.getKey().getStopB().getLat()+"\t");
                     writer.write(val.getKey().getStopB().getLon()+"\t");
                     writer.write(val.getKey().getTimebin()+"\t");
-                    writer.write(val.getValue()+"\t");
+                    writer.write(val.getValue().getCount()+"\t");
                     writer.write(val.getKey().getStopSequence().getFirst()+"\t"+val.getKey().getStopSequence().getSecond()+"\t");
                     writer.write(val.getKey().getTimeSpentOnSegment()+"\t");
                     writer.write(val.getKey().getLength()+"\t");
                     for (SigmoidFunctionUtils.SigmoidFunction sg : SigmoidFunctionUtils.SigmoidFunction.values()) {
-                        writer.write(SigmoidFunctionUtils.getValue(sg,val.getValue())+"\t");
+                        writer.write(SigmoidFunctionUtils.getValue(sg,val.getValue().getCount())+"\t");
                     }
                     writer.write("\n");
                 }

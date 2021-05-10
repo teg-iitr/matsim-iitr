@@ -17,6 +17,9 @@ public class Segment {
     private double length;
 
     public Segment (Stop stopA, Stop stopB, int timebin){
+        if ( !(stopA instanceof MyStopImpl && stopB instanceof MyStopImpl)) {
+            throw new RuntimeException("Stops must be of type MyStopImpl.");
+        }
         this.stopA = stopA;
         this.stopB = stopB;
         this.timebin = timebin;

@@ -21,7 +21,7 @@ public class DelhiGTFSOverlapIdentifier {
     public static void main(String[] args) {
         GtfsFeed gtfsFeed = new GtfsFeedImpl(GTFS_PATH);
         SpatialOverlap spatialOverlap = new SpatialOverlap(timebinSize);
-        // go through with trips because a trip is an instance of a vehicle
+        // go through with trips because a trip is an instance of a vehicle/ route
         gtfsFeed.getTrips().forEach(spatialOverlap::add);
 
         System.out.println("Evaluating overlaps...");
@@ -33,14 +33,14 @@ public class DelhiGTFSOverlapIdentifier {
         try {
         	writer.write("tripId\tstopA_lat\tstopA_lon\t_stopB_lat\tstopB_lon\ttimebin\toverlapcount\tstopA_seq\tstopB_seq\ttimeSpentOnSegment_sec\tlegnthOfSegment_m\n");
         	for (TripOverlap to : trip2tripOverlap.values()) {
-        		for (java.util.Map.Entry<Segment, Integer> val: to.getSegment2counts().entrySet()) {
+        		for (java.util.Map.Entry<Segment, SpatialOverlap.SegmentalOverlap> val: to.getSeg2overlaps().entrySet()) {
         			writer.write(to.getTripId()+"\t");
         			writer.write(val.getKey().getStopA().getLat()+"\t");
         			writer.write(val.getKey().getStopA().getLon()+"\t");
         			writer.write(val.getKey().getStopB().getLat()+"\t");
         			writer.write(val.getKey().getStopB().getLon()+"\t");
         			writer.write(val.getKey().getTimebin()+"\t");
-        			writer.write(val.getValue()+"\t");
+        			writer.write(val.getValue().getCount()+"\t");
         			writer.write(val.getKey().getStopSequence().getFirst()+"\t"+val.getKey().getStopSequence().getSecond()+"\t");
         			writer.write(val.getKey().getTimeSpentOnSegment()+"\t");
         			writer.write(val.getKey().getLength()+"\n");
