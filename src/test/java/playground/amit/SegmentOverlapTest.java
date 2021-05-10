@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.matsim.pt2matsim.gtfs.lib.Stop;
 import playground.amit.Delhi.gtfs.MyStopImpl;
-import playground.amit.Delhi.gtfs.Segment;
+import playground.amit.Delhi.gtfs.elements.Segment;
 
 /**
  * Created by Amit on 07/05/2021.
