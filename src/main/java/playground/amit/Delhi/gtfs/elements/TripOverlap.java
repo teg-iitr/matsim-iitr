@@ -2,8 +2,6 @@ package playground.amit.Delhi.gtfs.elements;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.pt2matsim.gtfs.lib.Trip;
-import playground.amit.Delhi.gtfs.SigmoidFunction;
-import playground.amit.Delhi.gtfs.SigmoidFunctionUtils;
 
 import java.util.*;
 

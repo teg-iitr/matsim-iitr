@@ -15,12 +15,13 @@ import java.util.*;
  */
 public class SpatialOverlap {
 
-    public SpatialOverlap(double timebinSize) {
+    public SpatialOverlap(int timebinSize) {
         this.timebinSize = timebinSize;
     }
 
-    private final double timebinSize;
+    private final int timebinSize;
     private final Map<String, TripOverlap> trip2tripOverlap = new LinkedHashMap<>();
+    private final Map<String, Set<String>> route2TripsIds = new HashMap<>();
     private final Map<Segment, SegmentalOverlap> collectedSegments = new HashMap<>();
 
     private int getTimeBin(double time_sec){
@@ -29,7 +30,15 @@ public class SpatialOverlap {
 
     public void add(String trip_id, Trip trip) {
         TripOverlap to = new TripOverlap(Id.create(trip_id, Trip.class));
-        to.setRouteId(trip.getRoute().getId());
+        String routeId = trip.getRoute().getId();
+        to.setRouteId(routeId);
+
+        // store route and trips
+        Set<String> trips = this.route2TripsIds.getOrDefault(routeId, new HashSet<>());
+        trips.add(trip_id);
+        this.route2TripsIds.put(routeId, trips);
+
+        // create and store segments
         NavigableSet<StopTime> stopTimes = trip.getStopTimes();
         StopTime prevStopTime = null;
         for (StopTime c : stopTimes){
@@ -50,9 +59,9 @@ public class SpatialOverlap {
                 SegmentalOverlap soverlap = this.collectedSegments.get(seg);
                 if (soverlap==null){
                     soverlap = new SegmentalOverlap(seg);
-                    soverlap.self(trip_id, trip.getRoute().getId());
+                    soverlap.self(trip_id, routeId);
                 } else{
-                    soverlap.overlapWith(trip_id, trip.getRoute().getId());
+                    soverlap.overlapWith(trip_id, routeId);
                 }
                 this.collectedSegments.put(seg, soverlap); // cannot put back in TripOverlay already here because segments are keep updating
                 prevStopTime = c;
@@ -69,7 +78,7 @@ public class SpatialOverlap {
     	for ( String tripId : this.trip2tripOverlap.keySet() ) {
             TripOverlap current = this.trip2tripOverlap.get(tripId);
             for (Segment seg : current.getSegments()) {
-                SegmentalOverlap so = this.collectedSegments.get(seg); //must noe be null
+                SegmentalOverlap so = this.collectedSegments.get(seg); //must not be null
                 if (so == null){
                     throw new RuntimeException("There must be segmental overlap against segment "+seg);
                 }
@@ -78,7 +87,21 @@ public class SpatialOverlap {
     	}
     }
 
+    public void removeRoute(String routeId){
+        Set<String> trips2Remove = this.route2TripsIds.remove(routeId);
+        for (String trip_id : trips2Remove) {
+            TripOverlap removedTO = this.trip2tripOverlap.remove(trip_id);
+            for (Segment removedSeg : removedTO.getSegments()) {
+                this.collectedSegments.get(removedSeg).remove(routeId, removedTO.getTripId().toString());
+            }
+        }
+    }
+
     public Map<String, TripOverlap> getTrip2tripOverlap() {
         return trip2tripOverlap;
+    }
+
+    public Map<String, Set<String>> getRoute2TripsIds() {
+        return route2TripsIds;
     }
 }

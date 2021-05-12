@@ -1,7 +1,6 @@
 package playground.amit.Delhi.gtfs.elements;
 
 import org.matsim.core.utils.collections.Tuple;
-import playground.amit.Delhi.gtfs.elements.Segment;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -29,6 +28,11 @@ public class SegmentalOverlap {
     void self(String tripId, String routeId){
         if (this.self_trip_routeId!=null) throw new RuntimeException("The 'self' must be called only once.");
         this.self_trip_routeId = new Tuple<>(tripId, routeId);
+    }
+    void remove(String routeId, String tripId){
+        this.counter--;
+        this.overlappingRouteIds.remove(routeId);
+        this.overlappingTripIds.remove(tripId);
     }
 
     public int getCount() {

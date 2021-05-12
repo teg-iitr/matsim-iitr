@@ -1,4 +1,4 @@
-package playground.amit.Delhi.gtfs;
+package playground.amit.Delhi.gtfs.elements;
 
 /**
  * Created by Amit on 10/05/2021.
