@@ -15,6 +15,7 @@ public class TripOverlap {
     private String routeId;
     private final Map<Segment, SegmentalOverlap> seg2overlaps = new LinkedHashMap<>();
     private final Map<SigmoidFunction, Double> sigmoidFunction2Probs = new HashMap<>();
+    private final double overlappingLengthRatio = Double.NaN;
 
     TripOverlap(Id<Trip> tripId) {
         this.tripId = tripId;

@@ -97,6 +97,10 @@ public class SpatialOverlap {
         }
     }
 
+    public Map<Segment, SegmentalOverlap> getCollectedSegments() {
+        return collectedSegments;
+    }
+
     public Map<String, TripOverlap> getTrip2tripOverlap() {
         return trip2tripOverlap;
     }
