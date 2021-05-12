@@ -32,6 +32,10 @@ public class VehicleRouteOverlap {
         return  routeProb;
     }
 
+    /**
+     * Trips ids of the route.
+     * @return
+     */
     public Map<Id<Trip>, Map<SigmoidFunction, Double>> getTripId2Probs() {
         return tripId2Probs;
     }

@@ -21,7 +21,7 @@ public class TripOverlap {
     TripOverlap(Id<Trip> tripId) {
         this.tripId = tripId;
     }
-    List<Segment> getSegments() {
+    public List<Segment> getSegments() {
         return this.segments;
     }
 
