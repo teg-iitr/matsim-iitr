@@ -2,8 +2,9 @@ package playground.amit.Delhi.gtfs.elements;
 
 import org.matsim.core.utils.collections.Tuple;
 
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 /**
  * Created by Amit on 10/05/2021.
@@ -13,8 +14,8 @@ public class SegmentalOverlap {
     private int counter = 0;
 
     private Tuple<String, String> self_trip_routeId = null;
-    private final Set<String> overlappingTripIds = new HashSet<>();
-    private final Set<String> overlappingRouteIds = new HashSet<>();
+    private final List<String> overlappingTripIds = new ArrayList<>();
+    private final List<String> overlappingRouteIds = new ArrayList<>();
 
     public SegmentalOverlap (Segment segment){
         this.segment = segment;
@@ -43,11 +44,11 @@ public class SegmentalOverlap {
         return self_trip_routeId;
     }
 
-    public Set<String> getOverlappingTripIds() {
+    public List<String> getOverlappingTripIds() {
         return overlappingTripIds;
     }
 
-    public Set<String> getOverlappingRouteIds() {
+    public List<String> getOverlappingRouteIds() {
         return overlappingRouteIds;
     }
 
