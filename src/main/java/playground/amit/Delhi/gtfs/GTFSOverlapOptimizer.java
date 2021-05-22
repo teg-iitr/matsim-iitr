@@ -54,6 +54,20 @@ public class GTFSOverlapOptimizer {
         writeIterationFiles();
     }
 
+    public void optimizeTillRoutes(int requiredVehicleRoutes){
+        int routesRemaining = 0;
+        do {
+            GTFSOverlapOptimizer.LOG.info("\t\tRunning iteration\t"+this.iteration);
+            Map<String, Double> route2Remove = getLeastProbRoute();
+            for (String s : route2Remove.keySet()) {
+                GTFSOverlapOptimizer.LOG.info("Removing vehicle route "+s);
+                remove(s, route2Remove.get(s));
+                writeIterationFiles();
+                routesRemaining = this.spatialOverlap.getRoute2TripsIds().size();
+            }
+        } while (routesRemaining > requiredVehicleRoutes);
+    }
+
     public void optimizeTillProb(double prob){
         double removedRouteProb = 1.0;
         do {
