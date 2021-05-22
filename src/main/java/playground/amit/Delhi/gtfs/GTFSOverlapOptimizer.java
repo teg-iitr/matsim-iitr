@@ -1,5 +1,7 @@
 package playground.amit.Delhi.gtfs;
 
+import org.apache.log4j.Logger;
+import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.pt2matsim.gtfs.GtfsFeed;
 import org.matsim.pt2matsim.gtfs.GtfsFeedImpl;
@@ -15,6 +17,8 @@ import java.util.*;
  */
 public class GTFSOverlapOptimizer {
 
+    public static final Logger LOG = Logger.getLogger(GTFSOverlapOptimizer.class);
+
     private final SpatialOverlap spatialOverlap;
     private final String outputPath;
     private final String suffix;
@@ -22,6 +26,7 @@ public class GTFSOverlapOptimizer {
     private final BufferedWriter writer;
     // required for optimization
     private final SigmoidFunction sigmoidFunction;
+    private double totalNetworkRouteLength= Double.NaN;
 
     public GTFSOverlapOptimizer(int timebinSize, String outputPath, SigmoidFunction sigmoidFunction){
       this.spatialOverlap = new SpatialOverlap(timebinSize);
@@ -30,6 +35,11 @@ public class GTFSOverlapOptimizer {
       String date = new SimpleDateFormat("dd-MM-yy").format(Calendar.getInstance().getTime());
       this.suffix = timebinSize+"_"+date;
       this.writer = IOUtils.getAppendingBufferedWriter(this.outputPath+"\\overall_summary_stats.txt");
+      try{
+          OutputDirectoryLogging.initLoggingWithOutputDirectory(this.outputPath);
+      }catch (IOException e){
+          throw new RuntimeException("The log file cannot be written. Reason "+e);
+      }
     }
 
     public void initialize(String gtfs_file){
@@ -38,7 +48,7 @@ public class GTFSOverlapOptimizer {
         // go through with trips because a trip is an instance of a vehicle
         gtfsFeed.getTrips().forEach(spatialOverlap::add);
 
-        System.out.println("Evaluating overlaps and overlaps probabilities to a file ...");
+        GTFSOverlapOptimizer.LOG.info("Evaluating overlaps and overlaps probabilities to a file ...");
         spatialOverlap.collectOverlaps();
         writeStatsToSummaryFile("-", 0);
         writeIterationFiles();
@@ -47,10 +57,10 @@ public class GTFSOverlapOptimizer {
     public void optimizeTillProb(double prob){
         double removedRouteProb = 1.0;
         do {
-            System.out.println("\t\tRunning iteration\t"+this.iteration);
+            GTFSOverlapOptimizer.LOG.info("\t\tRunning iteration\t"+this.iteration);
             Map<String, Double> route2Remove = getLeastProbRoute();
             for (String s : route2Remove.keySet()) {
-                System.out.println("Removing vehicle route "+s);
+                GTFSOverlapOptimizer.LOG.info("Removing vehicle route "+s);
                 remove(s, route2Remove.get(s));
                 writeIterationFiles();
                 removedRouteProb = route2Remove.get(s);
@@ -60,10 +70,10 @@ public class GTFSOverlapOptimizer {
 
     public void run(int iteration){
         for (int i = 1; i < iteration; i++) {
-            System.out.println("\t\tRunning iteration\t"+this.iteration);
+            GTFSOverlapOptimizer.LOG.info("\t\tRunning iteration\t"+this.iteration);
             Map<String, Double> route2Remove = getLeastProbRoute();
             for (String s : route2Remove.keySet()) {
-                System.out.println("Removing vehicle route "+s);
+                GTFSOverlapOptimizer.LOG.info("Removing vehicle route "+s);
                 remove(s, route2Remove.get(s));
                 writeIterationFiles();
             }
@@ -122,8 +132,11 @@ public class GTFSOverlapOptimizer {
      * This represents the network route length (not total route length).
      */
     public double getAllSegmentsLength(){
-        return spatialOverlap.getCollectedSegments().keySet().stream()
-                .mapToDouble(Segment::getLength).sum();
+        if (Double.isNaN(this.totalNetworkRouteLength)){
+            this.totalNetworkRouteLength= spatialOverlap.getCollectedSegments().keySet().stream()
+                    .mapToDouble(Segment::getLength).sum();
+        }
+        return this.totalNetworkRouteLength;
     }
 
     private String getItrDir(){
@@ -162,7 +175,7 @@ public class GTFSOverlapOptimizer {
      * Writing segmental counts and prob for each segment in all trips.
      */
     public void writeSegmentalOverlapCountsProbs(String outputFolder) {
-        System.out.println("Writing overlaps to a file ...");
+        GTFSOverlapOptimizer.LOG.info("Writing overlaps to a file ...");
         String filename = outputFolder+"segmentsProbs_"+suffix+"_"+"it-"+iteration+".txt.gz";
         BufferedWriter writer  = IOUtils.getBufferedWriter(filename);
         try {
@@ -191,7 +204,7 @@ public class GTFSOverlapOptimizer {
         } catch (IOException e) {
             throw new RuntimeException("Data is not written. Reason "+e);
         }
-        System.out.println("Writing overlaps to "+filename+" completed.");
+        GTFSOverlapOptimizer.LOG.info("Writing overlaps to "+filename+" completed.");
     }
 
     public void writeVehicleRouteProbs(String outputFolder){
@@ -205,7 +218,7 @@ public class GTFSOverlapOptimizer {
             route2VROverlpas.put(routeId, vrOverlap);
         }
 
-        System.out.println("Writing vehicle-route probs to a file ...");
+        GTFSOverlapOptimizer.LOG.info("Writing vehicle-route probs to a file ...");
         String filename = outputFolder+"vehicleRouteProbs_"+suffix+"_"+"it-"+iteration+".txt.gz";
         try (BufferedWriter writer  = IOUtils.getBufferedWriter(filename)) {
             writer.write("routeId\tnumberOfTrips\tsigmoidFunction\tprob\n");
@@ -217,7 +230,7 @@ public class GTFSOverlapOptimizer {
         }catch (IOException e) {
             throw new RuntimeException("Data is not written. Reason "+e);
         }
-        System.out.println("Writing vehicle-route probs to "+filename+" completed.");
+        GTFSOverlapOptimizer.LOG.info("Writing vehicle-route probs to "+filename+" completed.");
     }
 
     /**
@@ -227,7 +240,7 @@ public class GTFSOverlapOptimizer {
         Map<String, TripOverlap> trip2tripOverlap = spatialOverlap.getTrip2tripOverlap();
         Map<String, Set<String>> route2Trips = spatialOverlap.getRoute2TripsIds();
 
-        System.out.println("Writing overlaps to a file ...");
+        GTFSOverlapOptimizer.LOG.info("Writing overlaps to a file ...");
         String filename = outputFolder+"routeTripProbs_"+suffix+"_"+"it-"+iteration+".txt.gz";
         BufferedWriter writer  = IOUtils.getBufferedWriter(filename);
         try {
@@ -243,7 +256,7 @@ public class GTFSOverlapOptimizer {
         }catch (IOException e) {
             throw new RuntimeException("Data is not written. Reason "+e);
         }
-        System.out.println("Writing overlaps to "+filename+" completed.");
+        GTFSOverlapOptimizer.LOG.info("Writing overlaps to "+filename+" completed.");
     }
 
 //    private void writeSpecificRouteOverlapDetails(String outFilePath, String suffix){
@@ -292,6 +305,7 @@ public class GTFSOverlapOptimizer {
     }
 
     public void done() {
+        OutputDirectoryLogging.closeOutputDirLogging();
         try {
             this.writer.close();
         } catch (IOException e) {
