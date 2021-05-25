@@ -59,6 +59,7 @@ public class GTFSOverlapOptimizer {
         do {
             GTFSOverlapOptimizer.LOG.info("\t\tRunning iteration\t"+this.iteration);
             Map<String, Double> route2Remove = getLeastProbRoute();
+            if (route2Remove==null) break;
             for (String s : route2Remove.keySet()) {
                 GTFSOverlapOptimizer.LOG.info("Removing vehicle route "+s);
                 remove(s, route2Remove.get(s));
@@ -66,6 +67,7 @@ public class GTFSOverlapOptimizer {
                 routesRemaining = this.spatialOverlap.getRoute2TripsIds().size();
             }
         } while (routesRemaining > requiredVehicleRoutes);
+        done();
     }
 
     public void optimizeTillProb(double prob){
@@ -73,6 +75,7 @@ public class GTFSOverlapOptimizer {
         do {
             GTFSOverlapOptimizer.LOG.info("\t\tRunning iteration\t"+this.iteration);
             Map<String, Double> route2Remove = getLeastProbRoute();
+            if (route2Remove==null) break;
             for (String s : route2Remove.keySet()) {
                 GTFSOverlapOptimizer.LOG.info("Removing vehicle route "+s);
                 remove(s, route2Remove.get(s));
@@ -80,19 +83,20 @@ public class GTFSOverlapOptimizer {
                 removedRouteProb = route2Remove.get(s);
             }
         } while (removedRouteProb>=prob);
+        done();;
     }
 
-    public void run(int iteration){
-        for (int i = 1; i < iteration; i++) {
-            GTFSOverlapOptimizer.LOG.info("\t\tRunning iteration\t"+this.iteration);
-            Map<String, Double> route2Remove = getLeastProbRoute();
-            for (String s : route2Remove.keySet()) {
-                GTFSOverlapOptimizer.LOG.info("Removing vehicle route "+s);
-                remove(s, route2Remove.get(s));
-                writeIterationFiles();
-            }
-        }
-    }
+//    public void run(int iteration){
+//        for (int i = 1; i < iteration; i++) {
+//            GTFSOverlapOptimizer.LOG.info("\t\tRunning iteration\t"+this.iteration);
+//            Map<String, Double> route2Remove = getLeastProbRoute();
+//            for (String s : route2Remove.keySet()) {
+//                GTFSOverlapOptimizer.LOG.info("Removing vehicle route "+s);
+//                remove(s, route2Remove.get(s));
+//                writeIterationFiles();
+//            }
+//        }
+//    }
 
     public void remove(String routeId, double removalProb){
         this.iteration++;
@@ -110,6 +114,8 @@ public class GTFSOverlapOptimizer {
             vrOverlap.getTripId2Probs().put(to.getTripId(), to.getSigmoidFunction2Probs());
             route2VROverlpas.put(routeId, vrOverlap);
         }
+
+        if (route2VROverlpas.size()==0) return null;
 
         // identify which routes have highest prob
         List<VehicleRouteOverlap> vros = new ArrayList<>(route2VROverlpas.values());
@@ -138,7 +144,7 @@ public class GTFSOverlapOptimizer {
     public double getOverlappingNetworkLength(){
         return spatialOverlap.getCollectedSegments().values()
                 .stream()
-                .filter(so -> so.getCount() > 0.)
+                .filter(so -> so.getCount() > 1.)
                 .mapToDouble(so -> so.getSegment().getLength()).sum();
     }
 
@@ -318,7 +324,7 @@ public class GTFSOverlapOptimizer {
 		writeVehicleRouteProbs(outputFolder);
     }
 
-    public void done() {
+    private void done() {
         OutputDirectoryLogging.closeOutputDirLogging();
         try {
             this.writer.close();

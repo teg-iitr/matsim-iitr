@@ -28,7 +28,7 @@ public class SegmentalOverlap {
 
     void overlapWith(String tripId, String routeId){
         if(! routeId.equals(self_trip_routeId.getSecond())) {
-            counter++;
+            this.counter++;
             this.overlappingTripIds.add(tripId);
             this.overlappingRouteIds.add(routeId);
         }else{
@@ -39,16 +39,18 @@ public class SegmentalOverlap {
                     GTFSOverlapOptimizer.LOG.warn(Gbl.FUTURE_SUPPRESSED);
                 }
             }
-
-
         }
     }
     void self(String tripId, String routeId){
         if (this.self_trip_routeId!=null) throw new RuntimeException("The 'self' must be called only once.");
+        this.counter++;
         this.self_trip_routeId = new Tuple<>(tripId, routeId);
     }
     void remove(String routeId, String tripId){
-        this.counter--;
+        if(! routeId.equals(self_trip_routeId.getSecond())) {
+            // since overlap is not counted for self_routes, it should not be removed.
+            this.counter--;
+        }
         this.overlappingRouteIds.remove(routeId);
         this.overlappingTripIds.remove(tripId);
     }

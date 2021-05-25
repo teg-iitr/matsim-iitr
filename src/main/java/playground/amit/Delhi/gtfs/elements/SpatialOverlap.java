@@ -25,6 +25,10 @@ public class SpatialOverlap {
     private final Map<Segment, SegmentalOverlap> collectedSegments = new HashMap<>();
 
     private int getTimeBin(double time_sec){
+        // in matsim, pt works from 4 to 27, so need to be converted to 0 to 24.
+        if (time_sec >= 86400) {
+            time_sec = time_sec - 86400;
+        }
         return (int) (time_sec/timebinSize);
     }
 
