@@ -5,6 +5,7 @@ import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.pt2matsim.gtfs.GtfsFeed;
 import org.matsim.pt2matsim.gtfs.GtfsFeedImpl;
+import org.matsim.pt2matsim.gtfs.lib.Stop;
 import playground.amit.Delhi.gtfs.elements.*;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -191,6 +192,10 @@ public class GTFSOverlapOptimizer {
         writeToSummaryFile(out);
     }
 
+    private String getGeom(Stop stopA, Stop stopB){
+        return "LINESTRING ("+stopA.getLon()+" "+stopA.getLat()+","+ stopB.getLon()+" "+stopB.getLat()+")";
+    }
+
     /**
      * Writing segmental counts and prob for each segment in all trips.
      */
@@ -199,21 +204,23 @@ public class GTFSOverlapOptimizer {
         String filename = outputFolder+"segmentsProbs_"+suffix+"_"+"it-"+iteration+".txt.gz";
         BufferedWriter writer  = IOUtils.getBufferedWriter(filename);
         try {
-            writer.write("tripId\tstopA_lat\tstopA_lon\t_stopB_lat\tstopB_lon\ttimebin\toverlapcount" +
+            writer.write("tripId\tstopA_lat\tstopA_lon\t_stopB_lat\tstopB_lon\tgeom\ttimebin\toverlapcount" +
                     "\tstopA_seq\tstopB_seq\ttimeSpentOnSegment_sec\tlegnthOfSegment_m" +
                     "\tlogisticSigmoidProb\tbipolarSigmoidProb\ttanhProb\talgebraicSigmoidProb\n");
             for (TripOverlap to : spatialOverlap.getTrip2tripOverlap().values()) {
                 for (java.util.Map.Entry<Segment, SegmentalOverlap> val: to.getSeg2overlaps().entrySet()) {
                     writer.write(to.getTripId()+"\t");
-                    writer.write(val.getKey().getStopA().getLat()+"\t");
-                    writer.write(val.getKey().getStopA().getLon()+"\t");
-                    writer.write(val.getKey().getStopB().getLat()+"\t");
-                    writer.write(val.getKey().getStopB().getLon()+"\t");
-                    writer.write(val.getKey().getTimebin()+"\t");
+                    Segment key = val.getKey();
+                    writer.write(key.getStopA().getLat()+"\t");
+                    writer.write(key.getStopA().getLon()+"\t");
+                    writer.write(key.getStopB().getLat()+"\t");
+                    writer.write(key.getStopB().getLon()+"\t");
+                    writer.write(getGeom(key.getStopA(), key.getStopB())+ "\t");
+                    writer.write(key.getTimebin()+"\t");
                     writer.write(val.getValue().getCount()+"\t");
-                    writer.write(val.getKey().getStopSequence().getFirst()+"\t"+val.getKey().getStopSequence().getSecond()+"\t");
-                    writer.write(val.getKey().getTimeSpentOnSegment()+"\t");
-                    writer.write(val.getKey().getLength()+"\t");
+                    writer.write(key.getStopSequence().getFirst()+"\t"+ key.getStopSequence().getSecond()+"\t");
+                    writer.write(key.getTimeSpentOnSegment()+"\t");
+                    writer.write(key.getLength()+"\t");
                     for (SigmoidFunction sg : SigmoidFunction.values()) {
                         writer.write(SigmoidFunctionUtils.getValue(sg,val.getValue().getCount())+"\t");
                     }
