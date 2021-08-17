@@ -5,7 +5,7 @@ import playground.amit.Delhi.gtfs.elements.SigmoidFunction;
 /**
  * Created by Amit on 23/04/2021
  */
-public class DelhiGTFSOverlapIdentifier {
+public class DelhiGTFSOverlapIdentifier2 {
 
 	public static void main(String[] args) {
 		String GTFS_PATH = "..\\..\\repos\\sl-repos\\shared\\data\\project_data\\delhi\\gtfs_files\\\\12052021\\GTFS_DIMTS_12052021.zip";
