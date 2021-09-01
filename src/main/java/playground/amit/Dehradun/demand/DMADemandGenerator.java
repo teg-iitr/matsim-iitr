@@ -1,6 +1,5 @@
 package playground.amit.Dehradun.demand;
 
-import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -13,12 +12,12 @@ import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.IOUtils;
 import org.opengis.feature.simple.SimpleFeature;
 import playground.amit.Dehradun.DehradunUtils;
-import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.amit.utils.geometry.GeometryUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -28,13 +27,14 @@ import java.util.stream.IntStream;
  */
 public class DMADemandGenerator {
 
-    private static final String plans_file = "C:/Users/Amit/Downloads/UKMRC_Dehradun_Metropolitan_Area/road-network-osm/DehradunMetropolitanArea_plans.xml.gz";
-    private static final String zone_file = "C:/Users/Amit/Downloads/UKMRC_Dehradun_Metropolitan_Area/Zone/zone.shp";
+    private static final String SVN_repo = "C:/Users/Amit/Documents/svn-repos/shared/data/project_data/DehradunMetroArea_MetroNeo_data/";
+    private static final String plans_file = SVN_repo + "atIITR/matsim/DehradunMetropolitanArea_plans.xml.gz";
+    private static final String zone_file = SVN_repo + "atIITR/zones_update_29082021/zone_data_update.shp";
     private Collection<SimpleFeature> features ;
 
-    private static final String OD_all_file = "C:\\Users\\Amit\\Downloads\\UKMRC_Dehradun_Metropolitan_Area\\FinalTripMatrix.txt";
-    private static final String OD_rail_file = "C:\\Users\\Amit\\Downloads\\UKMRC_Dehradun_Metropolitan_Area\\FinalTripMatrix_rail.txt";
-    private static final String OD_bus_file = "C:\\Users\\Amit\\Downloads\\UKMRC_Dehradun_Metropolitan_Area\\FinalTripMatrix_bus.txt";
+    private static final String OD_all_file = SVN_repo + "atIITR/FinalTripMatrix.txt";
+    private static final String OD_rail_file = SVN_repo + "atIITR/FinalTripMatrix_rail.txt";
+    private static final String OD_bus_file = SVN_repo + "atIITR/FinalTripMatrix_bus.txt";
 
     private Population population;
     private PopulationFactory pf;
@@ -42,7 +42,6 @@ public class DMADemandGenerator {
     private Random random = MatsimRandom.getLocalInstance();
 
     public static void main(String[] args) {
-//        new DMADemandGenerator().generateOD();
         new DMADemandGenerator().run();
     }
 
@@ -61,7 +60,18 @@ public class DMADemandGenerator {
             IntStream.range(0, numberOfTrips).forEach(i -> generatePlan(value.origin, value.destination, getMode()));
         });
 
+        //clean plans without coords
+        List<Person> personsOutsideZones =  this.population.getPersons().values().stream().filter(this::isAnyActNull).collect(Collectors.toList());
+        personsOutsideZones.forEach(p -> this.population.removePerson(p.getId()));
         new PopulationWriter(this.population).write(plans_file);
+    }
+
+    private boolean isAnyActNull(Person p){
+        List<PlanElement> pes = p.getPlans().get(0).getPlanElements();
+        for (PlanElement pe : pes) {
+            if (  pe instanceof Activity && ((Activity)pe).getCoord()==null) return true;
+        }
+        return false;
     }
 
     private String getMode(){
@@ -99,25 +109,18 @@ public class DMADemandGenerator {
 
     private Coord getRandomCoord(String zoneId){
         for (SimpleFeature feature : this.features){
-            String handle = (String) feature.getAttribute("HANDLE"); // a unique key
-            String zone = getHandleToZone(handle);
-            if (zone==zoneId){
+            String handle = (String) feature.getAttribute("Zone"); // a unique key
+            if (handle.equals(zoneId)){
                 Point p = GeometryUtils.getRandomPointsInsideFeature(feature);
                 Coord cord = new Coord(p.getX(), p.getY());
-                return DehradunUtils.transformation.transform(cord);
+//                return DehradunUtils.transformation.transform(cord);
+                return cord;
             }
         }
         return null; // zone file does not match.
     }
 
-    private String getHandleToZone(String handle){
-        if(handle=="E2FE") return "150";
-        else if(handle=="E2FD") return "174";
-        //TODO complete the code.
-        else throw new RuntimeException("handle "+handle+ "not found.");
-    }
-
-    private static Id<OD> getID(String origin, String destination){
+    static Id<OD> getID(String origin, String destination){
         return Id.create(origin+"_"+destination, OD.class);
     }
 
@@ -147,26 +150,42 @@ public class DMADemandGenerator {
         return odMap;
     }
 
-    private class OD {
-        private final String origin;
-        private final String destination;
-        private final Id<OD> id;
+    public static class OD {
+        final String origin;
+        final String destination;
+        final Id<OD> id;
 
-        private int numberOfTrips = 0;
+        int numberOfTrips = 0;
 
-        OD (String origin, String destination) {
+        public OD (String origin, String destination) {
             this.origin = origin;
             this.destination = destination;
             this.id = DMADemandGenerator.getID(this.origin, this.destination);
         }
 
-        private void setNumberOfTrips(int trips){
+        public void setNumberOfTrips(int trips){
             this.numberOfTrips = trips;
         }
 
         @Override
         public String toString() {
             return "Origin: "+this.origin+"\t Destination: "+this.destination+"\t number of trips: "+this.numberOfTrips;
+        }
+
+        public String getOrigin() {
+            return origin;
+        }
+
+        public String getDestination() {
+            return destination;
+        }
+
+        public int getNumberOfTrips() {
+            return numberOfTrips;
+        }
+
+        public Id<OD> getId() {
+            return id;
         }
     }
 }

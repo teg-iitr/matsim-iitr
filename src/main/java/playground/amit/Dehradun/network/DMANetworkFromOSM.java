@@ -2,7 +2,6 @@ package playground.amit.Dehradun.network;
 
 import org.locationtech.jts.geom.Geometry;
 import org.matsim.api.core.v01.Coord;
-import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.contrib.osm.networkReader.SupersonicOsmNetworkReader;
@@ -26,9 +25,10 @@ import java.util.function.BiPredicate;
 
 public class DMANetworkFromOSM {
 
-    private static final String boundaryShapeFile = "C:/Users/Amit/Downloads/UKMRC_Dehradun_Metropolitan_Area/boundary/single_boundary_DMA.shp";
-    private static final String inputPBFFile = "C:/Users/Amit/Downloads/UKMRC_Dehradun_Metropolitan_Area/road-network-osm/planet_77.734,29.841_78.327,30.369.osm.pbf";
-    private static final String matsimNetworkFile = "C:/Users/Amit/Downloads/UKMRC_Dehradun_Metropolitan_Area/road-network-osm/DehradunMetropolitanArea_matsim_network_fromPBF_cleaned.xml.gz";
+    private static final String SVN_repo = "C:/Users/Amit/Documents/svn-repos/shared/data/project_data/DehradunMetroArea_MetroNeo_data/";
+    private static final String matsimNetworkFile = SVN_repo + "atIITR/matsim/road-network-osm/DehradunMetropolitanArea_matsim_network_fromPBF_cleaned.xml.gz";
+    private static final String boundaryShapeFile = SVN_repo+"atIITR/boundary/single_boundary_DMA.shp";
+    private static final String inputPBFFile = SVN_repo+"atIITR/matsim/road-network-osm/planet_77.734,29.841_78.327,30.369.osm.pbf";
 
     public static void main(String[] args) {
         CoordinateTransformation reverse_transformation = TransformationFactory
@@ -42,11 +42,13 @@ public class DMANetworkFromOSM {
             if (hierarchyLevel<=4) return true; //keep all roads upto level 4.
             else return ( hierarchyLevel<=5 && geometry.contains(MGC.coord2Point(reverse_transformation.transform(cord))) );
         };
+        Collection<String> modes = Arrays.asList(DehradunUtils.TravelModes.car.name(), DehradunUtils.TravelModes.auto.name(),
+                DehradunUtils.TravelModes.motorbike.name(), DehradunUtils.TravelModes.bicycle.name());
 
         Network network = new SupersonicOsmNetworkReader.Builder()
                 .setCoordinateTransformation(DehradunUtils.transformation)
                 .setIncludeLinkAtCoordWithHierarchy(includeLinkAtCoordWithHierarchy)
-                .setAfterLinkCreated((link, osmTags, isReverse) -> link.setAllowedModes(new HashSet<>(Arrays.asList(TransportMode.car, TransportMode.bike, "motorbike"))))
+                .setAfterLinkCreated((link, osmTags, isReverse) -> link.setAllowedModes(new HashSet<>(modes)))
                 .build()
                 .read(inputPBFFile);
 
