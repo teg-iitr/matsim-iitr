@@ -30,7 +30,7 @@ import org.matsim.core.controler.listener.ShutdownListener;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultSelector;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
 import org.matsim.core.utils.io.IOUtils;
-import playground.amit.opdyts.patna.networkModesOnly.PatnaNetworkModesOpdytsCalibrator;
+//import playground.amit.opdyts.patna.networkModesOnly.PatnaNetworkModesOpdytsCalibrator;
 
 /**
  * Created by amit on 11.05.18.
@@ -94,7 +94,7 @@ public class OpdytsModeChoiceUtils {
                             try {
                                 Files.copy(new File(sourceFile), new File(sinkFile));
                             } catch (IOException e) {
-                                Logger.getLogger(PatnaNetworkModesOpdytsCalibrator.class).warn("Data is not copied. Reason : " + e);
+//                                Logger.getLogger(PatnaNetworkModesOpdytsCalibrator.class).warn("Data is not copied. Reason : " + e);
                             }
                         }
                         {

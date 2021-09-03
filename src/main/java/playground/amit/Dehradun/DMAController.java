@@ -4,6 +4,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.StrategyConfigGroup;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
@@ -27,7 +28,7 @@ public class DMAController {
 
         config.controler().setFirstIteration(0);
         config.controler().setLastIteration(100);
-        config.controler().setOutputDirectory("./output/");
+        config.controler().setOutputDirectory("../output/");
         config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
 
         config.qsim().setFlowCapFactor(2.0);
@@ -36,6 +37,7 @@ public class DMAController {
         Collection<String> modes = Arrays.asList(DehradunUtils.TravelModes.car.name(), DehradunUtils.TravelModes.auto.name(),
                 DehradunUtils.TravelModes.motorbike.name(), DehradunUtils.TravelModes.bicycle.name());
         config.qsim().setMainModes(modes);
+        config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
 
         PlanCalcScoreConfigGroup.ActivityParams first = new PlanCalcScoreConfigGroup.ActivityParams("FirstAct");
         first.setTypicalDuration(8*2600.);
@@ -92,6 +94,7 @@ public class DMAController {
         config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
+        DMAVehicleGenerator.generateVehicles(scenario);
 
         Controler controler = new Controler(scenario);
         controler.run();

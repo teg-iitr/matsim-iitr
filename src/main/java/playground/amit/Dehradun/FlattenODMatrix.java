@@ -17,14 +17,19 @@ public class FlattenODMatrix {
     private final Map<Id<DMADemandGenerator.OD>, DMADemandGenerator.OD> odMap = new HashMap<>();
 
     public static void main(String[] args) {
-        String SVN_repo = "C:/Users/Amit/Documents/svn-repos/shared/data/project_data/DehradunMetroArea_MetroNeo_data/";
-        String OD_all_file = SVN_repo + "atIITR/FinalTripMatrix.txt";
-        String zone_centroid_file = SVN_repo + "atIITR/flowMapVisualization/flatten_OD.txt";
+        String SVN_repo = "C:/Users/Amit/Documents/svn-repos/shared/data/project_data/DehradunMetroArea_MetroNeo_data/atIITR/";
 
-        FlattenODMatrix flattenODMatrix = new FlattenODMatrix();
-        flattenODMatrix.flattenOD(OD_all_file);
-        flattenODMatrix.writeFlattenOD(zone_centroid_file);
+        String [] in_files = {"FinalTripMatrix.txt","FinalTripMatrix_bus.txt","FinalTripMatrix_rail.txt","OD_2021_all.txt", "OD_2021_metro.txt"};
+        String [] out_files = {"flattened_OD_all_2017.txt","flattened_OD_bus_2017.txt","flattened_OD_rail_2017.txt","flattened_OD_all_2021.txt","flattened_OD_metro_2021.txt"};
 
+        for (int i = 0; i < in_files.length; i++){
+            String inFile = SVN_repo + in_files[i];
+            String out_file = SVN_repo + "/flowMapVisualization/" + out_files[i];
+
+            FlattenODMatrix flattenODMatrix = new FlattenODMatrix();
+            flattenODMatrix.flattenOD(inFile);
+            flattenODMatrix.writeFlattenOD(out_file);
+        }
     }
 
     public void writeFlattenOD(String file){
