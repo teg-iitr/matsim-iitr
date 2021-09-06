@@ -71,10 +71,9 @@ public class DMAPtFareEventHandler implements PersonDepartureEventHandler, Telep
     }
 
     private double getPTFareFromDistance(final double distance) {
-        double fareInRs = Double.NEGATIVE_INFINITY;
-        if(distance < 4000) fareInRs = 0.01 * 300;
-        else fareInRs = 0.01* ( 300 + (distance/1000 - 4)*31 );
-        return fareInRs/PatnaUtils.INR_USD_RATE;
+        //y = 1.035x + 4.2734; using
+        double fareInRs = 1.035 * (distance/ 1000.) + 4.2734;
+        return fareInRs / PatnaUtils.INR_USD_RATE ;
     }
 
     @Override

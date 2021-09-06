@@ -38,9 +38,6 @@ public class DMAController {
         controler.addOverridingModule(new AbstractModule() { // plotting modal share over iterations
             @Override
             public void install() {
-                this.bind(ModalShareEventHandler.class);
-                this.addControlerListenerBinding().to(ModalShareControlerListener.class);
-
                 this.bind(ModalTripTravelTimeHandler.class);
                 this.addControlerListenerBinding().to(ModalTravelTimeControlerListener.class);
 
