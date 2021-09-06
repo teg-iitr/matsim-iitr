@@ -48,7 +48,7 @@ import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 public class DMAPtFareEventHandler implements PersonDepartureEventHandler, TeleportationArrivalEventHandler{
 
     private final Map<Id<Person>,String> person2mode = new HashMap<>();
-    private final List<String> ptModes = Arrays.asList(DehradunUtils.TravelModes.bus.name(),DehradunUtils.TravelModes.rail.name(),DehradunUtils.TravelModes.IPT.name());
+    private final List<String> ptModes = Arrays.asList(DehradunUtils.TravelModes.bus.name(),DehradunUtils.TravelModes.IPT.name());
 
     @Inject
     private EventsManager events;

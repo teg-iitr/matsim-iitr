@@ -19,7 +19,7 @@ public final class DehradunUtils {
 	public static final double sampleSize = 0.1;
 
 	public enum TravelModes{
-		car, motorbike, bicycle, rail, walk, metro, metro_neo, bus, auto, IPT;
+		car, motorbike, bicycle, walk, bus, IPT;
 	}
 //	public static double ModalShare {
 //		car (30), motorbike (30), bike (5), walk (10), rail(2), metro_neo(0) ;

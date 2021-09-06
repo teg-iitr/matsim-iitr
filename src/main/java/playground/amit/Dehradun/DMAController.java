@@ -1,36 +1,20 @@
 package playground.amit.Dehradun;
 
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
-import org.matsim.core.config.groups.ScenarioConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.scoring.ScoringFunction;
-import org.matsim.core.scoring.ScoringFunctionFactory;
-import org.matsim.core.scoring.SumScoringFunction;
-import org.matsim.core.scoring.functions.*;
 import playground.amit.mixedTraffic.patnaIndia.router.FreeSpeedTravelTimeForBike;
-import playground.amit.mixedTraffic.patnaIndia.scoring.PtFareEventHandler;
-import playground.amit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter;
-import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
 import playground.vsp.cadyts.multiModeCadyts.MultiModeCountsControlerListener;
 
-import javax.inject.Inject;
-import java.io.File;
-
 public class DMAController {
-    private static final String SVN_repo = "C:/Users/Amit/Documents/svn-repos/shared/data/project_data/DehradunMetroArea_MetroNeo_data/";
 
     public static void main(String[] args) {
 
@@ -42,13 +26,9 @@ public class DMAController {
             runId = args[1];
         }
 
-        System.out.println(new File(config_file).exists());
-
         Config config = ConfigUtils.loadConfig(config_file);
         config.controler().setRunId(runId);
-
-        config.planCalcScore().getOrCreateModeParams(DehradunUtils.TravelModes.rail.name()).setConstant(-2.0);
-        config.planCalcScore().getOrCreateModeParams(DehradunUtils.TravelModes.motorbike.name()).setConstant(1.0);
+        config.controler().setOutputDirectory(config.controler().getOutputDirectory()+runId);
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
         DMAVehicleGenerator.generateVehicles(scenario);
@@ -83,10 +63,6 @@ public class DMAController {
         PlanCalcScoreConfigGroup.ModeParams mp2 = controler.getConfig().planCalcScore().getModes().get(DehradunUtils.TravelModes.IPT.name());
         mp2.setMarginalUtilityOfDistance(0.0);
         mp2.setMonetaryDistanceRate(0.0);
-
-        PlanCalcScoreConfigGroup.ModeParams mp3 = controler.getConfig().planCalcScore().getModes().get(DehradunUtils.TravelModes.rail.name());
-        mp3.setMarginalUtilityOfDistance(0.0);
-        mp3.setMonetaryDistanceRate(0.0);
 
         controler.addOverridingModule(new AbstractModule() {
             @Override
