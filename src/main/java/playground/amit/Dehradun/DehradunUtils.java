@@ -16,6 +16,8 @@ public final class DehradunUtils {
 	public static final CoordinateTransformation transformation = TransformationFactory
 			.getCoordinateTransformation(TransformationFactory.WGS84, DehradunUtils.EPSG);
 
+	public static final double sampleSize = 0.1;
+
 	public enum TravelModes{
 		car, motorbike, bicycle, rail, walk, metro, metro_neo, bus, auto, IPT;
 	}

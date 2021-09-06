@@ -70,7 +70,7 @@ public class ModalShareEventHandler implements PersonDepartureEventHandler, Tran
 
         //at this point, it could be main leg (e.g. car/bike) or start of a stage activity (e.g. car/pt interaction)
         List<String> usedModes = person2Modes.getOrDefault(event.getPersonId(), new ArrayList<>());
-        usedModes.add(event.getLegMode());
+        usedModes.add(legMode);
         person2Modes.put(event.getPersonId(), usedModes);
     }
 

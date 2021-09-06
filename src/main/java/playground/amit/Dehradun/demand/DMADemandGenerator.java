@@ -1,5 +1,6 @@
 package playground.amit.Dehradun.demand;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.locationtech.jts.geom.Point;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -12,6 +13,7 @@ import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.IOUtils;
 import org.opengis.feature.simple.SimpleFeature;
 import playground.amit.Dehradun.DehradunUtils;
+import playground.amit.utils.RandomNumberUtils;
 import playground.amit.utils.geometry.GeometryUtils;
 
 import java.io.BufferedReader;
@@ -28,7 +30,7 @@ import java.util.stream.IntStream;
 public class DMADemandGenerator {
 
     private static final String SVN_repo = "C:/Users/Amit/Documents/svn-repos/shared/data/project_data/DehradunMetroArea_MetroNeo_data/";
-    private static final String plans_file = SVN_repo + "atIITR/matsim/DehradunMetropolitanArea_plans.xml.gz";
+    private static final String plans_file = SVN_repo + "atIITR/matsim/DehradunMetropolitanArea_plans_10sample.xml.gz";
     private static final String zone_file = SVN_repo + "atIITR/zones_update_29082021/zone_data_update.shp";
     private Collection<SimpleFeature> features ;
 
@@ -39,7 +41,7 @@ public class DMADemandGenerator {
     private Population population;
     private PopulationFactory pf;
 
-    private Random random = MatsimRandom.getLocalInstance();
+    private final Random random = MatsimRandom.getLocalInstance();
 
     public static void main(String[] args) {
         new DMADemandGenerator().run();
@@ -76,7 +78,7 @@ public class DMADemandGenerator {
 
     private String getMode(){
         //Table 6-4 of Metro report provides modal share by trips
-        // except, bus (18%), rail, shares of 2W, car, auto, shared IPT are 36, 20, 5, 21,
+        // except, bus (18%) and rail, shares of 2W, car, auto, shared IPT are 36, 20, 5, 21,
         // making these to 100%; shares will be 44, 24, 6, 26
         int rnd = this.random.nextInt(101);
         if(rnd <= 44) return DehradunUtils.TravelModes.motorbike.toString();
@@ -89,13 +91,24 @@ public class DMADemandGenerator {
         Person person = pf.createPerson(Id.createPersonId(this.population.getPersons().size()));
         Plan plan = pf.createPlan();
         Activity act = pf.createActivityFromCoord("FirstAct", getRandomCoord(origin));
-        act.setEndTime(5*3600. + random.nextInt(18*60+1)*60.); // trip end between 05:00 and 23:00
+        act.setEndTime(getTripEndTime()*3600.); // trip end between 05:00 and 23:00
         plan.addActivity(act);
         plan.addLeg(pf.createLeg(travelMode));
         Activity a = pf.createActivityFromCoord("SecondAct", getRandomCoord(destination));
         plan.addActivity(a);
         person.addPlan(plan);
         this.population.addPerson(person);
+    }
+
+    private double getTripEndTime(){
+        // we have typical two peak patterns (two normal distributions), let us assume the weights of each peak is 1:1
+        double share_morning_peak = 0.5; //TODO : do the math for this
+
+        if (random.nextDouble() < share_morning_peak) {
+            return RandomNumberUtils.getRNNormallyDistributed(9.0, 2.0);
+        } else {
+            return RandomNumberUtils.getRNNormallyDistributed(18.0, 2.0);
+        }
     }
 
     private void generatePlans( Map<Id<OD>, OD> odMap, String travelMode){
@@ -138,7 +151,7 @@ public class DMADemandGenerator {
                     String origin = parts[0];
                     for (int index = 1; index<destinations.size()-1;index++){
                         OD od = new OD(origin, destinations.get(index));
-                        od.numberOfTrips = Integer.parseInt(parts[index]);
+                        od.numberOfTrips = (int) Math.round(Integer.parseInt(parts[index]) * DehradunUtils.sampleSize);
                         odMap.put(od.id, od);
                     }
                 }
