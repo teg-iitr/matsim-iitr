@@ -40,7 +40,7 @@ import com.google.inject.Inject;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 
 /**
- * The fare calculation is taken from KumarEtc2004PTCost.
+ * The fare calculation is taken from Table 6-20 in Dehradun Metropolitan Area CMP.
  *
  * @author amit
  */
