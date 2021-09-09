@@ -48,7 +48,11 @@ public class DMANetworkFromOSM {
         Network network = new SupersonicOsmNetworkReader.Builder()
                 .setCoordinateTransformation(DehradunUtils.transformation)
                 .setIncludeLinkAtCoordWithHierarchy(includeLinkAtCoordWithHierarchy)
-                .setAfterLinkCreated((link, osmTags, isReverse) -> link.setAllowedModes(new HashSet<>(modes)))
+//                .setAfterLinkCreated((link, osmTags, isReverse) -> link.setAllowedModes(new HashSet<>(modes)))
+                .setAfterLinkCreated((link, osmTags, isReversed)-> {
+                    link.setFreespeed(80.00/3.6);
+                    link.setAllowedModes(new HashSet<>(modes));
+                })
                 .build()
                 .read(inputPBFFile);
 
