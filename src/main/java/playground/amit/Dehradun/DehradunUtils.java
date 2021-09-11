@@ -35,7 +35,7 @@ public final class DehradunUtils {
 			case "motorbike": speed = 80/3.6; break;
 			case "car": speed = 80/3.6; break;
 //
-			case "bicycle": speed = 15/3.6;
+			case "bicycle": speed = 15/3.6; break;
 //
 			default: throw new RuntimeException("No speed is set for travel mode "+travelMode+ ".");
 		}
