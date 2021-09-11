@@ -26,7 +26,7 @@ import java.util.function.BiPredicate;
 public class DMANetworkFromOSM {
 
     private static final String SVN_repo = "C:/Users/Amit/Documents/svn-repos/shared/data/project_data/DehradunMetroArea_MetroNeo_data/";
-    private static final String matsimNetworkFile = SVN_repo + "atIITR/matsim/road-network-osm/DehradunMetropolitanArea_matsim_network_fromPBF_cleaned.xml.gz";
+    private static final String matsimNetworkFile = SVN_repo + "atIITR/matsim/road-network-osm/DehradunMetropolitanArea_matsim_network_fromPBF_cleanedubunt.xml.gz";
     private static final String boundaryShapeFile = SVN_repo+"atIITR/boundary/single_boundary_DMA.shp";
     private static final String inputPBFFile = SVN_repo+"atIITR/matsim/road-network-osm/planet_77.734,29.841_78.327,30.369.osm.pbf";
 
@@ -57,6 +57,12 @@ public class DMANetworkFromOSM {
                 .read(inputPBFFile);
 
         new NetworkCleaner().run(network);
+
+        network.getLinks().values().forEach(l->{
+            l.setCapacity(10*l.getCapacity());
+            l.setNumberOfLanes(4*l.getNumberOfLanes());
+        });
+
         new NetworkWriter(network).write(matsimNetworkFile);
     }
 }

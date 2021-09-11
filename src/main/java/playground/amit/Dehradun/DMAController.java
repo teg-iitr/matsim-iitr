@@ -1,18 +1,26 @@
 package playground.amit.Dehradun;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
+import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
-import playground.amit.mixedTraffic.patnaIndia.router.FreeSpeedTravelTimeForBike;
-import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
-import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
+import org.matsim.core.utils.io.IOUtils;
+import org.matsim.vehicles.Vehicle;
+import playground.amit.analysis.StatsWriter;
+import playground.amit.analysis.modalShare.ModalShareFromEvents;
+import playground.amit.analysis.tripTime.ModalTravelTimeAnalyzer;
+import playground.amit.mixedTraffic.patnaIndia.input.joint.JointCalibrationControler;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
-import playground.vsp.cadyts.multiModeCadyts.MultiModeCountsControlerListener;
+
+import java.io.File;
 
 public class DMAController {
 
@@ -20,10 +28,14 @@ public class DMAController {
 
         String config_file = "/media/amit/hdd/DehMA/input/DehradunMetropolitanArea_config.xml" ;
         String runId = "r101_patna_params";
+        boolean useFreeSpeedTravelTimeCalculator_bicycle = false;
+        boolean useFreeSpeedTravelTimeCalculator_motorbike = false;
 
         if (args.length > 0) {
             config_file = args[0];
             runId = args[1];
+            if (args.length >2) useFreeSpeedTravelTimeCalculator_bicycle = Boolean.parseBoolean(args[2]);
+            if (args.length >3) useFreeSpeedTravelTimeCalculator_motorbike = Boolean.parseBoolean(args[3]);
         }
 
         Config config = ConfigUtils.loadConfig(config_file);
@@ -41,7 +53,7 @@ public class DMAController {
                 this.bind(ModalTripTravelTimeHandler.class);
                 this.addControlerListenerBinding().to(ModalTravelTimeControlerListener.class);
 
-                this.addControlerListenerBinding().to(MultiModeCountsControlerListener.class);
+//                this.addControlerListenerBinding().to(MultiModeCountsControlerListener.class);
             }
         });
 
@@ -61,16 +73,68 @@ public class DMAController {
         mp2.setMarginalUtilityOfDistance(0.0);
         mp2.setMonetaryDistanceRate(0.0);
 
-        controler.addOverridingModule(new AbstractModule() {
-            @Override
-            public void install() {
-                addTravelTimeBinding(DehradunUtils.TravelModes.bicycle.name()).to(FreeSpeedTravelTimeForBike.class);
-            }
-        });
+        if (useFreeSpeedTravelTimeCalculator_bicycle) {
+            controler.addOverridingModule(new AbstractModule() {
+                @Override
+                public void install() {
+                    addTravelTimeBinding(DehradunUtils.TravelModes.bicycle.name()).to(FreeSpeedTravelTimeForBicycle.class);
+                }
+            });
+        }
+
+        if(useFreeSpeedTravelTimeCalculator_motorbike) {
+            controler.addOverridingModule(new AbstractModule() {
+                @Override
+                public void install() {
+                    addTravelTimeBinding(DehradunUtils.TravelModes.motorbike.name()).to(FreeSpeedTravelTimeForMotorbike.class);
+                }
+            });
+        }
 
         controler.run();
 
+        String OUTPUT_DIR = config.controler().getOutputDirectory();
+        // delete unnecessary iterations folder here.
+        int firstIt = controler.getConfig().controler().getFirstIteration();
+        int lastIt = controler.getConfig().controler().getLastIteration();
+        for (int index =firstIt+1; index <lastIt; index ++){
+            String dirToDel = OUTPUT_DIR+"/ITERS/it."+index;
+            Logger.getLogger(JointCalibrationControler.class).info("Deleting the directory "+dirToDel);
+            IOUtils.deleteDirectoryRecursively(new File(dirToDel).toPath());
+        }
+
+        new File(OUTPUT_DIR+"/analysis/").mkdir();
+        String outputEventsFile = OUTPUT_DIR+"/output_events.xml.gz";
+        // write some default analysis
+
+        ModalTravelTimeAnalyzer mtta = new ModalTravelTimeAnalyzer(outputEventsFile);
+        mtta.run();
+        mtta.writeResults(OUTPUT_DIR+"/analysis/modalTravelTime.txt");
+
+        ModalShareFromEvents msc = new ModalShareFromEvents(outputEventsFile);
+        msc.run();
+        msc.writeResults(OUTPUT_DIR+"/analysis/modalShareFromEvents.txt");
+
+        StatsWriter.run(OUTPUT_DIR,config.controler().getRunId());
+
     }
+
+    public static class FreeSpeedTravelTimeForBicycle implements TravelTime {
+
+        @Override
+        public double getLinkTravelTime(Link link, double time, Person person, Vehicle vehicle) {
+            return link.getLength() / Math.min( DehradunUtils.getSpeed(DehradunUtils.TravelModes.bicycle.name()), link.getFreespeed(time) );
+        }
+    }
+
+    public static class FreeSpeedTravelTimeForMotorbike implements TravelTime {
+
+        @Override
+        public double getLinkTravelTime(Link link, double time, Person person, Vehicle vehicle) {
+            return link.getLength() / Math.min( DehradunUtils.getSpeed(DehradunUtils.TravelModes.motorbike.name()), link.getFreespeed(time) );
+        }
+    }
+
 
 }
 

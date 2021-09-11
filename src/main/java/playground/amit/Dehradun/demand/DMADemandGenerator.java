@@ -30,7 +30,7 @@ public class DMADemandGenerator {
 
     private static final String SVN_repo = "C:/Users/Amit/Documents/svn-repos/shared/data/project_data/DehradunMetroArea_MetroNeo_data/";
     private static final String plans_file = SVN_repo + "atIITR/matsim/DehradunMetropolitanArea_plans_0.1sample.xml.gz";
-    private static final String zone_file = SVN_repo + "atIITR/zones_update_29082021/zone_data_update.shp";
+    private static final String zone_file = SVN_repo + "atIITR/zones_update_29082021_11092021/zones_updated.shp";
     private Collection<SimpleFeature> features ;
 
     private static final String OD_all_file = SVN_repo + "atIITR/FinalTripMatrix.txt";
@@ -62,13 +62,14 @@ public class DMADemandGenerator {
             this.pf = this.population.getFactory();
         }
 
-        remaining_OD.forEach((key, value) -> {
-            int numberOfTrips = value.numberOfTrips; //- rail_OD.get(key).numberOfTrips - bus_OD.get(key).numberOfTrips;
-            IntStream.range(0, numberOfTrips).forEach(i -> generatePlan(value.origin, value.destination, getMode()));
-        });
+        remaining_OD.values().stream()
+                .filter(e-> ! (e.origin.equalsIgnoreCase("Total") || e.destination.equalsIgnoreCase("Total")))
+                .forEach(e -> IntStream.range(0, e.numberOfTrips)
+                        .forEach(i -> generatePlan(e.origin, e.destination, getMode())));
 
-        //clean plans without coords
-        List<Person> personsOutsideZones =  this.population.getPersons().values().stream().filter(this::isAnyActNull).collect(Collectors.toList());
+        //clean plans without coords (this should not happen anymore, Amit Sep'21)
+        List<Person> personsOutsideZones =  this.population.getPersons().values().stream()
+                .filter(this::isAnyActNull).collect(Collectors.toList());
         personsOutsideZones.forEach(p -> this.population.removePerson(p.getId()));
         new PopulationWriter(this.population).write(plans_file);
     }
@@ -102,6 +103,8 @@ public class DMADemandGenerator {
 
     private void generatePlan(String origin, String destination, String travelMode){
         Person person = pf.createPerson(Id.createPersonId(this.population.getPersons().size()));
+        person.getAttributes().putAttribute(DehradunUtils.origin, origin);
+        person.getAttributes().putAttribute(DehradunUtils.destination, destination);
         Plan plan = pf.createPlan();
         Activity act = pf.createActivityFromCoord("FirstAct", getRandomCoord(origin));
         act.setEndTime(getTripEndTime()*3600.); // trip end between 05:00 and 23:00
@@ -134,13 +137,13 @@ public class DMADemandGenerator {
 //    }
 
     private Coord getRandomCoord(String zoneId){
+        if (zoneId.equals("181")) zoneId ="135"; // cannot distinguish between 181 and 135
+
         for (SimpleFeature feature : this.features){
             String handle = (String) feature.getAttribute("Zone"); // a unique key
             if (handle.equals(zoneId)){
                 Point p = GeometryUtils.getRandomPointsInsideFeature(feature);
-                Coord cord = new Coord(p.getX(), p.getY());
-//                return DehradunUtils.transformation.transform(cord);
-                return cord;
+                return new Coord(p.getX(), p.getY());
             }
         }
         return null; // zone file does not match.
