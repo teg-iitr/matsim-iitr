@@ -17,6 +17,7 @@ import playground.amit.analysis.StatsWriter;
 import playground.amit.analysis.modalShare.ModalShareFromEvents;
 import playground.amit.analysis.tripTime.ModalTravelTimeAnalyzer;
 import playground.amit.mixedTraffic.patnaIndia.input.joint.JointCalibrationControler;
+import playground.amit.utils.FileUtils;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
 
@@ -94,17 +95,14 @@ public class DMAController {
         controler.run();
 
         String OUTPUT_DIR = config.controler().getOutputDirectory();
+        String run = config.controler().getRunId();
         // delete unnecessary iterations folder here.
         int firstIt = controler.getConfig().controler().getFirstIteration();
         int lastIt = controler.getConfig().controler().getLastIteration();
-        for (int index =firstIt+1; index <lastIt; index ++){
-            String dirToDel = OUTPUT_DIR+"/ITERS/it."+index;
-            Logger.getLogger(JointCalibrationControler.class).info("Deleting the directory "+dirToDel);
-            IOUtils.deleteDirectoryRecursively(new File(dirToDel).toPath());
-        }
+        FileUtils.deleteIntermediateIterations(OUTPUT_DIR, firstIt, lastIt);
 
         new File(OUTPUT_DIR+"/analysis/").mkdir();
-        String outputEventsFile = OUTPUT_DIR+"/output_events.xml.gz";
+        String outputEventsFile = OUTPUT_DIR+"/"+run+".output_events.xml.gz";
         // write some default analysis
 
         ModalTravelTimeAnalyzer mtta = new ModalTravelTimeAnalyzer(outputEventsFile);
@@ -134,7 +132,5 @@ public class DMAController {
             return link.getLength() / Math.min( DehradunUtils.getSpeed(DehradunUtils.TravelModes.motorbike.name()), link.getFreespeed(time) );
         }
     }
-
-
 }
 
