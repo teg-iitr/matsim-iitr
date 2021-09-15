@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.events.Event;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
 import org.matsim.api.core.v01.events.PersonMoneyEvent;
@@ -48,7 +47,7 @@ import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 public class DMAPtFareEventHandler implements PersonDepartureEventHandler, TeleportationArrivalEventHandler{
 
     private final Map<Id<Person>,String> person2mode = new HashMap<>();
-    private final List<String> ptModes = Arrays.asList(DehradunUtils.TravelModes.bus.name(),DehradunUtils.TravelModes.IPT.name());
+    private final List<String> ptModes = Arrays.asList(DehradunUtils.TravelModesBaseCase2017.bus.name(), DehradunUtils.TravelModesBaseCase2017.IPT.name());
 
     @Inject
     private EventsManager events;

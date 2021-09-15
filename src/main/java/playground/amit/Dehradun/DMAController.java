@@ -1,6 +1,5 @@
 package playground.amit.Dehradun;
 
-import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
@@ -11,12 +10,10 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.Vehicle;
 import playground.amit.analysis.StatsWriter;
 import playground.amit.analysis.modalShare.ModalShareFromEvents;
 import playground.amit.analysis.tripTime.ModalTravelTimeAnalyzer;
-import playground.amit.mixedTraffic.patnaIndia.input.joint.JointCalibrationControler;
 import playground.amit.utils.FileUtils;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
@@ -71,11 +68,11 @@ public class DMAController {
             }
         });
         // for above make sure that util_dist and monetary dist rate for pt are zero.
-        PlanCalcScoreConfigGroup.ModeParams mp = controler.getConfig().planCalcScore().getModes().get(DehradunUtils.TravelModes.bus.name());
+        PlanCalcScoreConfigGroup.ModeParams mp = controler.getConfig().planCalcScore().getModes().get(DehradunUtils.TravelModesBaseCase2017.bus.name());
         mp.setMarginalUtilityOfDistance(0.0);
         mp.setMonetaryDistanceRate(0.0);
 
-        PlanCalcScoreConfigGroup.ModeParams mp2 = controler.getConfig().planCalcScore().getModes().get(DehradunUtils.TravelModes.IPT.name());
+        PlanCalcScoreConfigGroup.ModeParams mp2 = controler.getConfig().planCalcScore().getModes().get(DehradunUtils.TravelModesBaseCase2017.IPT.name());
         mp2.setMarginalUtilityOfDistance(0.0);
         mp2.setMonetaryDistanceRate(0.0);
 
@@ -83,7 +80,7 @@ public class DMAController {
             controler.addOverridingModule(new AbstractModule() {
                 @Override
                 public void install() {
-                    addTravelTimeBinding(DehradunUtils.TravelModes.bicycle.name()).to(FreeSpeedTravelTimeForBicycle.class);
+                    addTravelTimeBinding(DehradunUtils.TravelModesBaseCase2017.bicycle.name()).to(FreeSpeedTravelTimeForBicycle.class);
                 }
             });
         }
@@ -92,7 +89,7 @@ public class DMAController {
             controler.addOverridingModule(new AbstractModule() {
                 @Override
                 public void install() {
-                    addTravelTimeBinding(DehradunUtils.TravelModes.motorbike.name()).to(FreeSpeedTravelTimeForMotorbike.class);
+                    addTravelTimeBinding(DehradunUtils.TravelModesBaseCase2017.motorbike.name()).to(FreeSpeedTravelTimeForMotorbike.class);
                 }
             });
         }
@@ -126,7 +123,7 @@ public class DMAController {
 
         @Override
         public double getLinkTravelTime(Link link, double time, Person person, Vehicle vehicle) {
-            return link.getLength() / Math.min( DehradunUtils.getSpeed(DehradunUtils.TravelModes.bicycle.name()), link.getFreespeed(time) );
+            return link.getLength() / Math.min( DehradunUtils.getSpeed(DehradunUtils.TravelModesBaseCase2017.bicycle.name()), link.getFreespeed(time) );
         }
     }
 
@@ -134,7 +131,7 @@ public class DMAController {
 
         @Override
         public double getLinkTravelTime(Link link, double time, Person person, Vehicle vehicle) {
-            return link.getLength() / Math.min( DehradunUtils.getSpeed(DehradunUtils.TravelModes.motorbike.name()), link.getFreespeed(time) );
+            return link.getLength() / Math.min( DehradunUtils.getSpeed(DehradunUtils.TravelModesBaseCase2017.motorbike.name()), link.getFreespeed(time) );
         }
     }
 }

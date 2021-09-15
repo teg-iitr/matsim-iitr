@@ -1,10 +1,8 @@
 package playground.amit.Dehradun;
 
 
-import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
-import static playground.amit.Dehradun.DehradunUtils.TravelModes.*;
 
 /**
  * 
@@ -21,8 +19,12 @@ public final class DehradunUtils {
 	public static final String origin = "O_Zone";
 	public static final String destination = "D_Zone";
 
-	public enum TravelModes{
+	public enum TravelModesBaseCase2017 {//Do NOT add Metro in this.
 		car, motorbike, bicycle, walk, bus, IPT;
+	}
+
+	public enum TravelModesMetroCase2017 {//Do NOT add Metro in this.
+		car, motorbike, bicycle, walk, bus, IPT, metro;
 	}
 
 	/**

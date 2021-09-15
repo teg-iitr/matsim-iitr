@@ -19,19 +19,19 @@ public class DMAVehicleGenerator {
         VehiclesFactory factory = vehicles.getFactory();
 
         {
-            VehicleType vehicleType = factory.createVehicleType(Id.create(DehradunUtils.TravelModes.car.name(), VehicleType.class));
+            VehicleType vehicleType = factory.createVehicleType(Id.create(DehradunUtils.TravelModesBaseCase2017.car.name(), VehicleType.class));
             vehicleType.setPcuEquivalents(1.0);
             vehicleType.setMaximumVelocity(80/3.6);
             vehicles.addVehicleType(vehicleType);
         }
         {
-            VehicleType vehicleType = factory.createVehicleType(Id.create(DehradunUtils.TravelModes.bicycle.name(), VehicleType.class));
+            VehicleType vehicleType = factory.createVehicleType(Id.create(DehradunUtils.TravelModesBaseCase2017.bicycle.name(), VehicleType.class));
             vehicleType.setPcuEquivalents(0.15);
             vehicleType.setMaximumVelocity(15/3.6);
             vehicles.addVehicleType(vehicleType);
         }
         {
-            VehicleType vehicleType = factory.createVehicleType(Id.create(DehradunUtils.TravelModes.motorbike.name(), VehicleType.class));
+            VehicleType vehicleType = factory.createVehicleType(Id.create(DehradunUtils.TravelModesBaseCase2017.motorbike.name(), VehicleType.class));
             vehicleType.setPcuEquivalents(0.15);
             vehicleType.setMaximumVelocity(80/3.6);
             vehicles.addVehicleType(vehicleType);

@@ -94,12 +94,12 @@ public class DMADemandGenerator {
 //        else if (rnd <= 77) return DehradunUtils.TravelModes.IPT.toString();
 //        else if (rnd <= 84) return DehradunUtils.TravelModes.walk.toString();
 //        else  return DehradunUtils.TravelModes.bicycle.toString();
-        if(rnd <= 36) return DehradunUtils.TravelModes.motorbike.toString();
-        else if (rnd <= 53) return DehradunUtils.TravelModes.car.toString();
-        else if (rnd <= 63) return DehradunUtils.TravelModes.IPT.toString();
-        else if (rnd <= 69) return DehradunUtils.TravelModes.walk.toString();
-        else if (rnd <= 82) return DehradunUtils.TravelModes.bicycle.toString();
-        else  return DehradunUtils.TravelModes.bus.toString();
+        if(rnd <= 36) return DehradunUtils.TravelModesBaseCase2017.motorbike.toString();
+        else if (rnd <= 53) return DehradunUtils.TravelModesBaseCase2017.car.toString();
+        else if (rnd <= 63) return DehradunUtils.TravelModesBaseCase2017.IPT.toString();
+        else if (rnd <= 69) return DehradunUtils.TravelModesBaseCase2017.walk.toString();
+        else if (rnd <= 82) return DehradunUtils.TravelModesBaseCase2017.bicycle.toString();
+        else  return DehradunUtils.TravelModesBaseCase2017.bus.toString();
     }
 
     private void generatePlan(String origin, String destination, String travelMode){

@@ -48,8 +48,8 @@ public class DMANetworkFromOSM {
             if (hierarchyLevel<=4) return true; //keep all roads upto level 4.
             else return ( hierarchyLevel<=5 && geometry.contains(MGC.coord2Point(reverse_transformation.transform(cord))) );
         };
-        Set<String> modes = new HashSet<>(Arrays.asList(DehradunUtils.TravelModes.car.name(),
-                DehradunUtils.TravelModes.motorbike.name(), DehradunUtils.TravelModes.bicycle.name()));
+        Set<String> modes = new HashSet<>(Arrays.asList(DehradunUtils.TravelModesBaseCase2017.car.name(),
+                DehradunUtils.TravelModesBaseCase2017.motorbike.name(), DehradunUtils.TravelModesBaseCase2017.bicycle.name()));
 
         Network network = new SupersonicOsmNetworkReader.Builder()
                 .setCoordinateTransformation(DehradunUtils.transformation)

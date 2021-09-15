@@ -44,8 +44,8 @@ public class DMAConfigGenerator {
         config.qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.withHoles);
         config.qsim().setNumberOfThreads(8);
 
-        Collection<String> modes = Arrays.asList(DehradunUtils.TravelModes.car.name(),
-                DehradunUtils.TravelModes.motorbike.name(), DehradunUtils.TravelModes.bicycle.name());
+        Collection<String> modes = Arrays.asList(DehradunUtils.TravelModesBaseCase2017.car.name(),
+                DehradunUtils.TravelModesBaseCase2017.motorbike.name(), DehradunUtils.TravelModesBaseCase2017.bicycle.name());
         config.qsim().setMainModes(modes);
         config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
 
@@ -57,19 +57,19 @@ public class DMAConfigGenerator {
         second.setTypicalDuration(8*2600.);
         config.planCalcScore().addActivityParams(second);
 
-        config.planCalcScore().getOrCreateModeParams(DehradunUtils.TravelModes.car.name());
-        config.planCalcScore().getOrCreateModeParams(DehradunUtils.TravelModes.motorbike.name());
-        config.planCalcScore().getOrCreateModeParams(DehradunUtils.TravelModes.bicycle.name());
+        config.planCalcScore().getOrCreateModeParams(DehradunUtils.TravelModesBaseCase2017.car.name());
+        config.planCalcScore().getOrCreateModeParams(DehradunUtils.TravelModesBaseCase2017.motorbike.name());
+        config.planCalcScore().getOrCreateModeParams(DehradunUtils.TravelModesBaseCase2017.bicycle.name());
 
-        config.planCalcScore().getOrCreateModeParams(DehradunUtils.TravelModes.bus.name()).setConstant(0.);
-        config.planCalcScore().getOrCreateModeParams(DehradunUtils.TravelModes.walk.name()).setConstant(0.);
-        config.planCalcScore().getOrCreateModeParams(DehradunUtils.TravelModes.IPT.name()).setConstant(0.);
+        config.planCalcScore().getOrCreateModeParams(DehradunUtils.TravelModesBaseCase2017.bus.name()).setConstant(0.);
+        config.planCalcScore().getOrCreateModeParams(DehradunUtils.TravelModesBaseCase2017.walk.name()).setConstant(0.);
+        config.planCalcScore().getOrCreateModeParams(DehradunUtils.TravelModesBaseCase2017.IPT.name()).setConstant(0.);
 
         config.plansCalcRoute().setNetworkModes(modes);
         config.plansCalcRoute().setClearingDefaultModeRoutingParams(true);
-        config.plansCalcRoute().getOrCreateModeRoutingParams(DehradunUtils.TravelModes.bus.name()).setTeleportedModeFreespeedFactor(1.5);
-        config.plansCalcRoute().getOrCreateModeRoutingParams(DehradunUtils.TravelModes.walk.name()).setTeleportedModeFreespeedFactor(1.0);
-        config.plansCalcRoute().getOrCreateModeRoutingParams(DehradunUtils.TravelModes.IPT.name()).setTeleportedModeFreespeedFactor(1.3);
+        config.plansCalcRoute().getOrCreateModeRoutingParams(DehradunUtils.TravelModesBaseCase2017.bus.name()).setTeleportedModeFreespeedFactor(1.5);
+        config.plansCalcRoute().getOrCreateModeRoutingParams(DehradunUtils.TravelModesBaseCase2017.walk.name()).setTeleportedModeFreespeedFactor(1.0);
+        config.plansCalcRoute().getOrCreateModeRoutingParams(DehradunUtils.TravelModesBaseCase2017.IPT.name()).setTeleportedModeFreespeedFactor(1.3);
         config.planCalcScore().setFractionOfIterationsToStartScoreMSA(0.8);
 
         StrategyConfigGroup.StrategySettings reRoute = new StrategyConfigGroup.StrategySettings();
@@ -81,10 +81,10 @@ public class DMAConfigGenerator {
         modeChoice.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode);
         modeChoice.setWeight(0.1);
         config.strategy().addStrategySettings(modeChoice);
-        config.changeMode().setModes(new String [] {DehradunUtils.TravelModes.car.name(),
-                DehradunUtils.TravelModes.motorbike.name(), DehradunUtils.TravelModes.bicycle.name(),
-                DehradunUtils.TravelModes.walk.name(), DehradunUtils.TravelModes.IPT.name(),
-                DehradunUtils.TravelModes.bus.name()});
+        config.changeMode().setModes(new String [] {DehradunUtils.TravelModesBaseCase2017.car.name(),
+                DehradunUtils.TravelModesBaseCase2017.motorbike.name(), DehradunUtils.TravelModesBaseCase2017.bicycle.name(),
+                DehradunUtils.TravelModesBaseCase2017.walk.name(), DehradunUtils.TravelModesBaseCase2017.IPT.name(),
+                DehradunUtils.TravelModesBaseCase2017.bus.name()});
 
         StrategyConfigGroup.StrategySettings timeMutation = new StrategyConfigGroup.StrategySettings();
         timeMutation.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator);
