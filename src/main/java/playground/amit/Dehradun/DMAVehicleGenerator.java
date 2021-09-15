@@ -6,6 +6,11 @@ import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.Vehicles;
 import org.matsim.vehicles.VehiclesFactory;
 
+/**
+ *
+ * @author Amit
+ *
+ */
 public class DMAVehicleGenerator {
 
     public static void generateVehicles(Scenario scenario) {

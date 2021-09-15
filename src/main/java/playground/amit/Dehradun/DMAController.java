@@ -23,6 +23,11 @@ import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTrav
 
 import java.io.File;
 
+/**
+ *
+ * @author Amit
+ *
+ */
 public class DMAController {
 
     public static void main(String[] args) {

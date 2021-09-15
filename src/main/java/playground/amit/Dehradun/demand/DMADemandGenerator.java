@@ -12,6 +12,7 @@ import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.IOUtils;
 import org.opengis.feature.simple.SimpleFeature;
 import playground.amit.Dehradun.DehradunUtils;
+import playground.amit.Dehradun.OD;
 import playground.amit.utils.RandomNumberUtils;
 import playground.amit.utils.geometry.GeometryUtils;
 
@@ -63,9 +64,9 @@ public class DMADemandGenerator {
         }
 
         remaining_OD.values().stream()
-                .filter(e-> ! (e.origin.equalsIgnoreCase("Total") || e.destination.equalsIgnoreCase("Total")))
-                .forEach(e -> IntStream.range(0, e.numberOfTrips)
-                        .forEach(i -> generatePlan(e.origin, e.destination, getMode())));
+                .filter(e-> ! (e.getOrigin().equalsIgnoreCase("Total") || e.getDestination().equalsIgnoreCase("Total")))
+                .forEach(e -> IntStream.range(0, e.getNumberOfTrips())
+                        .forEach(i -> generatePlan(e.getOrigin(), e.getDestination(), getMode())));
 
         //clean plans without coords (this should not happen anymore, Amit Sep'21)
         List<Person> personsOutsideZones =  this.population.getPersons().values().stream()
@@ -149,9 +150,7 @@ public class DMADemandGenerator {
         return null; // zone file does not match.
     }
 
-    static Id<OD> getID(String origin, String destination){
-        return Id.create(origin+"_"+destination, OD.class);
-    }
+
 
     private Map<Id<OD>, OD> generateOD(String inputFile){
         Map<Id<OD>, OD> odMap = new HashMap<>();
@@ -167,8 +166,8 @@ public class DMADemandGenerator {
                     String origin = parts[0];
                     for (int index = 1; index<destinations.size()-1;index++){
                         OD od = new OD(origin, destinations.get(index));
-                        od.numberOfTrips = (int) Math.round(Integer.parseInt(parts[index]) * DehradunUtils.sampleSize);
-                        odMap.put(od.id, od);
+                        od.setNumberOfTrips( (int) Math.round(Integer.parseInt(parts[index]) * DehradunUtils.sampleSize) );
+                        odMap.put(od.getId(), od);
                     }
                 }
                 line = reader.readLine();
@@ -177,45 +176,6 @@ public class DMADemandGenerator {
             e.printStackTrace();
         }
         return odMap;
-    }
-
-    public static class OD {
-        final String origin;
-        final String destination;
-        final Id<OD> id;
-
-        int numberOfTrips = 0;
-
-        public OD (String origin, String destination) {
-            this.origin = origin;
-            this.destination = destination;
-            this.id = DMADemandGenerator.getID(this.origin, this.destination);
-        }
-
-        public void setNumberOfTrips(int trips){
-            this.numberOfTrips = trips;
-        }
-
-        @Override
-        public String toString() {
-            return "Origin: "+this.origin+"\t Destination: "+this.destination+"\t number of trips: "+this.numberOfTrips;
-        }
-
-        public String getOrigin() {
-            return origin;
-        }
-
-        public String getDestination() {
-            return destination;
-        }
-
-        public int getNumberOfTrips() {
-            return numberOfTrips;
-        }
-
-        public Id<OD> getId() {
-            return id;
-        }
     }
 }
 

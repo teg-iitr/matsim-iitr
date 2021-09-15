@@ -21,6 +21,8 @@ package playground.amit.utils;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 
@@ -39,5 +41,13 @@ public class NetworkUtils {
                                          .collect(Collectors.toList());
 
         for(Node n : nodes2remove) {network.removeNode(n.getId());}
+    }
+
+    public static void copy(Link from, Link to) {
+        to.setCapacity(from.getCapacity());
+        to.setNumberOfLanes(from.getNumberOfLanes());
+        to.setAllowedModes(from.getAllowedModes());
+        to.setFreespeed(from.getFreespeed());
+        to.setLength(from.getLength());
     }
 }
