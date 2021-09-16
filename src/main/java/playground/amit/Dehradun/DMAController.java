@@ -31,14 +31,12 @@ public class DMAController {
 
         String config_file = "/media/amit/hdd/DehMA/input/DehradunMetropolitanArea_config.xml" ;
         String runId = "r101_patna_params";
-        boolean useFreeSpeedTravelTimeCalculator_bicycle = false;
         boolean useFreeSpeedTravelTimeCalculator_motorbike = false;
 
         if (args.length > 0) {
             config_file = args[0];
             runId = args[1];
-            if (args.length >2) useFreeSpeedTravelTimeCalculator_bicycle = Boolean.parseBoolean(args[2]);
-            if (args.length >3) useFreeSpeedTravelTimeCalculator_motorbike = Boolean.parseBoolean(args[3]);
+            if (args.length >2) useFreeSpeedTravelTimeCalculator_motorbike = Boolean.parseBoolean(args[2]);
         }
 
         Config config = ConfigUtils.loadConfig(config_file);
@@ -76,15 +74,6 @@ public class DMAController {
         mp2.setMarginalUtilityOfDistance(0.0);
         mp2.setMonetaryDistanceRate(0.0);
 
-        if (useFreeSpeedTravelTimeCalculator_bicycle) {
-            controler.addOverridingModule(new AbstractModule() {
-                @Override
-                public void install() {
-                    addTravelTimeBinding(DehradunUtils.TravelModesBaseCase2017.bicycle.name()).to(FreeSpeedTravelTimeForBicycle.class);
-                }
-            });
-        }
-
         if(useFreeSpeedTravelTimeCalculator_motorbike) {
             controler.addOverridingModule(new AbstractModule() {
                 @Override
@@ -117,14 +106,6 @@ public class DMAController {
 
         StatsWriter.run(OUTPUT_DIR,config.controler().getRunId());
 
-    }
-
-    public static class FreeSpeedTravelTimeForBicycle implements TravelTime {
-
-        @Override
-        public double getLinkTravelTime(Link link, double time, Person person, Vehicle vehicle) {
-            return link.getLength() / Math.min( DehradunUtils.getSpeed(DehradunUtils.TravelModesBaseCase2017.bicycle.name()), link.getFreespeed(time) );
-        }
     }
 
     public static class FreeSpeedTravelTimeForMotorbike implements TravelTime {

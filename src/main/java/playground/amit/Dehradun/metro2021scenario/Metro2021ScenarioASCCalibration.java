@@ -30,7 +30,7 @@ import java.util.*;
  * <b> After this stage, we simply create the ring road scenario (probably use graphhoper routing engine) and travel time between Haridwar-Rishikesh connectivity using integrated graphhoper routing engine and here maps API.</b>
  * <b> This should give the new metro ridership, i.e., impact of ring road as well as the connectivity of NH between Haridwar and Rishikesh.</b>
  */
-public class Scenario2021DemandAnalysis {
+public class Metro2021ScenarioASCCalibration {
 
     private static final String SVN_repo = "C:/Users/Amit/Documents/svn-repos/shared/data/project_data/DehradunMetroArea_MetroNeo_data/";
     private static final String zone_file = SVN_repo + "atIITR/zones_update_11092021/zones_updated.shp";
@@ -51,7 +51,7 @@ public class Scenario2021DemandAnalysis {
     private static final String METRO_ASC = "metro_asc";
 
     public static void main(String[] args) {
-        new Scenario2021DemandAnalysis().run();
+        new Metro2021ScenarioASCCalibration().run();
     }
 
     private void run(){
@@ -80,7 +80,7 @@ public class Scenario2021DemandAnalysis {
                 }
 
                 if(sum_exp_util_except_metro==0.) {
-                    Logger.getLogger(Scenario2021DemandAnalysis.class).warn("The sum of exponential of utility of all modes except metro is zero for OD " + od.getId() + ". This means everyone will use metro. This should not happen.");
+                    Logger.getLogger(Metro2021ScenarioASCCalibration.class).warn("The sum of exponential of utility of all modes except metro is zero for OD " + od.getId() + ". This means everyone will use metro. This should not happen.");
                     od.getAttributes().putAttribute(METRO_ASC, Double.NaN);
                 } else {
                     double util_metro_no_asc = UtilityComputation.getUtilMetroWithoutASC(getTripDistanceInKm(origin, destination, DehradunUtils.TravelModesMetroCase2021.metro.name()), getTripTimeInHour(origin, destination, DehradunUtils.TravelModesMetroCase2021.metro.name()));

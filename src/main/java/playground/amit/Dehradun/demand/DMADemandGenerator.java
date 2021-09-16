@@ -1,5 +1,6 @@
 package playground.amit.Dehradun.demand;
 
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -30,13 +31,13 @@ import java.util.stream.IntStream;
 public class DMADemandGenerator {
 
     private static final String SVN_repo = "C:/Users/Amit/Documents/svn-repos/shared/data/project_data/DehradunMetroArea_MetroNeo_data/";
-    private static final String plans_file = SVN_repo + "atIITR/matsim/DehradunMetropolitanArea_plans_0.1sample.xml.gz";
-    private static final String zone_file = SVN_repo + "atIITR/zones_update_29082021_11092021/zones_updated.shp";
-    private Collection<SimpleFeature> features ;
-
+    private static final String plans_file = SVN_repo + "atIITR/matsim/DehradunMetropolitanArea_plans_0.1sample_subPop.xml.gz";
+    private static final String zone_file = SVN_repo + "atIITR/zones_update_11092021/zones_updated.shp";
     private static final String OD_all_file = SVN_repo + "atIITR/FinalTripMatrix.txt";
-//    private static final String OD_rail_file = SVN_repo + "atIITR/FinalTripMatrix_rail.txt";
-//    private static final String OD_bus_file = SVN_repo + "atIITR/FinalTripMatrix_bus.txt";
+    private static final String dma_boundariesShape = SVN_repo+"atIITR/boundary/OSMB-DMA-Boundary_no-smoothening.shp";
+
+    private Collection<SimpleFeature> features ;
+    private Geometry dehradunGeom;
 
     private Population population;
     private PopulationFactory pf;
@@ -50,13 +51,16 @@ public class DMADemandGenerator {
     private void run(){
         this.features = ShapeFileReader.getAllFeatures(zone_file);
 
+        //allow autos in Dehradun only
+        Collection<SimpleFeature> features_boundaries = ShapeFileReader.getAllFeatures(dma_boundariesShape);
+        for (SimpleFeature feature: features_boundaries) {
+            if (feature.getAttribute("name").equals("Dehradun")){
+                this.dehradunGeom = (Geometry) feature.getDefaultGeometry();
+            }
+        }
+        if (dehradunGeom==null) throw new RuntimeException("Dehradun Geometry should not be null. Check the CRS.");
+
         Map<Id<OD>, OD> remaining_OD = generateOD(OD_all_file); //all - rail - bus
-//        Map<Id<OD>, OD> rail_OD = generateOD(OD_rail_file);
-//        Map<Id<OD>, OD> bus_OD = generateOD(OD_bus_file);
-
-//        generatePlans(rail_OD, DehradunUtils.TravelModes.rail.toString());
-//        generatePlans(bus_OD, DehradunUtils.TravelModes.bus.toString());
-
         if (this.population == null) {
             Scenario scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
             this.population = scenario.getPopulation();
@@ -84,21 +88,12 @@ public class DMADemandGenerator {
     }
 
     private String getMode(){
-        //Table 6-4 of Metro report provides modal share by trips
-        // except, bus (18%) and rail, shares of 2W, car, shared IPT (&others), walk, cycles are 36, 17, 10, 6, 13
-        // making these to 100%; shares will be 44, 21, 12, 7, 16
-        //Sep. 2021: considering only ONE OD Matrix.
+        //Table 6-4 of Metro report provides modal share by trips: 2W 36%, car 20%, Auto 5%, IPT 21%, Bus 18%.
         int rnd = this.random.nextInt(101);
-//        if(rnd <= 44) return DehradunUtils.TravelModes.motorbike.toString();
-//        else if (rnd <= 65) return DehradunUtils.TravelModes.car.toString();
-//        else if (rnd <= 77) return DehradunUtils.TravelModes.IPT.toString();
-//        else if (rnd <= 84) return DehradunUtils.TravelModes.walk.toString();
-//        else  return DehradunUtils.TravelModes.bicycle.toString();
         if(rnd <= 36) return DehradunUtils.TravelModesBaseCase2017.motorbike.toString();
-        else if (rnd <= 53) return DehradunUtils.TravelModesBaseCase2017.car.toString();
-        else if (rnd <= 63) return DehradunUtils.TravelModesBaseCase2017.IPT.toString();
-        else if (rnd <= 69) return DehradunUtils.TravelModesBaseCase2017.walk.toString();
-        else if (rnd <= 82) return DehradunUtils.TravelModesBaseCase2017.bicycle.toString();
+        else if (rnd <= 56) return DehradunUtils.TravelModesBaseCase2017.car.toString();
+        else if (rnd <= 61) return DehradunUtils.TravelModesBaseCase2017.auto.toString();
+        else if (rnd <= 82) return DehradunUtils.TravelModesBaseCase2017.IPT.toString();
         else  return DehradunUtils.TravelModesBaseCase2017.bus.toString();
     }
 
@@ -107,7 +102,15 @@ public class DMADemandGenerator {
         person.getAttributes().putAttribute(DehradunUtils.origin, origin);
         person.getAttributes().putAttribute(DehradunUtils.destination, destination);
         Plan plan = pf.createPlan();
-        Activity act = pf.createActivityFromCoord("FirstAct", getRandomCoord(origin));
+        Coord startCoord = getRandomCoord(origin);
+        Activity act = pf.createActivityFromCoord("FirstAct", startCoord);
+        //
+        String subPop = DehradunUtils.rest_subPop;
+        if(withinDehradun(startCoord)) {
+           subPop = DehradunUtils.dehradun_subPop;
+        }
+        person.getAttributes().putAttribute(DehradunUtils.subPopulation, subPop);
+
         act.setEndTime(getTripEndTime()*3600.); // trip end between 05:00 and 23:00
         plan.addActivity(act);
         plan.addLeg(pf.createLeg(travelMode));
@@ -115,6 +118,10 @@ public class DMADemandGenerator {
         plan.addActivity(a);
         person.addPlan(plan);
         this.population.addPerson(person);
+    }
+
+    private boolean withinDehradun(Coord coord){
+        return GeometryUtils.isCoordInsideGeometry(dehradunGeom, coord);
     }
 
     private double getTripEndTime(){
@@ -128,15 +135,6 @@ public class DMADemandGenerator {
         }
     }
 
-//    private void generatePlans( Map<Id<OD>, OD> odMap, String travelMode){
-//        if (this.population == null) {
-//            Scenario scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
-//            this.population = scenario.getPopulation();
-//            this.pf = this.population.getFactory();
-//        }
-//        odMap.values().forEach(od -> generatePlan(od.origin, od.destination, travelMode));
-//    }
-
     private Coord getRandomCoord(String zoneId){
         if (zoneId.equals("181")) zoneId ="135"; // cannot distinguish between 181 and 135
 
@@ -147,10 +145,8 @@ public class DMADemandGenerator {
                 return new Coord(p.getX(), p.getY());
             }
         }
-        return null; // zone file does not match.
+        throw new RuntimeException("Zone "+zoneId+ " is not known.");
     }
-
-
 
     private Map<Id<OD>, OD> generateOD(String inputFile){
         Map<Id<OD>, OD> odMap = new HashMap<>();

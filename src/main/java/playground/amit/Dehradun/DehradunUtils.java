@@ -18,13 +18,16 @@ public final class DehradunUtils {
 	public static final double sampleSize = 0.1;
 	public static final String origin = "O_Zone";
 	public static final String destination = "D_Zone";
+	public static final String subPopulation = "SubPopulation";
+	public static final String dehradun_subPop = "Dehradun";
+	public static final String rest_subPop = "rest";
 
 	public enum TravelModesBaseCase2017 {//Do NOT add Metro in this.
-		car, motorbike, bicycle, walk, bus, IPT;
+		car, motorbike, bus, IPT, auto;
 	}
 
-	public enum TravelModesMetroCase2021 {//Do NOT add Metro in this.
-		car, motorbike, bicycle, walk, bus, IPT, metro;
+	public enum TravelModesMetroCase2021 {
+		car, motorbike, bus, IPT, auto, metro;
 	}
 
 	/**
@@ -37,28 +40,10 @@ public final class DehradunUtils {
 			case "motorbike": speed = 80/3.6; break;
 			case "car": speed = 80/3.6; break;
 //
-			case "bicycle": speed = 15/3.6; break;
+//			case "bicycle": speed = 15/3.6; break;
 //
 			default: throw new RuntimeException("No speed is set for travel mode "+travelMode+ ".");
 		}
 		return speed;
 	}
-
-//	public static double ModalShare {
-//		car (30), motorbike (30), bike (5), walk (10), rail(2), metro_neo(0) ;
-//
-//		private double modalShare;
-//
-//		public double getModeShare(){
-//			return modalShare;
-//		}
-//
-//		public static double getModalShare ( String mode ) {
-//			return ModalShare.valueOf( mode ).getModeShare() ;
-//		}
-//
-//		ModalShare(double firstArg) {
-//			this.modalShare = firstArg;
-//		}
-//	}
 }

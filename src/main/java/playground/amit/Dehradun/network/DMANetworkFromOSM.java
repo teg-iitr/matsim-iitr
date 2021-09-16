@@ -16,6 +16,7 @@ import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
 import playground.amit.Dehradun.DehradunUtils;
 import playground.amit.utils.NetworkUtils;
+import playground.amit.utils.geometry.GeometryUtils;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,8 +33,9 @@ import java.util.function.BiPredicate;
 public class DMANetworkFromOSM {
 
     private static final String SVN_repo = "C:/Users/Amit/Documents/svn-repos/shared/data/project_data/DehradunMetroArea_MetroNeo_data/";
-    private static final String matsimNetworkFile = SVN_repo + "atIITR/matsim/road-network-osm/DehradunMetropolitanArea_matsim_network_fromPBF_cleaned_13092021.xml.gz";
+    private static final String matsimNetworkFile = SVN_repo + "atIITR/matsim/road-network-osm/DehradunMetropolitanArea_matsim_network_fromPBF_cleaned_16092021.xml.gz";
     private static final String boundaryShapeFile = SVN_repo+"atIITR/boundary/single_boundary_DMA.shp";
+    private static final String dma_boundariesShape = SVN_repo+"atIITR/boundary/OSMB-DMA-Boundary_no-smoothening.shp";
     private static final String inputPBFFile = SVN_repo+"atIITR/matsim/road-network-osm/planet_77.734,29.841_78.327,30.369.osm.pbf";
 
     public static void main(String[] args) {
@@ -49,7 +51,7 @@ public class DMANetworkFromOSM {
             else return ( hierarchyLevel<=5 && geometry.contains(MGC.coord2Point(reverse_transformation.transform(cord))) );
         };
         Set<String> modes = new HashSet<>(Arrays.asList(DehradunUtils.TravelModesBaseCase2017.car.name(),
-                DehradunUtils.TravelModesBaseCase2017.motorbike.name(), DehradunUtils.TravelModesBaseCase2017.bicycle.name()));
+                DehradunUtils.TravelModesBaseCase2017.motorbike.name()));
 
         Network network = new SupersonicOsmNetworkReader.Builder()
                 .setCoordinateTransformation(DehradunUtils.transformation)
@@ -183,6 +185,25 @@ public class DMANetworkFromOSM {
                 crossLink.setLength(55.0);
                 crossLink.setCapacity(600.);
                 network.addLink(crossLink);
+            }
+        }
+
+        //allow autos in Dehradun only
+        Collection<SimpleFeature> features_boundaries = ShapeFileReader.getAllFeatures(dma_boundariesShape);
+        Geometry dehradunGeom = null;
+        for (SimpleFeature feature: features_boundaries) {
+            if (feature.getAttribute("name").equals("Dehradun")){
+                dehradunGeom = (Geometry) feature.getDefaultGeometry();
+            }
+        }
+
+        if (dehradunGeom==null) throw new RuntimeException("Dehradun Geometry should not be null. Check the CRS.");
+
+        Set<String> d_modes = modes;
+        d_modes.add(DehradunUtils.TravelModesBaseCase2017.auto.name());
+        for(Link link : network.getLinks().values()){
+            if (GeometryUtils.isLinkInsideGeometry(dehradunGeom, link)){
+                link.setAllowedModes(d_modes);
             }
         }
 

@@ -25,9 +25,9 @@ public class DMAVehicleGenerator {
             vehicles.addVehicleType(vehicleType);
         }
         {
-            VehicleType vehicleType = factory.createVehicleType(Id.create(DehradunUtils.TravelModesBaseCase2017.bicycle.name(), VehicleType.class));
-            vehicleType.setPcuEquivalents(0.15);
-            vehicleType.setMaximumVelocity(15/3.6);
+            VehicleType vehicleType = factory.createVehicleType(Id.create(DehradunUtils.TravelModesBaseCase2017.auto.name(), VehicleType.class));
+            vehicleType.setPcuEquivalents(0.5);
+            vehicleType.setMaximumVelocity(50/3.6);
             vehicles.addVehicleType(vehicleType);
         }
         {

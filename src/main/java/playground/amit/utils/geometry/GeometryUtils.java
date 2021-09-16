@@ -72,6 +72,21 @@ public final class GeometryUtils {
 	}
 
 	/**
+	 * @return true if coord is inside the geometry
+	 */
+	public static boolean isCoordInsideGeometry(final Geometry geometry, final Coord coord) {
+		Point point = GF.createPoint(new Coordinate(coord.getX(), coord.getY()));
+		return geometry.contains(point);
+	}
+	/**
+	 * @return true if centroid of the link is inside the geometry
+	 */
+	public static boolean isLinkInsideGeometry(final Geometry geometry, final Link link) {
+		Coord coord = link.getCoord();
+		return GeometryUtils.isCoordInsideGeometry(geometry, coord);
+	}
+
+	/**
 	 * @return true if centroid of the link is covered by any of the geometry
 	 */
 	public static boolean isLinkInsideGeometries(final Collection<Geometry> geometries, final Link link) {
