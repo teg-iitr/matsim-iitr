@@ -23,7 +23,7 @@ public final class DehradunUtils {
 		car, motorbike, bicycle, walk, bus, IPT;
 	}
 
-	public enum TravelModesMetroCase2017 {//Do NOT add Metro in this.
+	public enum TravelModesMetroCase2021 {//Do NOT add Metro in this.
 		car, motorbike, bicycle, walk, bus, IPT, metro;
 	}
 

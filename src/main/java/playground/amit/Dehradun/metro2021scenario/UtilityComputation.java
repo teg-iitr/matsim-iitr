@@ -19,10 +19,10 @@ public class UtilityComputation {
                 util = 0.0 - 53.11 * travelTime_h - 12.38 * distance_km;
                 break;
             case bicycle:
-                util = 0.0 - 95.18 * travelTime_h - 9.09 * distance_km;
+                util = 0.0 - 53.11 * travelTime_h - 12.38 * distance_km;
                 break;
             case walk:
-                util = 0.0 - 95.18 * travelTime_h - 9.09 * distance_km;
+                util = 0.0 - 53.11 * travelTime_h - 12.38 * distance_km;
                 break;
             case bus:
                 util = 0.0 - 44.14 * travelTime_h - 18.37 * distance_km;
