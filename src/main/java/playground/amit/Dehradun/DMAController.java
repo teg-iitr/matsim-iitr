@@ -59,20 +59,20 @@ public class DMAController {
         });
 
         // adding pt fare system based on distance
-        controler.addOverridingModule(new AbstractModule() {
-            @Override
-            public void install() {
-                this.addEventHandlerBinding().to(DMAPtFareEventHandler.class);
-            }
-        });
+//        controler.addOverridingModule(new AbstractModule() {
+//            @Override
+//            public void install() {
+//                this.addEventHandlerBinding().to(DMAPtFareEventHandler.class);
+//            }
+//        });
         // for above make sure that util_dist and monetary dist rate for pt are zero.
-        PlanCalcScoreConfigGroup.ModeParams mp = controler.getConfig().planCalcScore().getModes().get(DehradunUtils.TravelModesBaseCase2017.bus.name());
-        mp.setMarginalUtilityOfDistance(0.0);
-        mp.setMonetaryDistanceRate(0.0);
-
-        PlanCalcScoreConfigGroup.ModeParams mp2 = controler.getConfig().planCalcScore().getModes().get(DehradunUtils.TravelModesBaseCase2017.IPT.name());
-        mp2.setMarginalUtilityOfDistance(0.0);
-        mp2.setMonetaryDistanceRate(0.0);
+//        PlanCalcScoreConfigGroup.ModeParams mp = controler.getConfig().planCalcScore().getModes().get(DehradunUtils.TravelModesBaseCase2017.bus.name());
+//        mp.setMarginalUtilityOfDistance(0.0);
+//        mp.setMonetaryDistanceRate(0.0);
+//
+//        PlanCalcScoreConfigGroup.ModeParams mp2 = controler.getConfig().planCalcScore().getModes().get(DehradunUtils.TravelModesBaseCase2017.IPT.name());
+//        mp2.setMarginalUtilityOfDistance(0.0);
+//        mp2.setMonetaryDistanceRate(0.0);
 
         if(useFreeSpeedTravelTimeCalculator_motorbike) {
             controler.addOverridingModule(new AbstractModule() {
@@ -105,7 +105,6 @@ public class DMAController {
         msc.writeResults(OUTPUT_DIR+"/analysis/modalShareFromEvents.txt");
 
         StatsWriter.run(OUTPUT_DIR,config.controler().getRunId());
-
     }
 
     public static class FreeSpeedTravelTimeForMotorbike implements TravelTime {
