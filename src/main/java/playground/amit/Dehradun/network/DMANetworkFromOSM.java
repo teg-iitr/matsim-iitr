@@ -7,6 +7,8 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.api.core.v01.network.Node;
+import org.matsim.contrib.osm.networkReader.LinkProperties;
+import org.matsim.contrib.osm.networkReader.OsmTags;
 import org.matsim.contrib.osm.networkReader.SupersonicOsmNetworkReader;
 import org.matsim.core.network.algorithms.NetworkCleaner;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
@@ -33,9 +35,9 @@ import java.util.function.BiPredicate;
 public class DMANetworkFromOSM {
 
     private static final String SVN_repo = "C:/Users/Amit/Documents/svn-repos/shared/data/project_data/DehradunMetroArea_MetroNeo_data/";
-    private static final String matsimNetworkFile = SVN_repo + "atIITR/matsim/road-network-osm/DehradunMetropolitanArea_matsim_network_fromPBF_cleaned_16092021.xml.gz";
+    private static final String matsimNetworkFile = SVN_repo + "atIITR/matsim/road-network-osm/DehradunMetropolitanArea_matsim_network_fromPBF_cleaned_20092021.xml.gz";
     private static final String boundaryShapeFile = SVN_repo+"atIITR/boundary/single_boundary_DMA.shp";
-    private static final String dma_boundariesShape = SVN_repo+"atIITR/boundary/OSMB-DMA-Boundary_no-smoothening.shp";
+//    private static final String dma_boundariesShape = SVN_repo+"atIITR/boundary/OSMB-DMA-Boundary_no-smoothening.shp";
     private static final String inputPBFFile = SVN_repo+"atIITR/matsim/road-network-osm/planet_77.734,29.841_78.327,30.369.osm.pbf";
 
     public static void main(String[] args) {
@@ -55,6 +57,16 @@ public class DMANetworkFromOSM {
 
         Network network = new SupersonicOsmNetworkReader.Builder()
                 .setCoordinateTransformation(DehradunUtils.transformation)
+                .addOverridingLinkProperties(OsmTags.MOTORWAY, new LinkProperties(LinkProperties.LEVEL_MOTORWAY, 2, 120.0 / 3.6, 2000, true))
+                .addOverridingLinkProperties(OsmTags.MOTORWAY_LINK, new LinkProperties(LinkProperties.LEVEL_MOTORWAY, 1, 120.0 / 3.6, 1800, true))
+                .addOverridingLinkProperties(OsmTags.TRUNK, new LinkProperties(LinkProperties.LEVEL_TRUNK, 1, 120.0 / 3.6, 2000, false))
+                .addOverridingLinkProperties(OsmTags.TRUNK_LINK, new LinkProperties(LinkProperties.LEVEL_TRUNK, 1, 80.0 / 3.6, 1800, false))
+                .addOverridingLinkProperties(OsmTags.PRIMARY, new LinkProperties(LinkProperties.LEVEL_PRIMARY, 1, 80.0 / 3.6, 1800, false))
+                .addOverridingLinkProperties(OsmTags.PRIMARY_LINK, new LinkProperties(LinkProperties.LEVEL_PRIMARY, 1, 80.0 / 3.6, 1800, false))
+                .addOverridingLinkProperties(OsmTags.SECONDARY, new LinkProperties(LinkProperties.LEVEL_SECONDARY, 1, 80.0 / 3.6, 1500, false))
+                .addOverridingLinkProperties(OsmTags.SECONDARY_LINK, new LinkProperties(LinkProperties.LEVEL_SECONDARY, 1, 80.0 / 3.6, 1500, false))
+                .addOverridingLinkProperties(OsmTags.TERTIARY, new LinkProperties(LinkProperties.LEVEL_TERTIARY, 1, 80.0 / 3.6, 1200, false))
+                .addOverridingLinkProperties(OsmTags.TERTIARY_LINK, new LinkProperties(LinkProperties.LEVEL_TERTIARY, 1, 80.0 / 3.6, 1200, false))
                 .setIncludeLinkAtCoordWithHierarchy(includeLinkAtCoordWithHierarchy)
                 .setAfterLinkCreated((link, osmTags, isReversed)-> {
                     link.setFreespeed(80.00/3.6);
@@ -66,7 +78,7 @@ public class DMANetworkFromOSM {
         new NetworkCleaner().run(network);
 
         // some corrections based on experience in the simulations by NK, Sep 21
-        {// there is no link in the opposite direction of 7266273210051f
+        {// there is no link in the opposite direction of 7266273210051f (fromNode = 681085758; toNode = 6810857603
             Link link = network.getLinks().get(Id.createLinkId("7266273210051f"));
             Link reverseLink = network.getFactory().createLink(Id.createLinkId("7266273210051r"), link.getToNode(), link.getFromNode());
             NetworkUtils.copy(link, reverseLink);
@@ -189,21 +201,29 @@ public class DMANetworkFromOSM {
         }
 
         //allow autos in Dehradun only
-        Collection<SimpleFeature> features_boundaries = ShapeFileReader.getAllFeatures(dma_boundariesShape);
-        Geometry dehradunGeom = null;
-        for (SimpleFeature feature: features_boundaries) {
-            if (feature.getAttribute("name").equals("Dehradun")){
-                dehradunGeom = (Geometry) feature.getDefaultGeometry();
-            }
-        }
+//        Collection<SimpleFeature> features_boundaries = ShapeFileReader.getAllFeatures(dma_boundariesShape);
+//        Geometry dehradunGeom = null;
+//        for (SimpleFeature feature: features_boundaries) {
+//            if (feature.getAttribute("name").equals("Dehradun")){
+//                dehradunGeom = (Geometry) feature.getDefaultGeometry();
+//            }
+//        }
+//
+//        if (dehradunGeom==null) throw new RuntimeException("Dehradun Geometry should not be null. Check the CRS.");
 
-        if (dehradunGeom==null) throw new RuntimeException("Dehradun Geometry should not be null. Check the CRS.");
+//        Set<String> d_modes = modes;
+//        d_modes.add(DehradunUtils.TravelModesBaseCase2017.auto.name());
+//        for(Link link : network.getLinks().values()){
+//            if (GeometryUtils.isLinkInsideGeometry(dehradunGeom, link)){
+//                link.setAllowedModes(d_modes);
+//            }
+//        }
 
-        Set<String> d_modes = modes;
-        d_modes.add(DehradunUtils.TravelModesBaseCase2017.auto.name());
-        for(Link link : network.getLinks().values()){
-            if (GeometryUtils.isLinkInsideGeometry(dehradunGeom, link)){
-                link.setAllowedModes(d_modes);
+        //none of the link length should be smaller than Euclidean distance
+        for (Link l : network.getLinks().values()) {
+            double beelineDist = org.matsim.core.network.NetworkUtils.getEuclideanDistance(l.getFromNode().getCoord(), l.getToNode().getCoord());
+            if (l.getLength() < beelineDist) {
+                l.setLength(Math.ceil(beelineDist));
             }
         }
 

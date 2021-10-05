@@ -24,12 +24,12 @@ public class DMAVehicleGenerator {
             vehicleType.setMaximumVelocity(80/3.6);
             vehicles.addVehicleType(vehicleType);
         }
-        {
-            VehicleType vehicleType = factory.createVehicleType(Id.create(DehradunUtils.TravelModesBaseCase2017.auto.name(), VehicleType.class));
-            vehicleType.setPcuEquivalents(0.5);
-            vehicleType.setMaximumVelocity(50/3.6);
-            vehicles.addVehicleType(vehicleType);
-        }
+//        {
+//            VehicleType vehicleType = factory.createVehicleType(Id.create(DehradunUtils.TravelModesBaseCase2017.auto.name(), VehicleType.class));
+//            vehicleType.setPcuEquivalents(0.5);
+//            vehicleType.setMaximumVelocity(50/3.6);
+//            vehicles.addVehicleType(vehicleType);
+//        }
         {
             VehicleType vehicleType = factory.createVehicleType(Id.create(DehradunUtils.TravelModesBaseCase2017.motorbike.name(), VehicleType.class));
             vehicleType.setPcuEquivalents(0.15);

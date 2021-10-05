@@ -18,16 +18,16 @@ public final class DehradunUtils {
 	public static final double sampleSize = 0.1;
 	public static final String origin = "O_Zone";
 	public static final String destination = "D_Zone";
-	public static final String subPopulation = "SubPopulation";
-	public static final String dehradun_subPop = "Dehradun";
-	public static final String rest_subPop = "rest";
+//	public static final String subPopulation = "SubPopulation";
+//	public static final String dehradun_subPop = "Dehradun";
+//	public static final String rest_subPop = "rest";
 
 	public enum TravelModesBaseCase2017 {//Do NOT add Metro in this.
-		car, motorbike, bus, IPT, auto;
+		car, motorbike, bus, IPT;
 	}
 
 	public enum TravelModesMetroCase2021 {
-		car, motorbike, bus, IPT, auto, metro;
+		car, motorbike, bus, IPT, metro;
 	}
 
 	/**

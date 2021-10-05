@@ -16,9 +16,9 @@ public class UtilityComputation {
             case motorbike:
                 util = 58.0 - 53.11 * travelTime_h - 12.38 * distance_km;
                 break;
-            case auto: //TODO: check
-                util = 0.0 - 53.11 * travelTime_h - 10.12 * distance_km;
-                break;
+//            case auto:
+//                util = 0.0 - 53.11 * travelTime_h - 10.18 * distance_km;
+//                break;
             case bus:
                 util = -190.0 - 44.14 * travelTime_h - 18.37 * distance_km;
                 break;

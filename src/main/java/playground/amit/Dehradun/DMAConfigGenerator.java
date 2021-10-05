@@ -45,7 +45,7 @@ public class DMAConfigGenerator {
         config.qsim().setNumberOfThreads(8);
 
         Collection<String> modes = Arrays.asList(DehradunUtils.TravelModesBaseCase2017.car.name(),
-                DehradunUtils.TravelModesBaseCase2017.motorbike.name(), DehradunUtils.TravelModesBaseCase2017.auto.name());
+                DehradunUtils.TravelModesBaseCase2017.motorbike.name());
         config.qsim().setMainModes(modes);
         config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
 
@@ -59,7 +59,6 @@ public class DMAConfigGenerator {
 
         config.planCalcScore().getOrCreateModeParams(DehradunUtils.TravelModesBaseCase2017.car.name());
         config.planCalcScore().getOrCreateModeParams(DehradunUtils.TravelModesBaseCase2017.motorbike.name());
-        config.planCalcScore().getOrCreateModeParams(DehradunUtils.TravelModesBaseCase2017.auto.name());
 
         config.planCalcScore().getOrCreateModeParams(DehradunUtils.TravelModesBaseCase2017.bus.name()).setConstant(0.);
         config.planCalcScore().getOrCreateModeParams(DehradunUtils.TravelModesBaseCase2017.IPT.name()).setConstant(0.);
@@ -80,7 +79,7 @@ public class DMAConfigGenerator {
         modeChoice.setWeight(0.1);
         config.strategy().addStrategySettings(modeChoice);
         config.changeMode().setModes(new String [] {DehradunUtils.TravelModesBaseCase2017.car.name(),
-                DehradunUtils.TravelModesBaseCase2017.motorbike.name(), DehradunUtils.TravelModesBaseCase2017.auto.name(),
+                DehradunUtils.TravelModesBaseCase2017.motorbike.name(),
                 DehradunUtils.TravelModesBaseCase2017.IPT.name(), DehradunUtils.TravelModesBaseCase2017.bus.name()});
 
         StrategyConfigGroup.StrategySettings timeMutation = new StrategyConfigGroup.StrategySettings();
