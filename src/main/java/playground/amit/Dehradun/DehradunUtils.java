@@ -4,6 +4,9 @@ package playground.amit.Dehradun;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * 
  * @author Amit
@@ -42,6 +45,19 @@ public final class DehradunUtils {
 //
 //			case "bicycle": speed = 15/3.6; break;
 //
+			default: throw new RuntimeException("No speed is set for travel mode "+travelMode+ ".");
+		}
+		return speed;
+	}
+
+	public static double getSpeedKPHFromReport(final String travelMode){
+		double speed;
+		switch (travelMode) {
+			case "motorbike": speed = 70; break;
+			case "car": speed = 45; break;
+			case "IPT": speed = 10; break;
+			case "bus": speed = 24; break;
+			case "metro": speed = 50; break;
 			default: throw new RuntimeException("No speed is set for travel mode "+travelMode+ ".");
 		}
 		return speed;
