@@ -10,6 +10,8 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.utils.collections.Tuple;
+import org.matsim.core.utils.geometry.CoordinateTransformation;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.IOUtils;
 import org.opengis.feature.simple.SimpleFeature;
@@ -55,6 +57,8 @@ public class Metro2021ScenarioASCCalibration {
     private static final String TRIP_DIST = "trip_dist";
     private static final String TRIP_TIME = "trip_time";
     private static final String METRO_ASC = "metro_asc";
+
+    private static final CoordinateTransformation Reverse_transformation = TransformationFactory.getCoordinateTransformation(DehradunUtils.EPSG,TransformationFactory.WGS84);
 
     public static void main(String[] args) {
         new Metro2021ScenarioASCCalibration().run();
@@ -144,6 +148,8 @@ public class Metro2021ScenarioASCCalibration {
 
     private Tuple<Double, Double> getTripDistanceInKmTimeInHr(Coord origin, Coord destination, String travelMode){
         //this should come from a rounting engine line graphhoper; however as of now, we can use the beeline distances
+        origin = Reverse_transformation.transform(origin);
+        destination = Reverse_transformation.transform(destination);
         double dist = 0;
         if ( travelMode.equals("bus") || travelMode.equals("IPT") || travelMode.equals("metro")) {
             dist = GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(origin, destination, "car", "fastest").getFirst();
