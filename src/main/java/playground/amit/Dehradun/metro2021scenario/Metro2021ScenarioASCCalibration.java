@@ -1,6 +1,7 @@
 package playground.amit.Dehradun.metro2021scenario;
 
 import org.apache.log4j.Logger;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -18,6 +19,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import playground.amit.Dehradun.DehradunUtils;
 import playground.amit.Dehradun.GHNetworkDistanceCalculator;
 import playground.amit.Dehradun.OD;
+import playground.amit.utils.geometry.GeometryUtils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -47,10 +49,10 @@ public class Metro2021ScenarioASCCalibration {
     private static final String OD_all_2021_file = SVN_repo + "atIITR/OD_2021_all.txt";
     private static final String OD_metro_2021_file = SVN_repo + "atIITR/OD_2021_metro.txt";
 
-    private final Random random = MatsimRandom.getLocalInstance();
-    private static final int numberOfPoints2DrawInEachZone = 10;
+//    private final Random random = MatsimRandom.getLocalInstance();
+    private static final int numberOfPoints2DrawInEachZone = 1;
 
-    private static final String outFile = SVN_repo + "atIITR/OD_2021_metro_trips_comparison_13-10-2021.txt";
+    private static final String outFile = SVN_repo + "atIITR/OD_2021_metro_trips_comparison_14-10-2021.txt";
 
     //key of attributes
     private static final String METRO_TRIPS = "metro_trips";
@@ -152,7 +154,7 @@ public class Metro2021ScenarioASCCalibration {
         destination = Reverse_transformation.transform(destination);
         double dist = 0;
         if ( travelMode.equals("bus") || travelMode.equals("IPT") || travelMode.equals("metro")) {
-            dist = GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(origin, destination, "car", "fastest").getFirst();
+            dist = GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(origin, destination, travelMode, null).getFirst();
         } else {
             dist = GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(origin, destination, travelMode, "fastest").getFirst();
         }

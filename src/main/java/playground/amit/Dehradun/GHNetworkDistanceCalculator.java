@@ -27,18 +27,22 @@ public class GHNetworkDistanceCalculator {
         if (mode == null ) {
             Logger.getLogger(GHNetworkDistanceCalculator.class).warn("Transport mode is null. Setting to "+"car");
             mode = "car";
-        }
+        } else if (mode.equals("motorbike")) mode = "motorcycle";
+        else if(mode.equals("IPT")) mode ="ipt";
+
         if (routeType == null ) {
-            Logger.getLogger(GHNetworkDistanceCalculator.class).warn("Route type is null. Setting to "+"fastest");
-            routeType = "fastest";
+            Logger.getLogger(GHNetworkDistanceCalculator.class).warn("Route type is null. Going ahead without it.");
         }
 
         String base_url = "http://localhost:9098/routing?";
         String json_suffix = "&mediaType=json";
 //        String url_string = base_url+"StartLoc=77.09652%2C28.555764&EndLoc=77.32%2C28.57&RouteType=fastest&Vehicle=bike&mediaType=json";
-        String url_string = base_url+"StartLoc="+origin.getY()+"%2C"+origin.getX()+
-                "&EndLoc="+destination.getY()+"%2C"+destination.getX()+
-                "&RouteType="+routeType+"&Vehicle="+mode+json_suffix;
+        String url_string = base_url+"StartLoc="+origin.getX()+"%2C"+origin.getY()+
+                "&EndLoc="+destination.getX()+"%2C"+destination.getY();
+
+        if (routeType!=null) url_string = url_string+"&RouteType="+routeType+"&Vehicle="+mode+json_suffix;
+        else url_string = url_string+"&Vehicle="+mode+json_suffix;
+
         System.out.println("URL is "+url_string);
         try {
             URL url = new URL(url_string);
