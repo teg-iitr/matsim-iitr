@@ -11,19 +11,19 @@ public class UtilityComputation {
         double util = 0.;
         switch (mode){
             case car:
-                util = 30.0 - 95.18 * travelTime_h - 9.09 * distance_km;
+                util = 0.0 - 95.18 * travelTime_h - 9.09 * distance_km;
                 break;
             case motorbike:
-                util = 58.0 - 53.11 * travelTime_h - 12.38 * distance_km;
+                util = 27.0 - 53.11 * travelTime_h - 12.38 * distance_km;
                 break;
 //            case auto:
 //                util = 0.0 - 53.11 * travelTime_h - 10.18 * distance_km;
 //                break;
             case bus:
-                util = -190.0 - 44.14 * travelTime_h - 18.37 * distance_km;
+                util = -196.0 - 44.14 * travelTime_h - 18.37 * distance_km;
                 break;
             case IPT:
-                util = -125.0 - 38.50 * travelTime_h - 16.30 * distance_km;
+                util = -108.0 - 38.50 * travelTime_h - 16.30 * distance_km;
                 break;
             default:
                 throw new IllegalStateException("Unknown mode: " + mode);
