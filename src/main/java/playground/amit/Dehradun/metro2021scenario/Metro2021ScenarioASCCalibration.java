@@ -139,17 +139,17 @@ public class Metro2021ScenarioASCCalibration {
         return Math.log(a) - util_metro_except_ASC;
     }
 
-    private String getGH_Modes(String mode){
-        //GH supports only car, bike, foot, motorcycle
-        if(mode.equals("walk")) return "foot";
-        else if(mode.equals("car")) return mode;
-        else if(mode.equals("motorbike")) return "motorcycle";
-        else if (mode.equals("bicycle")) return "bike";
-        else throw new RuntimeException("The travel mode "+mode+" is unknown. Aborting...");
-    }
+//    private String getGH_Modes(String mode){
+//        //GH supports only car, bike, foot, motorcycle
+//        if(mode.equals("walk")) return "foot";
+//        else if(mode.equals("car")) return mode;
+//        else if(mode.equals("motorbike")) return "motorcycle";
+//        else if (mode.equals("bicycle")) return "bike";
+//        else throw new RuntimeException("The travel mode "+mode+" is unknown. Aborting...");
+//    }
 
     private Tuple<Double, Double> getTripDistanceInKmTimeInHr(Coord origin, Coord destination, String travelMode){
-        //this should come from a rounting engine line graphhoper; however as of now, we can use the beeline distances
+        //this is coming from a Routing Engine like Graphhopper
         origin = Reverse_transformation.transform(origin);
         destination = Reverse_transformation.transform(destination);
         double dist = 0;

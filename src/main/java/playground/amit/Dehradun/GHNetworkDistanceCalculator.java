@@ -31,7 +31,7 @@ public class GHNetworkDistanceCalculator {
         else if(mode.equals("IPT")) mode ="ipt";
 
         if (routeType == null ) {
-            Logger.getLogger(GHNetworkDistanceCalculator.class).warn("Route type is null. Going ahead without it.");
+//            Logger.getLogger(GHNetworkDistanceCalculator.class).warn("Route type is null. Going ahead without it. This might throw an exception for car, motorcycle, bike, foot.");
         }
 
         String base_url = "http://localhost:9098/routing?";
@@ -43,7 +43,7 @@ public class GHNetworkDistanceCalculator {
         if (routeType!=null) url_string = url_string+"&RouteType="+routeType+"&Vehicle="+mode+json_suffix;
         else url_string = url_string+"&Vehicle="+mode+json_suffix;
 
-        System.out.println("URL is "+url_string);
+//        System.out.println("URL is "+url_string);
         try {
             URL url = new URL(url_string);
             URLConnection request = url.openConnection();
