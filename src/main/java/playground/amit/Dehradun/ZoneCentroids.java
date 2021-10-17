@@ -24,7 +24,7 @@ public class ZoneCentroids {
     private static final String zone_file = SVN_repo + "atIITR/zones_update_29082021/zone_data_update.shp";
     private static final String zone_centroid_file = SVN_repo + "atIITR/flowMapVisualization/zone_cendtroid_details.txt";
     private static final CoordinateTransformation transformation = TransformationFactory
-            .getCoordinateTransformation(DehradunUtils.EPSG,TransformationFactory.WGS84);
+            .getCoordinateTransformation(DehradunUtils.Dehradun_EPGS,TransformationFactory.WGS84);
 
     public static void main(String[] args) {
 

@@ -4,9 +4,6 @@ package playground.amit.Dehradun;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * 
  * @author Amit
@@ -14,9 +11,11 @@ import java.util.List;
  */
 public final class DehradunUtils {
 	
-	public static final String EPSG = "EPSG:32644"; // same is used for Delhi.
+	public static final String Dehradun_EPGS = "EPSG:32644"; // same is used for Delhi.
 	public static final CoordinateTransformation transformation = TransformationFactory
-			.getCoordinateTransformation(TransformationFactory.WGS84, EPSG);
+			.getCoordinateTransformation(TransformationFactory.WGS84, Dehradun_EPGS);
+
+	public static final CoordinateTransformation Reverse_transformation = TransformationFactory.getCoordinateTransformation(DehradunUtils.Dehradun_EPGS,TransformationFactory.WGS84);
 
 	public static final double sampleSize = 0.1;
 	public static final String origin = "O_Zone";

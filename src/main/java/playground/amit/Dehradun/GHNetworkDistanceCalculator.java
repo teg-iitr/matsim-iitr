@@ -6,6 +6,9 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.core.utils.collections.Tuple;
+import org.matsim.core.utils.geometry.CoordinateTransformation;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
+
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -19,6 +22,17 @@ public class GHNetworkDistanceCalculator {
 
     public static void main(String[] args) {
         System.out.println( GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(new Coord(28.555764, 77.09652), new Coord(28.57,77.32), "car", "fastest"));
+    }
+
+    public static Tuple<Double, Double> getTripDistanceInKmTimeInHr(Coord origin, Coord destination, String travelMode){
+        //this is coming from a Routing Engine like Graphhopper
+        double dist = 0;
+        if ( travelMode.equals("bus") || travelMode.equals("IPT") || travelMode.equals("metro")) {
+            dist = GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(origin, destination, travelMode, null).getFirst();
+        } else {
+            dist = GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(origin, destination, travelMode, "fastest").getFirst();
+        }
+        return new Tuple<>(dist, dist/DehradunUtils.getSpeedKPHFromReport(travelMode));
     }
 
     public static Tuple<Double, Double> getDistanceInKmTimeInHr(Coord origin, Coord destination, String mode, String routeType) {
@@ -62,7 +76,10 @@ public class GHNetworkDistanceCalculator {
             JSONObject summary = (JSONObject) json.get("summary");
             return new Tuple<>((Double) summary.get("distance")/1000., (Double) summary.get("time")/3600.);
         } catch (IOException | ParseException e) {
-            throw new RuntimeException("URL is not connected.");
+            System.out.println("Origin: "+origin);
+            System.out.println("Destination: "+destination);
+            System.out.println(url_string);
+            throw new RuntimeException("URL is not connected. Reason "+e);
         }
     }
 }

@@ -18,7 +18,6 @@ import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
 import playground.amit.Dehradun.DehradunUtils;
 import playground.amit.utils.NetworkUtils;
-import playground.amit.utils.geometry.GeometryUtils;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -42,7 +41,7 @@ public class DMANetworkFromOSM {
 
     public static void main(String[] args) {
         CoordinateTransformation reverse_transformation = TransformationFactory
-                .getCoordinateTransformation(DehradunUtils.EPSG, TransformationFactory.WGS84);
+                .getCoordinateTransformation(DehradunUtils.Dehradun_EPGS, TransformationFactory.WGS84);
 
         Collection<SimpleFeature> features = ShapeFileReader.getAllFeatures(boundaryShapeFile);
         Geometry geometry = (Geometry)features.iterator().next().getDefaultGeometry(); // --> WGS:84

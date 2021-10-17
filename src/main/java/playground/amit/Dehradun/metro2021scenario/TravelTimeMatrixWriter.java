@@ -11,6 +11,7 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.IOUtils;
 import org.opengis.feature.simple.SimpleFeature;
+import playground.amit.Dehradun.DMAZonesProcessor;
 import playground.amit.Dehradun.DehradunUtils;
 import playground.amit.Dehradun.GHNetworkDistanceCalculator;
 import playground.amit.Dehradun.OD;
@@ -35,14 +36,16 @@ public class TravelTimeMatrixWriter {
     private static final int numberOfPoints2DrawInEachZone = 10;
     private static final String outFolder = SVN_repo + "atIITR/TravelTimeMatrix/";
     private static final String suffix = "16-10-2021.txt";
-    private static final CoordinateTransformation Reverse_transformation = TransformationFactory.getCoordinateTransformation(DehradunUtils.EPSG,TransformationFactory.WGS84);
+    private static final CoordinateTransformation Reverse_transformation = TransformationFactory.getCoordinateTransformation(DehradunUtils.Dehradun_EPGS,TransformationFactory.WGS84);
     private final Collection<SimpleFeature> features;
     private final Geometry excludedGeom ;
+    private final DMAZonesProcessor dmaZonesProcessor;
 
     private final List<String> zones_with_forest_areas = List.of("100","120","121","99","123","98","122","25","108","125","131","132","133","134","182");
 
     public TravelTimeMatrixWriter(){
         this.features = ShapeFileReader.getAllFeatures(zone_file);
+        this.dmaZonesProcessor = new DMAZonesProcessor();
         this.excludedGeom = GeometryUtils.getGeometryFromListOfFeatures(ShapeFileReader.getAllFeatures(forest_area_shape_file));
     }
 
@@ -68,15 +71,15 @@ public class TravelTimeMatrixWriter {
                 List<Coord> origins;
 
                 if(zones_with_forest_areas.contains(origin)) {
-                    origins = getRandomCoords_excludedForestArea(origin_feature);
+                    origins = this.dmaZonesProcessor.getRandomPointsInsideFeature_excludedForestArea(origin_feature,numberOfPoints2DrawInEachZone);
                 }
-                else origins = getRandomCoords(origin_feature);
+                else origins = this.dmaZonesProcessor.getRandomPointsInsideFeature(origin_feature,numberOfPoints2DrawInEachZone);
 
                 List<Coord> destinations;
                 if(zones_with_forest_areas.contains(destination)) {
-                    destinations = getRandomCoords_excludedForestArea(destination_feature);
+                    destinations = this.dmaZonesProcessor.getRandomPointsInsideFeature_excludedForestArea(destination_feature, numberOfPoints2DrawInEachZone);
                 }
-                else destinations = getRandomCoords(destination_feature);
+                else destinations = this.dmaZonesProcessor.getRandomPointsInsideFeature(destination_feature,numberOfPoints2DrawInEachZone);
 
                 for (DehradunUtils.TravelModesMetroCase2021 mode : DehradunUtils.TravelModesMetroCase2021.values()) {
                     List<Double> distances = new ArrayList<>();
@@ -96,14 +99,14 @@ public class TravelTimeMatrixWriter {
         try(BufferedWriter writer = IOUtils.getBufferedWriter(outFolder + "/modal_od_summary"+suffix)){
             writer.write("origin\tdestination\tmode\tdistanceInKm\ttravelTimeInHr\n");
             for (OD od : modal_od_travelTimes) {
-                writer.write(od.getOrigin()+"\t");
-                writer.write(od.getDestination()+"\t");
                 for (DehradunUtils.TravelModesMetroCase2021 mode : DehradunUtils.TravelModesMetroCase2021.values()) {
+                    writer.write(od.getOrigin()+"\t");
+                    writer.write(od.getDestination()+"\t");
                     writer.write(mode+"\t");
                     writer.write(od.getAttributes().getAttribute(mode+"_distance_Km")+"\t");
                     writer.write(od.getAttributes().getAttribute(mode+"_times_h")+"\t");
+                    writer.write("\n");
                 }
-                writer.write("\n");
             }
         } catch (IOException e) {
             throw new RuntimeException("Data is not written to file "+ outFolder +". Possible reason "+e);
@@ -119,23 +122,5 @@ public class TravelTimeMatrixWriter {
         } else {
             return GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(origin, destination, travelMode, "fastest");
         }
-    }
-
-    private List<Coord> getRandomCoords(SimpleFeature feature){
-        RandomPointsBuilder rnd = new RandomPointsBuilder(GEOMETRY_FACTORY);
-        rnd.setNumPoints(TravelTimeMatrixWriter.numberOfPoints2DrawInEachZone);
-        Geometry final_geom = (Geometry) feature.getDefaultGeometry();
-        rnd.setExtent(final_geom);
-        Coordinate []  coordinates = rnd.getGeometry().getCoordinates();
-        return Arrays.stream(coordinates).map(c->new Coord(c.getX(),c.getY())).collect(Collectors.toList());
-    }
-
-    private List<Coord> getRandomCoords_excludedForestArea(SimpleFeature feature){
-        RandomPointsBuilder rnd = new RandomPointsBuilder(GEOMETRY_FACTORY);
-        rnd.setNumPoints(TravelTimeMatrixWriter.numberOfPoints2DrawInEachZone);
-        Geometry final_geom = ((Geometry) feature.getDefaultGeometry()).difference(this.excludedGeom);
-        rnd.setExtent(final_geom);
-        Coordinate []  coordinates = rnd.getGeometry().getCoordinates();
-        return Arrays.stream(coordinates).map(c->new Coord(c.getX(),c.getY())).collect(Collectors.toList());
     }
 }
