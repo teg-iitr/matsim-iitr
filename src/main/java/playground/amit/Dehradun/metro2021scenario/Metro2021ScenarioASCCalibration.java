@@ -3,8 +3,6 @@ package playground.amit.Dehradun.metro2021scenario;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.core.utils.collections.Tuple;
-import org.matsim.core.utils.geometry.CoordinateTransformation;
-import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.io.IOUtils;
 import playground.amit.Dehradun.DMAZonesProcessor;
 import playground.amit.Dehradun.DehradunUtils;
@@ -37,7 +35,7 @@ public class Metro2021ScenarioASCCalibration {
     private static final int numberOfPoints2DrawInEachZone = 10;
     private final DMAZonesProcessor dmaZonesProcessor;
 
-    private static final String outFile = SVN_repo + "atIITR/OD_2021_metro_trips_comparison_17-10-2021.txt";
+    private static final String outFile = SVN_repo + "atIITR/OD_2021_metro_trips_comparison_19-10-2021.txt";
 
     //key of attributes
     public static final String METRO_TRIPS = "metro_trips";
@@ -57,7 +55,7 @@ public class Metro2021ScenarioASCCalibration {
 
         //process od_all and od_metro, store everything in attributes.
         for(OD od : od_2021_all.values()){
-            System.out.println(od.getId());
+//            System.out.println(od.getId());
 
             double metroTrips = od_2021_metro.get(od.getId()).getNumberOfTrips();
             od.getAttributes().putAttribute(METRO_TRIPS, metroTrips);
@@ -73,7 +71,7 @@ public class Metro2021ScenarioASCCalibration {
                 for (int i = 0; i<origin.size(); i ++) {
                     double sum_util_per_OD = 0;
                 for (DehradunUtils.TravelModesBaseCase2017 tMode : DehradunUtils.TravelModesBaseCase2017.values()) {
-                        Tuple<Double, Double> distTime = GHNetworkDistanceCalculator.getTripDistanceInKmTimeInHr(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
+                        Tuple<Double, Double> distTime = GHNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
                                 DehradunUtils.Reverse_transformation.transform(destination.get(i)), tMode.name());
                         double tripDist = distTime.getFirst();
                         double tripTime = distTime.getSecond();
@@ -88,7 +86,7 @@ public class Metro2021ScenarioASCCalibration {
 //                        Logger.getLogger(Metro2021ScenarioASCCalibration.class).warn("The sum of exponential of utility of all modes except metro is zero for OD " + od.getId() + ". This means everyone will use metro. This should not happen.");
 //                        od.getAttributes().putAttribute(METRO_ASC, Double.NaN);
                     } else {
-                        Tuple<Double, Double> distTime = GHNetworkDistanceCalculator.getTripDistanceInKmTimeInHr(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
+                        Tuple<Double, Double> distTime = GHNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
                                 DehradunUtils.Reverse_transformation.transform(destination.get(i)), DehradunUtils.TravelModesMetroCase2021.metro.name());
                         double util_metro_no_asc = UtilityComputation.getUtilMetroWithoutASC(distTime.getFirst(), distTime.getSecond());
                         double asc_metro = getMetroASC(metroShare, sum_exp_util_except_metro.get(i), util_metro_no_asc);
@@ -112,6 +110,7 @@ public class Metro2021ScenarioASCCalibration {
         } catch (IOException e) {
             throw new RuntimeException("Data is not written to file "+outFile+". Possible reason "+e);
         }
+        System.out.println("Finished processing and writing.");
     }
 
     private double getMetroASC(double metroShare, double sum_exp_util_all_modes_except_metro, double util_metro_except_ASC){

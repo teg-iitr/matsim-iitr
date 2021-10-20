@@ -86,7 +86,7 @@ public class TravelTimeMatrixWriter {
                     List<Double> times = new ArrayList<>();
 
                     for (int index =0 ; index < numberOfPoints2DrawInEachZone; index ++) {
-                        Tuple<Double, Double> dist_time = getTripDistanceInKmTimeInHr(origins.get(index),destinations.get(index),mode.toString());
+                        Tuple<Double, Double> dist_time = GHNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromGHRouter(origins.get(index),destinations.get(index),mode.toString());
                         distances.add(dist_time.getFirst());
                         times.add(dist_time.getSecond());
                     }
@@ -113,14 +113,5 @@ public class TravelTimeMatrixWriter {
         }
     }
 
-    private Tuple<Double, Double> getTripDistanceInKmTimeInHr(Coord origin, Coord destination, String travelMode){
-        //this is coming from a Routing Engine like Graphhopper
-        origin = Reverse_transformation.transform(origin);
-        destination = Reverse_transformation.transform(destination);
-        if ( travelMode.equals("bus") || travelMode.equals("IPT") || travelMode.equals("metro")) {
-            return GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(origin, destination, travelMode, null);
-        } else {
-            return GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(origin, destination, travelMode, "fastest");
-        }
-    }
+
 }

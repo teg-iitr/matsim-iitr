@@ -10,6 +10,7 @@ import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
 import java.io.IOException;
+import java.net.BindException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Scanner;
@@ -24,7 +25,7 @@ public class GHNetworkDistanceCalculator {
         System.out.println( GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(new Coord(28.555764, 77.09652), new Coord(28.57,77.32), "car", "fastest"));
     }
 
-    public static Tuple<Double, Double> getTripDistanceInKmTimeInHr(Coord origin, Coord destination, String travelMode){
+    public static Tuple<Double, Double> getTripDistanceInKmTimeInHrFromAvgSpeeds(Coord origin, Coord destination, String travelMode){
         //this is coming from a Routing Engine like Graphhopper
         double dist = 0;
         if ( travelMode.equals("bus") || travelMode.equals("IPT") || travelMode.equals("metro")) {
@@ -33,6 +34,15 @@ public class GHNetworkDistanceCalculator {
             dist = GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(origin, destination, travelMode, "fastest").getFirst();
         }
         return new Tuple<>(dist, dist/DehradunUtils.getSpeedKPHFromReport(travelMode));
+    }
+
+    public static Tuple<Double, Double> getTripDistanceInKmTimeInHrFromGHRouter(Coord origin, Coord destination, String travelMode){
+        //this is coming from a Routing Engine like Graphhopper
+        if ( travelMode.equals("bus") || travelMode.equals("IPT") || travelMode.equals("metro")) {
+            return GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(origin, destination, travelMode, null);
+        } else {
+            return GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(origin, destination, travelMode, "fastest");
+        }
     }
 
     public static Tuple<Double, Double> getDistanceInKmTimeInHr(Coord origin, Coord destination, String mode, String routeType) {
@@ -59,27 +69,38 @@ public class GHNetworkDistanceCalculator {
 
 //        System.out.println("URL is "+url_string);
         try {
-            URL url = new URL(url_string);
-            URLConnection request = url.openConnection();
-            request.connect();
-
-            Scanner sc = new Scanner(url.openStream());
-            StringBuilder inline = new StringBuilder();
-            while(sc.hasNext())
-            {
-                inline.append(sc.nextLine());
+            return getDoubleDoubleTuple(url_string);
+        } catch (BindException e) {
+            System.out.println("Caught "+e+"; re-running" + url_string);
+            try {
+                return getDoubleDoubleTuple(url_string);
+            } catch (IOException | ParseException ex) {
+                throw new RuntimeException("URL is not connected. Reason "+e);
             }
-            sc.close();
-
-            JSONParser parse = new JSONParser();
-            JSONObject json =  (JSONObject)parse.parse(inline.toString());
-            JSONObject summary = (JSONObject) json.get("summary");
-            return new Tuple<>((Double) summary.get("distance")/1000., (Double) summary.get("time")/3600.);
         } catch (IOException | ParseException e) {
             System.out.println("Origin: "+origin);
             System.out.println("Destination: "+destination);
             System.out.println(url_string);
             throw new RuntimeException("URL is not connected. Reason "+e);
         }
+    }
+
+    private static Tuple<Double, Double> getDoubleDoubleTuple(String url_string) throws IOException, ParseException {
+        URL url = new URL(url_string);
+        URLConnection request = url.openConnection();
+        request.connect();
+
+        Scanner sc = new Scanner(url.openStream());
+        StringBuilder inline = new StringBuilder();
+        while(sc.hasNext())
+        {
+            inline.append(sc.nextLine());
+        }
+        sc.close();
+
+        JSONParser parse = new JSONParser();
+        JSONObject json =  (JSONObject)parse.parse(inline.toString());
+        JSONObject summary = (JSONObject) json.get("summary");
+        return new Tuple<>((Double) summary.get("distance")/1000., (Double) summary.get("time")/3600.);
     }
 }
