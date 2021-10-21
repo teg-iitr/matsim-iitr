@@ -5,9 +5,13 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.matsim.api.core.v01.Coord;
+import org.matsim.api.core.v01.network.Node;
+import org.matsim.core.network.NetworkUtils;
+import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
+import playground.amit.Dehradun.metro2021scenario.MetroStopsQuadTree;
 
 import java.io.IOException;
 import java.net.BindException;
@@ -21,28 +25,63 @@ import java.util.Scanner;
 
 public class GHNetworkDistanceCalculator {
 
+    private final QuadTree<Node> quadTree;
+    private static final double walk_speed = 5.;
+    private static final double walk_beeline_distance_factor = 1.1;
+
+    public GHNetworkDistanceCalculator(){
+        MetroStopsQuadTree metroStopsQuadTree = new MetroStopsQuadTree();
+        this.quadTree = metroStopsQuadTree.getQuadTree();
+    }
+
     public static void main(String[] args) {
         System.out.println( GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(new Coord(28.555764, 77.09652), new Coord(28.57,77.32), "car", "fastest"));
     }
 
-    public static Tuple<Double, Double> getTripDistanceInKmTimeInHrFromAvgSpeeds(Coord origin, Coord destination, String travelMode){
+    public Tuple<Double, Double> getTripDistanceInKmTimeInHrFromAvgSpeeds(Coord origin, Coord destination, String travelMode){
         //this is coming from a Routing Engine like Graphhopper
         double dist = 0;
-        if ( travelMode.equals("bus") || travelMode.equals("IPT") || travelMode.equals("metro")) {
+        if ( travelMode.equals("bus") || travelMode.equals("IPT") ) {
             dist = GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(origin, destination, travelMode, null).getFirst();
+            return new Tuple<>(dist, dist/DehradunUtils.getSpeedKPHFromReport(travelMode));
+        } else if (travelMode.equals("metro")) {
+            return getMetroDistTime(origin, destination, travelMode);
         } else {
             dist = GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(origin, destination, travelMode, "fastest").getFirst();
+            return new Tuple<>(dist, dist/DehradunUtils.getSpeedKPHFromReport(travelMode));
         }
-        return new Tuple<>(dist, dist/DehradunUtils.getSpeedKPHFromReport(travelMode));
     }
 
-    public static Tuple<Double, Double> getTripDistanceInKmTimeInHrFromGHRouter(Coord origin, Coord destination, String travelMode){
+    /**
+     *
+     * The metro travel time would be from avg speeds only.
+     */
+    public Tuple<Double, Double> getTripDistanceInKmTimeInHrFromGHRouter(Coord origin, Coord destination, String travelMode){
         //this is coming from a Routing Engine like Graphhopper
-        if ( travelMode.equals("bus") || travelMode.equals("IPT") || travelMode.equals("metro")) {
+        if ( travelMode.equals("bus") || travelMode.equals("IPT") ) {
             return GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(origin, destination, travelMode, null);
+        } else if (travelMode.equals("metro")) {
+            return getMetroDistTime(origin, destination, travelMode);
         } else {
             return GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(origin, destination, travelMode, "fastest");
         }
+    }
+
+    private Tuple<Double, Double> getMetroDistTime(Coord origin, Coord destination, String travelMode) {
+        Node nearestMetroStop_origin = this.quadTree.getClosest(origin.getX(), origin.getY());
+        Node nearestMetroStop_destination = this.quadTree.getClosest(destination.getX(), destination.getY());
+        double dist =  GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(nearestMetroStop_origin.getCoord(), nearestMetroStop_destination.getCoord(), travelMode, null).getFirst();
+        // distance is metro distance but
+        double accessDistance = getWalkTravelDistance(origin, nearestMetroStop_destination.getCoord());
+        double egressDistance = getWalkTravelDistance(nearestMetroStop_destination.getCoord(), destination);
+        return new Tuple<>(dist+accessDistance+egressDistance,
+                dist/DehradunUtils.getSpeedKPHFromReport("metro")+(accessDistance+egressDistance)/walk_speed);
+    }
+
+    private double getWalkTravelDistance(Coord origin, Coord destination){
+        return walk_beeline_distance_factor * NetworkUtils.getEuclideanDistance(
+                DehradunUtils.transformation.transform(origin),
+                DehradunUtils.transformation.transform(destination))/(1000. );
     }
 
     public static Tuple<Double, Double> getDistanceInKmTimeInHr(Coord origin, Coord destination, String mode, String routeType) {
@@ -60,7 +99,6 @@ public class GHNetworkDistanceCalculator {
 
         String base_url = "http://localhost:9098/routing?";
         String json_suffix = "&mediaType=json";
-//        String url_string = base_url+"StartLoc=77.09652%2C28.555764&EndLoc=77.32%2C28.57&RouteType=fastest&Vehicle=bike&mediaType=json";
         String url_string = base_url+"StartLoc="+origin.getX()+"%2C"+origin.getY()+
                 "&EndLoc="+destination.getX()+"%2C"+destination.getY();
 

@@ -87,6 +87,7 @@ public class MetroShareEstimator {
     }
 
     private void computeMetroShare(){
+        GHNetworkDistanceCalculator ghNetworkDistanceCalculator = new GHNetworkDistanceCalculator();
         for(OD od : this.odMap.values()) {
             double metroTrips = (double) od.getAttributes().getAttribute(Metro2021ScenarioASCCalibration.METRO_TRIPS);
             if (metroTrips == 0. || od.getNumberOfTrips()==0.){
@@ -101,14 +102,14 @@ public class MetroShareEstimator {
                     double util_rest_modes = 0.;
                     for (DehradunUtils.TravelModesBaseCase2017 tMode : DehradunUtils.TravelModesBaseCase2017.values()) {
 
-                        Tuple<Double, Double> distTime = GHNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromGHRouter(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
+                        Tuple<Double, Double> distTime = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
                                 DehradunUtils.Reverse_transformation.transform(destination.get(i)), tMode.name());
                         double tripDist = distTime.getFirst();
                         double tripTime = distTime.getSecond();
                         util_rest_modes += Math.exp(UtilityComputation.getUtilExceptMetro(tMode, tripDist, tripTime));
                     }
 
-                    Tuple<Double, Double> distTime = GHNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
+                    Tuple<Double, Double> distTime = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
                     DehradunUtils.Reverse_transformation.transform(destination.get(i)), DehradunUtils.TravelModesMetroCase2021.metro.name());
                     double util_metro = UtilityComputation.getUtilMetroWithoutASC(distTime.getFirst(), distTime.getSecond())+asc_metro;
                     double exp_util_metro = Math.exp(util_metro);

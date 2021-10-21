@@ -35,7 +35,7 @@ public class Metro2021ScenarioASCCalibration {
     private static final int numberOfPoints2DrawInEachZone = 10;
     private final DMAZonesProcessor dmaZonesProcessor;
 
-    private static final String outFile = SVN_repo + "atIITR/OD_2021_metro_trips_comparison_19-10-2021.txt";
+    private static final String outFile = SVN_repo + "atIITR/OD_2021_metro_trips_comparison_21-10-2021.txt";
 
     //key of attributes
     public static final String METRO_TRIPS = "metro_trips";
@@ -52,6 +52,8 @@ public class Metro2021ScenarioASCCalibration {
     private void run(){
         Map<Id<OD>, OD> od_2021_all = generateOD(OD_all_2021_file);
         Map<Id<OD>, OD> od_2021_metro = generateOD(OD_metro_2021_file);
+
+        GHNetworkDistanceCalculator ghNetworkDistanceCalculator = new GHNetworkDistanceCalculator();
 
         //process od_all and od_metro, store everything in attributes.
         for(OD od : od_2021_all.values()){
@@ -71,7 +73,7 @@ public class Metro2021ScenarioASCCalibration {
                 for (int i = 0; i<origin.size(); i ++) {
                     double sum_util_per_OD = 0;
                 for (DehradunUtils.TravelModesBaseCase2017 tMode : DehradunUtils.TravelModesBaseCase2017.values()) {
-                        Tuple<Double, Double> distTime = GHNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
+                        Tuple<Double, Double> distTime = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
                                 DehradunUtils.Reverse_transformation.transform(destination.get(i)), tMode.name());
                         double tripDist = distTime.getFirst();
                         double tripTime = distTime.getSecond();
@@ -86,7 +88,7 @@ public class Metro2021ScenarioASCCalibration {
 //                        Logger.getLogger(Metro2021ScenarioASCCalibration.class).warn("The sum of exponential of utility of all modes except metro is zero for OD " + od.getId() + ". This means everyone will use metro. This should not happen.");
 //                        od.getAttributes().putAttribute(METRO_ASC, Double.NaN);
                     } else {
-                        Tuple<Double, Double> distTime = GHNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
+                        Tuple<Double, Double> distTime = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
                                 DehradunUtils.Reverse_transformation.transform(destination.get(i)), DehradunUtils.TravelModesMetroCase2021.metro.name());
                         double util_metro_no_asc = UtilityComputation.getUtilMetroWithoutASC(distTime.getFirst(), distTime.getSecond());
                         double asc_metro = getMetroASC(metroShare, sum_exp_util_except_metro.get(i), util_metro_no_asc);
