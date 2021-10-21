@@ -24,8 +24,8 @@ public class MetroStopsQuadTree {
 
     private static final String SVN_repo = "C:/Users/Amit/Documents/svn-repos/shared/data/project_data/DehradunMetroArea_MetroNeo_data/";
     private static final String station_location_file = SVN_repo+"atIITR/metro_stop_locations.txt";
-    private static final String node_line_name = "line_name";
-    private static final String node_name = "stop_name";
+    public static final String node_line_name = "line_name";
+    public static final String node_name = "stop_name";
 
     private final QuadTree<Node> qt;
 

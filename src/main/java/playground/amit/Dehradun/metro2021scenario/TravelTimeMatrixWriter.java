@@ -31,14 +31,10 @@ public class TravelTimeMatrixWriter {
 
     private static final String SVN_repo = "C:/Users/Amit/Documents/svn-repos/shared/data/project_data/DehradunMetroArea_MetroNeo_data/";
     private static final String zone_file = SVN_repo + "atIITR/zones_update_11092021/zones_updated.shp";
-    private static final String forest_area_shape_file = SVN_repo + "atIITR/area_to_be_excluded/haridwar_area_to_exclude.shp";
-    private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
     private static final int numberOfPoints2DrawInEachZone = 10;
     private static final String outFolder = SVN_repo + "atIITR/TravelTimeMatrix/";
     private static final String suffix = "16-10-2021.txt";
-    private static final CoordinateTransformation Reverse_transformation = TransformationFactory.getCoordinateTransformation(DehradunUtils.Dehradun_EPGS,TransformationFactory.WGS84);
     private final Collection<SimpleFeature> features;
-    private final Geometry excludedGeom ;
     private final DMAZonesProcessor dmaZonesProcessor;
 
     private final List<String> zones_with_forest_areas = List.of("100","120","121","99","123","98","122","25","108","125","131","132","133","134","182");
@@ -46,7 +42,6 @@ public class TravelTimeMatrixWriter {
     public TravelTimeMatrixWriter(){
         this.features = ShapeFileReader.getAllFeatures(zone_file);
         this.dmaZonesProcessor = new DMAZonesProcessor();
-        this.excludedGeom = GeometryUtils.getGeometryFromListOfFeatures(ShapeFileReader.getAllFeatures(forest_area_shape_file));
     }
 
     public static void main(String[] args) {

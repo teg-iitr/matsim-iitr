@@ -1,16 +1,15 @@
 package playground.amit.Dehradun.metro2021scenario;
 
 import org.matsim.api.core.v01.Coord;
-import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.core.utils.io.IOUtils;
 import playground.amit.Dehradun.DMAZonesProcessor;
-
+import playground.amit.Dehradun.DehradunUtils;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,7 +19,8 @@ import java.util.Map;
 public class MetroTripsCollector {
 
     private static final String SVN_repo = "C:/Users/Amit/Documents/svn-repos/shared/data/project_data/DehradunMetroArea_MetroNeo_data/";
-    private static final String outFile = SVN_repo + "atIITR/metro_trips_comparison_gh-router_19-10-2021.txt";
+    private static final String metro_trips_file = SVN_repo + "atIITR/metro_trips_comparison_gh-router_19-10-2021.txt";
+    private static final String nearest_metro_file = SVN_repo + "atIITR/nearest_metro_stops_zones.txt";
 
     private final Map<String, Zone> zoneId2Zone = new HashMap<>();
     private final DMAZonesProcessor zonesProcessor = new DMAZonesProcessor();
@@ -29,19 +29,35 @@ public class MetroTripsCollector {
         MetroTripsCollector metroTripsCollector = new MetroTripsCollector();
         metroTripsCollector.readODFile();
         metroTripsCollector.run();
+        metroTripsCollector.writeFile();
+    }
+
+    private void writeFile(){
+        try(BufferedWriter writer = IOUtils.getBufferedWriter(nearest_metro_file)){
+            writer.write("zoneID\tnearestMetroStopNr\tmetroStopName\tmetroLine\n");
+            for(Zone zone : zoneId2Zone.values()){
+                writer.write(zone.getZoneId()+"\t");
+                writer.write(zone.getNearestMetroNode().getId()+"\t");
+                writer.write(zone.getNearestMetroNode().getAttributes().getAttribute(MetroStopsQuadTree.node_name)+"\t");
+                writer.write(zone.getNearestMetroNode().getAttributes().getAttribute(MetroStopsQuadTree.node_line_name)+"\t");
+                writer.write("\n");
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Data is not written to file "+nearest_metro_file+". Possible reason "+e);
+        }
     }
 
     private void run(){
         QuadTree<Node> qt = new MetroStopsQuadTree().getQuadTree();
         for(Zone z : this.zoneId2Zone.values()){
-            Coord coord = this.zonesProcessor.getRandomCoords(z.zoneId, 1).get(0);
+            Coord coord = DehradunUtils.Reverse_transformation.transform(this.zonesProcessor.getRandomCoords(z.zoneId, 1).get(0));
             Node node = qt.getClosest(coord.getX(), coord.getY());
             z.setNearestMetroNode(node);
         }
     }
 
     private void readODFile(){
-        try(BufferedReader reader = IOUtils.getBufferedReader(outFile)){
+        try(BufferedReader reader = IOUtils.getBufferedReader(metro_trips_file)){
             String line = reader.readLine();
             boolean header = true;
             while(line!=null){
@@ -109,5 +125,4 @@ public class MetroTripsCollector {
             this.nearestMetroNode = nearestMetroNode;
         }
     }
-
 }
