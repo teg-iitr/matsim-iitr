@@ -70,7 +70,7 @@ public class GHNetworkDistanceCalculator {
     private Tuple<Double, Double> getMetroDistTime(Coord origin, Coord destination) {
         Node nearestMetroStop_origin = this.quadTree.getClosest(origin.getX(), origin.getY());
         Node nearestMetroStop_destination = this.quadTree.getClosest(destination.getX(), destination.getY());
-        double dist =  GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(nearestMetroStop_origin.getCoord(), nearestMetroStop_destination.getCoord(), "car", null).getFirst();
+        double dist =  GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(nearestMetroStop_origin.getCoord(), nearestMetroStop_destination.getCoord(), "car", "fastest").getFirst();
         // distance is metro distance but
         double accessDistance = getWalkTravelDistance(origin, nearestMetroStop_destination.getCoord());
         double egressDistance = getWalkTravelDistance(nearestMetroStop_destination.getCoord(), destination);
