@@ -44,8 +44,8 @@ public class GHNetworkDistanceCalculator {
         if ( travelMode.equals("bus") || travelMode.equals("IPT") ) {
             dist = GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(origin, destination, travelMode, null).getFirst();
             return new Tuple<>(dist, dist/DehradunUtils.getSpeedKPHFromReport(travelMode));
-        } else if (travelMode.equals("metro")) {
-            return getMetroDistTime(origin, destination, travelMode);
+        } else if (travelMode.equals("car")) {
+            return getMetroDistTime(origin, destination);
         } else {
             dist = GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(origin, destination, travelMode, "fastest").getFirst();
             return new Tuple<>(dist, dist/DehradunUtils.getSpeedKPHFromReport(travelMode));
@@ -60,17 +60,17 @@ public class GHNetworkDistanceCalculator {
         //this is coming from a Routing Engine like Graphhopper
         if ( travelMode.equals("bus") || travelMode.equals("IPT") ) {
             return GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(origin, destination, travelMode, null);
-        } else if (travelMode.equals("metro")) {
-            return getMetroDistTime(origin, destination, travelMode);
+        } else if (travelMode.equals("car")) {
+            return getMetroDistTime(origin, destination);
         } else {
             return GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(origin, destination, travelMode, "fastest");
         }
     }
 
-    private Tuple<Double, Double> getMetroDistTime(Coord origin, Coord destination, String travelMode) {
+    private Tuple<Double, Double> getMetroDistTime(Coord origin, Coord destination) {
         Node nearestMetroStop_origin = this.quadTree.getClosest(origin.getX(), origin.getY());
         Node nearestMetroStop_destination = this.quadTree.getClosest(destination.getX(), destination.getY());
-        double dist =  GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(nearestMetroStop_origin.getCoord(), nearestMetroStop_destination.getCoord(), travelMode, null).getFirst();
+        double dist =  GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(nearestMetroStop_origin.getCoord(), nearestMetroStop_destination.getCoord(), "car", null).getFirst();
         // distance is metro distance but
         double accessDistance = getWalkTravelDistance(origin, nearestMetroStop_destination.getCoord());
         double egressDistance = getWalkTravelDistance(nearestMetroStop_destination.getCoord(), destination);

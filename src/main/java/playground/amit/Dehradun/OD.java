@@ -11,7 +11,7 @@ public class OD  implements Attributable {
     private final String origin;
     private final String destination;
     private final Id<OD> id;
-    private int numberOfTrips = 0;
+    private double numberOfTrips = 0;
     private final Attributes attributes = new Attributes();
 
     public OD (String origin, String destination) {
@@ -20,7 +20,7 @@ public class OD  implements Attributable {
         this.id = OD.getID(this.origin, this.destination);
     }
 
-    public void setNumberOfTrips(int trips){
+    public void setNumberOfTrips(double trips){
         this.numberOfTrips = trips;
     }
 
@@ -37,7 +37,7 @@ public class OD  implements Attributable {
         return destination;
     }
 
-    public int getNumberOfTrips() {
+    public double getNumberOfTrips() {
         return numberOfTrips;
     }
 

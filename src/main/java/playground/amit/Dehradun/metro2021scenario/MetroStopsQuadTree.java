@@ -28,11 +28,12 @@ public class MetroStopsQuadTree {
     public static final String node_name = "stop_name";
 
     private final QuadTree<Node> qt;
+    private final Network metroStopsNetwork;
 
     public MetroStopsQuadTree() {
         Scenario scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
-        Network network = scenario.getNetwork();
-        NetworkFactory networkFactory = network.getFactory();
+        this.metroStopsNetwork = scenario.getNetwork();
+        NetworkFactory networkFactory = metroStopsNetwork.getFactory();
         try(BufferedReader reader = IOUtils.getBufferedReader(station_location_file)){
             String line = reader.readLine();
             boolean header= true;
@@ -46,7 +47,7 @@ public class MetroStopsQuadTree {
                             new Coord(Double.parseDouble(parts[3]),Double.parseDouble(parts[2])));
                     n.getAttributes().putAttribute(node_name, parts[0]);
                     n.getAttributes().putAttribute(node_line_name, parts[4]);
-                    network.addNode(n);
+                    metroStopsNetwork.addNode(n);
                     line = reader.readLine();
                 }
             }
@@ -55,15 +56,17 @@ public class MetroStopsQuadTree {
         }
 
         CalcBoundingBox calcBoundingBox = new CalcBoundingBox();
-        calcBoundingBox.run(network);
+        calcBoundingBox.run(metroStopsNetwork);
 
         this.qt = new QuadTree<>(calcBoundingBox.getMinX(), calcBoundingBox.getMinY(), calcBoundingBox.getMaxX(), calcBoundingBox.getMaxY());
-        network.getNodes().values().forEach(n -> this.qt.put(n.getCoord().getX(), n.getCoord().getY(), n));
+        metroStopsNetwork.getNodes().values().forEach(n -> this.qt.put(n.getCoord().getX(), n.getCoord().getY(), n));
     }
 
     public QuadTree<Node> getQuadTree(){
         return this.qt;
     }
 
-
+    public Network getMetroStopsNetwork() {
+        return metroStopsNetwork;
+    }
 }

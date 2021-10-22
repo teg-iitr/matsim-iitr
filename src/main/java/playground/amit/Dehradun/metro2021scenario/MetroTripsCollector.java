@@ -9,8 +9,7 @@ import playground.amit.Dehradun.DehradunUtils;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Amit, created on 21-10-2021
@@ -35,11 +34,13 @@ public class MetroTripsCollector {
     private void writeFile(){
         try(BufferedWriter writer = IOUtils.getBufferedWriter(nearest_metro_file)){
             writer.write("zoneID\tnearestMetroStopNr\tmetroStopName\tmetroLine\n");
-            for(Zone zone : zoneId2Zone.values()){
-                writer.write(zone.getZoneId()+"\t");
-                writer.write(zone.getNearestMetroNode().getId()+"\t");
-                writer.write(zone.getNearestMetroNode().getAttributes().getAttribute(MetroStopsQuadTree.node_name)+"\t");
-                writer.write(zone.getNearestMetroNode().getAttributes().getAttribute(MetroStopsQuadTree.node_line_name)+"\t");
+            List<String> zones = new ArrayList<>(zoneId2Zone.keySet());
+            Collections.sort(zones);
+            for(String z : zones){
+                writer.write(z+"\t");
+                writer.write(zoneId2Zone.get(z).getNearestMetroNode().getId()+"\t");
+                writer.write(zoneId2Zone.get(z).getNearestMetroNode().getAttributes().getAttribute(MetroStopsQuadTree.node_name)+"\t");
+                writer.write(zoneId2Zone.get(z).getNearestMetroNode().getAttributes().getAttribute(MetroStopsQuadTree.node_line_name)+"\t");
                 writer.write("\n");
             }
         } catch (IOException e) {

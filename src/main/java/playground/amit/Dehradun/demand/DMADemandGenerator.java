@@ -68,7 +68,7 @@ public class DMADemandGenerator {
 
         remaining_OD.values().stream()
                 .filter(e-> ! (e.getOrigin().equalsIgnoreCase("Total") || e.getDestination().equalsIgnoreCase("Total")))
-                .forEach(e -> IntStream.range(0, e.getNumberOfTrips())
+                .forEach(e -> IntStream.range(0, (int) e.getNumberOfTrips())
                         .forEach(i -> generatePlan(e.getOrigin(), e.getDestination())));
 
         //clean plans without coords (this should not happen anymore, Amit Sep'21)
