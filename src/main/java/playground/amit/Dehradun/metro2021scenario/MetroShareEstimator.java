@@ -72,7 +72,7 @@ public class MetroShareEstimator {
                     String [] parts = line.split("\t");
                     OD od = new OD(parts[0], parts[1]);
 //                    System.out.println(od.getId());
-                    od.setNumberOfTrips(Integer.parseInt(parts[2]));
+                    od.setNumberOfTrips(Double.parseDouble(parts[2]));
                     od.getAttributes().putAttribute(Metro2021ScenarioASCCalibration.METRO_TRIPS, Double.parseDouble(parts[3]));
                     od.getAttributes().putAttribute(Metro2021ScenarioASCCalibration.METRO_ASC, Double.parseDouble(parts[4]));
                     odMap.put(od.getId(), od);
