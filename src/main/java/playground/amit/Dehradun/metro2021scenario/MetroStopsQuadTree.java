@@ -12,6 +12,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.core.utils.io.IOUtils;
 import playground.amit.Dehradun.DehradunUtils;
+import playground.amit.utils.FileUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,8 +23,7 @@ import java.io.IOException;
 
 public class MetroStopsQuadTree {
 
-    private static final String SVN_repo = "C:/Users/Amit/Documents/svn-repos/shared/data/project_data/DehradunMetroArea_MetroNeo_data/";
-    private static final String station_location_file = SVN_repo+"atIITR/metro_stop_locations.txt";
+    private static final String station_location_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/metro_stop_locations.txt";
     public static final String node_line_name = "line_name";
     public static final String node_name = "stop_name";
 

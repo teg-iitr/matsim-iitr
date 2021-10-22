@@ -14,6 +14,7 @@ import org.matsim.core.utils.io.IOUtils;
 import org.opengis.feature.simple.SimpleFeature;
 import playground.amit.Dehradun.DehradunUtils;
 import playground.amit.Dehradun.OD;
+import playground.amit.utils.FileUtils;
 import playground.amit.utils.RandomNumberUtils;
 import playground.amit.utils.geometry.GeometryUtils;
 import java.io.BufferedReader;
@@ -29,11 +30,10 @@ import java.util.stream.IntStream;
  */
 public class DMADemandGenerator {
 
-    private static final String SVN_repo = "C:/Users/Amit/Documents/svn-repos/shared/data/project_data/DehradunMetroArea_MetroNeo_data/";
-    private static final String plans_file = SVN_repo + "atIITR/matsim/DehradunMetropolitanArea_plans_0.1sample_17092021.xml.gz";
-    private static final String zone_file = SVN_repo + "atIITR/zones_update_11092021/zones_updated.shp";
-    private static final String OD_all_file = SVN_repo + "atIITR/FinalTripMatrix.txt";
-    private static final String dma_boundariesShape = SVN_repo+"atIITR/boundary/OSMB-DMA-Boundary_no-smoothening.shp";
+    private static final String plans_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/matsim/DehradunMetropolitanArea_plans_0.1sample_17092021.xml.gz";
+    private static final String zone_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/zones_update_11092021/zones_updated.shp";
+    private static final String OD_all_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/FinalTripMatrix.txt";
+    private static final String dma_boundariesShape = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/boundary/OSMB-DMA-Boundary_no-smoothening.shp";
 
     private Collection<SimpleFeature> features ;
     private Geometry dehradunGeom;

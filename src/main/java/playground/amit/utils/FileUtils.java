@@ -41,6 +41,9 @@ public final class FileUtils {
     public static final String SHARED_SVN = System.getProperty("user.name").equalsIgnoreCase("amit") ? "C:/Users/Amit Agarwal/Google Drive/iitr_gmail_drive/project_data/" : "../../shared-svn/";
     public static final String GNU_SCRIPT_DIR = "../agarwalamit/src/main/resources/gnuplot/";
 
+    public static final String SVN_PROJECT_DATA_DRIVE = System.getProperty("user.name").equalsIgnoreCase("Amit") ? "C:/Users/Amit/Documents/svn-repos/shared/data/project_data/" : "C:/Users/Nidhi/Documents/svn-repos/shared/data/project_data/";
+
+
     /*
     * To delete all intermediate iteration except first and last.
     */

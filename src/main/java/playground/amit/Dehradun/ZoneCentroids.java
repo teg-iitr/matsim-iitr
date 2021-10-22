@@ -8,6 +8,7 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.IOUtils;
 import org.opengis.feature.simple.SimpleFeature;
+import playground.amit.utils.FileUtils;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -20,9 +21,9 @@ import java.util.Collection;
  */
 
 public class ZoneCentroids {
-    private static final String SVN_repo = "C:/Users/Amit/Documents/svn-repos/shared/data/project_data/DehradunMetroArea_MetroNeo_data/";
-    private static final String zone_file = SVN_repo + "atIITR/zones_update_29082021/zone_data_update.shp";
-    private static final String zone_centroid_file = SVN_repo + "atIITR/flowMapVisualization/zone_cendtroid_details.txt";
+
+    private static final String zone_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/zones_update_29082021/zone_data_update.shp";
+    private static final String zone_centroid_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/flowMapVisualization/zone_cendtroid_details.txt";
     private static final CoordinateTransformation transformation = TransformationFactory
             .getCoordinateTransformation(DehradunUtils.Dehradun_EPGS,TransformationFactory.WGS84);
 

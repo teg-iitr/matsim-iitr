@@ -17,6 +17,7 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
 import playground.amit.Dehradun.DehradunUtils;
+import playground.amit.utils.FileUtils;
 import playground.amit.utils.NetworkUtils;
 
 import java.util.Arrays;
@@ -33,11 +34,10 @@ import java.util.function.BiPredicate;
 
 public class DMANetworkFromOSM {
 
-    private static final String SVN_repo = "C:/Users/Amit/Documents/svn-repos/shared/data/project_data/DehradunMetroArea_MetroNeo_data/";
-    private static final String matsimNetworkFile = SVN_repo + "atIITR/matsim/road-network-osm/DehradunMetropolitanArea_matsim_network_fromPBF_cleaned_20092021.xml.gz";
-    private static final String boundaryShapeFile = SVN_repo+"atIITR/boundary/single_boundary_DMA.shp";
+    private static final String matsimNetworkFile = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/matsim/road-network-osm/DehradunMetropolitanArea_matsim_network_fromPBF_cleaned_20092021.xml.gz";
+    private static final String boundaryShapeFile = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/boundary/single_boundary_DMA.shp";
 //    private static final String dma_boundariesShape = SVN_repo+"atIITR/boundary/OSMB-DMA-Boundary_no-smoothening.shp";
-    private static final String inputPBFFile = SVN_repo+"atIITR/matsim/road-network-osm/planet_77.734,29.841_78.327,30.369.osm.pbf";
+    private static final String inputPBFFile = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/matsim/road-network-osm/planet_77.734,29.841_78.327,30.369.osm.pbf";
 
     public static void main(String[] args) {
         CoordinateTransformation reverse_transformation = TransformationFactory

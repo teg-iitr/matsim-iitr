@@ -15,6 +15,7 @@ import playground.amit.Dehradun.DMAZonesProcessor;
 import playground.amit.Dehradun.DehradunUtils;
 import playground.amit.Dehradun.GHNetworkDistanceCalculator;
 import playground.amit.Dehradun.OD;
+import playground.amit.utils.FileUtils;
 import playground.amit.utils.ListUtils;
 import playground.amit.utils.geometry.GeometryUtils;
 
@@ -29,10 +30,9 @@ import java.util.stream.Collectors;
 
 public class TravelTimeMatrixWriter {
 
-    private static final String SVN_repo = "C:/Users/Amit/Documents/svn-repos/shared/data/project_data/DehradunMetroArea_MetroNeo_data/";
-    private static final String zone_file = SVN_repo + "atIITR/zones_update_11092021/zones_updated.shp";
+    private static final String zone_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/zones_update_11092021/zones_updated.shp";
     private static final int numberOfPoints2DrawInEachZone = 10;
-    private static final String outFolder = SVN_repo + "atIITR/TravelTimeMatrix/";
+    private static final String outFolder = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/TravelTimeMatrix/";
     private static final String suffix = "16-10-2021.txt";
     private final Collection<SimpleFeature> features;
     private final DMAZonesProcessor dmaZonesProcessor;

@@ -8,6 +8,8 @@ import playground.amit.Dehradun.DMAZonesProcessor;
 import playground.amit.Dehradun.DehradunUtils;
 import playground.amit.Dehradun.GHNetworkDistanceCalculator;
 import playground.amit.Dehradun.OD;
+import playground.amit.utils.FileUtils;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -27,15 +29,13 @@ import java.util.*;
  */
 public class Metro2021ScenarioASCCalibration {
 
-    private static final String SVN_repo = "C:/Users/Amit/Documents/svn-repos/shared/data/project_data/DehradunMetroArea_MetroNeo_data/";
-
-    private static final String OD_all_2021_file = SVN_repo + "atIITR/OD_2021_all.txt";
-    private static final String OD_metro_2021_file = SVN_repo + "atIITR/OD_2021_metro.txt";
+    private static final String OD_all_2021_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/OD_2021_all.txt";
+    private static final String OD_metro_2021_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/OD_2021_metro.txt";
 
     private static final int numberOfPoints2DrawInEachZone = 10;
     private final DMAZonesProcessor dmaZonesProcessor;
 
-    private static final String outFile = SVN_repo + "atIITR/OD_2021_metro_trips_comparison_21-10-2021.txt";
+    private static final String outFile = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/OD_2021_metro_trips_comparison_21-10-2021.txt";
 
     //key of attributes
     public static final String METRO_TRIPS = "metro_trips";

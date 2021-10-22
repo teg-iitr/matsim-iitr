@@ -9,6 +9,7 @@ import org.matsim.core.config.groups.StrategyConfigGroup;
 import org.matsim.core.config.groups.VspExperimentalConfigGroup;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
+import playground.amit.utils.FileUtils;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,8 +21,7 @@ import java.util.Collection;
  */
 public class DMAConfigGenerator {
 
-    private static final String SVN_repo = "C:/Users/Amit/Documents/svn-repos/shared/data/project_data/DehradunMetroArea_MetroNeo_data/";
-    private static final String config_file = SVN_repo + "atIITR/matsim/DehradunMetropolitanArea_config.xml";
+    private static final String config_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/matsim/DehradunMetropolitanArea_config.xml";
 
     public static void main(String[] args) {
 

@@ -6,6 +6,8 @@ import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.core.utils.io.IOUtils;
 import playground.amit.Dehradun.DMAZonesProcessor;
 import playground.amit.Dehradun.DehradunUtils;
+import playground.amit.utils.FileUtils;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -17,9 +19,8 @@ import java.util.*;
 
 public class MetroTripsCollector {
 
-    private static final String SVN_repo = "C:/Users/Amit/Documents/svn-repos/shared/data/project_data/DehradunMetroArea_MetroNeo_data/";
-    private static final String metro_trips_file = SVN_repo + "atIITR/metro_trips_comparison_gh-router_19-10-2021.txt";
-    private static final String nearest_metro_file = SVN_repo + "atIITR/nearest_metro_stops_zones.txt";
+    private static final String metro_trips_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/metro_trips_comparison_gh-router_19-10-2021.txt";
+    private static final String nearest_metro_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/nearest_metro_stops_zones.txt";
 
     private final Map<String, Zone> zoneId2Zone = new HashMap<>();
     private final DMAZonesProcessor zonesProcessor = new DMAZonesProcessor();

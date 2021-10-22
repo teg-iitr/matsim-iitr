@@ -8,6 +8,7 @@ import playground.amit.Dehradun.DMAZonesProcessor;
 import playground.amit.Dehradun.DehradunUtils;
 import playground.amit.Dehradun.GHNetworkDistanceCalculator;
 import playground.amit.Dehradun.OD;
+import playground.amit.utils.FileUtils;
 import playground.amit.utils.ListUtils;
 import playground.amit.utils.NumberUtils;
 
@@ -22,15 +23,14 @@ import java.util.*;
 
 public class MetroShareEstimator {
 
-    private static final String SVN_repo = "C:/Users/Amit/Documents/svn-repos/shared/data/project_data/DehradunMetroArea_MetroNeo_data/";
-    private static final String OD_merged_file = SVN_repo + "atIITR/OD_2021_metro_trips_comparison_19-10-2021.txt";
+    private static final String OD_merged_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/OD_2021_metro_trips_comparison_19-10-2021.txt";
     private final Map<Id<OD>, OD> odMap = new HashMap<>();
     private static final int numberOfPoints2DrawInEachZone = 10;
 
     private final DMAZonesProcessor dmaZonesProcessor;
 
     public static final String new_metro_trips = "new_metro_trips";
-    private static final String outFile = SVN_repo + "atIITR/metro_trips_comparison_gh-router_19-10-2021.txt";
+    private static final String outFile = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/metro_trips_comparison_gh-router_19-10-2021.txt";
 
     MetroShareEstimator(){
         this.dmaZonesProcessor = new DMAZonesProcessor();

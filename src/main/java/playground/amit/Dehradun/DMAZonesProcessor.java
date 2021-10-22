@@ -8,6 +8,7 @@ import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
 import playground.amit.Dehradun.metro2021scenario.MetroShareEstimator;
+import playground.amit.utils.FileUtils;
 import playground.amit.utils.geometry.GeometryUtils;
 
 import java.util.Arrays;
@@ -21,14 +22,13 @@ import java.util.stream.Collectors;
 
 public class DMAZonesProcessor {
 
-    private static final String SVN_repo = "C:/Users/Amit/Documents/svn-repos/shared/data/project_data/DehradunMetroArea_MetroNeo_data/";
-    private static final String zone_file = SVN_repo + "atIITR/zones_update_11092021/zones_updated.shp";
+    private static final String zone_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/zones_update_11092021/zones_updated.shp";
     private final Collection<SimpleFeature> features ;
     private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
 
     private final Geometry excludedGeom ;
     private final List<String> zones_with_forest_areas = List.of("100","120","121","99","123","98","122","25","108","125","131","132","133","134","182");
-    private static final String forest_area_shape_file = SVN_repo + "atIITR/area_to_be_excluded/haridwar_area_to_exclude.shp";
+    private static final String forest_area_shape_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/area_to_be_excluded/haridwar_area_to_exclude.shp";
 
     public DMAZonesProcessor(){
         this.features = ShapeFileReader.getAllFeatures(zone_file);
