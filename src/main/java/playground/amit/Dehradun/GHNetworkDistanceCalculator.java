@@ -44,7 +44,7 @@ public class GHNetworkDistanceCalculator {
         if ( travelMode.equals("bus") || travelMode.equals("IPT") ) {
             dist = GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(origin, destination, travelMode, null).getFirst();
             return new Tuple<>(dist, dist/DehradunUtils.getSpeedKPHFromReport(travelMode));
-        } else if (travelMode.equals("car")) {
+        } else if (travelMode.equals("metro")) {
             return getMetroDistTime(origin, destination);
         } else {
             dist = GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(origin, destination, travelMode, "fastest").getFirst();
@@ -60,7 +60,7 @@ public class GHNetworkDistanceCalculator {
         //this is coming from a Routing Engine like Graphhopper
         if ( travelMode.equals("bus") || travelMode.equals("IPT") ) {
             return GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(origin, destination, travelMode, null);
-        } else if (travelMode.equals("car")) {
+        } else if (travelMode.equals("metro")) {
             return getMetroDistTime(origin, destination);
         } else {
             return GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(origin, destination, travelMode, "fastest");
