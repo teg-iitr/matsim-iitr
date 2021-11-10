@@ -23,14 +23,14 @@ import java.util.*;
 
 public class MetroShareEstimator {
 
-    private static final String OD_merged_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/OD_2021_metro_trips_comparison_19-10-2021.txt";
+    private static final String OD_merged_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/OD_2021_metro_trips_comparison_25-10-2021.txt";
     private final Map<Id<OD>, OD> odMap = new HashMap<>();
     private static final int numberOfPoints2DrawInEachZone = 10;
 
     private final DMAZonesProcessor dmaZonesProcessor;
 
     public static final String new_metro_trips = "new_metro_trips";
-    private static final String outFile = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/metro_trips_comparison_gh-router_19-10-2021.txt";
+    private static final String outFile = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/metro_trips_comparison_gh-router_10-11-2021.txt";
 
     MetroShareEstimator(){
         this.dmaZonesProcessor = new DMAZonesProcessor();
@@ -102,7 +102,7 @@ public class MetroShareEstimator {
                     double util_rest_modes = 0.;
                     for (DehradunUtils.TravelModesBaseCase2017 tMode : DehradunUtils.TravelModesBaseCase2017.values()) {
 
-                        Tuple<Double, Double> distTime = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
+                        Tuple<Double, Double> distTime = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromGHRouter(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
                                 DehradunUtils.Reverse_transformation.transform(destination.get(i)), tMode.name());
                         double tripDist = distTime.getFirst();
                         double tripTime = distTime.getSecond();
