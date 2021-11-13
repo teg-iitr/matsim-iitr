@@ -4,12 +4,10 @@ import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.utils.collections.QuadTree;
-import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.io.IOUtils;
 import playground.amit.Dehradun.DMAZonesProcessor;
 import playground.amit.Dehradun.DehradunUtils;
 import playground.amit.utils.FileUtils;
-import playground.amit.utils.NumberUtils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -100,7 +98,7 @@ public class MetroTripsComparator {
                     destination.addIncomingTrips(metro_trips_after,Double.parseDouble(parts[5]));
 
                     zoneId2Zone.put(origin.getZoneId(), origin);
-                    zoneId2Zone.put(origin.getZoneId(), destination);
+                    zoneId2Zone.put(destination.getZoneId(), destination);
                 } else{
                     header=false;
                 }
