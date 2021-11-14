@@ -24,6 +24,9 @@ import java.util.*;
 public class MetroShareEstimator {
 
     private static final String OD_merged_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/OD_2021_metro_trips_comparison_25-10-2021.txt";
+    private static final String production_nearby_zone = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/production_nearby_zone.txt";
+    private static final String attraction_nearby_zone = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/attraction_nearby_zone.txt";
+
     private final Map<Id<OD>, OD> odMap = new HashMap<>();
     private static final int numberOfPoints2DrawInEachZone = 10;
 
@@ -42,9 +45,55 @@ public class MetroShareEstimator {
 
     private void run(){
         readODFile();
+        readNearByZoneFiles();
         computeMetroShare();
         writeData();
     }
+
+    private void readNearByZoneFiles(){
+        Map<String, String> productionActual2NearbyZone = readAndStore(production_nearby_zone);
+//        Map<String, String> attractionActual2NearbyZone = readAndStore(attraction_nearby_zone);
+
+        for (OD od : this.odMap.values()) {
+            double metroTrips = (double) od.getAttributes().getAttribute(Metro2021ScenarioASCCalibration.METRO_TRIPS);
+            if (metroTrips==0.){
+                String nearbyZone = productionActual2NearbyZone.get(od.getOrigin());
+                if (nearbyZone==null) continue;
+                OD newOD = this.odMap.get(OD.getID(nearbyZone, od.getDestination()));
+                double newMetroTrips = (double) newOD.getAttributes().getAttribute(Metro2021ScenarioASCCalibration.METRO_TRIPS);
+                if(newMetroTrips!=0.){
+                    od.getAttributes().putAttribute(Metro2021ScenarioASCCalibration.METRO_ASC, newOD.getAttributes().getAttribute(Metro2021ScenarioASCCalibration.METRO_ASC));
+                }/*else{
+                    OD anotherOD = this.odMap.get(OD.getID(nearbyZone, attractionActual2NearbyZone.get(od.getDestination())));
+                    if(anotherOD==null) continue;
+                    od.getAttributes().putAttribute(Metro2021ScenarioASCCalibration.METRO_ASC, anotherOD.getAttributes().getAttribute(Metro2021ScenarioASCCalibration.METRO_ASC));
+                }*/
+            }
+        }
+
+    }
+
+    private Map<String, String> readAndStore(String file){
+        Map<String, String> outMap = new HashMap<>();
+        try(BufferedReader reader = IOUtils.getBufferedReader(file)){
+            String line = reader.readLine();
+            boolean header = true;
+            while(line!=null) {
+                if (!header) {
+                    String[] parts = line.split("\t");
+                    outMap.put(parts[0], parts[1]);
+                } else {
+                    header = false;
+                }
+                line = reader.readLine();
+            }
+        }catch (IOException e) {
+            throw new RuntimeException("Data is not read. Reason "+e);
+        }
+        return outMap;
+    }
+
+
 
     private void writeData(){
         try(BufferedWriter writer = IOUtils.getBufferedWriter(outFile)){
@@ -90,9 +139,11 @@ public class MetroShareEstimator {
         GHNetworkDistanceCalculator ghNetworkDistanceCalculator = new GHNetworkDistanceCalculator();
         for(OD od : this.odMap.values()) {
             double metroTrips = (double) od.getAttributes().getAttribute(Metro2021ScenarioASCCalibration.METRO_TRIPS);
-            if (metroTrips == 0. || od.getNumberOfTrips()==0.){
+            if ( od.getNumberOfTrips()==0.){
                 od.getAttributes().putAttribute(new_metro_trips, 0.);
-            } else{
+            } else if ( od.getAttributes().getAttribute(Metro2021ScenarioASCCalibration.METRO_ASC).equals(Double.NaN) ) {
+                od.getAttributes().putAttribute(new_metro_trips, 0.);
+            } else {
                 List<Coord> origin = this.dmaZonesProcessor.getRandomCoords(od.getOrigin(), numberOfPoints2DrawInEachZone);
                 List<Coord> destination = this.dmaZonesProcessor.getRandomCoords(od.getDestination(), numberOfPoints2DrawInEachZone);
                 double asc_metro =(double) od.getAttributes().getAttribute(Metro2021ScenarioASCCalibration.METRO_ASC);
