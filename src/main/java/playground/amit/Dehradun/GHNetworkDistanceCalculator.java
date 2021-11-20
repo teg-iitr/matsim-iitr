@@ -101,8 +101,9 @@ public class GHNetworkDistanceCalculator {
 
         if (destination == null ) throw new RuntimeException("Destination is null. Aborting...");
 
+
         if (origin==destination) {
-            Logger.getLogger(GHNetworkDistanceCalculator.class).warn("Identical origin and destination.");
+//            Logger.getLogger(GHNetworkDistanceCalculator.class).warn("Identical origin and destination.");
             return new Tuple<>(0.0, 0.0);
         }
 
