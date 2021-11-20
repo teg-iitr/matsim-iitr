@@ -88,6 +88,7 @@ public class MetroStopsQuadTree {
     }
 
     public static Node [] arrangeMetroStopsAsPerOriginLines(Node [] nearestMetroStops_origin, Node [] nearestMetroStops_destination){
+        //TODO this will work only for one line.
         if ( (nearestMetroStops_origin[0].getAttributes().getAttribute(MetroStopsQuadTree.metro_line_name)).equals(nearestMetroStops_destination[0].getAttributes().getAttribute(MetroStopsQuadTree.metro_line_name))) {
             return nearestMetroStops_destination;
         } else {

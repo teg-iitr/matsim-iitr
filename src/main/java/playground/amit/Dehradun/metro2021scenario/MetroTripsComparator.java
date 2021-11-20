@@ -3,7 +3,6 @@ package playground.amit.Dehradun.metro2021scenario;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.core.utils.io.IOUtils;
 import playground.amit.Dehradun.DMAZonesProcessor;
 import playground.amit.Dehradun.DehradunUtils;
@@ -103,7 +102,7 @@ public class MetroTripsComparator {
                     MetroStopDetails metroStopDetails_destination = this.stop_details.getOrDefault(nearest_destination.getId(), new MetroStopDetails(nearest_destination));
                     metroStopDetails_destination.addAlighting_before((Double) od.getAttributes().getAttribute(OD.metro_old));
                     metroStopDetails_destination.addAlighting_after((Double) od.getAttributes().getAttribute(OD.metro_new));
-                    stop_details.put(nearest_origin.getId(),metroStopDetails_destination);
+                    stop_details.put(nearest_destination.getId(),metroStopDetails_destination);
                 }
             }
         }
