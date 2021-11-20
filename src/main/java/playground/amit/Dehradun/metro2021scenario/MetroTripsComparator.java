@@ -8,6 +8,7 @@ import org.matsim.core.utils.io.IOUtils;
 import playground.amit.Dehradun.DMAZonesProcessor;
 import playground.amit.Dehradun.DehradunUtils;
 import playground.amit.utils.FileUtils;
+import playground.amit.utils.NetworkUtils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -66,15 +67,20 @@ public class MetroTripsComparator {
         for(Zone z : this.zoneId2Zone.values()){
             Coord coord = DehradunUtils.Reverse_transformation.transform(this.zonesProcessor.getRandomCoords(z.zoneId, 1).get(0));
             Node node = qt.getClosest(coord.getX(), coord.getY());
-            z.setNearestMetroNode(node);
+            double dist = NetworkUtils.haversineDistanceKm(coord.getY(), coord.getX(), node.getCoord().getY(), node.getCoord().getX());
+            if (dist<=2.) { //if metro access_distance > 2000, no metro trips
+                z.setNearestMetroNode(node);
 
-            MetroStopDetails metroStopDetails = this.stop_details.getOrDefault(node.getId(), new MetroStopDetails(node));
-            metroStopDetails.addAlighting_before(z.getIncomingTrips(metro_trips_before));
-            metroStopDetails.addAlighting_after(z.getIncomingTrips(metro_trips_after));
+                MetroStopDetails metroStopDetails = this.stop_details.getOrDefault(node.getId(), new MetroStopDetails(node));
+                metroStopDetails.addAlighting_before(z.getIncomingTrips(metro_trips_before));
+                metroStopDetails.addAlighting_after(z.getIncomingTrips(metro_trips_after));
 
-            metroStopDetails.addBoarding_before(z.getOutgoingTrips(metro_trips_before));
-            metroStopDetails.addBoarding_after(z.getOutgoingTrips(metro_trips_after));
-            stop_details.put(node.getId(),metroStopDetails);
+                metroStopDetails.addBoarding_before(z.getOutgoingTrips(metro_trips_before));
+                metroStopDetails.addBoarding_after(z.getOutgoingTrips(metro_trips_after));
+                stop_details.put(node.getId(),metroStopDetails);
+            } else {
+                z.setNearestMetroNode(null);
+            }
         }
     }
 
