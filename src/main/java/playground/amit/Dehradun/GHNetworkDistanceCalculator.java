@@ -5,12 +5,12 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.matsim.api.core.v01.Coord;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.core.utils.collections.Tuple;
-import org.matsim.core.utils.geometry.CoordinateTransformation;
-import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import playground.amit.Dehradun.metro2021scenario.MetroStopsQuadTree;
 
 import java.io.IOException;
@@ -26,12 +26,14 @@ import java.util.Scanner;
 public class GHNetworkDistanceCalculator {
 
     private final QuadTree<Node> quadTree;
+    private final Network metroStopNetwork;
     private static final double walk_speed = 5.;
     private static final double walk_beeline_distance_factor = 1.1;
 
     public GHNetworkDistanceCalculator(){
         MetroStopsQuadTree metroStopsQuadTree = new MetroStopsQuadTree();
         this.quadTree = metroStopsQuadTree.getQuadTree();
+        this.metroStopNetwork = metroStopsQuadTree.getMetroStopsNetwork();
     }
 
     public static void main(String[] args) {
@@ -68,14 +70,45 @@ public class GHNetworkDistanceCalculator {
     }
 
     private Tuple<Double, Double> getMetroDistTime(Coord origin, Coord destination) {
-        Node nearestMetroStop_origin = this.quadTree.getClosest(origin.getX(), origin.getY());
-        Node nearestMetroStop_destination = this.quadTree.getClosest(destination.getX(), destination.getY());
-        double dist =  GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(nearestMetroStop_origin.getCoord(), nearestMetroStop_destination.getCoord(), "car", "fastest").getFirst();
+        Node [] nearestMetroStops_origin = getNearestNodeAndNodeInOppositeDirection(origin);
+        Node [] nearestMetroStops_destination = getNearestNodeAndNodeInOppositeDirection(destination);
+        nearestMetroStops_destination = arrangeMetroStopsAsPerOriginLines(nearestMetroStops_origin, nearestMetroStops_destination);
+
+        double shortestDist = Double.POSITIVE_INFINITY;
+        Node nearest_origin = null;
+        Node nearest_destination = null;
+        for (int i = 0; i<nearestMetroStops_origin.length; i++) {
+            double dist =  getShortestDist(nearestMetroStops_origin[i].getCoord(), nearestMetroStops_destination[i].getCoord());
+            if (dist < shortestDist) {
+                nearest_origin = nearestMetroStops_origin[i];
+                nearest_destination = nearestMetroStops_destination[i];
+                shortestDist = dist;
+            }
+        }
+
         // distance is metro distance but
-        double accessDistance = getWalkTravelDistance(origin, nearestMetroStop_destination.getCoord());
-        double egressDistance = getWalkTravelDistance(nearestMetroStop_destination.getCoord(), destination);
-        return new Tuple<>(dist+accessDistance+egressDistance,
-                dist/DehradunUtils.getSpeedKPHFromReport("metro")+(accessDistance+egressDistance)/walk_speed);
+        double accessDistance = getWalkTravelDistance(origin, nearest_origin.getCoord());
+        double egressDistance = getWalkTravelDistance(nearest_destination.getCoord(), destination);
+        return new Tuple<>(shortestDist+accessDistance+egressDistance,
+                shortestDist/DehradunUtils.getSpeedKPHFromReport("metro")+(accessDistance+egressDistance)/walk_speed);
+    }
+
+    private Node [] arrangeMetroStopsAsPerOriginLines(Node [] nearestMetroStops_origin, Node [] nearestMetroStops_destination){
+        if ( (nearestMetroStops_origin[0].getAttributes().getAttribute(MetroStopsQuadTree.node_line_name)).equals(nearestMetroStops_destination[0].getAttributes().getAttribute(MetroStopsQuadTree.node_line_name))) {
+            return nearestMetroStops_destination;
+        } else {
+            return new Node [] {nearestMetroStops_destination[1], nearestMetroStops_destination[0]};
+        }
+    }
+
+    private Node [] getNearestNodeAndNodeInOppositeDirection(Coord cord){
+        Node nearestMetroStop_origin = this.quadTree.getClosest(cord.getX(), cord.getY());
+        Node node_oppDir = this.metroStopNetwork.getNodes().get(Id.createNodeId((String) nearestMetroStop_origin.getAttributes().getAttribute(MetroStopsQuadTree.node_id_opposite_direction)));
+        return new Node [] {nearestMetroStop_origin, node_oppDir};
+    }
+
+    private double getShortestDist(Coord from, Coord to){
+        return GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(from, to, "car", "fastest").getFirst();
     }
 
     private double getWalkTravelDistance(Coord origin, Coord destination){

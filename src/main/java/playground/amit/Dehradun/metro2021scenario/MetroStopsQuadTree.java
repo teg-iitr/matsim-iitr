@@ -11,7 +11,6 @@ import org.matsim.core.network.algorithms.CalcBoundingBox;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.QuadTree;
 import org.matsim.core.utils.io.IOUtils;
-import playground.amit.Dehradun.DehradunUtils;
 import playground.amit.utils.FileUtils;
 
 import java.io.BufferedReader;
@@ -23,9 +22,10 @@ import java.io.IOException;
 
 public class MetroStopsQuadTree {
 
-    private static final String station_location_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/metro_stop_locations.txt";
+    private static final String station_location_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/metro_stop_locations_HR-region.txt";
     public static final String node_line_name = "line_name";
     public static final String node_name = "stop_name";
+    public static final String node_id_opposite_direction = "stop_id_opposite_direction";
 
     private final QuadTree<Node> qt;
     private final Network metroStopsNetwork;
@@ -47,6 +47,7 @@ public class MetroStopsQuadTree {
                             new Coord(Double.parseDouble(parts[3]),Double.parseDouble(parts[2])));
                     n.getAttributes().putAttribute(node_name, parts[0]);
                     n.getAttributes().putAttribute(node_line_name, parts[4]);
+                    n.getAttributes().putAttribute(node_id_opposite_direction, switchCharacters(parts[1]));
                     metroStopsNetwork.addNode(n);
                     line = reader.readLine();
                 }
@@ -60,6 +61,16 @@ public class MetroStopsQuadTree {
 
         this.qt = new QuadTree<>(calcBoundingBox.getMinX(), calcBoundingBox.getMinY(), calcBoundingBox.getMaxX(), calcBoundingBox.getMaxY());
         metroStopsNetwork.getNodes().values().forEach(n -> this.qt.put(n.getCoord().getX(), n.getCoord().getY(), n));
+    }
+
+    /**
+     * switches the places of first two characters
+     * @param str
+     */
+    private String switchCharacters(String str){
+       char first=str.charAt(0);
+       char second=str.charAt(1);
+       return String.valueOf(second) + first + str.substring(2);
     }
 
     public QuadTree<Node> getQuadTree(){
