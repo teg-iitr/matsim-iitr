@@ -48,7 +48,7 @@ public class MetroTripsComparator {
             for(Id<Node> stop : stops){
                 writer.write(stop+"\t");
                 writer.write(this.stop_details.get(stop).getStop().getAttributes().getAttribute(MetroStopsQuadTree.node_name)+"\t");
-                writer.write(this.stop_details.get(stop).getStop().getAttributes().getAttribute(MetroStopsQuadTree.node_line_name)+"\t");
+                writer.write(this.stop_details.get(stop).getStop().getAttributes().getAttribute(MetroStopsQuadTree.metro_line_name)+"\t");
                 writer.write(this.stop_details.get(stop).getBoarding_before()+"\t");
                 writer.write(this.stop_details.get(stop).getBoarding_after()+"\t");
                 writer.write(this.stop_details.get(stop).getBoarding_pct_change()+"\t");

@@ -68,4 +68,8 @@ public class MetroStopDetails{
         lock=true;
         return NumberUtils.round((alighting_after-alighting_before)*100/alighting_before,2);
     }
+
+    public String getMetroLine(){
+        return (String) this.stop.getAttributes().getAttribute(MetroStopsQuadTree.metro_line_name);
+    }
 }

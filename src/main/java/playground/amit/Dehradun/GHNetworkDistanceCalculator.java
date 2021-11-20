@@ -25,15 +25,12 @@ import java.util.Scanner;
 
 public class GHNetworkDistanceCalculator {
 
-    private final QuadTree<Node> quadTree;
-    private final Network metroStopNetwork;
+    private final MetroStopsQuadTree metroStopsQuadTree;
     private static final double walk_speed = 5.;
     private static final double walk_beeline_distance_factor = 1.1;
 
     public GHNetworkDistanceCalculator(){
-        MetroStopsQuadTree metroStopsQuadTree = new MetroStopsQuadTree();
-        this.quadTree = metroStopsQuadTree.getQuadTree();
-        this.metroStopNetwork = metroStopsQuadTree.getMetroStopsNetwork();
+        metroStopsQuadTree= new MetroStopsQuadTree();
     }
 
     public static void main(String[] args) {
@@ -70,15 +67,15 @@ public class GHNetworkDistanceCalculator {
     }
 
     private Tuple<Double, Double> getMetroDistTime(Coord origin, Coord destination) {
-        Node [] nearestMetroStops_origin = getNearestNodeAndNodeInOppositeDirection(origin);
-        Node [] nearestMetroStops_destination = getNearestNodeAndNodeInOppositeDirection(destination);
-        nearestMetroStops_destination = arrangeMetroStopsAsPerOriginLines(nearestMetroStops_origin, nearestMetroStops_destination);
+        Node [] nearestMetroStops_origin = this.metroStopsQuadTree.getNearestNodeAndNodeInOppositeDirection(origin);
+        Node [] nearestMetroStops_destination = this.metroStopsQuadTree.getNearestNodeAndNodeInOppositeDirection(destination);
+        nearestMetroStops_destination = MetroStopsQuadTree.arrangeMetroStopsAsPerOriginLines(nearestMetroStops_origin, nearestMetroStops_destination);
 
         double shortestDist = Double.POSITIVE_INFINITY;
         Node nearest_origin = null;
         Node nearest_destination = null;
         for (int i = 0; i<nearestMetroStops_origin.length; i++) {
-            double dist =  getShortestDist(nearestMetroStops_origin[i].getCoord(), nearestMetroStops_destination[i].getCoord());
+            double dist =  GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(nearestMetroStops_origin[i].getCoord(), nearestMetroStops_destination[i].getCoord(),"metro",null).getFirst();
             if (dist < shortestDist) {
                 nearest_origin = nearestMetroStops_origin[i];
                 nearest_destination = nearestMetroStops_destination[i];
@@ -93,24 +90,6 @@ public class GHNetworkDistanceCalculator {
                 shortestDist/DehradunUtils.getSpeedKPHFromReport("metro")+(accessDistance+egressDistance)/walk_speed);
     }
 
-    private Node [] arrangeMetroStopsAsPerOriginLines(Node [] nearestMetroStops_origin, Node [] nearestMetroStops_destination){
-        if ( (nearestMetroStops_origin[0].getAttributes().getAttribute(MetroStopsQuadTree.node_line_name)).equals(nearestMetroStops_destination[0].getAttributes().getAttribute(MetroStopsQuadTree.node_line_name))) {
-            return nearestMetroStops_destination;
-        } else {
-            return new Node [] {nearestMetroStops_destination[1], nearestMetroStops_destination[0]};
-        }
-    }
-
-    private Node [] getNearestNodeAndNodeInOppositeDirection(Coord cord){
-        Node nearestMetroStop_origin = this.quadTree.getClosest(cord.getX(), cord.getY());
-        Node node_oppDir = this.metroStopNetwork.getNodes().get(Id.createNodeId((String) nearestMetroStop_origin.getAttributes().getAttribute(MetroStopsQuadTree.node_id_opposite_direction)));
-        return new Node [] {nearestMetroStop_origin, node_oppDir};
-    }
-
-    private double getShortestDist(Coord from, Coord to){
-        return GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(from, to, "car", "fastest").getFirst();
-    }
-
     private double getWalkTravelDistance(Coord origin, Coord destination){
         return walk_beeline_distance_factor * NetworkUtils.getEuclideanDistance(
                 DehradunUtils.transformation.transform(origin),
@@ -119,16 +98,20 @@ public class GHNetworkDistanceCalculator {
 
     public static Tuple<Double, Double> getDistanceInKmTimeInHr(Coord origin, Coord destination, String mode, String routeType) {
         if (origin == null ) throw new RuntimeException("Origin is null. Aborting...");
+
         if (destination == null ) throw new RuntimeException("Destination is null. Aborting...");
+
+        if (origin==destination) {
+            Logger.getLogger(GHNetworkDistanceCalculator.class).warn("Identical origin and destination.");
+            return new Tuple<>(0.0, 0.0);
+        }
+
         if (mode == null ) {
             Logger.getLogger(GHNetworkDistanceCalculator.class).warn("Transport mode is null. Setting to "+"car");
             mode = "car";
         } else if (mode.equals("motorbike")) mode = "motorcycle";
+        else if (mode.equals("metro")) mode = "metro";
         else if(mode.equals("IPT")) mode ="ipt";
-
-        if (routeType == null ) {
-//            Logger.getLogger(GHNetworkDistanceCalculator.class).warn("Route type is null. Going ahead without it. This might throw an exception for car, motorcycle, bike, foot.");
-        }
 
         String base_url = "http://localhost:9098/routing?";
         String json_suffix = "&mediaType=json";
@@ -142,7 +125,7 @@ public class GHNetworkDistanceCalculator {
         try {
             return getDoubleDoubleTuple(url_string);
         } catch (BindException e) {
-            System.out.println("Caught "+e+"; re-running" + url_string);
+            System.out.println("Caught "+e+"; re-running " + url_string);
             try {
                 return getDoubleDoubleTuple(url_string);
             } catch (IOException | ParseException ex) {

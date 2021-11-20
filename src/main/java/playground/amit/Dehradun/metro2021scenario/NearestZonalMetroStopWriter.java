@@ -17,6 +17,10 @@ import java.util.*;
  * @author Amit, created on 21-10-2021
  */
 
+@Deprecated
+/**
+ * Do not use it, because trips at metro stops depends on the direction which cannot be identified based on one zone only.
+ */
 public class NearestZonalMetroStopWriter {
 
     private static final String metro_trips_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/metro_trips_comparison_gh-router_19-10-2021.txt";
@@ -41,7 +45,7 @@ public class NearestZonalMetroStopWriter {
                 writer.write(z+"\t");
                 writer.write(zoneId2Zone.get(z).getNearestMetroNode().getId()+"\t");
                 writer.write(zoneId2Zone.get(z).getNearestMetroNode().getAttributes().getAttribute(MetroStopsQuadTree.node_name)+"\t");
-                writer.write(zoneId2Zone.get(z).getNearestMetroNode().getAttributes().getAttribute(MetroStopsQuadTree.node_line_name)+"\t");
+                writer.write(zoneId2Zone.get(z).getNearestMetroNode().getAttributes().getAttribute(MetroStopsQuadTree.metro_line_name)+"\t");
                 writer.write("\n");
             }
         } catch (IOException e) {

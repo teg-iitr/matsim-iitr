@@ -1,6 +1,7 @@
 package playground.amit.Dehradun;
 
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.network.Node;
 import org.matsim.utils.objectattributes.attributable.Attributable;
 import org.matsim.utils.objectattributes.attributable.Attributes;
 
@@ -13,6 +14,12 @@ public class OD  implements Attributable {
     private final Id<OD> id;
     private double numberOfTrips = 0;
     private final Attributes attributes = new Attributes();
+    private Node origin_metro_stop ;
+    private Node destination_metro_stop ;
+
+    public static final String total_trips = "total";
+    public static final String metro_old = "metro_old";
+    public static final String metro_new = "metro_new";
 
     public OD (String origin, String destination) {
         this.origin = origin;
@@ -52,5 +59,21 @@ public class OD  implements Attributable {
     @Override
     public Attributes getAttributes() {
         return attributes;
+    }
+
+    public Node getOrigin_metro_stop() {
+        return origin_metro_stop;
+    }
+
+    public void setOrigin_metro_stop(Node origin_metro_stop) {
+        this.origin_metro_stop = origin_metro_stop;
+    }
+
+    public Node getDestination_metro_stop() {
+        return destination_metro_stop;
+    }
+
+    public void setDestination_metro_stop(Node destination_metro_stop) {
+        this.destination_metro_stop = destination_metro_stop;
     }
 }
