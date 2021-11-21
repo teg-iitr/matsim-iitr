@@ -128,8 +128,9 @@ public class GHNetworkDistanceCalculator {
         } catch (BindException e) {
             System.out.println("Caught "+e+"; re-running " + url_string);
             try {
+                Thread.currentThread().sleep(20000);
                 return getDoubleDoubleTuple(url_string);
-            } catch (IOException | ParseException ex) {
+            } catch (IOException | ParseException | InterruptedException ex) {
                 throw new RuntimeException("URL is not connected. Reason "+e);
             }
         } catch (IOException | ParseException e) {
