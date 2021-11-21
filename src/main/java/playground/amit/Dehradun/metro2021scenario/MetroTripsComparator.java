@@ -29,8 +29,6 @@ public class MetroTripsComparator {
     private final DMAZonesProcessor zonesProcessor = new DMAZonesProcessor();
 
     private final Map<Id<Node>, MetroStopDetails> stop_details = new HashMap<>();
-//    private static final String metro_trips_before = "metro_trips_before";
-//    private static final String metro_trips_after = "metro_trips_after";
 
     public static void main(String[] args) {
         MetroTripsComparator metroTripsCollector = new MetroTripsComparator();
@@ -74,21 +72,32 @@ public class MetroTripsComparator {
             Node [] nearestMetroStops_destination = metroStopsQuadTree.getNearestNodeAndNodeInOppositeDirection(destination);
             nearestMetroStops_destination = MetroStopsQuadTree.arrangeMetroStopsAsPerOriginLines(nearestMetroStops_origin, nearestMetroStops_destination);
 
+            //do a check in advance to reduce the number of calls for GH routing API
+            double [] accessDists = new double[] {NetworkUtils.haversineDistanceKm(origin.getY(), origin.getX(), nearestMetroStops_origin[0].getCoord().getY(), nearestMetroStops_origin[0].getCoord().getX()),
+                    NetworkUtils.haversineDistanceKm(origin.getY(), origin.getX(), nearestMetroStops_origin[1].getCoord().getY(), nearestMetroStops_origin[1].getCoord().getX())};
+
+            double [] egressDists = new double[] {NetworkUtils.haversineDistanceKm(destination.getY(), destination.getX(), nearestMetroStops_destination[0].getCoord().getY(), nearestMetroStops_destination[0].getCoord().getX()),
+                    NetworkUtils.haversineDistanceKm(origin.getY(), origin.getX(), nearestMetroStops_destination[1].getCoord().getY(), nearestMetroStops_destination[1].getCoord().getX())};
+
+            if ((accessDists[0] > 2.0 && egressDists [0] > 2.0) && (accessDists[1] > 2.0 && egressDists [1] > 2.0)) continue;
+
             double shortestDist = Double.POSITIVE_INFINITY;
-            Node nearest_origin = null;
-            Node nearest_destination = null;
+            int final_index = 0;
             for (int i = 0; i<nearestMetroStops_origin.length; i++) {
                 double dist =  GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(nearestMetroStops_origin[i].getCoord(), nearestMetroStops_destination[i].getCoord(),"metro",null).getFirst();
                 if (dist < shortestDist) {
-                    nearest_origin = nearestMetroStops_origin[i];
-                    nearest_destination = nearestMetroStops_destination[i];
+                    final_index = i;
                     shortestDist = dist;
                 }
             }
 
-            double access_dist = NetworkUtils.haversineDistanceKm(origin.getY(), origin.getX(), nearest_origin.getCoord().getY(), nearest_origin.getCoord().getX());
-            double egress_dist = NetworkUtils.haversineDistanceKm(destination.getY(), destination.getX(), nearest_destination.getCoord().getY(), nearest_destination.getCoord().getX());
-            if (access_dist < 2. && egress_dist < 2.) {
+            Node nearest_origin = nearestMetroStops_origin[final_index];
+            Node nearest_destination = nearestMetroStops_destination[final_index];
+
+            double access_dist = accessDists[final_index];
+            double egress_dist = egressDists[final_index];
+
+            if (access_dist <= 2. && egress_dist <= 2.) {
                 od.setOrigin_metro_stop(nearest_origin);
                 od.setDestination_metro_stop(nearest_destination);
 
@@ -130,45 +139,6 @@ public class MetroTripsComparator {
             }
         }catch (IOException e) {
             throw new RuntimeException("Data is not read. Reason "+e);
-        }
-    }
-
-    private static class Zone{
-        private final String zoneId;
-        private final Map<String, Double> modeToIncomingTrips = new HashMap<>();
-        private final Map<String, Double> modeToOutgoingTrips = new HashMap<>();
-        private Node nearestMetroNode;
-
-        Zone(String zoneId){
-            this.zoneId = zoneId;
-        }
-
-        String getZoneId() {
-            return zoneId;
-        }
-
-        void addIncomingTrips(String mode, double numberOfTrips){
-            this.modeToIncomingTrips.put(mode, getIncomingTrips(mode)+numberOfTrips);
-        }
-
-        void addOutgoingTrips(String mode, double numberOfTrips){
-            this.modeToOutgoingTrips.put(mode, getOutgoingTrips(mode)+numberOfTrips);
-        }
-
-        double getIncomingTrips(String mode){
-            return this.modeToIncomingTrips.getOrDefault(mode,0.);
-        }
-
-        double getOutgoingTrips(String mode){
-            return this.modeToOutgoingTrips.getOrDefault(mode,0.);
-        }
-
-        public Node getNearestMetroNode() {
-            return nearestMetroNode;
-        }
-
-        public void setNearestMetroNode(Node nearestMetroNode) {
-            this.nearestMetroNode = nearestMetroNode;
         }
     }
 }
