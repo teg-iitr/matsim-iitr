@@ -81,6 +81,9 @@ public class MetroTripsComparator {
 
             if ((accessDists[0] > 2.0 && egressDists [0] > 2.0) && (accessDists[1] > 2.0 && egressDists [1] > 2.0)) continue;
 
+            //do another check in advance if the metro stops (entry/ exit) are same
+            if ( nearestMetroStops_origin[0].getId().equals(nearestMetroStops_destination[0].getId()) ) continue;
+
             double shortestDist = Double.POSITIVE_INFINITY;
             int final_index = 0;
             for (int i = 0; i<nearestMetroStops_origin.length; i++) {
