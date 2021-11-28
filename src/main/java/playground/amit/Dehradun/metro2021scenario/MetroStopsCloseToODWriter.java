@@ -68,7 +68,7 @@ public class MetroStopsCloseToODWriter {
             Node nearest_origin = null;
             Node nearest_destination = null;
             for (int i = 0; i<nearestMetroStops_origin.length; i++) {
-                double dist =  GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(nearestMetroStops_origin[i].getCoord(), nearestMetroStops_destination[i].getCoord(),"metro",null).getFirst();
+                double dist =  GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(nearestMetroStops_origin[i].getCoord(), nearestMetroStops_destination[i].getCoord(),"metro",null).tripDist;
                 if (dist < shortestDist) {
                     nearest_origin = nearestMetroStops_origin[i];
                     nearest_destination = nearestMetroStops_destination[i];

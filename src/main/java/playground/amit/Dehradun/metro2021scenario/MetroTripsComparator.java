@@ -95,7 +95,7 @@ public class MetroTripsComparator {
             double shortestDist = Double.POSITIVE_INFINITY;
             int final_index = 0;
             for (int i = 0; i<nearestMetroStops_origin.length; i++) {
-                double dist =  GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(nearestMetroStops_origin[i].getCoord(), nearestMetroStops_destination[i].getCoord(),"metro",null).getFirst();
+                double dist =  GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(nearestMetroStops_origin[i].getCoord(), nearestMetroStops_destination[i].getCoord(),"metro",null).tripDist;
                 if (dist < shortestDist) {
                     final_index = i;
                     shortestDist = dist;

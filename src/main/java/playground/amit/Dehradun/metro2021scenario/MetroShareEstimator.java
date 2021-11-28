@@ -152,7 +152,7 @@ public class MetroShareEstimator {
                     double util_rest_modes = 0.;
                     for (DehradunUtils.TravelModesBaseCase2017 tMode : DehradunUtils.TravelModesBaseCase2017.values()) {
 
-                        Tuple<Double, Double> distTime;
+                        TripChar distTime;
 
                         switch(this.hrScenarios){
                             case RingRoadOnly:
@@ -166,14 +166,14 @@ public class MetroShareEstimator {
                                 break;
                             default: throw new RuntimeException("HR scenario undefined.");
                         }
-                        double tripDist = distTime.getFirst();
-                        double tripTime = distTime.getSecond();
+                        double tripDist = distTime.tripDist;
+                        double tripTime = distTime.tripTime;
                         util_rest_modes += Math.exp(UtilityComputation.getUtilExceptMetro(tMode, tripDist, tripTime));
                     }
 
-                    Tuple<Double, Double> distTime = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
+                    TripChar tc = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
                     DehradunUtils.Reverse_transformation.transform(destination.get(i)), DehradunUtils.TravelModesMetroCase2021.metro.name());
-                    double util_metro = UtilityComputation.getUtilMetroWithoutASC(distTime.getFirst(), distTime.getSecond())+asc_metro;
+                    double util_metro = UtilityComputation.getUtilMetroWithoutASC(tc.tripDist+tc.accessDist+tc.egressDist, tc.tripTime+tc.accessTime+tc.egressTime)+asc_metro;
                     double exp_util_metro = Math.exp(util_metro);
                     double metroShare = exp_util_metro/ (exp_util_metro+util_rest_modes);
                     metroShareList.add(metroShare);

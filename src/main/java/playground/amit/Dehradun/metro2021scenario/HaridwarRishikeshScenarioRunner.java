@@ -14,7 +14,7 @@ public class HaridwarRishikeshScenarioRunner {
 
     public enum HRScenario { RingRoadOnly, NHOnly, Integrated}
 
-    private final HRScenario hr_scenario = HRScenario.NHOnly;
+    private final HRScenario hr_scenario = HRScenario.Integrated;
     private final String date = "28-11-2021";
     private final boolean runASCCalibration = false;
     public static final int numberOfPoints2DrawInEachZone = 20;

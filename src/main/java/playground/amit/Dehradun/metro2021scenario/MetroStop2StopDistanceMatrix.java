@@ -35,7 +35,7 @@ public class MetroStop2StopDistanceMatrix {
             for (Node d : metroStopsNet.getNodes().values()){
                 OD od = new OD((String)o.getAttributes().getAttribute(MetroStopsQuadTree.node_name),
                         (String)d.getAttributes().getAttribute(MetroStopsQuadTree.node_name));
-                double dist = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(o.getCoord(), d.getCoord(), "metro").getFirst();
+                double dist = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(o.getCoord(), d.getCoord(), "metro").tripDist;
                 od.setNumberOfTrips(Math.round(dist)); // using dist instead of number of trips, so that matrix writer can be used.
                 odMap.put(od.getId(), od);
             }

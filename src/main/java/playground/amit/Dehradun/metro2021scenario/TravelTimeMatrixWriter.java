@@ -82,9 +82,9 @@ public class TravelTimeMatrixWriter {
                     List<Double> times = new ArrayList<>();
 
                     for (int index =0 ; index < numberOfPoints2DrawInEachZone; index ++) {
-                        Tuple<Double, Double> dist_time = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromGHRouter(origins.get(index),destinations.get(index),mode.toString());
-                        distances.add(dist_time.getFirst());
-                        times.add(dist_time.getSecond());
+                        TripChar dist_time = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromGHRouter(origins.get(index),destinations.get(index),mode.toString());
+                        distances.add(dist_time.tripDist);
+                        times.add(dist_time.tripTime);
                     }
                     od.getAttributes().putAttribute(mode+"_distance_Km", ListUtils.doubleMean(distances));
                     od.getAttributes().putAttribute(mode+"_times_h", ListUtils.doubleMean(times));

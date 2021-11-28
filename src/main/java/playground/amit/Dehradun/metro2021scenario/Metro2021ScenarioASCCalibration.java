@@ -71,10 +71,10 @@ public class Metro2021ScenarioASCCalibration {
                 for (int i = 0; i<origin.size(); i ++) {
                     double sum_util_per_OD = 0;
                 for (DehradunUtils.TravelModesBaseCase2017 tMode : DehradunUtils.TravelModesBaseCase2017.values()) {
-                        Tuple<Double, Double> distTime = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
+                        TripChar tc = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
                                 DehradunUtils.Reverse_transformation.transform(destination.get(i)), tMode.name());
-                        double tripDist = distTime.getFirst();
-                        double tripTime = distTime.getSecond();
+                        double tripDist = tc.tripDist;
+                        double tripTime = tc.tripTime;
                     sum_util_per_OD += Math.exp(UtilityComputation.getUtilExceptMetro(tMode, tripDist, tripTime));
                     }
                     sum_exp_util_except_metro.add(sum_util_per_OD);
@@ -86,9 +86,9 @@ public class Metro2021ScenarioASCCalibration {
 //                        Logger.getLogger(Metro2021ScenarioASCCalibration.class).warn("The sum of exponential of utility of all modes except metro is zero for OD " + od.getId() + ". This means everyone will use metro. This should not happen.");
 //                        od.getAttributes().putAttribute(METRO_ASC, Double.NaN);
                     } else {
-                        Tuple<Double, Double> distTime = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
+                        TripChar tc = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
                                 DehradunUtils.Reverse_transformation.transform(destination.get(i)), DehradunUtils.TravelModesMetroCase2021.metro.name());
-                        double util_metro_no_asc = UtilityComputation.getUtilMetroWithoutASC(distTime.getFirst(), distTime.getSecond());
+                        double util_metro_no_asc = UtilityComputation.getUtilMetroWithoutASC(tc.tripDist+tc.accessDist+tc.egressDist, tc.tripTime+tc.accessTime+tc.egressTime);
                         double asc_metro = getMetroASC(metroShare, sum_exp_util_except_metro.get(i), util_metro_no_asc);
                         asc_metro_sum += asc_metro;
                     }

@@ -8,6 +8,7 @@ import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.IOUtils;
 import org.opengis.feature.simple.SimpleFeature;
+import playground.amit.Dehradun.metro2021scenario.HaridwarRishikeshScenarioRunner;
 import playground.amit.Dehradun.metro2021scenario.MetroShareEstimator;
 import playground.amit.utils.FileUtils;
 import playground.amit.utils.geometry.GeometryUtils;
@@ -39,8 +40,11 @@ public class DMAZonesProcessor {
     private static final String forest_area_shape_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/area_to_be_excluded/haridwar_area_to_exclude.shp";
 
     public DMAZonesProcessor(){
+        HaridwarRishikeshScenarioRunner.LOG.info("reading zone file.");
         this.features = ShapeFileReader.getAllFeatures(zone_file);
+        HaridwarRishikeshScenarioRunner.LOG.info("reading forest area shape file.");
         this.excludedGeom = GeometryUtils.getGeometryFromListOfFeatures(ShapeFileReader.getAllFeatures(forest_area_shape_file));
+        HaridwarRishikeshScenarioRunner.LOG.info("storing Dehradun zones.");
         storeDehradunZones();
     }
 
