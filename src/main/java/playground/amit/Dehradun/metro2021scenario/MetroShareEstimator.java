@@ -23,31 +23,33 @@ import java.util.*;
 
 public class MetroShareEstimator {
 
-    private static final String OD_merged_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/OD_2021_metro_trips_comparison_25-10-2021.txt";
     private static final String production_nearby_zone = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/production_nearby_zone.txt";
     private static final String attraction_nearby_zone = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/attraction_nearby_zone.txt";
 
     private final Map<Id<OD>, OD> odMap = new HashMap<>();
     private static final int numberOfPoints2DrawInEachZone = 10;
+    private final HaridwarRishikeshScenarioRunner.HRScenario hrScenarios;
 
     private final DMAZonesProcessor dmaZonesProcessor;
 
     public static final String new_metro_trips = "new_metro_trips";
-    private static final String outFile = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/metro_trips_comparison_gh-router_10-11-2021.txt";
 
-    MetroShareEstimator(){
+    public MetroShareEstimator(HaridwarRishikeshScenarioRunner.HRScenario hrScenarios){
         this.dmaZonesProcessor = new DMAZonesProcessor();
+        this.hrScenarios = hrScenarios;
     }
 
     public static void main(String[] args) {
-        new MetroShareEstimator().run();
+        String OD_merged_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/OD_2021_metro_trips_comparison_28-11-2021.txt";
+        String outFile = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/metro_trips_comparison_gh-router_NH-only_28-11-2021.txt";
+        new MetroShareEstimator(HaridwarRishikeshScenarioRunner.HRScenario.Integrated).run(OD_merged_file,outFile);
     }
 
-    private void run(){
-        readODFile();
+    public void run(String OD_merged_file, String outputFile){
+        readODFile(OD_merged_file);
         readNearByZoneFiles();
         computeMetroShare();
-        writeData();
+        writeData(outputFile);
     }
 
     private void readNearByZoneFiles(){
@@ -93,9 +95,7 @@ public class MetroShareEstimator {
         return outMap;
     }
 
-
-
-    private void writeData(){
+    private void writeData(String outFile){
         try(BufferedWriter writer = IOUtils.getBufferedWriter(outFile)){
             writer.write("origin\tdestination\ttotalTrips\tmetroTrips_old" +
                     "\tASC_metro\tmetroTrips_new\n");
@@ -112,7 +112,7 @@ public class MetroShareEstimator {
         }
     }
 
-    private void readODFile(){
+    private void readODFile(String OD_merged_file){
         try(BufferedReader reader = IOUtils.getBufferedReader(OD_merged_file)){
             String line = reader.readLine();
             boolean header = true;
@@ -153,8 +153,20 @@ public class MetroShareEstimator {
                     double util_rest_modes = 0.;
                     for (DehradunUtils.TravelModesBaseCase2017 tMode : DehradunUtils.TravelModesBaseCase2017.values()) {
 
-                        Tuple<Double, Double> distTime = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromGHRouter(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
-                                DehradunUtils.Reverse_transformation.transform(destination.get(i)), tMode.name());
+                        Tuple<Double, Double> distTime;
+
+                        switch(this.hrScenarios){
+                            case RingRoadOnly:
+                                distTime  = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
+                                        DehradunUtils.Reverse_transformation.transform(destination.get(i)), tMode.name());
+                                break;
+                            case NHOnly:
+                            case Integrated:
+                                distTime  = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromGHRouter(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
+                                        DehradunUtils.Reverse_transformation.transform(destination.get(i)), tMode.name());
+                                break;
+                            default: throw new RuntimeException("HR scenario undefined.");
+                        }
                         double tripDist = distTime.getFirst();
                         double tripTime = distTime.getSecond();
                         util_rest_modes += Math.exp(UtilityComputation.getUtilExceptMetro(tMode, tripDist, tripTime));

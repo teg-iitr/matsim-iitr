@@ -35,10 +35,8 @@ public class Metro2021ScenarioASCCalibration {
     private static final String dehradunZonesFile = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/dehradunZones.txt";
     private final List<String> dehradunZones = new ArrayList<>();
 
-    private static final int numberOfPoints2DrawInEachZone = 10;
+    private static final int numberOfPoints2DrawInEachZone = 30;
     private final DMAZonesProcessor dmaZonesProcessor;
-
-    private static final String outFile = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/OD_2021_metro_trips_comparison_25-10-2021.txt";
 
     //key of attributes
     public static final String METRO_TRIPS = "metro_trips";
@@ -49,10 +47,11 @@ public class Metro2021ScenarioASCCalibration {
     }
 
     public static void main(String[] args) {
-        new Metro2021ScenarioASCCalibration().run();
+        String outFile = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/OD_2021_metro_trips_comparison_28-11-2021.txt";
+        new Metro2021ScenarioASCCalibration().run(outFile);
     }
 
-    private void run(){
+    void run(String outputFile){
         storeDehradunZones();
         Map<Id<OD>, OD> od_2021_all = generateOD(OD_all_2021_file);
         Map<Id<OD>, OD> od_2021_metro = generateOD(OD_metro_2021_file);
@@ -103,7 +102,7 @@ public class Metro2021ScenarioASCCalibration {
             }
         }
 
-        try(BufferedWriter writer = IOUtils.getBufferedWriter(outFile)){
+        try(BufferedWriter writer = IOUtils.getBufferedWriter(outputFile)){
             writer.write("origin\tdestination\ttotalTrips\tmetroTrips" +
                     "\tASC_metro\n");
             for(OD od : od_2021_all.values()){
@@ -114,7 +113,7 @@ public class Metro2021ScenarioASCCalibration {
                 writer.write(od.getAttributes().getAttribute(METRO_ASC)+"\n");
             }
         } catch (IOException e) {
-            throw new RuntimeException("Data is not written to file "+outFile+". Possible reason "+e);
+            throw new RuntimeException("Data is not written to file "+outputFile+". Possible reason "+e);
         }
         System.out.println("Finished processing and writing.");
     }

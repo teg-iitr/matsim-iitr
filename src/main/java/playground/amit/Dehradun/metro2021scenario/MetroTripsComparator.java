@@ -22,22 +22,26 @@ import java.util.*;
 
 public class MetroTripsComparator {
 
-    private static final String metro_trips_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/metro_trips_comparison_gh-router_10-11-2021.txt";
-    private static final String stop_metro_share = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/metro_share_change_at_stops_10-11-2021.txt";
-
     private final Map<Id<OD>, OD> odId2OD = new HashMap<>();
     private final DMAZonesProcessor zonesProcessor = new DMAZonesProcessor();
 
     private final Map<Id<Node>, MetroStopDetails> stop_details = new HashMap<>();
 
     public static void main(String[] args) {
-        MetroTripsComparator metroTripsCollector = new MetroTripsComparator();
-        metroTripsCollector.readODFile();
-        metroTripsCollector.setNearestStopToZone();
-        metroTripsCollector.writeFile();
+        String metro_trips_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/metro_trips_comparison_gh-router_NH-only_28-11-2021.txt";
+        String stop_metro_share = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/metro_share_change_at_stops_NH-only_28-11-2021.txt";
+
+        new MetroTripsComparator().run(metro_trips_file, stop_metro_share);
     }
 
-    private void writeFile(){
+    public void run(String metro_trips_file, String stop_metro_share) {
+        MetroTripsComparator metroTripsCollector = new MetroTripsComparator();
+        metroTripsCollector.readODFile(metro_trips_file);
+        metroTripsCollector.setNearestStopToZone();
+        metroTripsCollector.writeFile(stop_metro_share);
+    }
+
+    private void writeFile(String stop_metro_share){
         try(BufferedWriter writer = IOUtils.getBufferedWriter(stop_metro_share)){
             writer.write("stopId\tmetroStopName\tmetroLine" +
                     "\tboarding_before\tboarding_after\tboarding_pct_change" +
@@ -120,7 +124,7 @@ public class MetroTripsComparator {
         }
     }
 
-    private void readODFile(){
+    private void readODFile(String metro_trips_file){
         try(BufferedReader reader = IOUtils.getBufferedReader(metro_trips_file)){
             String line = reader.readLine();
             boolean header = true;
