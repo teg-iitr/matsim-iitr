@@ -27,22 +27,21 @@ public class MetroShareEstimator {
     private static final String attraction_nearby_zone = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/attraction_nearby_zone.txt";
 
     private final Map<Id<OD>, OD> odMap = new HashMap<>();
-    private static final int numberOfPoints2DrawInEachZone = 10;
     private final HaridwarRishikeshScenarioRunner.HRScenario hrScenarios;
 
     private final DMAZonesProcessor dmaZonesProcessor;
 
     public static final String new_metro_trips = "new_metro_trips";
 
-    public MetroShareEstimator(HaridwarRishikeshScenarioRunner.HRScenario hrScenarios){
-        this.dmaZonesProcessor = new DMAZonesProcessor();
+    public MetroShareEstimator(DMAZonesProcessor dmaZonesProcessor, HaridwarRishikeshScenarioRunner.HRScenario hrScenarios){
+        this.dmaZonesProcessor = dmaZonesProcessor;
         this.hrScenarios = hrScenarios;
     }
 
     public static void main(String[] args) {
         String OD_merged_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/OD_2021_metro_trips_comparison_28-11-2021.txt";
         String outFile = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/metro_trips_comparison_gh-router_NH-only_28-11-2021.txt";
-        new MetroShareEstimator(HaridwarRishikeshScenarioRunner.HRScenario.Integrated).run(OD_merged_file,outFile);
+        new MetroShareEstimator(new DMAZonesProcessor(),HaridwarRishikeshScenarioRunner.HRScenario.Integrated).run(OD_merged_file,outFile);
     }
 
     public void run(String OD_merged_file, String outputFile){
@@ -144,12 +143,12 @@ public class MetroShareEstimator {
             } else if ( od.getAttributes().getAttribute(Metro2021ScenarioASCCalibration.METRO_ASC).equals(Double.NaN) ) {
                 od.getAttributes().putAttribute(new_metro_trips, 0.);
             } else {
-                List<Coord> origin = this.dmaZonesProcessor.getRandomCoords(od.getOrigin(), numberOfPoints2DrawInEachZone);
-                List<Coord> destination = this.dmaZonesProcessor.getRandomCoords(od.getDestination(), numberOfPoints2DrawInEachZone);
+                List<Coord> origin = this.dmaZonesProcessor.getRandomCoords(od.getOrigin(), HaridwarRishikeshScenarioRunner.numberOfPoints2DrawInEachZone);
+                List<Coord> destination = this.dmaZonesProcessor.getRandomCoords(od.getDestination(), HaridwarRishikeshScenarioRunner.numberOfPoints2DrawInEachZone);
                 double asc_metro =(double) od.getAttributes().getAttribute(Metro2021ScenarioASCCalibration.METRO_ASC);
 
                 List<Double> metroShareList = new ArrayList<>();
-                for (int i = 0; i<MetroShareEstimator.numberOfPoints2DrawInEachZone; i++) {
+                for (int i = 0; i< HaridwarRishikeshScenarioRunner.numberOfPoints2DrawInEachZone; i++) {
                     double util_rest_modes = 0.;
                     for (DehradunUtils.TravelModesBaseCase2017 tMode : DehradunUtils.TravelModesBaseCase2017.values()) {
 

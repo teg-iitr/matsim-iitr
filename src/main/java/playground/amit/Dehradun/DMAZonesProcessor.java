@@ -6,11 +6,15 @@ import org.locationtech.jts.shape.random.RandomPointsBuilder;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.ShapeFileReader;
+import org.matsim.core.utils.io.IOUtils;
 import org.opengis.feature.simple.SimpleFeature;
 import playground.amit.Dehradun.metro2021scenario.MetroShareEstimator;
 import playground.amit.utils.FileUtils;
 import playground.amit.utils.geometry.GeometryUtils;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -26,6 +30,10 @@ public class DMAZonesProcessor {
     private final Collection<SimpleFeature> features ;
     private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
 
+    private static final String dehradunZonesFile = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/dehradunZones.txt";
+
+    private final List<String> dehradunZones = new ArrayList<>();
+
     private final Geometry excludedGeom ;
     private final List<String> zones_with_forest_areas = List.of("100","120","121","99","123","98","122","25","108","125","131","132","133","134","182");
     private static final String forest_area_shape_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/area_to_be_excluded/haridwar_area_to_exclude.shp";
@@ -33,6 +41,19 @@ public class DMAZonesProcessor {
     public DMAZonesProcessor(){
         this.features = ShapeFileReader.getAllFeatures(zone_file);
         this.excludedGeom = GeometryUtils.getGeometryFromListOfFeatures(ShapeFileReader.getAllFeatures(forest_area_shape_file));
+        storeDehradunZones();
+    }
+
+    private void storeDehradunZones() {
+        try (BufferedReader reader = IOUtils.getBufferedReader(dehradunZonesFile)){
+            String line = reader.readLine();
+            while (line!=null){
+                this.dehradunZones.add(line.split("\t")[0]);
+                line = reader.readLine();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Could not store the dehradun zones, reason "+e);
+        }
     }
 
     public List<Coord> getRandomCoords(String zoneId, int numberOfPoints){
@@ -63,5 +84,7 @@ public class DMAZonesProcessor {
         return Arrays.stream(rnd.getGeometry().getCoordinates()).map(MGC::coordinate2Coord).collect(Collectors.toList());
     }
 
-
+    public List<String> getDehradunZones() {
+        return dehradunZones;
+    }
 }

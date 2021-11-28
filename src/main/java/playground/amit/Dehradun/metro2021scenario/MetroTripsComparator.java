@@ -23,22 +23,25 @@ import java.util.*;
 public class MetroTripsComparator {
 
     private final Map<Id<OD>, OD> odId2OD = new HashMap<>();
-    private final DMAZonesProcessor zonesProcessor = new DMAZonesProcessor();
+    private final DMAZonesProcessor zonesProcessor;
 
     private final Map<Id<Node>, MetroStopDetails> stop_details = new HashMap<>();
+
+    public MetroTripsComparator(DMAZonesProcessor zonesProcessor){
+        this.zonesProcessor = zonesProcessor;
+    }
 
     public static void main(String[] args) {
         String metro_trips_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/metro_trips_comparison_gh-router_NH-only_28-11-2021.txt";
         String stop_metro_share = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/metro_share_change_at_stops_NH-only_28-11-2021.txt";
 
-        new MetroTripsComparator().run(metro_trips_file, stop_metro_share);
+        new MetroTripsComparator(new DMAZonesProcessor()).run(metro_trips_file, stop_metro_share);
     }
 
     public void run(String metro_trips_file, String stop_metro_share) {
-        MetroTripsComparator metroTripsCollector = new MetroTripsComparator();
-        metroTripsCollector.readODFile(metro_trips_file);
-        metroTripsCollector.setNearestStopToZone();
-        metroTripsCollector.writeFile(stop_metro_share);
+        readODFile(metro_trips_file);
+        setNearestStopToZone();
+        writeFile(stop_metro_share);
     }
 
     private void writeFile(String stop_metro_share){
@@ -83,6 +86,7 @@ public class MetroTripsComparator {
             double [] egressDists = new double[] {NetworkUtils.haversineDistanceKm(destination.getY(), destination.getX(), nearestMetroStops_destination[0].getCoord().getY(), nearestMetroStops_destination[0].getCoord().getX()),
                     NetworkUtils.haversineDistanceKm(origin.getY(), origin.getX(), nearestMetroStops_destination[1].getCoord().getY(), nearestMetroStops_destination[1].getCoord().getX())};
 
+            //following still might be a problem due to first processing and then filtering...this can be instead applied in metro asc calibration
             if ((accessDists[0] > 2.0 && egressDists [0] > 2.0) && (accessDists[1] > 2.0 && egressDists [1] > 2.0)) continue;
 
             //do another check in advance if the metro stops (entry/ exit) are same

@@ -32,27 +32,22 @@ public class Metro2021ScenarioASCCalibration {
     private static final String OD_all_2021_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/OD_2021_all.txt";
     private static final String OD_metro_2021_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/OD_2021_metro.txt";
 
-    private static final String dehradunZonesFile = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/dehradunZones.txt";
-    private final List<String> dehradunZones = new ArrayList<>();
-
-    private static final int numberOfPoints2DrawInEachZone = 30;
     private final DMAZonesProcessor dmaZonesProcessor;
 
     //key of attributes
     public static final String METRO_TRIPS = "metro_trips";
     public static final String METRO_ASC = "metro_asc";
 
-    Metro2021ScenarioASCCalibration(){
+    public Metro2021ScenarioASCCalibration(DMAZonesProcessor dmaZonesProcessor){
         this.dmaZonesProcessor = new DMAZonesProcessor();
     }
 
     public static void main(String[] args) {
         String outFile = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/OD_2021_metro_trips_comparison_28-11-2021.txt";
-        new Metro2021ScenarioASCCalibration().run(outFile);
+        new Metro2021ScenarioASCCalibration(new DMAZonesProcessor()).run(outFile);
     }
 
     void run(String outputFile){
-        storeDehradunZones();
         Map<Id<OD>, OD> od_2021_all = generateOD(OD_all_2021_file);
         Map<Id<OD>, OD> od_2021_metro = generateOD(OD_metro_2021_file);
 
@@ -69,8 +64,8 @@ public class Metro2021ScenarioASCCalibration {
             if (metroTrips ==0. || od.getNumberOfTrips()==0.){
                 od.getAttributes().putAttribute(METRO_ASC, Double.NaN);
             } else{
-                List<Coord> origin = this.dmaZonesProcessor.getRandomCoords(od.getOrigin(),numberOfPoints2DrawInEachZone);
-                List<Coord> destination = this.dmaZonesProcessor.getRandomCoords(od.getDestination(), numberOfPoints2DrawInEachZone);
+                List<Coord> origin = this.dmaZonesProcessor.getRandomCoords(od.getOrigin(),HaridwarRishikeshScenarioRunner.numberOfPoints2DrawInEachZone);
+                List<Coord> destination = this.dmaZonesProcessor.getRandomCoords(od.getDestination(), HaridwarRishikeshScenarioRunner.numberOfPoints2DrawInEachZone);
 
                 List<Double> sum_exp_util_except_metro = new ArrayList<>();
                 for (int i = 0; i<origin.size(); i ++) {
@@ -118,18 +113,6 @@ public class Metro2021ScenarioASCCalibration {
         System.out.println("Finished processing and writing.");
     }
 
-    private void storeDehradunZones() {
-        try (BufferedReader reader = IOUtils.getBufferedReader(dehradunZonesFile)){
-            String line = reader.readLine();
-            while (line!=null){
-                this.dehradunZones.add(line.split("\t")[0]);
-                line = reader.readLine();
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Could not store the dehradun zones, reason "+e);
-        }
-    }
-
     private double getMetroASC(double metroShare, double sum_exp_util_all_modes_except_metro, double util_metro_except_ASC){
         // metroShare = exp(U_metro) / sum_exp(U_modes)
         //exp(u_metro) = metroShare * sum_exp(U_modes_except_metro) + metroShare * exp(U_metro)
@@ -154,7 +137,7 @@ public class Metro2021ScenarioASCCalibration {
                     for (int index = 1; index<destinations.size()-2;index++){ // first column is origin number, last column is row sum --> no need to store them
                         String desti = destinations.get(index);
                         if (origin.equalsIgnoreCase("Total")) continue; // last row is column sum --> no need to store it.
-                        else if(this.dehradunZones.contains(origin) && this.dehradunZones.contains(desti)) continue; //--> excluding dehradun intrazonal zones
+                        else if(this.dmaZonesProcessor.getDehradunZones().contains(origin) && this.dmaZonesProcessor.getDehradunZones().contains(desti)) continue; //--> excluding dehradun intrazonal zones
 
                         OD od = new OD(origin, desti);
                         od.setNumberOfTrips( (int) Math.round(Integer.parseInt(parts[index]) ) );
