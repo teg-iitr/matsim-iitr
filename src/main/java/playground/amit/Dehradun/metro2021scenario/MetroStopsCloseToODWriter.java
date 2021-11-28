@@ -91,9 +91,9 @@ public class MetroStopsCloseToODWriter {
                     Id<OD> odID = OD.getID(parts[0],parts[1]);
 
                     OD od = this.od2OD.getOrDefault(odID, new OD(parts[0],parts[1]));
-                    od.getAttributes().putAttribute(OD.total_trips,Double.parseDouble(parts[2]));
-                    od.getAttributes().putAttribute(OD.metro_old,Double.parseDouble(parts[3]));
-                    od.getAttributes().putAttribute(OD.metro_new,Double.parseDouble(parts[5]));
+                    od.getAttributes().putAttribute(HaridwarRishikeshScenarioRunner.total_trips,Double.parseDouble(parts[2]));
+                    od.getAttributes().putAttribute(HaridwarRishikeshScenarioRunner.metro_trips_old,Double.parseDouble(parts[3]));
+                    od.getAttributes().putAttribute(HaridwarRishikeshScenarioRunner.metro_trips_new,Double.parseDouble(parts[5]));
 
                     od2OD.put(odID, od);
                 } else{

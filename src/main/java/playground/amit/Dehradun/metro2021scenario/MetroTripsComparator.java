@@ -9,7 +9,6 @@ import playground.amit.Dehradun.DehradunUtils;
 import playground.amit.Dehradun.GHNetworkDistanceCalculator;
 import playground.amit.Dehradun.OD;
 import playground.amit.utils.FileUtils;
-import playground.amit.utils.NetworkUtils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -80,14 +79,15 @@ public class MetroTripsComparator {
             nearestMetroStops_destination = MetroStopsQuadTree.arrangeMetroStopsAsPerOriginLines(nearestMetroStops_origin, nearestMetroStops_destination);
 
             //do a check in advance to reduce the number of calls for GH routing API
-            double [] accessDists = new double[] {NetworkUtils.haversineDistanceKm(origin.getY(), origin.getX(), nearestMetroStops_origin[0].getCoord().getY(), nearestMetroStops_origin[0].getCoord().getX()),
-                    NetworkUtils.haversineDistanceKm(origin.getY(), origin.getX(), nearestMetroStops_origin[1].getCoord().getY(), nearestMetroStops_origin[1].getCoord().getX())};
-
-            double [] egressDists = new double[] {NetworkUtils.haversineDistanceKm(destination.getY(), destination.getX(), nearestMetroStops_destination[0].getCoord().getY(), nearestMetroStops_destination[0].getCoord().getX()),
-                    NetworkUtils.haversineDistanceKm(origin.getY(), origin.getX(), nearestMetroStops_destination[1].getCoord().getY(), nearestMetroStops_destination[1].getCoord().getX())};
+//            double [] accessDists = new double[] {NetworkUtils.haversineDistanceKm(origin.getY(), origin.getX(), nearestMetroStops_origin[0].getCoord().getY(), nearestMetroStops_origin[0].getCoord().getX()),
+//                    NetworkUtils.haversineDistanceKm(origin.getY(), origin.getX(), nearestMetroStops_origin[1].getCoord().getY(), nearestMetroStops_origin[1].getCoord().getX())};
+//
+//            double [] egressDists = new double[] {NetworkUtils.haversineDistanceKm(destination.getY(), destination.getX(), nearestMetroStops_destination[0].getCoord().getY(), nearestMetroStops_destination[0].getCoord().getX()),
+//                    NetworkUtils.haversineDistanceKm(origin.getY(), origin.getX(), nearestMetroStops_destination[1].getCoord().getY(), nearestMetroStops_destination[1].getCoord().getX())};
 
             //following still might be a problem due to first processing and then filtering...this can be instead applied in metro asc calibration
-            if ((accessDists[0] > 2.0 && egressDists [0] > 2.0) && (accessDists[1] > 2.0 && egressDists [1] > 2.0)) continue;
+            // no need for check at this level, because this has been introduced in metro asc calibration now. 28 Nov 2021 AA
+//            if ((accessDists[0] > 2.0 && egressDists [0] > 2.0) && (accessDists[1] > 2.0 && egressDists [1] > 2.0)) continue;
 
             //do another check in advance if the metro stops (entry/ exit) are same
             if ( nearestMetroStops_origin[0].getId().equals(nearestMetroStops_destination[0].getId()) ) continue;
@@ -105,26 +105,26 @@ public class MetroTripsComparator {
             Node nearest_origin = nearestMetroStops_origin[final_index];
             Node nearest_destination = nearestMetroStops_destination[final_index];
 
-            double access_dist = accessDists[final_index];
-            double egress_dist = egressDists[final_index];
+//            double access_dist = accessDists[final_index];
+//            double egress_dist = egressDists[final_index];
 
-            if (access_dist <= 2. && egress_dist <= 2.) {
+//            if (access_dist <= 2. && egress_dist <= 2.) {
                 od.setOrigin_metro_stop(nearest_origin);
                 od.setDestination_metro_stop(nearest_destination);
 
                 {
                     MetroStopDetails metroStopDetails_origin = this.stop_details.getOrDefault(nearest_origin.getId(), new MetroStopDetails(nearest_origin));
-                    metroStopDetails_origin.addBoarding_before((Double) od.getAttributes().getAttribute(OD.metro_old));
-                    metroStopDetails_origin.addBoarding_after((Double) od.getAttributes().getAttribute(OD.metro_new));
+                    metroStopDetails_origin.addBoarding_before((Double) od.getAttributes().getAttribute(HaridwarRishikeshScenarioRunner.metro_trips_old));
+                    metroStopDetails_origin.addBoarding_after((Double) od.getAttributes().getAttribute(HaridwarRishikeshScenarioRunner.metro_trips_new));
                     stop_details.put(nearest_origin.getId(),metroStopDetails_origin);
                 }
                 {
                     MetroStopDetails metroStopDetails_destination = this.stop_details.getOrDefault(nearest_destination.getId(), new MetroStopDetails(nearest_destination));
-                    metroStopDetails_destination.addAlighting_before((Double) od.getAttributes().getAttribute(OD.metro_old));
-                    metroStopDetails_destination.addAlighting_after((Double) od.getAttributes().getAttribute(OD.metro_new));
+                    metroStopDetails_destination.addAlighting_before((Double) od.getAttributes().getAttribute(HaridwarRishikeshScenarioRunner.metro_trips_old));
+                    metroStopDetails_destination.addAlighting_after((Double) od.getAttributes().getAttribute(HaridwarRishikeshScenarioRunner.metro_trips_new));
                     stop_details.put(nearest_destination.getId(),metroStopDetails_destination);
                 }
-            }
+//            }
         }
     }
 
@@ -138,9 +138,9 @@ public class MetroTripsComparator {
                     Id<OD> odID = OD.getID(parts[0],parts[1]);
 
                     OD od = this.odId2OD.getOrDefault(odID, new OD(parts[0],parts[1]));
-                    od.getAttributes().putAttribute(OD.total_trips,Double.parseDouble(parts[2]));
-                    od.getAttributes().putAttribute(OD.metro_old,Double.parseDouble(parts[3]));
-                    od.getAttributes().putAttribute(OD.metro_new,Double.parseDouble(parts[5]));
+                    od.getAttributes().putAttribute(HaridwarRishikeshScenarioRunner.total_trips,Double.parseDouble(parts[2]));
+                    od.getAttributes().putAttribute(HaridwarRishikeshScenarioRunner.metro_trips_old,Double.parseDouble(parts[3]));
+                    od.getAttributes().putAttribute(HaridwarRishikeshScenarioRunner.metro_trips_new,Double.parseDouble(parts[5]));
 
                     odId2OD.put(odID, od);
                 } else{

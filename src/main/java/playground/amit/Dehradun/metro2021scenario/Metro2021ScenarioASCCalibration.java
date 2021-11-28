@@ -2,13 +2,13 @@ package playground.amit.Dehradun.metro2021scenario;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
-import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.io.IOUtils;
 import playground.amit.Dehradun.DMAZonesProcessor;
 import playground.amit.Dehradun.DehradunUtils;
 import playground.amit.Dehradun.GHNetworkDistanceCalculator;
 import playground.amit.Dehradun.OD;
 import playground.amit.utils.FileUtils;
+import playground.amit.utils.ListUtils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -34,10 +34,6 @@ public class Metro2021ScenarioASCCalibration {
 
     private final DMAZonesProcessor dmaZonesProcessor;
 
-    //key of attributes
-    public static final String METRO_TRIPS = "metro_trips";
-    public static final String METRO_ASC = "metro_asc";
-
     public Metro2021ScenarioASCCalibration(DMAZonesProcessor dmaZonesProcessor){
         this.dmaZonesProcessor = new DMAZonesProcessor();
     }
@@ -58,11 +54,11 @@ public class Metro2021ScenarioASCCalibration {
 //            System.out.println(od.getId());
 
             double metroTrips = od_2021_metro.get(od.getId()).getNumberOfTrips();
-            od.getAttributes().putAttribute(METRO_TRIPS, metroTrips);
+            od.getAttributes().putAttribute(HaridwarRishikeshScenarioRunner.metro_trips_old, metroTrips);
 
             double metroShare = metroTrips/ od.getNumberOfTrips();
             if (metroTrips ==0. || od.getNumberOfTrips()==0.){
-                od.getAttributes().putAttribute(METRO_ASC, Double.NaN);
+                od.getAttributes().putAttribute(HaridwarRishikeshScenarioRunner.METRO_ASC, Double.NaN);
             } else{
                 List<Coord> origin = this.dmaZonesProcessor.getRandomCoords(od.getOrigin(),HaridwarRishikeshScenarioRunner.numberOfPoints2DrawInEachZone);
                 List<Coord> destination = this.dmaZonesProcessor.getRandomCoords(od.getDestination(), HaridwarRishikeshScenarioRunner.numberOfPoints2DrawInEachZone);
@@ -80,7 +76,8 @@ public class Metro2021ScenarioASCCalibration {
                     sum_exp_util_except_metro.add(sum_util_per_OD);
                 }
 
-                double asc_metro_sum = 0;
+                boolean keepMetroTrips = false;
+                List<Double> ascs_metro = new ArrayList<>();
                 for (int i = 0; i<sum_exp_util_except_metro.size(); i ++){
                     if(sum_exp_util_except_metro.get(i)==0.) {
 //                        Logger.getLogger(Metro2021ScenarioASCCalibration.class).warn("The sum of exponential of utility of all modes except metro is zero for OD " + od.getId() + ". This means everyone will use metro. This should not happen.");
@@ -88,12 +85,20 @@ public class Metro2021ScenarioASCCalibration {
                     } else {
                         TripChar tc = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
                                 DehradunUtils.Reverse_transformation.transform(destination.get(i)), DehradunUtils.TravelModesMetroCase2021.metro.name());
-                        double util_metro_no_asc = UtilityComputation.getUtilMetroWithoutASC(tc.tripDist+tc.accessDist+tc.egressDist, tc.tripTime+tc.accessTime+tc.egressTime);
-                        double asc_metro = getMetroASC(metroShare, sum_exp_util_except_metro.get(i), util_metro_no_asc);
-                        asc_metro_sum += asc_metro;
+                        if( tc.accessDist <= HaridwarRishikeshScenarioRunner.threshold_access_egress_distance && tc.egressDist  <= HaridwarRishikeshScenarioRunner.threshold_access_egress_distance) {
+                            keepMetroTrips = true;
+                            double util_metro_no_asc = UtilityComputation.getUtilMetroWithoutASC(tc.tripDist + tc.accessDist + tc.egressDist, tc.tripTime + tc.accessTime + tc.egressTime);
+                            double asc_metro = getMetroASC(metroShare, sum_exp_util_except_metro.get(i), util_metro_no_asc);
+                            ascs_metro.add(asc_metro);
+                        }
                     }
                 }
-                od.getAttributes().putAttribute(METRO_ASC, asc_metro_sum/sum_exp_util_except_metro.size());
+                if(keepMetroTrips){
+                    od.getAttributes().putAttribute(HaridwarRishikeshScenarioRunner.METRO_ASC, ListUtils.doubleSum(ascs_metro) /ascs_metro.size());
+                } else{
+                    od.getAttributes().putAttribute(HaridwarRishikeshScenarioRunner.metro_trips_old, 0.0); //also update the metro trips in OD matrix so that it is not carried forward
+                    od.getAttributes().putAttribute(HaridwarRishikeshScenarioRunner.METRO_ASC, HaridwarRishikeshScenarioRunner.too_far_metro);
+                }
             }
         }
 
@@ -104,8 +109,8 @@ public class Metro2021ScenarioASCCalibration {
                 writer.write(od.getOrigin()+"\t");
                 writer.write(od.getDestination()+"\t");
                 writer.write(od.getNumberOfTrips()+"\t");
-                writer.write(od.getAttributes().getAttribute(METRO_TRIPS)+"\t");
-                writer.write(od.getAttributes().getAttribute(METRO_ASC)+"\n");
+                writer.write(od.getAttributes().getAttribute(HaridwarRishikeshScenarioRunner.metro_trips_old)+"\t");
+                writer.write(od.getAttributes().getAttribute(HaridwarRishikeshScenarioRunner.METRO_ASC)+"\n");
             }
         } catch (IOException e) {
             throw new RuntimeException("Data is not written to file "+outputFile+". Possible reason "+e);

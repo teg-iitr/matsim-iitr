@@ -17,10 +17,6 @@ public class OD  implements Attributable {
     private Node origin_metro_stop ;
     private Node destination_metro_stop ;
 
-    public static final String total_trips = "total";
-    public static final String metro_old = "metro_old";
-    public static final String metro_new = "metro_new";
-
     public OD (String origin, String destination) {
         this.origin = origin;
         this.destination = destination;

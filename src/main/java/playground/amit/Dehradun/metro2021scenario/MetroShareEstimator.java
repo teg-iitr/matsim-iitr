@@ -2,7 +2,6 @@ package playground.amit.Dehradun.metro2021scenario;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
-import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.io.IOUtils;
 import playground.amit.Dehradun.DMAZonesProcessor;
 import playground.amit.Dehradun.DehradunUtils;
@@ -56,14 +55,15 @@ public class MetroShareEstimator {
 //        Map<String, String> attractionActual2NearbyZone = readAndStore(attraction_nearby_zone);
 
         for (OD od : this.odMap.values()) {
-            double metroTrips = (double) od.getAttributes().getAttribute(Metro2021ScenarioASCCalibration.METRO_TRIPS);
+            String nearbyZone = productionActual2NearbyZone.get(od.getOrigin());
+            if (nearbyZone==null) continue;
+
+            double metroTrips = (double) od.getAttributes().getAttribute(HaridwarRishikeshScenarioRunner.metro_trips_old);
             if (metroTrips==0.){
-                String nearbyZone = productionActual2NearbyZone.get(od.getOrigin());
-                if (nearbyZone==null) continue;
                 OD newOD = this.odMap.get(OD.getID(nearbyZone, od.getDestination()));
-                double newMetroTrips = (double) newOD.getAttributes().getAttribute(Metro2021ScenarioASCCalibration.METRO_TRIPS);
+                double newMetroTrips = (double) newOD.getAttributes().getAttribute(HaridwarRishikeshScenarioRunner.metro_trips_old);
                 if(newMetroTrips!=0.){
-                    od.getAttributes().putAttribute(Metro2021ScenarioASCCalibration.METRO_ASC, newOD.getAttributes().getAttribute(Metro2021ScenarioASCCalibration.METRO_ASC));
+                    od.getAttributes().putAttribute(HaridwarRishikeshScenarioRunner.METRO_ASC, newOD.getAttributes().getAttribute(HaridwarRishikeshScenarioRunner.METRO_ASC));
                 }/*else{
                     OD anotherOD = this.odMap.get(OD.getID(nearbyZone, attractionActual2NearbyZone.get(od.getDestination())));
                     if(anotherOD==null) continue;
@@ -102,8 +102,8 @@ public class MetroShareEstimator {
                 writer.write(od.getOrigin()+"\t");
                 writer.write(od.getDestination()+"\t");
                 writer.write(od.getNumberOfTrips()+"\t");
-                writer.write(od.getAttributes().getAttribute(Metro2021ScenarioASCCalibration.METRO_TRIPS)+"\t");
-                writer.write(od.getAttributes().getAttribute(Metro2021ScenarioASCCalibration.METRO_ASC)+"\t");
+                writer.write(od.getAttributes().getAttribute(HaridwarRishikeshScenarioRunner.metro_trips_old)+"\t");
+                writer.write(od.getAttributes().getAttribute(HaridwarRishikeshScenarioRunner.METRO_ASC)+"\t");
                 writer.write(od.getAttributes().getAttribute(MetroShareEstimator.new_metro_trips)+"\n");
             }
         } catch (IOException e) {
@@ -121,8 +121,8 @@ public class MetroShareEstimator {
                     OD od = new OD(parts[0], parts[1]);
 //                    System.out.println(od.getId());
                     od.setNumberOfTrips(Double.parseDouble(parts[2]));
-                    od.getAttributes().putAttribute(Metro2021ScenarioASCCalibration.METRO_TRIPS, Double.parseDouble(parts[3]));
-                    od.getAttributes().putAttribute(Metro2021ScenarioASCCalibration.METRO_ASC, Double.parseDouble(parts[4]));
+                    od.getAttributes().putAttribute(HaridwarRishikeshScenarioRunner.metro_trips_old, Double.parseDouble(parts[3]));
+                    od.getAttributes().putAttribute(HaridwarRishikeshScenarioRunner.METRO_ASC, Double.parseDouble(parts[4]));
                     odMap.put(od.getId(), od);
                 } else{
                     header=false;
@@ -137,15 +137,17 @@ public class MetroShareEstimator {
     private void computeMetroShare(){
         GHNetworkDistanceCalculator ghNetworkDistanceCalculator = new GHNetworkDistanceCalculator();
         for(OD od : this.odMap.values()) {
-            double metroTrips = (double) od.getAttributes().getAttribute(Metro2021ScenarioASCCalibration.METRO_TRIPS);
+//            double metroTrips = (double) od.getAttributes().getAttribute(Metro2021ScenarioASCCalibration.METRO_TRIPS);
             if ( od.getNumberOfTrips()==0.){
                 od.getAttributes().putAttribute(new_metro_trips, 0.);
-            } else if ( od.getAttributes().getAttribute(Metro2021ScenarioASCCalibration.METRO_ASC).equals(Double.NaN) ) {
+            } else if ( od.getAttributes().getAttribute(HaridwarRishikeshScenarioRunner.METRO_ASC).equals(Double.NaN) ) {
+                od.getAttributes().putAttribute(new_metro_trips, 0.);
+            } else if ( od.getAttributes().getAttribute(HaridwarRishikeshScenarioRunner.METRO_ASC).equals(HaridwarRishikeshScenarioRunner.too_far_metro) ) {
                 od.getAttributes().putAttribute(new_metro_trips, 0.);
             } else {
-                List<Coord> origin = this.dmaZonesProcessor.getRandomCoords(od.getOrigin(), HaridwarRishikeshScenarioRunner.numberOfPoints2DrawInEachZone);
-                List<Coord> destination = this.dmaZonesProcessor.getRandomCoords(od.getDestination(), HaridwarRishikeshScenarioRunner.numberOfPoints2DrawInEachZone);
-                double asc_metro =(double) od.getAttributes().getAttribute(Metro2021ScenarioASCCalibration.METRO_ASC);
+                List<Coord> origins = this.dmaZonesProcessor.getRandomCoords(od.getOrigin(), HaridwarRishikeshScenarioRunner.numberOfPoints2DrawInEachZone);
+                List<Coord> destinations = this.dmaZonesProcessor.getRandomCoords(od.getDestination(), HaridwarRishikeshScenarioRunner.numberOfPoints2DrawInEachZone);
+                double asc_metro =(double) od.getAttributes().getAttribute(HaridwarRishikeshScenarioRunner.METRO_ASC);
 
                 List<Double> metroShareList = new ArrayList<>();
                 for (int i = 0; i< HaridwarRishikeshScenarioRunner.numberOfPoints2DrawInEachZone; i++) {
@@ -156,13 +158,13 @@ public class MetroShareEstimator {
 
                         switch(this.hrScenarios){
                             case RingRoadOnly:
-                                distTime  = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
-                                        DehradunUtils.Reverse_transformation.transform(destination.get(i)), tMode.name());
+                                distTime  = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(DehradunUtils.Reverse_transformation.transform(origins.get(i)),
+                                        DehradunUtils.Reverse_transformation.transform(destinations.get(i)), tMode.name());
                                 break;
                             case NHOnly:
                             case Integrated:
-                                distTime  = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromGHRouter(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
-                                        DehradunUtils.Reverse_transformation.transform(destination.get(i)), tMode.name());
+                                distTime  = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromGHRouter(DehradunUtils.Reverse_transformation.transform(origins.get(i)),
+                                        DehradunUtils.Reverse_transformation.transform(destinations.get(i)), tMode.name());
                                 break;
                             default: throw new RuntimeException("HR scenario undefined.");
                         }
@@ -171,8 +173,8 @@ public class MetroShareEstimator {
                         util_rest_modes += Math.exp(UtilityComputation.getUtilExceptMetro(tMode, tripDist, tripTime));
                     }
 
-                    TripChar tc = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
-                    DehradunUtils.Reverse_transformation.transform(destination.get(i)), DehradunUtils.TravelModesMetroCase2021.metro.name());
+                    TripChar tc = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(DehradunUtils.Reverse_transformation.transform(origins.get(i)),
+                    DehradunUtils.Reverse_transformation.transform(destinations.get(i)), DehradunUtils.TravelModesMetroCase2021.metro.name());
                     double util_metro = UtilityComputation.getUtilMetroWithoutASC(tc.tripDist+tc.accessDist+tc.egressDist, tc.tripTime+tc.accessTime+tc.egressTime)+asc_metro;
                     double exp_util_metro = Math.exp(util_metro);
                     double metroShare = exp_util_metro/ (exp_util_metro+util_rest_modes);

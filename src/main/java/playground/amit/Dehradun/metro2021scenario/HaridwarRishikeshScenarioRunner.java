@@ -9,15 +9,21 @@ import playground.amit.utils.FileUtils;
  */
 
 public class HaridwarRishikeshScenarioRunner {
-
     public static final Logger LOG = Logger.getLogger(HaridwarRishikeshScenarioRunner.class);
+
+    public static final String too_far_metro = "too-far-metro-stop";
+    public static final String total_trips = "total";
+    public static final String metro_trips_old = "metro_old";
+    public static final String metro_trips_new = "metro_new";
+    public static final String METRO_ASC = "metro_asc";
 
     public enum HRScenario { RingRoadOnly, NHOnly, Integrated}
 
     private final HRScenario hr_scenario = HRScenario.Integrated;
-    private final String date = "28-11-2021";
-    private final boolean runASCCalibration = false;
+    private static final String date = "28-11-2021";
+    private static final boolean runASCCalibration = true;
     public static final int numberOfPoints2DrawInEachZone = 20;
+    public static final double threshold_access_egress_distance = 2.5;
 
     public static void main(String[] args) {
         new HaridwarRishikeshScenarioRunner().run();
