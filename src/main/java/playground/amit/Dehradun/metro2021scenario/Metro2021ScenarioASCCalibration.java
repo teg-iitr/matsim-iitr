@@ -97,7 +97,7 @@ public class Metro2021ScenarioASCCalibration {
                     od.getAttributes().putAttribute(HaridwarRishikeshScenarioRunner.METRO_ASC, ListUtils.doubleSum(ascs_metro) /ascs_metro.size());
                 } else{
                     od.getAttributes().putAttribute(HaridwarRishikeshScenarioRunner.metro_trips_old, 0.0); //also update the metro trips in OD matrix so that it is not carried forward
-                    od.getAttributes().putAttribute(HaridwarRishikeshScenarioRunner.METRO_ASC, HaridwarRishikeshScenarioRunner.too_far_metro);
+                    od.getAttributes().putAttribute(HaridwarRishikeshScenarioRunner.METRO_ASC, Double.NaN);
                 }
             }
         }

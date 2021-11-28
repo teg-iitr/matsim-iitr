@@ -142,8 +142,6 @@ public class MetroShareEstimator {
                 od.getAttributes().putAttribute(new_metro_trips, 0.);
             } else if ( od.getAttributes().getAttribute(HaridwarRishikeshScenarioRunner.METRO_ASC).equals(Double.NaN) ) {
                 od.getAttributes().putAttribute(new_metro_trips, 0.);
-            } else if ( od.getAttributes().getAttribute(HaridwarRishikeshScenarioRunner.METRO_ASC).equals(HaridwarRishikeshScenarioRunner.too_far_metro) ) {
-                od.getAttributes().putAttribute(new_metro_trips, 0.);
             } else {
                 List<Coord> origins = this.dmaZonesProcessor.getRandomCoords(od.getOrigin(), HaridwarRishikeshScenarioRunner.numberOfPoints2DrawInEachZone);
                 List<Coord> destinations = this.dmaZonesProcessor.getRandomCoords(od.getDestination(), HaridwarRishikeshScenarioRunner.numberOfPoints2DrawInEachZone);
