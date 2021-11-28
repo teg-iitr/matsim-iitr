@@ -1,5 +1,6 @@
 package playground.amit.Dehradun.metro2021scenario;
 
+import org.apache.log4j.Logger;
 import playground.amit.Dehradun.DMAZonesProcessor;
 import playground.amit.utils.FileUtils;
 
@@ -9,12 +10,14 @@ import playground.amit.utils.FileUtils;
 
 public class HaridwarRishikeshScenarioRunner {
 
+    public static final Logger LOG = Logger.getLogger(HaridwarRishikeshScenarioRunner.class);
+
     public enum HRScenario { RingRoadOnly, NHOnly, Integrated}
 
-    private final HRScenario hr_scenario = HRScenario.RingRoadOnly;
+    private final HRScenario hr_scenario = HRScenario.NHOnly;
     private final String date = "28-11-2021";
-    private final boolean runASCCalibration = true;
-    public static final int numberOfPoints2DrawInEachZone = 30;
+    private final boolean runASCCalibration = false;
+    public static final int numberOfPoints2DrawInEachZone = 20;
 
     public static void main(String[] args) {
         new HaridwarRishikeshScenarioRunner().run();
@@ -28,17 +31,20 @@ public class HaridwarRishikeshScenarioRunner {
         DMAZonesProcessor dmaZonesProcessor = new DMAZonesProcessor();
 
         if (runASCCalibration){
+            LOG.info("Running ASC Calibration for metro trips .... ");
             // Run it together with gh_configured_router normal network
             Metro2021ScenarioASCCalibration metro2021ScenarioASCCalibration = new Metro2021ScenarioASCCalibration(dmaZonesProcessor);
             metro2021ScenarioASCCalibration.run(outFile_post_ASC_calibration);
         } else {
+            LOG.info("Running "+this.hr_scenario+" scenario to estimate the metro trips.");
             // following should not be run with ASC calibration.
             MetroShareEstimator metroShareEstimator= new MetroShareEstimator(dmaZonesProcessor,hr_scenario);
             metroShareEstimator.run(outFile_post_ASC_calibration, outFile_metro_share);
 
+            LOG.info("Running "+this.hr_scenario+" scenario to compare the new vs old metro trips.");
             MetroTripsComparator metroTripsComparator = new MetroTripsComparator(dmaZonesProcessor);
             metroTripsComparator.run(outFile_metro_share, outFile_stops_ridership_compare );
+            LOG.info("Completed.");
         }
     }
-
 }

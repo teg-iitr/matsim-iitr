@@ -110,7 +110,7 @@ public class Metro2021ScenarioASCCalibration {
         } catch (IOException e) {
             throw new RuntimeException("Data is not written to file "+outputFile+". Possible reason "+e);
         }
-        System.out.println("Finished processing and writing.");
+        HaridwarRishikeshScenarioRunner.LOG.info("Finished processing and writing.");
     }
 
     private double getMetroASC(double metroShare, double sum_exp_util_all_modes_except_metro, double util_metro_except_ASC){
