@@ -1,4 +1,4 @@
-package playground.amit.Delhi.gtfs.elements;
+package playground.amit.Delhi.overlap.gtfs.elements;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.pt2matsim.gtfs.lib.Trip;
@@ -16,6 +16,7 @@ public class TripOverlap {
     private final Map<Segment, SegmentalOverlap> seg2overlaps = new LinkedHashMap<>();
     private final Map<SigmoidFunction, Double> sigmoidFunction2Probs = new HashMap<>();
     private final double overlappingLengthRatio = Double.NaN;
+    private String vehicleNumber;
 
     TripOverlap(Id<Trip> tripId) {
         this.tripId = tripId;
@@ -38,6 +39,14 @@ public class TripOverlap {
 
     public void setRouteId(String routeId) {
         this.routeId = routeId;
+    }
+
+    public String getVehicleNumber() {
+        return vehicleNumber;
+    }
+
+    public void setVehicleNumber(String vehicleNumber) {
+        this.vehicleNumber = vehicleNumber;
     }
 
     public Map<SigmoidFunction, Double> getSigmoidFunction2Probs() {

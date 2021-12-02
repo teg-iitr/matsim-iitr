@@ -1,4 +1,4 @@
-package playground.amit.Delhi.gtfs;
+package playground.amit.Delhi.overlap.gtfs;
 
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.pt2matsim.gtfs.GtfsFeed;
@@ -20,7 +20,6 @@ public class GTFSRouteStopsWriter {
 
     public static void main(String[] args) {
         GtfsFeed gtfsFeed = new GtfsFeedImpl(GTFS_PATH);
-
         try(BufferedWriter writer = IOUtils.getBufferedWriter(outFilePath)){
             writer.write("routeId\trouteLongName\trouteShortName\ttripId\tstopSequencePosition\tstopId\tstopName\n");
             for (Route route : gtfsFeed.getRoutes().values()){
@@ -36,10 +35,5 @@ public class GTFSRouteStopsWriter {
         }catch (IOException e) {
             throw new RuntimeException("Data is not written. Reason :"+e);
         }
-
-
-
-
     }
-
 }

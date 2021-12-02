@@ -1,11 +1,11 @@
-package playground.amit.Delhi.gtfs.elements;
+package playground.amit.Delhi.overlap.gtfs.elements;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.pt2matsim.gtfs.lib.Stop;
 import org.matsim.pt2matsim.gtfs.lib.StopTime;
 import org.matsim.pt2matsim.gtfs.lib.Trip;
-import playground.amit.Delhi.gtfs.MyStopImpl;
+import playground.amit.Delhi.overlap.gtfs.MyStopImpl;
 import playground.amit.utils.geometry.GeometryUtils;
 
 import java.util.*;
@@ -21,7 +21,7 @@ public class SpatialOverlap {
 
     private final int timebinSize;
     private final Map<String, TripOverlap> trip2tripOverlap = new LinkedHashMap<>();
-    private final Map<String, Set<String>> route2TripsIds = new HashMap<>();
+    private final Map<String, Set<String>> vehicleRoute2TripsIds = new HashMap<>();
     private final Map<Segment, SegmentalOverlap> collectedSegments = new HashMap<>();
 
     private int getTimeBin(double time_sec){
@@ -32,15 +32,16 @@ public class SpatialOverlap {
         return (int) (time_sec/timebinSize);
     }
 
-    public void add(String trip_id, Trip trip) {
+    public void add(Trip trip, String vehicleNumber) {
+        String trip_id = trip.getId();
         TripOverlap to = new TripOverlap(Id.create(trip_id, Trip.class));
-        String routeId = trip.getRoute().getId();
-        to.setRouteId(routeId);
+        to.setRouteId(trip.getRoute().getId());
+        to.setVehicleNumber(vehicleNumber);
 
         // store route and trips
-        Set<String> trips = this.route2TripsIds.getOrDefault(routeId, new HashSet<>());
+        Set<String> trips = this.vehicleRoute2TripsIds.getOrDefault(vehicleNumber, new HashSet<>());
         trips.add(trip_id);
-        this.route2TripsIds.put(routeId, trips);
+        this.vehicleRoute2TripsIds.put(vehicleNumber, trips);
 
         // create and store segments
         NavigableSet<StopTime> stopTimes = trip.getStopTimes();
@@ -63,9 +64,9 @@ public class SpatialOverlap {
                 SegmentalOverlap soverlap = this.collectedSegments.get(seg);
                 if (soverlap==null){
                     soverlap = new SegmentalOverlap(seg);
-                    soverlap.self(trip_id, routeId);
+                    soverlap.self(trip_id, vehicleNumber);
                 } else{
-                    soverlap.overlapWith(trip_id, routeId);
+                    soverlap.overlapWith(trip_id, vehicleNumber);
                 }
                 this.collectedSegments.put(seg, soverlap); // cannot put back in TripOverlay already here because segments are keep updating
                 prevStopTime = c;
@@ -91,12 +92,12 @@ public class SpatialOverlap {
     	}
     }
 
-    public void removeRoute(String routeId){
-        Set<String> trips2Remove = this.route2TripsIds.remove(routeId);
+    public void removeVehicle(String vehicleNumber){
+        Set<String> trips2Remove = this.vehicleRoute2TripsIds.remove(vehicleNumber);
         for (String trip_id : trips2Remove) {
             TripOverlap removedTO = this.trip2tripOverlap.remove(trip_id);
             for (Segment removedSeg : removedTO.getSegments()) {
-                this.collectedSegments.get(removedSeg).remove(routeId, removedTO.getTripId().toString());
+                this.collectedSegments.get(removedSeg).remove(vehicleNumber, removedTO.getTripId().toString());
             }
         }
     }
@@ -109,7 +110,7 @@ public class SpatialOverlap {
         return trip2tripOverlap;
     }
 
-    public Map<String, Set<String>> getRoute2TripsIds() {
-        return route2TripsIds;
+    public Map<String, Set<String>> getVehicleRoute2TripsIds() {
+        return vehicleRoute2TripsIds;
     }
 }
