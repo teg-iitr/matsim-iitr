@@ -110,18 +110,6 @@ public class OverlapOptimizer {
         done();
     }
 
-//    public void run(int iteration){
-//        for (int i = 1; i < iteration; i++) {
-//            GTFSOverlapOptimizer.LOG.info("\t\tRunning iteration\t"+this.iteration);
-//            Map<String, Double> route2Remove = getLeastProbRoute();
-//            for (String s : route2Remove.keySet()) {
-//                GTFSOverlapOptimizer.LOG.info("Removing vehicle route "+s);
-//                remove(s, route2Remove.get(s));
-//                writeIterationFiles();
-//            }
-//        }
-//    }
-
     public void remove(String vehicleNumber, double removalProb){
         this.iteration++;
         this.spatialOverlap.removeVehicle(vehicleNumber);
@@ -132,14 +120,7 @@ public class OverlapOptimizer {
     public Map<String, Double> getLeastProbVehicle(){
         Map<String, VehicleRouteOverlap> vehicleRoute2VROverlpas = new HashMap<>();
 
-        for (TripOverlap to: spatialOverlap.getTrip2tripOverlap().values()) {
-            String vehicleNumber = to.getVehicleNumber();
-            String routeLongName = to.getRouteLongName();
-            VehicleRouteOverlap vrOverlap = vehicleRoute2VROverlpas.getOrDefault(vehicleNumber, new VehicleRouteOverlap(vehicleNumber, to.getRouteLongName()));
-            vrOverlap.addProbsToTrip(routeLongName, to.getTripId(), to.getSigmoidFunction2Probs());
-//            vrOverlap.getTripId2Probs().put(to.getTripId(), to.getSigmoidFunction2Probs());
-            vehicleRoute2VROverlpas.put(vehicleNumber, vrOverlap);
-        }
+        processTripOverlaps(vehicleRoute2VROverlpas);
 
         if (vehicleRoute2VROverlpas.size()==0) return null;
 
@@ -165,6 +146,15 @@ public class OverlapOptimizer {
             else break;
         }
         return removedVehicles;
+    }
+
+    private void processTripOverlaps(Map<String, VehicleRouteOverlap> vehicleRoute2VROverlpas) {
+        for (TripOverlap to : spatialOverlap.getTrip2tripOverlap().values()) {
+            String vehicleNumber = to.getVehicleNumber();
+            VehicleRouteOverlap vrOverlap = vehicleRoute2VROverlpas.getOrDefault(vehicleNumber, new VehicleRouteOverlap(vehicleNumber));
+            vrOverlap.addProbsToTrip(to.getRouteLongName(), to.getTripId(), to.getSigmoidFunction2Probs());
+            vehicleRoute2VROverlpas.put(vehicleNumber, vrOverlap);
+        }
     }
 
     public double getOverlappingNetworkLength(){
@@ -263,13 +253,7 @@ public class OverlapOptimizer {
         Map<String, TripOverlap> trip2tripOverlap = spatialOverlap.getTrip2tripOverlap();
         Map<String, VehicleRouteOverlap> vehicleRoute2VROverlpas = new HashMap<>();
 
-        for (TripOverlap to: trip2tripOverlap.values()) {
-            String vehicleNumber = to.getVehicleNumber();
-            VehicleRouteOverlap vrOverlap = vehicleRoute2VROverlpas.getOrDefault(vehicleNumber, new VehicleRouteOverlap(to.getVehicleNumber(), vehicleNumber));
-            vrOverlap.addProbsToTrip(vehicleNumber, to.getTripId(), to.getSigmoidFunction2Probs());
-//            vrOverlap.getTripId2Probs().put(to.getTripId(), to.getSigmoidFunction2Probs());
-            vehicleRoute2VROverlpas.put(vehicleNumber, vrOverlap);
-        }
+        processTripOverlaps(vehicleRoute2VROverlpas);
 
         OverlapOptimizer.LOG.info("Writing vehicle-route probs to a file ...");
         String filename = outputFolder+"vehicleRouteProbs_"+suffix+"_"+"it-"+iteration+".txt.gz";

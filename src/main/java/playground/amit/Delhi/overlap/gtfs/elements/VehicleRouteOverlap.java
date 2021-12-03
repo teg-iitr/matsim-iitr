@@ -14,22 +14,8 @@ public class VehicleRouteOverlap {
     private final Map<Id<Trip>, Map<SigmoidFunction, Double>> tripId2Probs = new HashMap<>();
     private final Map<SigmoidFunction, Double> routeProb = new HashMap<>();
 
-    /**
-     * Use if vehicle information is unavailable, a vehicle will be created with number same as that of route.
-     * @param routeLongName
-     */
-//    public VehicleRouteOverlap(String routeLongName){
-//        this.vehicleNumber = routeLongName;
-//        addRouteToVehicle(routeLongName);
-//    }
-
-    public VehicleRouteOverlap(String vehicleNumber, String routeLongName){
+    public VehicleRouteOverlap(String vehicleNumber){
         this.vehicleNumber = vehicleNumber;
-        addRouteToVehicle(routeLongName);
-    }
-
-    public void addRouteToVehicle(String routeName){
-        this.routeName2Trips.put(routeName, new ArrayList<>());
     }
 
     public Map<SigmoidFunction, Double> getVRProb(){
@@ -46,25 +32,15 @@ public class VehicleRouteOverlap {
     }
 
     public void addProbsToTrip(String routeName, Id<Trip> tripId, Map<SigmoidFunction, Double> probs ){
-        if (this.routeName2Trips.get(routeName)==null){
-            throw new RuntimeException("Route name "+routeName+" is not found.");
-        } else{
-            this.routeName2Trips.get(routeName).add(tripId);
-        }
+        this.routeName2Trips.computeIfAbsent(routeName, k -> new ArrayList<>());
+
+        this.routeName2Trips.get(routeName).add(tripId);
         this.tripId2Probs.put(tripId, probs);
     }
 
     public int getNumberOfTrips(){
         return this.tripId2Probs.size();
     }
-
-//    /**
-//     * Trips ids of the route.
-//     * @return
-//     */
-//    public Map<Id<Trip>, Map<SigmoidFunction, Double>> getTripId2Probs() {
-//        return tripId2Probs;
-//    }
 
     public Set<String> getRoutes(){
         return this.routeName2Trips.keySet();
