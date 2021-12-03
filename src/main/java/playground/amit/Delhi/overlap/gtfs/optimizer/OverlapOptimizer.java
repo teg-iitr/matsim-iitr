@@ -134,9 +134,9 @@ public class OverlapOptimizer {
 
         for (TripOverlap to: spatialOverlap.getTrip2tripOverlap().values()) {
             String vehicleNumber = to.getVehicleNumber();
-            String routeId = to.getRouteId();
-            VehicleRouteOverlap vrOverlap = vehicleRoute2VROverlpas.getOrDefault(vehicleNumber, new VehicleRouteOverlap(vehicleNumber, routeId));
-            vrOverlap.addProbsToTrip(routeId, to.getTripId(), to.getSigmoidFunction2Probs());
+            String routeLongName = to.getRouteLongName();
+            VehicleRouteOverlap vrOverlap = vehicleRoute2VROverlpas.getOrDefault(vehicleNumber, new VehicleRouteOverlap(vehicleNumber, to.getRouteLongName()));
+            vrOverlap.addProbsToTrip(routeLongName, to.getTripId(), to.getSigmoidFunction2Probs());
 //            vrOverlap.getTripId2Probs().put(to.getTripId(), to.getSigmoidFunction2Probs());
             vehicleRoute2VROverlpas.put(vehicleNumber, vrOverlap);
         }

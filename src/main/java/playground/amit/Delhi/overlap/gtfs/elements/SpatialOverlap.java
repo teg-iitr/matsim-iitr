@@ -35,7 +35,7 @@ public class SpatialOverlap {
     public void add(Trip trip, String vehicleNumber) {
         String trip_id = trip.getId();
         TripOverlap to = new TripOverlap(Id.create(trip_id, Trip.class));
-        to.setRouteId(trip.getRoute().getId());
+        to.setRouteLongName(trip.getRoute().getLongName());
         to.setVehicleNumber(vehicleNumber);
 
         // store route and trips

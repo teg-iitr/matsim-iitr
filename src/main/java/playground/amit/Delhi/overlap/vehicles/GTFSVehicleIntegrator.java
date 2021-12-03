@@ -29,12 +29,18 @@ public class GTFSVehicleIntegrator {
         List<VehicleDetails> vehicleDetailsList = this.routeId2VehicleDetails.get(routeName);
         if(vehicleDetailsList == null) return null;
 
+        String vehicleNumber = null;
+        double minDiff = Double.POSITIVE_INFINITY;
         for(VehicleDetails vehicleDetails : vehicleDetailsList){
-            List<Double> startTimes = vehicleDetails.getStartTimes();
+            List<Double> startTimes = vehicleDetails.getRouteNamesToStartTimes().get(routeName);
             double closestTime = closestNumberFromList(tripStartTime, startTimes);
-            if (closestTime < tripStartThreshold) return vehicleDetails.vehicleNumber;
+            double diff = Math.abs(closestTime-tripStartTime);
+            if ( diff <= tripStartThreshold && diff < minDiff ) {
+                minDiff = diff;
+                vehicleNumber = vehicleDetails.getVehicleNumber();
+            }
         }
-        return null;
+        return vehicleNumber;
     }
 
     public double closestNumberFromList(double number, List<Double> list){
@@ -58,9 +64,14 @@ public class GTFSVehicleIntegrator {
                     if (vehicleDetails==null){
                         vehicleDetails = new VehicleDetails(parts[0], vehicleNumber);
                     }
-                    vehicleDetails.getRouteNames().add(parts[2]);
-                    vehicleDetails.getStartTimes().add(toSeconds(parts[4]));
-                    vehicleDetails.getEndTimes().add(toSeconds(parts[4]));
+                    List<Double> startTimes = vehicleDetails.getRouteNamesToStartTimes().getOrDefault(parts[2], new ArrayList<>());
+                    startTimes.add(toSeconds(parts[4]));
+                    vehicleDetails.getRouteNamesToStartTimes().put(parts[2], startTimes);
+
+                    List<Double> endTimes = vehicleDetails.getRouteNamesToEndTimes().getOrDefault(parts[2], new ArrayList<>());
+                    endTimes.add(toSeconds(parts[6]));
+                    vehicleDetails.getRouteNamesToEndTimes().put(parts[2], endTimes);
+
                     this.vehicleNumberToVehicleDetails.put(vehicleNumber, vehicleDetails);
 
                     List<VehicleDetails> vds = this.routeId2VehicleDetails.get(parts[2]);
@@ -78,11 +89,10 @@ public class GTFSVehicleIntegrator {
     }
 
     public static class VehicleDetails{
-        final String depotName;
-        final String vehicleNumber;
-        final List<String> routeNames = new ArrayList<>();
-        final List<Double> startTimes = new ArrayList<>();
-        final List<Double> endTimes = new ArrayList<>();
+        private final String depotName;
+        private final String vehicleNumber;
+        private final Map<String, List<Double>> routeNamesToStartTimes = new HashMap<>();
+        private final Map<String, List<Double>> routeNamesToEndTimes = new HashMap<>();
 
         public VehicleDetails(String depotName, String vehicleNumber) {
             this.depotName = depotName;
@@ -97,16 +107,12 @@ public class GTFSVehicleIntegrator {
             return vehicleNumber;
         }
 
-        public List<String> getRouteNames() {
-            return this.routeNames;
+        public Map<String, List<Double>> getRouteNamesToStartTimes() {
+            return this.routeNamesToStartTimes;
         }
 
-        public List<Double> getStartTimes() {
-            return startTimes;
-        }
-
-        public List<Double> getEndTimes() {
-            return endTimes;
+        public Map<String, List<Double>> getRouteNamesToEndTimes() {
+            return this.routeNamesToEndTimes;
         }
     }
 

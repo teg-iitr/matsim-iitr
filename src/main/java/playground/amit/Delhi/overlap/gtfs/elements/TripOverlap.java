@@ -12,10 +12,10 @@ public class TripOverlap {
 
     private final List<Segment> segments = new ArrayList<>();
     private final Id<Trip> tripId;
-    private String routeId;
+    private String routeLongName;
     private final Map<Segment, SegmentalOverlap> seg2overlaps = new LinkedHashMap<>();
     private final Map<SigmoidFunction, Double> sigmoidFunction2Probs = new HashMap<>();
-    private final double overlappingLengthRatio = Double.NaN;
+//    private final double overlappingLengthRatio = Double.NaN;
     private String vehicleNumber;
 
     TripOverlap(Id<Trip> tripId) {
@@ -33,12 +33,12 @@ public class TripOverlap {
         return seg2overlaps;
     }
 
-    public String getRouteId() {
-        return routeId;
+    public String getRouteLongName() {
+        return routeLongName;
     }
 
-    public void setRouteId(String routeId) {
-        this.routeId = routeId;
+    public void setRouteLongName(String routeId) {
+        this.routeLongName = routeId;
     }
 
     public String getVehicleNumber() {

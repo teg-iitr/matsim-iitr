@@ -10,26 +10,26 @@ import java.util.*;
  */
 public class VehicleRouteOverlap {
     private final String vehicleNumber;
-    private final Map<String, List<Id<Trip>>> routeId2Trips = new HashMap<>(); // a vehicle may be serving multiple routes (eg., up and down)
+    private final Map<String, List<Id<Trip>>> routeName2Trips = new HashMap<>(); // a vehicle may be serving multiple routes (eg., up and down)
     private final Map<Id<Trip>, Map<SigmoidFunction, Double>> tripId2Probs = new HashMap<>();
     private final Map<SigmoidFunction, Double> routeProb = new HashMap<>();
 
     /**
      * Use if vehicle information is unavailable, a vehicle will be created with number same as that of route.
-     * @param routeId
+     * @param routeLongName
      */
-//    public VehicleRouteOverlap(String routeId){
-//        this.vehicleNumber = routeId;
-//        addRouteToVehicle(routeId);
+//    public VehicleRouteOverlap(String routeLongName){
+//        this.vehicleNumber = routeLongName;
+//        addRouteToVehicle(routeLongName);
 //    }
 
-    public VehicleRouteOverlap(String vehicleNumber, String routeId){
+    public VehicleRouteOverlap(String vehicleNumber, String routeLongName){
         this.vehicleNumber = vehicleNumber;
-        addRouteToVehicle(routeId);
+        addRouteToVehicle(routeLongName);
     }
 
-    public void addRouteToVehicle(String routeId){
-        this.routeId2Trips.put(routeId, new ArrayList<>());
+    public void addRouteToVehicle(String routeName){
+        this.routeName2Trips.put(routeName, new ArrayList<>());
     }
 
     public Map<SigmoidFunction, Double> getVRProb(){
@@ -45,11 +45,11 @@ public class VehicleRouteOverlap {
         return  routeProb;
     }
 
-    public void addProbsToTrip(String routeId, Id<Trip> tripId, Map<SigmoidFunction, Double> probs ){
-        if (this.routeId2Trips.get(routeId)==null){
-            throw new RuntimeException("Route Id "+routeId+" is not found.");
+    public void addProbsToTrip(String routeName, Id<Trip> tripId, Map<SigmoidFunction, Double> probs ){
+        if (this.routeName2Trips.get(routeName)==null){
+            throw new RuntimeException("Route name "+routeName+" is not found.");
         } else{
-            this.routeId2Trips.get(routeId).add(tripId);
+            this.routeName2Trips.get(routeName).add(tripId);
         }
         this.tripId2Probs.put(tripId, probs);
     }
@@ -67,7 +67,7 @@ public class VehicleRouteOverlap {
 //    }
 
     public Set<String> getRoutes(){
-        return this.routeId2Trips.keySet();
+        return this.routeName2Trips.keySet();
     }
 
     public String getVehicleNumber() {
