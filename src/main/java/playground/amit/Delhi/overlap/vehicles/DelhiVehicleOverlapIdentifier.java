@@ -1,7 +1,7 @@
 package playground.amit.Delhi.overlap.vehicles;
 
-import playground.amit.Delhi.overlap.gtfs.optimizer.OverlapOptimizer;
-import playground.amit.Delhi.overlap.gtfs.elements.SigmoidFunction;
+import playground.amit.Delhi.overlap.algo.optimizer.OverlapOptimizer;
+import playground.amit.Delhi.overlap.algo.elements.SigmoidFunction;
 import playground.amit.utils.FileUtils;
 
 /**

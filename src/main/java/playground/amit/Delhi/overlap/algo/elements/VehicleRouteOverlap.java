@@ -1,4 +1,4 @@
-package playground.amit.Delhi.overlap.gtfs.elements;
+package playground.amit.Delhi.overlap.algo.elements;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.pt2matsim.gtfs.lib.Trip;

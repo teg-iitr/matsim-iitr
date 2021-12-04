@@ -1,8 +1,8 @@
-package playground.amit.Delhi.overlap.gtfs.elements;
+package playground.amit.Delhi.overlap.algo.elements;
 
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.pt2matsim.gtfs.lib.Stop;
-import playground.amit.Delhi.overlap.gtfs.MyStopImpl;
+import playground.amit.Delhi.overlap.algo.MyStopImpl;
 
 /**
  * Created by Amit on 23/04/2021

@@ -1,11 +1,11 @@
-package playground.amit.Delhi.overlap.gtfs.elements;
+package playground.amit.Delhi.overlap.algo.elements;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.pt2matsim.gtfs.lib.Stop;
 import org.matsim.pt2matsim.gtfs.lib.StopTime;
 import org.matsim.pt2matsim.gtfs.lib.Trip;
-import playground.amit.Delhi.overlap.gtfs.MyStopImpl;
+import playground.amit.Delhi.overlap.algo.MyStopImpl;
 import playground.amit.utils.geometry.GeometryUtils;
 
 import java.util.*;

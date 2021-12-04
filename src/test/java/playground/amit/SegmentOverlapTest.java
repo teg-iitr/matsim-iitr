@@ -3,8 +3,8 @@ package playground.amit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.matsim.pt2matsim.gtfs.lib.Stop;
-import playground.amit.Delhi.overlap.gtfs.MyStopImpl;
-import playground.amit.Delhi.overlap.gtfs.elements.Segment;
+import playground.amit.Delhi.overlap.algo.MyStopImpl;
+import playground.amit.Delhi.overlap.algo.elements.Segment;
 
 /**
  * Created by Amit on 07/05/2021.

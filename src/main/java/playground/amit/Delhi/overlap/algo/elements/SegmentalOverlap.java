@@ -1,8 +1,8 @@
-package playground.amit.Delhi.overlap.gtfs.elements;
+package playground.amit.Delhi.overlap.algo.elements;
 
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.utils.collections.Tuple;
-import playground.amit.Delhi.overlap.gtfs.optimizer.OverlapOptimizer;
+import playground.amit.Delhi.overlap.algo.optimizer.OverlapOptimizer;
 
 import java.util.ArrayList;
 import java.util.List;

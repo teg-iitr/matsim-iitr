@@ -1,4 +1,4 @@
-package playground.amit.Delhi.overlap.gtfs.optimizer;
+package playground.amit.Delhi.overlap.algo.optimizer;
 
 import org.apache.log4j.Logger;
 import org.matsim.core.controler.OutputDirectoryLogging;
@@ -6,7 +6,7 @@ import org.matsim.core.utils.io.IOUtils;
 import org.matsim.pt2matsim.gtfs.GtfsFeed;
 import org.matsim.pt2matsim.gtfs.GtfsFeedImpl;
 import org.matsim.pt2matsim.gtfs.lib.Stop;
-import playground.amit.Delhi.overlap.gtfs.elements.*;
+import playground.amit.Delhi.overlap.algo.elements.*;
 import playground.amit.Delhi.overlap.vehicles.GTFSVehicleIntegrator;
 
 import java.io.BufferedWriter;
@@ -219,11 +219,12 @@ public class OverlapOptimizer {
         String filename = outputFolder+"segmentsProbs_"+suffix+"_"+"it-"+iteration+".txt.gz";
         BufferedWriter writer  = IOUtils.getBufferedWriter(filename);
         try {
-            writer.write("tripId\tstopA_lat\tstopA_lon\t_stopB_lat\tstopB_lon\tgeom\ttimebin\toverlapcount" +
+            writer.write("vehicleNumber\ttripId\tstopA_lat\tstopA_lon\t_stopB_lat\tstopB_lon\tgeom\ttimebin\toverlapcount" +
                     "\tstopA_seq\tstopB_seq\ttimeSpentOnSegment_sec\tlegnthOfSegment_m" +
                     "\tlogisticSigmoidProb\tbipolarSigmoidProb\ttanhProb\talgebraicSigmoidProb\n");
             for (TripOverlap to : spatialOverlap.getTrip2tripOverlap().values()) {
                 for (java.util.Map.Entry<Segment, SegmentalOverlap> val: to.getSeg2overlaps().entrySet()) {
+                    writer.write(to.getVehicleNumber()+"\t");
                     writer.write(to.getTripId()+"\t");
                     Segment key = val.getKey();
                     writer.write(key.getStopA().getLat()+"\t");

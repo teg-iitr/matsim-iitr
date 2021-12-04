@@ -1,7 +1,7 @@
 package playground.amit.Delhi.overlap.gtfs;
 
-import playground.amit.Delhi.overlap.gtfs.elements.SigmoidFunction;
-import playground.amit.Delhi.overlap.gtfs.optimizer.OverlapOptimizer;
+import playground.amit.Delhi.overlap.algo.elements.SigmoidFunction;
+import playground.amit.Delhi.overlap.algo.optimizer.OverlapOptimizer;
 
 /**
  * Created by Amit on 23/04/2021
