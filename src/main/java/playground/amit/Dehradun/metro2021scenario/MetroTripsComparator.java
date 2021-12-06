@@ -23,23 +23,25 @@ public class MetroTripsComparator {
 
     private final Map<Id<OD>, OD> odId2OD = new HashMap<>();
     private final DMAZonesProcessor zonesProcessor;
+    private final MetroStopsQuadTree metroStopsQuadTree;
 
     private final Map<Id<Node>, MetroStopDetails> stop_details = new HashMap<>();
 
-    public MetroTripsComparator(DMAZonesProcessor zonesProcessor){
+    public MetroTripsComparator(DMAZonesProcessor zonesProcessor, MetroStopsQuadTree metroStopsQuadTree){
         this.zonesProcessor = zonesProcessor;
+        this.metroStopsQuadTree = metroStopsQuadTree;
     }
 
     public static void main(String[] args) {
         String metro_trips_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/metro_trips_comparison_gh-router_NH-only_28-11-2021.txt";
         String stop_metro_share = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/metro_share_change_at_stops_NH-only_28-11-2021.txt";
 
-        new MetroTripsComparator(new DMAZonesProcessor()).run(metro_trips_file, stop_metro_share);
+        new MetroTripsComparator(new DMAZonesProcessor(), new MetroStopsQuadTree()).run(metro_trips_file, stop_metro_share, OD2MetroTripCharsWriter.readMetroData(HaridwarRishikeshScenarioRunner.OD_2_metro_trips_characteristics));
     }
 
-    public void run(String metro_trips_file, String stop_metro_share) {
+    public void run(String metro_trips_file, String stop_metro_share, Map<Id<OD>, TripChar> od2MetroTripChar) {
         readODFile(metro_trips_file);
-        setNearestStopToZone();
+        setNearestStopToZone(od2MetroTripChar);
         writeFile(stop_metro_share);
     }
 
@@ -67,16 +69,14 @@ public class MetroTripsComparator {
         }
     }
 
-    private void setNearestStopToZone(){
-
-        MetroStopsQuadTree metroStopsQuadTree = new MetroStopsQuadTree();
+    private void setNearestStopToZone(Map<Id<OD>, TripChar> od2MetroTripChar){
         for(OD od : this.odId2OD.values()){
-            Coord origin = DehradunUtils.Reverse_transformation.transform(this.zonesProcessor.getRandomCoords(od.getOrigin(), 1).get(0));
-            Coord destination = DehradunUtils.Reverse_transformation.transform(this.zonesProcessor.getRandomCoords(od.getDestination(), 1).get(0));
-
-            Node [] nearestMetroStops_origin = metroStopsQuadTree.getNearestNodeAndNodeInOppositeDirection(origin);
-            Node [] nearestMetroStops_destination = metroStopsQuadTree.getNearestNodeAndNodeInOppositeDirection(destination);
-            nearestMetroStops_destination = MetroStopsQuadTree.arrangeMetroStopsAsPerOriginLines(nearestMetroStops_origin, nearestMetroStops_destination);
+//            Coord origin = DehradunUtils.Reverse_transformation.transform(this.zonesProcessor.getRandomCoords(od.getOrigin(), 1).get(0));
+//            Coord destination = DehradunUtils.Reverse_transformation.transform(this.zonesProcessor.getRandomCoords(od.getDestination(), 1).get(0));
+//
+//            Node [] nearestMetroStops_origin = metroStopsQuadTree.getNearestNodeAndNodeInOppositeDirection(origin);
+//            Node [] nearestMetroStops_destination = metroStopsQuadTree.getNearestNodeAndNodeInOppositeDirection(destination);
+//            nearestMetroStops_destination = MetroStopsQuadTree.arrangeMetroStopsAsPerOriginLines(nearestMetroStops_origin, nearestMetroStops_destination);
 
             //do a check in advance to reduce the number of calls for GH routing API
 //            double [] accessDists = new double[] {NetworkUtils.haversineDistanceKm(origin.getY(), origin.getX(), nearestMetroStops_origin[0].getCoord().getY(), nearestMetroStops_origin[0].getCoord().getX()),
@@ -90,20 +90,22 @@ public class MetroTripsComparator {
 //            if ((accessDists[0] > 2.0 && egressDists [0] > 2.0) && (accessDists[1] > 2.0 && egressDists [1] > 2.0)) continue;
 
             //do another check in advance if the metro stops (entry/ exit) are same
-            if ( nearestMetroStops_origin[0].getId().equals(nearestMetroStops_destination[0].getId()) ) continue;
+//            if ( nearestMetroStops_origin[0].getId().equals(nearestMetroStops_destination[0].getId()) ) continue;
 
-            double shortestDist = Double.POSITIVE_INFINITY;
-            int final_index = 0;
-            for (int i = 0; i<nearestMetroStops_origin.length; i++) {
-                double dist =  GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(nearestMetroStops_origin[i].getCoord(), nearestMetroStops_destination[i].getCoord(),"metro",null).tripDist;
-                if (dist < shortestDist) {
-                    final_index = i;
-                    shortestDist = dist;
-                }
-            }
+//            double shortestDist = Double.POSITIVE_INFINITY;
+//            int final_index = 0;
+//            for (int i = 0; i<nearestMetroStops_origin.length; i++) {
+//                double dist =  GHNetworkDistanceCalculator.getDistanceInKmTimeInHr(nearestMetroStops_origin[i].getCoord(), nearestMetroStops_destination[i].getCoord(),"metro",null).tripDist;
+//                if (dist < shortestDist) {
+//                    final_index = i;
+//                    shortestDist = dist;
+//                }
+//            }
+            TripChar tc = od2MetroTripChar.get(od.getId());
+            if(tc==null) continue;
 
-            Node nearest_origin = nearestMetroStops_origin[final_index];
-            Node nearest_destination = nearestMetroStops_destination[final_index];
+            Node nearest_origin = this.metroStopsQuadTree.getMetroStopsNetwork().getNodes().get(Id.createNodeId(tc.access_stop));
+            Node nearest_destination = this.metroStopsQuadTree.getMetroStopsNetwork().getNodes().get(Id.createNodeId(tc.egress_stop));
 
 //            double access_dist = accessDists[final_index];
 //            double egress_dist = egressDists[final_index];

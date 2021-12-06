@@ -2,6 +2,7 @@ package playground.amit.Dehradun;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Node;
+import org.matsim.core.utils.collections.Tuple;
 import org.matsim.utils.objectattributes.attributable.Attributable;
 import org.matsim.utils.objectattributes.attributable.Attributes;
 
@@ -16,6 +17,8 @@ public class OD  implements Attributable {
     private final Attributes attributes = new Attributes();
     private Node origin_metro_stop ;
     private Node destination_metro_stop ;
+
+    private static final String id_sep = "_";
 
     public OD (String origin, String destination) {
         this.origin = origin;
@@ -49,7 +52,12 @@ public class OD  implements Attributable {
     }
 
     public static Id<OD> getID(String origin, String destination){
-        return Id.create(origin+"_"+destination, OD.class);
+        return Id.create(origin+OD.id_sep+destination, OD.class);
+    }
+
+    public static Tuple<String, String> getOriginAndDestination(Id<OD> id){
+        String [] ods = id.toString().split(OD.id_sep);
+        return new Tuple<>(ods[0],ods[1]);
     }
 
     @Override

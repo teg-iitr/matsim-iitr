@@ -22,4 +22,6 @@ public class TripChar {
     public double accessTime;
     public double egressDist;
     public double egressTime;
+    public String access_stop;
+    public String egress_stop;
 }

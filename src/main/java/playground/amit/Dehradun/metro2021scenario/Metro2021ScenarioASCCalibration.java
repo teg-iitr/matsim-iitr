@@ -33,31 +33,35 @@ public class Metro2021ScenarioASCCalibration {
     private static final String OD_metro_2021_file = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/OD_2021_metro.txt";
 
     private final DMAZonesProcessor dmaZonesProcessor;
+    private final GHNetworkDistanceCalculator ghNetworkDistanceCalculator;
 
-    public Metro2021ScenarioASCCalibration(DMAZonesProcessor dmaZonesProcessor){
+    public Metro2021ScenarioASCCalibration(DMAZonesProcessor dmaZonesProcessor, GHNetworkDistanceCalculator ghNetworkDistanceCalculator){
         this.dmaZonesProcessor = new DMAZonesProcessor();
+        this.ghNetworkDistanceCalculator = ghNetworkDistanceCalculator;
     }
 
     public static void main(String[] args) {
         String outFile = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/OD_2021_metro_trips_comparison_28-11-2021.txt";
-        new Metro2021ScenarioASCCalibration(new DMAZonesProcessor()).run(outFile);
+        new Metro2021ScenarioASCCalibration(new DMAZonesProcessor(), new GHNetworkDistanceCalculator(new MetroStopsQuadTree())).run(outFile, OD2MetroTripCharsWriter.readMetroData(HaridwarRishikeshScenarioRunner.OD_2_metro_trips_characteristics));
     }
 
-    void run(String outputFile){
+    void run(String outputFile, Map<Id<OD>, TripChar> od2metroTripChar){
         Map<Id<OD>, OD> od_2021_all = generateOD(OD_all_2021_file);
         Map<Id<OD>, OD> od_2021_metro = generateOD(OD_metro_2021_file);
 
-        GHNetworkDistanceCalculator ghNetworkDistanceCalculator = new GHNetworkDistanceCalculator();
-
         //process od_all and od_metro, store everything in attributes.
         for(OD od : od_2021_all.values()){
-//            System.out.println(od.getId());
 
             double metroTrips = od_2021_metro.get(od.getId()).getNumberOfTrips();
             od.getAttributes().putAttribute(HaridwarRishikeshScenarioRunner.metro_trips_old, metroTrips);
 
             double metroShare = metroTrips/ od.getNumberOfTrips();
+            TripChar metroTC = od2metroTripChar.get(od.getId());
+
             if (metroTrips ==0. || od.getNumberOfTrips()==0.){
+                od.getAttributes().putAttribute(HaridwarRishikeshScenarioRunner.METRO_ASC, Double.NaN);
+            } else if (metroTC==null) {
+                od.getAttributes().putAttribute(HaridwarRishikeshScenarioRunner.metro_trips_old, 0.0); //also update the metro trips in OD matrix so that it is not carried forward
                 od.getAttributes().putAttribute(HaridwarRishikeshScenarioRunner.METRO_ASC, Double.NaN);
             } else{
                 List<Coord> origin = this.dmaZonesProcessor.getRandomCoords(od.getOrigin(),HaridwarRishikeshScenarioRunner.numberOfPoints2DrawInEachZone);
@@ -78,23 +82,24 @@ public class Metro2021ScenarioASCCalibration {
 
                 boolean keepMetroTrips = false;
                 List<Double> ascs_metro = new ArrayList<>();
-                for (int i = 0; i<sum_exp_util_except_metro.size(); i ++){
+                for (int i = 0; i<HaridwarRishikeshScenarioRunner.numberOfPoints2DrawInEachZone; i ++){
                     if(sum_exp_util_except_metro.get(i)==0.) {
 //                        Logger.getLogger(Metro2021ScenarioASCCalibration.class).warn("The sum of exponential of utility of all modes except metro is zero for OD " + od.getId() + ". This means everyone will use metro. This should not happen.");
 //                        od.getAttributes().putAttribute(METRO_ASC, Double.NaN);
                     } else {
-                        TripChar tc = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
-                                DehradunUtils.Reverse_transformation.transform(destination.get(i)), DehradunUtils.TravelModesMetroCase2021.metro.name());
-                        if( tc.accessDist <= HaridwarRishikeshScenarioRunner.threshold_access_egress_distance && tc.egressDist  <= HaridwarRishikeshScenarioRunner.threshold_access_egress_distance) {
+//                        TripChar metroTC = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(DehradunUtils.Reverse_transformation.transform(origin.get(i)),
+//                                DehradunUtils.Reverse_transformation.transform(destination.get(i)), DehradunUtils.TravelModesMetroCase2021.metro.name());
+
+                      if( metroTC.accessDist <= HaridwarRishikeshScenarioRunner.threshold_access_egress_distance && metroTC.egressDist  <= HaridwarRishikeshScenarioRunner.threshold_access_egress_distance) {
                             keepMetroTrips = true;
-                            double util_metro_no_asc = UtilityComputation.getUtilMetroWithoutASC(tc.tripDist + tc.accessDist + tc.egressDist, tc.tripTime + tc.accessTime + tc.egressTime);
+                            double util_metro_no_asc = UtilityComputation.getUtilMetroWithoutASC(metroTC.tripDist + metroTC.accessDist + metroTC.egressDist, metroTC.tripTime + metroTC.accessTime + metroTC.egressTime);
                             double asc_metro = getMetroASC(metroShare, sum_exp_util_except_metro.get(i), util_metro_no_asc);
                             ascs_metro.add(asc_metro);
                         }
                     }
                 }
                 if(keepMetroTrips){
-                    od.getAttributes().putAttribute(HaridwarRishikeshScenarioRunner.METRO_ASC, ListUtils.doubleSum(ascs_metro) /ascs_metro.size());
+                    od.getAttributes().putAttribute(HaridwarRishikeshScenarioRunner.METRO_ASC, ListUtils.doubleMean(ascs_metro));
                 } else{
                     od.getAttributes().putAttribute(HaridwarRishikeshScenarioRunner.metro_trips_old, 0.0); //also update the metro trips in OD matrix so that it is not carried forward
                     od.getAttributes().putAttribute(HaridwarRishikeshScenarioRunner.METRO_ASC, Double.NaN);
@@ -142,7 +147,10 @@ public class Metro2021ScenarioASCCalibration {
                     for (int index = 1; index<destinations.size()-2;index++){ // first column is origin number, last column is row sum --> no need to store them
                         String desti = destinations.get(index);
                         if (origin.equalsIgnoreCase("Total")) continue; // last row is column sum --> no need to store it.
-                        else if(this.dmaZonesProcessor.getDehradunZones().contains(origin) && this.dmaZonesProcessor.getDehradunZones().contains(desti)) continue; //--> excluding dehradun intrazonal zones
+                        else if(this.dmaZonesProcessor.excludeTrip(origin, desti)) {
+                            //--> excluding any trip which starts/ ends in dehradun zones
+                            continue;
+                        }
 
                         OD od = new OD(origin, desti);
                         od.setNumberOfTrips( (int) Math.round(Integer.parseInt(parts[index]) ) );

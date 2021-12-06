@@ -9,7 +9,6 @@ import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.IOUtils;
 import org.opengis.feature.simple.SimpleFeature;
 import playground.amit.Dehradun.metro2021scenario.HaridwarRishikeshScenarioRunner;
-import playground.amit.Dehradun.metro2021scenario.MetroShareEstimator;
 import playground.amit.utils.FileUtils;
 import playground.amit.utils.geometry.GeometryUtils;
 
@@ -46,6 +45,10 @@ public class DMAZonesProcessor {
         this.excludedGeom = GeometryUtils.getGeometryFromListOfFeatures(ShapeFileReader.getAllFeatures(forest_area_shape_file));
         HaridwarRishikeshScenarioRunner.LOG.info("storing Dehradun zones.");
         storeDehradunZones();
+    }
+
+    public List<String> getZonesList(){
+        return this.features.stream().map(sf -> (String) sf.getAttribute("Zone")).collect(Collectors.toList());
     }
 
     private void storeDehradunZones() {
@@ -88,7 +91,12 @@ public class DMAZonesProcessor {
         return Arrays.stream(rnd.getGeometry().getCoordinates()).map(MGC::coordinate2Coord).collect(Collectors.toList());
     }
 
-    public List<String> getDehradunZones() {
-        return dehradunZones;
+//    public List<String> getDehradunZones() {
+//        return dehradunZones;
+//    }
+
+    public boolean excludeTrip(String origin, String destination){
+        //--> excluding any trip which starts/ ends in dehradun zones
+        return this.dehradunZones.contains(origin) || this.dehradunZones.contains(destination);
     }
 }

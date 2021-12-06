@@ -26,6 +26,7 @@ public class MetroStopsQuadTree {
     public static final String metro_line_name = "line_name";
     public static final String node_name = "stop_name";
     public static final String node_id_opposite_direction = "stop_id_opposite_direction";
+    public static final String stop_number = "stop_number";
 
     private final QuadTree<Node> qt;
     private final Network metroStopsNetwork;
@@ -48,6 +49,7 @@ public class MetroStopsQuadTree {
                     n.getAttributes().putAttribute(node_name, parts[0]);
                     n.getAttributes().putAttribute(metro_line_name, parts[4]);
                     n.getAttributes().putAttribute(node_id_opposite_direction, switchCharacters(parts[1]));
+                    n.getAttributes().putAttribute(stop_number, parts[1].substring(2));
                     metroStopsNetwork.addNode(n);
                     line = reader.readLine();
                 }
@@ -71,6 +73,16 @@ public class MetroStopsQuadTree {
        char first=str.charAt(0);
        char second=str.charAt(1);
        return String.valueOf(second) + first + str.substring(2);
+    }
+
+    public boolean isInRightOrder(int accessStopOrder, int egressStopOrder, String line_name){
+        if (line_name.startsWith("H") && accessStopOrder < egressStopOrder) return true; // line H to R --> HR1 to HR20
+        else if (line_name.startsWith("R") && accessStopOrder > egressStopOrder) return true; // linke R to H --> RH20 to RH1
+        else if( !( line_name.startsWith("R") || line_name.startsWith("H") ) ) {
+            throw new RuntimeException("Metro line name "+line_name +" is unknown.");
+        } else{
+            return false;
+        }
     }
 
     public QuadTree<Node> getQuadTree(){

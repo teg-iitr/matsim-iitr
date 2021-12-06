@@ -18,7 +18,7 @@ public class MetroStop2StopDistanceMatrix {
 
     private final Map<Id<OD>,OD> odMap = new HashMap<>();
     private static final String outputFile = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/metro_stops_distance_matrix.txt";
-    private final GHNetworkDistanceCalculator ghNetworkDistanceCalculator = new GHNetworkDistanceCalculator();
+    private final GHNetworkDistanceCalculator ghNetworkDistanceCalculator = new GHNetworkDistanceCalculator(new MetroStopsQuadTree());
 
     public static void main(String[] args) {
         new MetroStop2StopDistanceMatrix().run();

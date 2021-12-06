@@ -50,7 +50,7 @@ public class TravelTimeMatrixWriter {
 
     private void run(){
         List<OD> modal_od_travelTimes = new ArrayList<>();
-        GHNetworkDistanceCalculator ghNetworkDistanceCalculator = new GHNetworkDistanceCalculator();
+        GHNetworkDistanceCalculator ghNetworkDistanceCalculator = new GHNetworkDistanceCalculator(new MetroStopsQuadTree());
 
         for(SimpleFeature origin_feature : features) {
             String origin = (String) origin_feature.getAttribute("Zone"); // a unique key
