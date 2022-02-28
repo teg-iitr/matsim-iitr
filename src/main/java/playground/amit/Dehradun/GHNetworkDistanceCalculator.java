@@ -1,6 +1,7 @@
 package playground.amit.Dehradun;
 
 import org.apache.log4j.Logger;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -174,7 +175,7 @@ public class GHNetworkDistanceCalculator {
         sc.close();
 
         JSONParser parse = new JSONParser();
-        JSONObject json =  (JSONObject)parse.parse(inline.toString());
+        JSONObject json =  ((JSONObject)((JSONArray)parse.parse(inline.toString())).get(0));
         JSONObject summary = (JSONObject) json.get("summary");
         return new TripChar((Double) summary.get("distance")/1000., (Double) summary.get("time")/3600.);
     }

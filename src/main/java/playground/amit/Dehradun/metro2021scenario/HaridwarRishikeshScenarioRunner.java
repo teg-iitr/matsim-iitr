@@ -16,7 +16,7 @@ import java.util.Map;
 public class HaridwarRishikeshScenarioRunner {
     public static final Logger LOG = Logger.getLogger(HaridwarRishikeshScenarioRunner.class);
 
-    private static final String date = "06-12-2021";
+    private static final String date = "15-12-2021_7-30";
     public static final String OD_2_metro_trips_characteristics = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/HR/OD2MetroTripChars_"+date+".txt";
 
     public static final String total_trips = "total";
@@ -26,15 +26,14 @@ public class HaridwarRishikeshScenarioRunner {
 
     public enum HRScenario { RingRoadOnly, NHOnly, Integrated}
 
-    private final HRScenario hr_scenario = HRScenario.Integrated;
+    private final HRScenario hr_scenario = HRScenario.RingRoadOnly  ;
     private static final boolean runASCCalibration = false;
-    public static final int numberOfPoints2DrawInEachZone = 20;
+    public final boolean writeOD2MetroTripCharsFiles = false;
+    public static final int numberOfPoints2DrawInEachZone = 50;
     public static final double threshold_access_egress_distance = 2.5;
 
     public static final double walk_speed = 5.;
     public static final double walk_beeline_distance_factor = 1.1;
-
-    public final boolean writeOD2MetroTripCharsFiles = false;
 
     public static void main(String[] args) {
         new HaridwarRishikeshScenarioRunner().run();
@@ -43,7 +42,7 @@ public class HaridwarRishikeshScenarioRunner {
     public void run() {
         String outFile_post_ASC_calibration = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/HR/OD_2021_metro_ASC_"+date+".txt";
         String outFile_metro_share = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/HR/metro_trips_comparison_ODLevel_"+hr_scenario+"_"+date+".txt";
-        String outFile_stops_ridership_compare = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/HR/metro_ridership_at_stops_"+hr_scenario+"_"+date+".txt";
+        String outFile_stops_ridership_compare = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/HR/metro_ridership_at_stops_"+hr_scenario+"_"+date+"_8-50.txt";
 
         DMAZonesProcessor dmaZonesProcessor = new DMAZonesProcessor();
         MetroStopsQuadTree metroStopsQuadTree = new MetroStopsQuadTree();
