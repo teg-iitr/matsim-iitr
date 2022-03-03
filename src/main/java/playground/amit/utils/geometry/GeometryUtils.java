@@ -48,14 +48,14 @@ public final class GeometryUtils {
 	/**
 	 * @return a random point inside given feature
 	 */
-	public static Point getRandomPointsInsideFeature (final SimpleFeature feature) {
-		return getRandomPointsInsideGeometry( (Geometry) feature.getDefaultGeometry() );
+	public static Point getRandomPointInsideFeature(final SimpleFeature feature) {
+		return getRandomPointInsideGeometry( (Geometry) feature.getDefaultGeometry() );
 	}
 
 	/**
 	 * @return a random point inside given geometry
 	 */
-	public static Point getRandomPointsInsideGeometry (final Geometry geometry) {
+	public static Point getRandomPointInsideGeometry(final Geometry geometry) {
 		RandomPointsBuilder rnd = new RandomPointsBuilder(GF);
 		rnd.setNumPoints(1);
 		rnd.setExtent(geometry);
@@ -68,7 +68,7 @@ public final class GeometryUtils {
 	 */
 	public static Point getRandomPointsInsideFeatures (final List<SimpleFeature> features) {
 		Geometry combinedGeometry = getGeometryFromListOfFeatures(features);
-		return getRandomPointsInsideGeometry(combinedGeometry);
+		return getRandomPointInsideGeometry(combinedGeometry);
 	}
 
 	/**

@@ -148,7 +148,7 @@ public class DMADemandGenerator {
         for (SimpleFeature feature : this.features){
             String handle = (String) feature.getAttribute("Zone"); // a unique key
             if (handle.equals(zoneId)){
-                Point p = GeometryUtils.getRandomPointsInsideFeature(feature);
+                Point p = GeometryUtils.getRandomPointInsideFeature(feature);
                 return new Coord(p.getX(), p.getY());
             }
         }

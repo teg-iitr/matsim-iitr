@@ -156,11 +156,11 @@ public class UrbanDemandGenerator {
 
 								SimpleFeature feature = iterator.next();
 
-								p = GeometryUtils.getRandomPointsInsideFeature(feature);
+								p = GeometryUtils.getRandomPointInsideFeature(feature);
 								Coord fromZoneCoord = new Coord(p.getX(), p.getY());
 								homeZoneCoordTransform = PatnaUtils.COORDINATE_TRANSFORMATION.transform(fromZoneCoord);
 
-								q = GeometryUtils.getRandomPointsInsideFeature(feature);
+								q = GeometryUtils.getRandomPointInsideFeature(feature);
 								Coord toZoneCoord = new Coord(q.getX(), q.getY());
 								workZoneCoordTransform= PatnaUtils.COORDINATE_TRANSFORMATION.transform(toZoneCoord);
 							}
@@ -171,12 +171,12 @@ public class UrbanDemandGenerator {
 								String zoneId  = String.valueOf(id);
 
 								if(fromZoneId.equals(zoneId) ) {
-									p = GeometryUtils.getRandomPointsInsideFeature(feature);
+									p = GeometryUtils.getRandomPointInsideFeature(feature);
 									Coord fromZoneCoord = new Coord(p.getX(), p.getY());
 									homeZoneCoordTransform = PatnaUtils.COORDINATE_TRANSFORMATION.transform(fromZoneCoord);
 								}
 								else if (toZoneId.equals(zoneId)){
-									q = GeometryUtils.getRandomPointsInsideFeature(feature);
+									q = GeometryUtils.getRandomPointInsideFeature(feature);
 									Coord toZoneCoord = new Coord(q.getX(), q.getY());
 									workZoneCoordTransform= PatnaUtils.COORDINATE_TRANSFORMATION.transform(toZoneCoord);
 								}
