@@ -32,8 +32,8 @@ public class ODMatrixGenerator {
     private static final String shapeFile = "C:\\Users\\Amit\\Documents\\git-repos\\matsim-Indian-scenarios\\Jaipur\\shapeFile\\Jaipur\\datameet\\Jaipur_Wards-SHP\\Jaipur_Wards.shp";
     private static final String ODMatrixFile = "C:\\Users\\Amit\\Downloads\\OD Matrix.csv";
     private static final String zone_key= "WARD_NO";
-    private static final String ORIGIN_ACTIVITY = "origin";
-    private static final String DESTINATION_ACTIVITY = "destination";
+    public static final String ORIGIN_ACTIVITY = "origin";
+    public static final String DESTINATION_ACTIVITY = "destination";
     private static final CoordinateTransformation transformation = TransformationFactory.getCoordinateTransformation(TransformationFactory.WGS84, JaipurUtils.EPSG);
 
     public static void main(String[] args) {
