@@ -29,8 +29,8 @@ public class JaipurController {
 //        String configFile = "";
 //        Config config = ConfigUtils.loadConfig(configFile);
 
-        String networkFile = "C:/Users/Amit/Downloads/matsim-example-scenario/input/network.xml.gz";
-        String plansFile = "C:/Users/Amit/Downloads/matsim-example-scenario/input/plans.xml.gz";
+        String networkFile = "C:\\Users\\Amit\\Documents\\git-repos\\matsim-Indian-scenarios\\Jaipur\\matsimFiles\\jaipur_net_insideDistrictBoundary_09032022.xml.gz";
+        String plansFile = "C:\\Users\\Amit\\Downloads\\matsim-example-scenario\\input\\plans.xml.gz";
         Collection<String> mainModes = Arrays.asList("car","motorbike","truck");
         String outputDir = "C:/Users/Amit/Downloads/matsim-example-scenario/output/";
 
