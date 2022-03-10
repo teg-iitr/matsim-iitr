@@ -34,18 +34,18 @@ public class RunFDDataExample {
 
     public static void main(String[] args) {
 
-        boolean runUsingConfig = true;
+        boolean runUsingConfig = false;
 
         Scenario scenario ;
 
         if (runUsingConfig ) {
-            String configFile = FileUtils.RUNS_SVN+"/dynamicPCU/raceTrack/input/config.xml";
+            String configFile = "../../Downloads/config.xml";
             scenario = ScenarioUtils.loadScenario(ConfigUtils.loadConfig(configFile));
         } else {
             scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
         }
 
-        String myDir = FileUtils.RUNS_SVN+"/dynamicPCU/raceTrack/test";
+        String myDir = "../../Downloads/test";
         String outFolder ="/1lane/";
         scenario.getConfig().controler().setOutputDirectory(myDir+outFolder);
 

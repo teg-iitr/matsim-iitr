@@ -17,9 +17,12 @@ import org.matsim.core.mobsim.framework.Mobsim;
 import org.matsim.core.mobsim.qsim.PopulationModule;
 import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.QSimBuilder;
+import org.matsim.core.mobsim.qsim.qnetsimengine.ConfigurableQNetworkFactory;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QNetworkFactory;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QVehicle;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QVehicleImpl;
+import org.matsim.core.mobsim.qsim.qnetsimengine.linkspeedcalculator.DefaultLinkSpeedCalculator;
+import org.matsim.core.router.util.TravelTime;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
@@ -36,18 +39,19 @@ public class FDQSimProvider implements Provider<Mobsim> {
 	
 	private final Scenario scenario;
 	private final EventsManager events;
-	private final QNetworkFactory qnetworkFactory;
+//	private final QNetworkFactory qnetworkFactory;
 	
 	private final Map<String, VehicleType> modeToVehicleTypes ;
 	private final FDNetworkGenerator fdNetworkGenerator;
 	private final FDStabilityTester stabilityTester;
 	
 	@Inject
-	private FDQSimProvider(Scenario scenario, EventsManager events, QNetworkFactory qnetworkFactory,
+	private FDQSimProvider(Scenario scenario, EventsManager events,
+//						   QNetworkFactory qnetworkFactory,
 						   FDNetworkGenerator fdNetworkGenerator, FDStabilityTester stabilityTester) {
 		this.scenario = scenario;
 		this.events = events;
-		this.qnetworkFactory = qnetworkFactory;
+//		this.qnetworkFactory = qnetworkFactory;
 		this.modeToVehicleTypes = this.scenario.getVehicles()
 											   .getVehicleTypes()
 											   .entrySet()
@@ -66,7 +70,20 @@ public class FDQSimProvider implements Provider<Mobsim> {
 				.addOverridingModule(new AbstractModule() {
 					@Override
 					public void install() {
-						bind(QNetworkFactory.class).toInstance(qnetworkFactory);
+						bind(QNetworkFactory.class).toProvider(new Provider<QNetworkFactory>() {
+							@Inject
+							private Scenario scenario;
+
+							@Inject
+							private EventsManager events;
+
+							@Override
+							public QNetworkFactory get() {
+								final ConfigurableQNetworkFactory factory = new ConfigurableQNetworkFactory(events, scenario);
+								factory.setLinkSpeedCalculator(new DefaultLinkSpeedCalculator());
+								return factory;
+							}
+						});
 					}
 				}) //
 				.build(scenario, events);
@@ -116,5 +133,4 @@ public class FDQSimProvider implements Provider<Mobsim> {
 		}
 		return qSim;
 	}
-	
 }

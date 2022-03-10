@@ -40,9 +40,11 @@ import org.matsim.core.config.groups.StrategyConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.controler.TerminationCriterion;
+import org.matsim.core.mobsim.qsim.qnetsimengine.QNetworkFactory;
 import org.matsim.core.network.VariableIntervalTimeVariantLinkFactory;
 import org.matsim.core.network.io.NetworkWriter;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
+import org.matsim.vehicles.MatsimVehicleWriter;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.VehicleWriterV1;
@@ -67,7 +69,7 @@ public class FDModule extends AbstractModule {
 	private static FDNetworkGenerator fdNetworkGenerator;
 
 	private String[] travelModes;
-	private FDConfigGroup FDConfigGroup;
+	private final FDConfigGroup FDConfigGroup;
 
 	public FDModule(final Scenario scenario){
 		FDConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), FDConfigGroup.class);
@@ -80,7 +82,7 @@ public class FDModule extends AbstractModule {
 
 		new ConfigWriter(scenario.getConfig()).write(this.runDir+"/output_config.xml");
 		new NetworkWriter(scenario.getNetwork()).write(this.runDir+"/output_network.xml");
-		new VehicleWriterV1(scenario.getVehicles()).writeFile(this.runDir+"/output_vehicles.xml");
+		new MatsimVehicleWriter(scenario.getVehicles()).writeFile(this.runDir+"/output_vehicles.xml");
 	}
 
 	private void checkForConsistencyAndInitialize(){
@@ -120,6 +122,9 @@ public class FDModule extends AbstractModule {
 	}
 
 	private void setUpConfig() {
+		// TODO: following need to updated.
+		scenario.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
+
 		// required when using controler
 		PlanCalcScoreConfigGroup.ActivityParams home = new PlanCalcScoreConfigGroup.ActivityParams("home");
 		home.setScoringThisActivityAtAll(false);
@@ -153,28 +158,28 @@ public class FDModule extends AbstractModule {
 
 	@Override
 	public void install() {
-		bind(FDNetworkGenerator.class).toInstance(fdNetworkGenerator); // required for FDTrackMobsimAgent
+		this.bind(FDNetworkGenerator.class).toInstance(fdNetworkGenerator); // required for FDTrackMobsimAgent
 
 		this.bindMobsim().toProvider(FDQSimProvider.class);
 
-		bind(GlobalFlowDynamicsUpdator.class).asEagerSingleton(); //provide same instance everywhere
-		addEventHandlerBinding().to(GlobalFlowDynamicsUpdator.class);
+		this.bind(GlobalFlowDynamicsUpdator.class).asEagerSingleton(); //provide same instance everywhere
+		this.addEventHandlerBinding().to(GlobalFlowDynamicsUpdator.class);
 
 		if (FDConfigGroup.isRunningDistribution()) {
-			bind(FDAgentsGenerator.class).to(FDDistributionAgentsGeneratorImpl.class);
+			this.bind(FDAgentsGenerator.class).to(FDDistributionAgentsGeneratorImpl.class);
 		} else {
-			bind(FDAgentsGenerator.class).to(FDAgentsGeneratorImpl.class);
+			this.bind(FDAgentsGenerator.class).to(FDAgentsGeneratorImpl.class);
 		}
 
-		bind(FDAgentsGeneratorControlerListner.class).asEagerSingleton(); //probably, not really necessary, since there is no shared information wherever it is required.
-		addControlerListenerBinding().to(FDAgentsGeneratorControlerListner.class);
-		bind(TerminationCriterion.class).to(FDAgentsGeneratorControlerListner.class);
+		this.bind(FDAgentsGeneratorControlerListner.class).asEagerSingleton(); //probably, not really necessary, since there is no shared information wherever it is required.
+		this.addControlerListenerBinding().to(FDAgentsGeneratorControlerListner.class);
+		this.bind(TerminationCriterion.class).to(FDAgentsGeneratorControlerListner.class);
 
-		bind(FDDataWriter.class).asEagerSingleton();// necessary to access constructor arguments
-		addControlerListenerBinding().to(FDDataWriter.class);
+		this.bind(FDDataWriter.class).asEagerSingleton();// necessary to access constructor arguments
+		this.addControlerListenerBinding().to(FDDataWriter.class);
 
-		bind(FDStabilityTester.class).asEagerSingleton();
-		bind(FDDataContainer.class).asEagerSingleton();
+		this.bind(FDStabilityTester.class).asEagerSingleton();
+		this.bind(FDDataContainer.class).asEagerSingleton();
 	}
 
 	private void createLogFile(){
