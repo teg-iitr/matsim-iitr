@@ -50,6 +50,7 @@ public class RunFDDataExample {
         scenario.getConfig().controler().setOutputDirectory(myDir+outFolder);
 
         Controler controler = new Controler(scenario);
+//        controler.addOverridingQSimModule(new FDQSimModule());
         controler.addOverridingModule(new FDModule(scenario));
         controler.run();
 

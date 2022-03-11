@@ -49,7 +49,7 @@ public class FDAgentsGeneratorControlerListner implements IterationStartsListene
 
     @Override
     public boolean mayTerminateAfterIteration(int i) {
-        throw new RuntimeException("not implemented.");
+        return ! this.fdDataContainer.getListOfPointsToRun().isEmpty();
     }
 
     //    @Override

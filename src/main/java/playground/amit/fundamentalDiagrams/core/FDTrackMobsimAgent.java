@@ -114,7 +114,7 @@ public class FDTrackMobsimAgent implements MobsimAgent, MobsimDriverAgent {
             // TODO: if the link ids are not consecutive numbers, this will not work.
             // Probably, store the consecutive link Ids...then get the index of current link and then return next link..
             Id<Link> existingLInkId = this.currentLinkId;
-            return Id.createLinkId(Integer.valueOf(existingLInkId.toString())+1);
+            return Id.createLinkId(Integer.parseInt(existingLInkId.toString())+1);
         }
     }
 
