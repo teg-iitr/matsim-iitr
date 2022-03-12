@@ -49,7 +49,7 @@ public class FDAgentsGeneratorControlerListner implements IterationStartsListene
 
     @Override
     public boolean mayTerminateAfterIteration(int i) {
-        return ! this.fdDataContainer.getListOfPointsToRun().isEmpty();
+        return false;
     }
 
     //    @Override

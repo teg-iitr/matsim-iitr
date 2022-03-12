@@ -18,6 +18,7 @@ import org.matsim.core.mobsim.qsim.PopulationModule;
 import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.QSimBuilder;
 import org.matsim.core.mobsim.qsim.QSimModule;
+import org.matsim.core.mobsim.qsim.agents.PopulationAgentSource;
 import org.matsim.core.mobsim.qsim.qnetsimengine.ConfigurableQNetworkFactory;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QNetworkFactory;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QVehicle;
@@ -66,7 +67,9 @@ public class FDQSimProvider implements Provider<Mobsim> {
 	public Mobsim get() {
 		final QSim qSim = new QSimBuilder(scenario.getConfig()) //
 				.useDefaults() //
-				.removeModule(PopulationModule.class) //
+				.configureQSimComponents( components -> {
+						components.removeNamedComponent(PopulationModule.COMPONENT_NAME);
+					} )
 //				.addOverridingModule(new AbstractModule() {
 //					@Override
 //					public void install() {
@@ -79,33 +82,29 @@ public class FDQSimProvider implements Provider<Mobsim> {
 		FDModule.LOG.info("Mobsim agents' are directly added to AgentSource.");
 		FDModule.LOG.info("=======================");
 
-		AgentSource agentSource = new AgentSource() {
-			@Override
-			public void insertAgentsIntoMobsim() {
+		AgentSource agentSource = () -> {
+			for (Person person : scenario.getPopulation().getPersons().values()) {
+				String travelMode = (String) person.getAttributes().getAttribute(PERSON_MODE_ATTRIBUTE_KEY);
+				double randDouble = MatsimRandom.getRandom().nextDouble();
+				double actEndTime = randDouble * FDModule.MAX_ACT_END_TIME;
 
-				for (Person person : scenario.getPopulation().getPersons().values()) {
-					String travelMode = (String) person.getAttributes().getAttribute(PERSON_MODE_ATTRIBUTE_KEY);
-					double randDouble = MatsimRandom.getRandom().nextDouble();
-					double actEndTime = randDouble * FDModule.MAX_ACT_END_TIME;
-
-					FDTrackMobsimAgent agent = new FDTrackMobsimAgent(person.getId(), actEndTime, travelMode, fdNetworkGenerator);
-					agent.setStabilityTester(stabilityTester);
-					qSim.insertAgentIntoMobsim(agent);
+				FDTrackMobsimAgent agent = new FDTrackMobsimAgent(person.getId(), actEndTime, travelMode, fdNetworkGenerator);
+				agent.setStabilityTester(stabilityTester);
+				qSim.insertAgentIntoMobsim(agent);
 
 //					AttributableVehicle attributableVehicle = new AttributableVehicle(Id.create(agent.getId(), Vehicle.class), modeToVehicleTypes.get(travelMode));
-					Vehicle attributableVehicle = VehicleUtils.createVehicle(Id.create(agent.getId(), Vehicle.class), modeToVehicleTypes.get(travelMode));
-					final QVehicle vehicle = new QVehicleImpl(
+				Vehicle attributableVehicle = VehicleUtils.createVehicle(Id.create(agent.getId(), Vehicle.class), modeToVehicleTypes.get(travelMode));
+				final QVehicle vehicle = new QVehicleImpl(
 //							VehicleUtils.getFactory().createVehicle(Id.create(agent.getId(), Vehicle.class), modeToVehicleTypes.get(travelMode))
-							attributableVehicle
-					);
-					vehicle.setDriver(agent);
-					scenario.getVehicles().removeVehicle(vehicle.getId());
-					scenario.getVehicles().addVehicle(vehicle.getVehicle());
-					agent.setVehicle(vehicle);
-					final Id<Link> linkId4VehicleInsertion = fdNetworkGenerator.getTripDepartureLinkId();
+						attributableVehicle
+				);
+				vehicle.setDriver(agent);
+				scenario.getVehicles().removeVehicle(vehicle.getId());
+				scenario.getVehicles().addVehicle(vehicle.getVehicle());
+				agent.setVehicle(vehicle);
+				final Id<Link> linkId4VehicleInsertion = fdNetworkGenerator.getTripDepartureLinkId();
 //					qSim.createAndParkVehicleOnLink(vehicle.getVehicle(), linkId4VehicleInsertion);
-					qSim.addParkedVehicle(vehicle, linkId4VehicleInsertion);
-				}
+				qSim.addParkedVehicle(vehicle, linkId4VehicleInsertion);
 			}
 		};
 
