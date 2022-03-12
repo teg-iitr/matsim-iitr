@@ -21,6 +21,7 @@ package playground.amit.fundamentalDiagrams;
 
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 import playground.amit.fundamentalDiagrams.core.FDModule;
@@ -39,13 +40,13 @@ public class RunFDDataExample {
         Scenario scenario ;
 
         if (runUsingConfig ) {
-            String configFile = "../../Downloads/config.xml";
+            String configFile = "../../../Downloads/config.xml";
             scenario = ScenarioUtils.loadScenario(ConfigUtils.loadConfig(configFile));
         } else {
             scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
         }
 
-        String myDir = "../../Downloads/test";
+        String myDir = "../../../Downloads/test";
         String outFolder ="/1lane/";
         scenario.getConfig().controler().setOutputDirectory(myDir+outFolder);
 
