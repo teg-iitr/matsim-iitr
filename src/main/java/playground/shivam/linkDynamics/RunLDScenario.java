@@ -84,7 +84,7 @@ public class RunLDScenario {
 		config.controler().setDumpDataAtEnd(true);
 		config.controler().setCreateGraphs(true);
 		config.controler().setWriteEventsInterval(50);
-		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.failIfDirectoryExists);
+		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
 //        config.controler().setRunId();
 
 		StrategyConfigGroup.StrategySettings reRoute = new StrategyConfigGroup.StrategySettings();
@@ -127,6 +127,7 @@ public class RunLDScenario {
 		scenario.getVehicles().addVehicleType(truck);
 
 		Controler controler = new Controler(scenario);
+		controler.addOverridingQSimModule(new LDModule());
 		controler.run();
 	}
 }
