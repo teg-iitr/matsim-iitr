@@ -1,17 +1,16 @@
-package playground.shivam.linkDynamics;
+package playground.shivam.trafficChar;
 
-import ch.sbb.matsim.routing.pt.raptor.SwissRailRaptorModule;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
-import org.matsim.core.config.CommandLine;
-import org.matsim.core.config.CommandLine.ConfigurationException;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
-import org.matsim.core.config.groups.QSimConfigGroup.StarttimeInterpretation;
 import org.matsim.core.config.groups.StrategyConfigGroup;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
@@ -19,12 +18,12 @@ import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vehicles.VehicleType;
 import playground.amit.jaipur.plans.ODMatrixGenerator;
-import playground.shivam.linkDynamics.core.LDConfigGroup;
+import playground.shivam.trafficChar.core.TrafficCharConfigGroup;
 
 import java.util.Arrays;
 import java.util.Collection;
 
-public class RunLDScenario {
+public class RunTrafficCharScenario {
 
 	public static void main(String[] args) {
 		String networkFile = "/Users/shivam4896/Downloads/network.xml.gz";
@@ -56,7 +55,7 @@ public class RunLDScenario {
 		config.planCalcScore().addActivityParams(homeAct);
 
 		PlanCalcScoreConfigGroup.ActivityParams destinationAct = new PlanCalcScoreConfigGroup.ActivityParams(ODMatrixGenerator.DESTINATION_ACTIVITY);
-		;
+
 		destinationAct.setTypicalDuration(10 * 3600.);
 		destinationAct.setScoringThisActivityAtAll(false);
 		config.planCalcScore().addActivityParams(destinationAct);
@@ -99,17 +98,29 @@ public class RunLDScenario {
 
 		config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
 
-		LDConfigGroup ldConfigGroup = new LDConfigGroup();
+		TrafficCharConfigGroup trafficCharConfigGroup = new TrafficCharConfigGroup();
 
-		ldConfigGroup.setLinkDynamics1(LDConfigGroup.LinkDynamics.PassingQ);
-		ldConfigGroup.setLinkDynamics2(LDConfigGroup.LinkDynamics.FIFO);
-		ldConfigGroup.setTrafficDynamics1(LDConfigGroup.TrafficDynamics.withHoles);
-		ldConfigGroup.setTrafficDynamics2(LDConfigGroup.TrafficDynamics.queue);
-		config.getModules().put(LDConfigGroup.GROUP_NAME, ldConfigGroup);
+		QSimConfigGroup qSimConfigGroupFIFO = new QSimConfigGroup();
+		qSimConfigGroupFIFO.setLinkDynamics(QSimConfigGroup.LinkDynamics.FIFO);
+		trafficCharConfigGroup.addQSimConfigGroup("FIFO", qSimConfigGroupFIFO);
+		trafficCharConfigGroup.addQSimConfigGroup("default", config.qsim());
+		config.getModules().put(TrafficCharConfigGroup.GROUP_NAME, trafficCharConfigGroup);
 
 		new ConfigWriter(config).write("config.xml");
 
+		ConfigGroup configGroup = config.getModules().get(TrafficCharConfigGroup.GROUP_NAME);
 		Scenario scenario = ScenarioUtils.loadScenario(config);
+
+		// set roadtypes attributes
+		Network network = scenario.getNetwork();
+
+		for (Link link: network.getLinks().values()) {
+			if (link.getAttributes().getAttribute("type").equals("primary"))
+				link.getAttributes().putAttribute("roadType", "FIFO");
+			else
+				link.getAttributes().putAttribute("roadType", "default");
+		}
+		new NetworkWriter(network).write("/Users/shivam4896/Downloads/network.xml");
 
 		VehicleType car = scenario.getVehicles().getFactory().createVehicleType(Id.create("car", VehicleType.class));
 		car.setPcuEquivalents(1.0);
@@ -127,7 +138,7 @@ public class RunLDScenario {
 		scenario.getVehicles().addVehicleType(truck);
 
 		Controler controler = new Controler(scenario);
-		controler.addOverridingQSimModule(new LDModule());
+		controler.addOverridingQSimModule(new TrafficCharModule());
 		controler.run();
 	}
 }

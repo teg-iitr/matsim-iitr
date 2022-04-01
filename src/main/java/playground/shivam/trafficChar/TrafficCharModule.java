@@ -1,4 +1,4 @@
-package playground.shivam.linkDynamics;
+package playground.shivam.trafficChar;
 
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
@@ -9,7 +9,7 @@ import org.matsim.core.mobsim.qsim.qnetsimengine.DynamicHeadwayQNetworkFactory;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QNetworkFactory;
 import org.matsim.core.mobsim.qsim.qnetsimengine.linkspeedcalculator.DefaultLinkSpeedCalculator;
 
-public class LDModule extends AbstractQSimModule {
+public class TrafficCharModule extends AbstractQSimModule {
 
 	@Override
 	public void configureQSim() {
