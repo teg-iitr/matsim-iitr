@@ -31,8 +31,12 @@ import org.matsim.core.mobsim.qsim.interfaces.AgentCounter;
 import org.matsim.core.mobsim.qsim.qnetsimengine.linkspeedcalculator.DefaultLinkSpeedCalculator;
 import org.matsim.core.mobsim.qsim.qnetsimengine.linkspeedcalculator.LinkSpeedCalculator;
 import org.matsim.vis.snapshotwriters.SnapshotLinkWidthCalculator;
+import playground.shivam.trafficChar.core.TrafficCharConfigGroup;
 
 import javax.inject.Inject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.matsim.core.mobsim.qsim.qnetsimengine.AbstractQNetsimEngine.createAgentSnapshotInfoBuilder;
 
@@ -45,14 +49,17 @@ import static org.matsim.core.mobsim.qsim.qnetsimengine.AbstractQNetsimEngine.cr
  */
 public final class DynamicHeadwayQNetworkFactory implements QNetworkFactory {
 
-	private QSimConfigGroup qsimConfig ;
-	private EventsManager events ;
-	private Network network ;
-	private Scenario scenario ;
-	private NetsimEngineContext context;
+	private final QSimConfigGroup qsimConfig ;
+	private final EventsManager events ;
+	private final Network network ;
+	private final Scenario scenario ;
+//	private NetsimEngineContext context;
 	private QNetsimEngineI.NetsimInternalInterface netsimEngine ;
 	private LinkSpeedCalculator linkSpeedCalculator = new DefaultLinkSpeedCalculator() ;
 	private TurnAcceptanceLogic turnAcceptanceLogic = new DefaultTurnAcceptanceLogic() ;
+	public static final String roadType = "roadType";
+	private final TrafficCharConfigGroup tcConfigGroup;
+	private final Map<String, NetsimEngineContext> roadType2Contexts = new HashMap<>();
 
 	@Inject
 	public DynamicHeadwayQNetworkFactory(EventsManager events, Scenario scenario ) {
@@ -60,6 +67,7 @@ public final class DynamicHeadwayQNetworkFactory implements QNetworkFactory {
 		this.scenario = scenario;
 		this.network = scenario.getNetwork();
 		this.qsimConfig = scenario.getConfig().qsim();
+		this.tcConfigGroup = (TrafficCharConfigGroup) scenario.getConfig().getModules().get(TrafficCharConfigGroup.GROUP_NAME);
 	}
 
 	@Override
@@ -72,12 +80,18 @@ public final class DynamicHeadwayQNetworkFactory implements QNetworkFactory {
 			linkWidthCalculator.setLaneWidth( network.getEffectiveLaneWidth() );
 		}
 		AbstractAgentSnapshotInfoBuilder agentSnapshotInfoBuilder = createAgentSnapshotInfoBuilder( scenario, linkWidthCalculator );
-		context = new NetsimEngineContext( events, effectiveCellSize, agentCounter, agentSnapshotInfoBuilder, qsimConfig, mobsimTimer, linkWidthCalculator );
+
+		this.tcConfigGroup.getRoadType2TrafficChar().forEach((key, value) -> {
+			NetsimEngineContext context = new NetsimEngineContext(events, effectiveCellSize, agentCounter, agentSnapshotInfoBuilder, value, mobsimTimer, linkWidthCalculator);
+			this.roadType2Contexts.put(key, context);
+		});
 	}
 	@Override
 	public QLinkI createNetsimLink(final Link link, final QNodeI toQueueNode) {
-		DynamicHeadwayQueueWithBuffer.Builder laneFactory = new DynamicHeadwayQueueWithBuffer.Builder(context) ;
+		String rT = (String) link.getAttributes().getAttribute(roadType);
+		NetsimEngineContext context = this.roadType2Contexts.get(rT);
 
+		DynamicHeadwayQueueWithBuffer.Builder laneFactory = new DynamicHeadwayQueueWithBuffer.Builder(context) ;
 		QLinkImpl.Builder linkBuilder = new QLinkImpl.Builder(context, netsimEngine) ;
 		linkBuilder.setLaneFactory(laneFactory);
 		linkBuilder.setLinkSpeedCalculator( linkSpeedCalculator ) ;
@@ -88,7 +102,12 @@ public final class DynamicHeadwayQNetworkFactory implements QNetworkFactory {
 
     @Override
 	public QNodeI createNetsimNode(final Node node) {
-		QNodeImpl.Builder builder = new QNodeImpl.Builder(netsimEngine, context, qsimConfig) ;
+		// just using one of the qsimConfigGroup and netsimEngineContext in the node logic. Mar'22 SA, AA
+
+		Map.Entry<String, QSimConfigGroup> next = this.tcConfigGroup.getRoadType2TrafficChar().entrySet().iterator().next();
+		NetsimEngineContext context = this.roadType2Contexts.get(next.getKey());
+
+		QNodeImpl.Builder builder = new QNodeImpl.Builder(netsimEngine, context, next.getValue()) ;
 
 		builder.setTurnAcceptanceLogic( this.turnAcceptanceLogic ) ;
 
