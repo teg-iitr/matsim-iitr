@@ -26,10 +26,10 @@ import java.util.Collection;
 public class RunTrafficCharScenario {
 
 	public static void main(String[] args) {
-		String networkFile = "/Users/shivam4896/Downloads/network.xml.gz";
-		String plansFile = "/Users/shivam4896/Downloads/plans.xml.gz";
+		String networkFile = "input/network.xml.gz";
+		String plansFile = "input/plans.xml.gz";
 		Collection<String> mainModes = Arrays.asList("car", "motorbike", "truck");
-		String outputDir = "/Users/shivam4896/Documents/GitHub/matsim-iitr/output/linkDynamics/";
+		String outputDir = "output/trafficDynamics/";
 
 		Config config = ConfigUtils.createConfig();
 
