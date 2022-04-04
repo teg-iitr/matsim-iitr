@@ -26,6 +26,8 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 import playground.amit.fundamentalDiagrams.core.FDModule;
 import playground.amit.utils.FileUtils;
+import playground.shivam.trafficChar.TrafficCharModule;
+import playground.shivam.trafficChar.core.TrafficCharConfigGroup;
 
 /**
  * Created by amit on 16/02/2017.
@@ -40,18 +42,26 @@ public class RunFDDataExample {
         Scenario scenario ;
 
         if (runUsingConfig ) {
-            String configFile = "../../../Downloads/config.xml";
+            String configFile = "input/FD/output_config.xml";
             scenario = ScenarioUtils.loadScenario(ConfigUtils.loadConfig(configFile));
         } else {
             scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
         }
 
-        String myDir = "../../../Downloads/test";
+        String myDir = "output/FDDataExample";
         String outFolder ="/1lane/";
         scenario.getConfig().controler().setOutputDirectory(myDir+outFolder);
+        TrafficCharConfigGroup trafficCharConfigGroup = new TrafficCharConfigGroup();
+
+        QSimConfigGroup qSimConfigGroupFIFO = new QSimConfigGroup();
+        qSimConfigGroupFIFO.setLinkDynamics(QSimConfigGroup.LinkDynamics.FIFO);
+        trafficCharConfigGroup.addQSimConfigGroup("FIFO", qSimConfigGroupFIFO);
+        trafficCharConfigGroup.addQSimConfigGroup("default", scenario.getConfig().qsim());
+        scenario.getConfig().getModules().put(TrafficCharConfigGroup.GROUP_NAME, trafficCharConfigGroup);
 
         Controler controler = new Controler(scenario);
 //        controler.addOverridingQSimModule(new FDQSimModule());
+        controler.addOverridingQSimModule(new TrafficCharModule());
         controler.addOverridingModule(new FDModule(scenario));
         controler.run();
 

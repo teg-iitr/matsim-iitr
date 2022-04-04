@@ -118,6 +118,7 @@ public final class FDNetworkGenerator {
 			link.setFreespeed(FDConfigGroup.getTrackLinkSpeed());
 			link.setLength(FDConfigGroup.getTrackLinkLength());
 			link.setNumberOfLanes(FDConfigGroup.getTrackLinkLanes());
+			link.getAttributes().putAttribute("roadType", "default");
 			network.addLink(link);
 
 			if (i==0) {
@@ -144,6 +145,7 @@ public final class FDNetworkGenerator {
 		startLink.setFreespeed(FDConfigGroup.getTrackLinkSpeed());
 		startLink.setLength(25.);
 		startLink.setNumberOfLanes(1.);
+		startLink.getAttributes().putAttribute("roadType", "FIFO");
 		network.addLink(startLink);
 
 		Link endLink = network
@@ -154,6 +156,7 @@ public final class FDNetworkGenerator {
 		endLink.setFreespeed(FDConfigGroup.getTrackLinkSpeed());
 		endLink.setLength(25.);
 		endLink.setNumberOfLanes(1.);
+		endLink.getAttributes().putAttribute("roadType", "FIFO");
 		network.addLink(endLink);
 	}
 

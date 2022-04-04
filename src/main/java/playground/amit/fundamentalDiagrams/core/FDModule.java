@@ -143,7 +143,7 @@ public class FDModule extends AbstractModule {
 		scenario.getConfig().controler().setCreateGraphs(false);
 		scenario.getConfig().controler().setDumpDataAtEnd(false);
 
-		scenario.getConfig().qsim().setEndTime(100.0*3600.); // qsim should not go beyond 100 hrs it stability is not achieved.
+		scenario.getConfig().qsim().setEndTime(24.0*3600.); // qsim should not go beyond 100 hrs it stability is not achieved.
 
 		// following is necessary, in order to achieve the data points at high density
 		if(this.travelModes.length==1 && this.travelModes[0].equals("car")) scenario.getConfig().qsim().setStuckTime(60.);
