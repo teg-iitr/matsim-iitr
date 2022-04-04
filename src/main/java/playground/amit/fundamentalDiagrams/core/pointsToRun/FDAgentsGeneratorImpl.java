@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.inject.Inject;
+
+import org.apache.commons.dbcp.DelegatingResultSet;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
@@ -138,7 +140,11 @@ public class FDAgentsGeneratorImpl implements FDAgentsGenerator {
 
     @Override
     public void createPersons() {
-        List<Integer> pointToRun = fdDataContainer.getListOfPointsToRun().remove(0);
+        List<Integer> pointToRun;
+        if (fdDataContainer.getListOfPointsToRun().size() > 0)
+            pointToRun = fdDataContainer.getListOfPointsToRun().remove(0);
+        else
+            pointToRun = fdDataContainer.getListOfPointsToRun().get(0);
 
         FDModule.LOG.info("===============");
         FDModule.LOG.info("Going into run where number of Agents are - \t"+pointToRun);
