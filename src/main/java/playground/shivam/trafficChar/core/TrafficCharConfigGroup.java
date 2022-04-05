@@ -69,6 +69,7 @@ public class TrafficCharConfigGroup extends ReflectiveConfigGroup {
 
     public void addQSimConfigGroup(String roadType, QSimConfigGroup qSimConfigGroup){
         this.roadType2TrafficChar.put(roadType, qSimConfigGroup);
+        super.addParameterSet(super.createParameterSet(roadType));
     }
 
     public Map<String, QSimConfigGroup> getRoadType2TrafficChar() {

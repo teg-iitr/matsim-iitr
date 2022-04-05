@@ -138,7 +138,7 @@ public class RunTrafficCharScenario {
 		scenario.getVehicles().addVehicleType(truck);
 
 		Controler controler = new Controler(scenario);
-		controler.addOverridingQSimModule(new TrafficCharModule());
+		controler.addOverridingQSimModule(new TrafficCharQSimModule());
 		controler.run();
 	}
 }

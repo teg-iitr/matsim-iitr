@@ -49,14 +49,14 @@ import static org.matsim.core.mobsim.qsim.qnetsimengine.AbstractQNetsimEngine.cr
  */
 public final class DynamicHeadwayQNetworkFactory implements QNetworkFactory {
 
-	private final QSimConfigGroup qsimConfig ;
-	private final EventsManager events ;
-	private final Network network ;
-	private final Scenario scenario ;
+	private final QSimConfigGroup qsimConfig;
+	private final EventsManager events;
+	private final Network network;
+	private final Scenario scenario;
 //	private NetsimEngineContext context;
-	private QNetsimEngineI.NetsimInternalInterface netsimEngine ;
-	private LinkSpeedCalculator linkSpeedCalculator = new DefaultLinkSpeedCalculator() ;
-	private TurnAcceptanceLogic turnAcceptanceLogic = new DefaultTurnAcceptanceLogic() ;
+	private QNetsimEngineI.NetsimInternalInterface netsimEngine;
+	private LinkSpeedCalculator linkSpeedCalculator = new DefaultLinkSpeedCalculator();
+	private TurnAcceptanceLogic turnAcceptanceLogic = new DefaultTurnAcceptanceLogic();
 	public static final String roadType = "roadType";
 	private final TrafficCharConfigGroup tcConfigGroup;
 	private final Map<String, NetsimEngineContext> roadType2Contexts = new HashMap<>();
@@ -73,10 +73,10 @@ public final class DynamicHeadwayQNetworkFactory implements QNetworkFactory {
 	@Override
 	public void initializeFactory(AgentCounter agentCounter, MobsimTimer mobsimTimer, QNetsimEngineI.NetsimInternalInterface netsimEngine1) {
 		this.netsimEngine = netsimEngine1;
-		double effectiveCellSize = network.getEffectiveCellSize() ;
+		double effectiveCellSize = network.getEffectiveCellSize();
 		SnapshotLinkWidthCalculator linkWidthCalculator = new SnapshotLinkWidthCalculator();
 		linkWidthCalculator.setLinkWidthForVis( qsimConfig.getLinkWidthForVis() );
-		if (! Double.isNaN(network.getEffectiveLaneWidth())){
+		if (!Double.isNaN(network.getEffectiveLaneWidth())){
 			linkWidthCalculator.setLaneWidth( network.getEffectiveLaneWidth() );
 		}
 		AbstractAgentSnapshotInfoBuilder agentSnapshotInfoBuilder = createAgentSnapshotInfoBuilder( scenario, linkWidthCalculator );
@@ -91,27 +91,27 @@ public final class DynamicHeadwayQNetworkFactory implements QNetworkFactory {
 		String rT = (String) link.getAttributes().getAttribute(roadType);
 		NetsimEngineContext context = this.roadType2Contexts.get(rT);
 
-		DynamicHeadwayQueueWithBuffer.Builder laneFactory = new DynamicHeadwayQueueWithBuffer.Builder(context) ;
-		QLinkImpl.Builder linkBuilder = new QLinkImpl.Builder(context, netsimEngine) ;
+		DynamicHeadwayQueueWithBuffer.Builder laneFactory = new DynamicHeadwayQueueWithBuffer.Builder(context);
+		QLinkImpl.Builder linkBuilder = new QLinkImpl.Builder(context, netsimEngine);
 		linkBuilder.setLaneFactory(laneFactory);
-		linkBuilder.setLinkSpeedCalculator( linkSpeedCalculator ) ;
+		linkBuilder.setLinkSpeedCalculator( linkSpeedCalculator );
 
-		return linkBuilder.build(link, toQueueNode) ;
+		return linkBuilder.build(link, toQueueNode);
 	}
 
 
     @Override
 	public QNodeI createNetsimNode(final Node node) {
-		// just using one of the qsimConfigGroup and netsimEngineContext in the node logic. Mar'22 SA, AA
+		// just using one of the qsimConfigGroup and netsimEngineContext in the node logic. Mar'22 AA, SA
+//		Map.Entry<String, QSimConfigGroup> next = this.tcConfigGroup.getRoadType2TrafficChar().entrySet().iterator().next();
 
-		Map.Entry<String, QSimConfigGroup> next = this.tcConfigGroup.getRoadType2TrafficChar().entrySet().iterator().next();
-		NetsimEngineContext context = this.roadType2Contexts.get(next.getKey());
+		NetsimEngineContext context = (NetsimEngineContext) this.roadType2Contexts.entrySet().iterator().next();
 
-		QNodeImpl.Builder builder = new QNodeImpl.Builder(netsimEngine, context, next.getValue()) ;
+		QNodeImpl.Builder builder = new QNodeImpl.Builder(netsimEngine, context, context.qsimConfig);
 
-		builder.setTurnAcceptanceLogic( this.turnAcceptanceLogic ) ;
+		builder.setTurnAcceptanceLogic( this.turnAcceptanceLogic );
 
-		return builder.build( node ) ;
+		return builder.build( node );
 	}
 	public final void setLinkSpeedCalculator(LinkSpeedCalculator linkSpeedCalculator) {
 		this.linkSpeedCalculator = linkSpeedCalculator;

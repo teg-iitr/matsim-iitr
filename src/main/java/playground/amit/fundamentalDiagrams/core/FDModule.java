@@ -21,6 +21,7 @@
 package playground.amit.fundamentalDiagrams.core;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -34,6 +35,7 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
@@ -89,6 +91,7 @@ public class FDModule extends AbstractModule {
 		new ConfigWriter(scenario.getConfig()).write(this.runDir+"/output_config.xml");
 		new NetworkWriter(scenario.getNetwork()).write(this.runDir+"/output_network.xml");
 		new MatsimVehicleWriter(scenario.getVehicles()).writeFile(this.runDir+"/output_vehicles.xml");
+		new PopulationWriter(scenario.getPopulation()).write(this.runDir + "/output_plans.xml");
 	}
 
 	private void checkForConsistencyAndInitialize(){
@@ -141,9 +144,9 @@ public class FDModule extends AbstractModule {
 		scenario.getConfig().planCalcScore().addActivityParams(work);
 
 		scenario.getConfig().controler().setCreateGraphs(false);
-		scenario.getConfig().controler().setDumpDataAtEnd(false);
+		scenario.getConfig().controler().setDumpDataAtEnd(true);
 
-		scenario.getConfig().qsim().setEndTime(24.0*3600.); // qsim should not go beyond 100 hrs it stability is not achieved.
+		scenario.getConfig().qsim().setEndTime(100*3600.); // qsim should not go beyond 100 hrs it stability is not achieved.
 
 		// following is necessary, in order to achieve the data points at high density
 		if(this.travelModes.length==1 && this.travelModes[0].equals("car")) scenario.getConfig().qsim().setStuckTime(60.);
