@@ -53,13 +53,10 @@ public final class DynamicHeadwayQNetworkFactory implements QNetworkFactory {
 	private final EventsManager events;
 	private final Network network;
 	private final Scenario scenario;
-//	private NetsimEngineContext context;
+	private NetsimEngineContext context;
 	private QNetsimEngineI.NetsimInternalInterface netsimEngine;
 	private LinkSpeedCalculator linkSpeedCalculator = new DefaultLinkSpeedCalculator();
 	private TurnAcceptanceLogic turnAcceptanceLogic = new DefaultTurnAcceptanceLogic();
-	public static final String roadType = "roadType";
-	private final TrafficCharConfigGroup tcConfigGroup;
-	private final Map<String, NetsimEngineContext> roadType2Contexts = new HashMap<>();
 
 	@Inject
 	public DynamicHeadwayQNetworkFactory(EventsManager events, Scenario scenario ) {
@@ -67,7 +64,6 @@ public final class DynamicHeadwayQNetworkFactory implements QNetworkFactory {
 		this.scenario = scenario;
 		this.network = scenario.getNetwork();
 		this.qsimConfig = scenario.getConfig().qsim();
-		this.tcConfigGroup = (TrafficCharConfigGroup) scenario.getConfig().getModules().get(TrafficCharConfigGroup.GROUP_NAME);
 	}
 
 	@Override
@@ -81,15 +77,12 @@ public final class DynamicHeadwayQNetworkFactory implements QNetworkFactory {
 		}
 		AbstractAgentSnapshotInfoBuilder agentSnapshotInfoBuilder = createAgentSnapshotInfoBuilder( scenario, linkWidthCalculator );
 
-		this.tcConfigGroup.getRoadType2TrafficChar().forEach((key, value) -> {
-			NetsimEngineContext context = new NetsimEngineContext(events, effectiveCellSize, agentCounter, agentSnapshotInfoBuilder, value, mobsimTimer, linkWidthCalculator);
-			this.roadType2Contexts.put(key, context);
-		});
+
+		context = new NetsimEngineContext(events, effectiveCellSize, agentCounter, agentSnapshotInfoBuilder, qsimConfig, mobsimTimer, linkWidthCalculator);
+
 	}
 	@Override
 	public QLinkI createNetsimLink(final Link link, final QNodeI toQueueNode) {
-		String rT = (String) link.getAttributes().getAttribute(roadType);
-		NetsimEngineContext context = this.roadType2Contexts.get(rT);
 
 		DynamicHeadwayQueueWithBuffer.Builder laneFactory = new DynamicHeadwayQueueWithBuffer.Builder(context);
 		QLinkImpl.Builder linkBuilder = new QLinkImpl.Builder(context, netsimEngine);
@@ -102,11 +95,6 @@ public final class DynamicHeadwayQNetworkFactory implements QNetworkFactory {
 
     @Override
 	public QNodeI createNetsimNode(final Node node) {
-		// just using one of the qsimConfigGroup and netsimEngineContext in the node logic. Mar'22 AA, SA
-//		Map.Entry<String, QSimConfigGroup> next = this.tcConfigGroup.getRoadType2TrafficChar().entrySet().iterator().next();
-
-		NetsimEngineContext context = (NetsimEngineContext) this.roadType2Contexts.entrySet().iterator().next();
-
 		QNodeImpl.Builder builder = new QNodeImpl.Builder(netsimEngine, context, context.qsimConfig);
 
 		builder.setTurnAcceptanceLogic( this.turnAcceptanceLogic );
