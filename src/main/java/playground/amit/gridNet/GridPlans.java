@@ -16,7 +16,7 @@ import java.util.Random;
  */
 public class GridPlans {
 
-    public final static String GRID_PLANS = "C:\\Users\\Amit Agarwal\\Google Drive\\iitr_gmail_drive\\project_data\\matsim_grid_example\\gridPlans.xml.gz";
+    public final static String GRID_PLANS = "C:\\Users\\amit2\\Documents\\svn-repos\\shared\\data\\project_data\\matsim_grid_example\\gridPlans.xml.gz";
     private final Random random = MatsimRandom.getLocalInstance();
     private final Scenario scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
 
@@ -40,7 +40,7 @@ public class GridPlans {
          * Leisure outside city center
          * Shopping close to home
          */
-        for(int i = 0; i < 100; i ++) {
+        for(int i = 0; i < 1000; i ++) {
             Person person = factory.createPerson(Id.createPersonId(population.getPersons().size()));
             Plan plan = factory.createPlan();
             Activity home = factory.createActivityFromCoord("home", getRandomCoordInGrid());
@@ -88,11 +88,11 @@ public class GridPlans {
     }
 
     private String getTravelMode(int number){
-        if (number <20) return "car";
-        else if(number < 35) return "bicycle";
-        else if (number < 65) return "motorbike";
-        else if (number < 80) return "walk";
-        else if (number < 100) return "pt";
+        if (number <40) return "car";
+        else if(number < 65) return "bicycle";
+        else if (number < 100) return "motorcycle";
+//        else if (number < 80) return "walk";
+//        else if (number < 100) return "pt";
         else {
             throw new RuntimeException("Chose a number less than 100.");
         }

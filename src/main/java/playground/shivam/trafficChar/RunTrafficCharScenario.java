@@ -103,7 +103,7 @@ public class RunTrafficCharScenario {
 		QSimConfigGroup qSimConfigGroupFIFO = new QSimConfigGroup();
 		qSimConfigGroupFIFO.setLinkDynamics(QSimConfigGroup.LinkDynamics.FIFO);
 		trafficCharConfigGroup.addQSimConfigGroup("FIFO", qSimConfigGroupFIFO);
-		trafficCharConfigGroup.addQSimConfigGroup("default", config.qsim());
+		trafficCharConfigGroup.addQSimConfigGroup(TrafficCharConfigGroup.ROAD_TYPE_DEFAULT, config.qsim());
 		config.getModules().put(TrafficCharConfigGroup.GROUP_NAME, trafficCharConfigGroup);
 
 		new ConfigWriter(config).write("config.xml");
@@ -116,9 +116,9 @@ public class RunTrafficCharScenario {
 
 		for (Link link: network.getLinks().values()) {
 			if (link.getAttributes().getAttribute("type").equals("primary"))
-				link.getAttributes().putAttribute("roadType", "FIFO");
+				link.getAttributes().putAttribute(TrafficCharConfigGroup.ROAD_TYPE, "FIFO");
 			else
-				link.getAttributes().putAttribute("roadType", "default");
+				link.getAttributes().putAttribute(TrafficCharConfigGroup.ROAD_TYPE, TrafficCharConfigGroup.ROAD_TYPE_DEFAULT);
 		}
 		new NetworkWriter(network).write("/Users/shivam4896/Downloads/network.xml");
 

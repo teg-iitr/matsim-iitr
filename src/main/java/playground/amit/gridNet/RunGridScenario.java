@@ -33,8 +33,8 @@ public class RunGridScenario {
         Scenario scenario = ScenarioUtils.loadScenario(config);
         rgs.addVehicleTypes(scenario);
 
-        new ConfigWriter(config).write("C:\\Users\\Amit\\Google Drive\\iitr_gmail_drive\\project_data\\matsim_grid\\grid_config.xml");
-        new MatsimVehicleWriter(scenario.getVehicles()).writeFile("C:\\Users\\Amit\\Google Drive\\iitr_gmail_drive\\project_data\\matsim_grid\\grid_vehicles.xml.gz");
+        new ConfigWriter(config).write("C:\\Users\\amit2\\Documents\\svn-repos\\shared\\data\\project_data\\matsim_grid_example\\grid_config.xml");
+        new MatsimVehicleWriter(scenario.getVehicles()).writeFile("C:\\Users\\amit2\\Documents\\svn-repos\\shared\\data\\project_data\\matsim_grid_example\\grid_vehicles.xml.gz");
 //        org.matsim.core.controler.Controler controler = new org.matsim.core.controler.Controler(scenario);
 //        controler.run();
     }
@@ -72,7 +72,7 @@ public class RunGridScenario {
         config.plans().setInputFile(GridPlans.GRID_PLANS);
         config.network().setInputFile(GridNetwork.NETWORK_FILE);
 
-        config.controler().setOutputDirectory("C:/Users/Amit Agarwal/Downloads/gridNetwork/output/");
+        config.controler().setOutputDirectory("C:\\Users\\amit2\\Downloads\\test\\output");
         config.controler().setLastIteration(40);
         config.controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
 
@@ -117,7 +117,7 @@ public class RunGridScenario {
         config.strategy().addStrategySettings(modeChoice);
 
         ChangeModeConfigGroup changeTripMode = config.changeMode();
-        changeTripMode.setModes(new String [] {TransportMode.car,TransportMode.walk,TransportMode.pt,"motorcycle","bicycle"});
+        changeTripMode.setModes(new String [] {TransportMode.car,"motorcycle","bicycle"});
 
         config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
         {

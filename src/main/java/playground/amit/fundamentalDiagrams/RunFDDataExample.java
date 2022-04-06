@@ -21,12 +21,9 @@ package playground.amit.fundamentalDiagrams;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.Controler;
-import org.matsim.core.controler.Injector;
-import org.matsim.core.events.EventsManagerModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
@@ -93,9 +90,8 @@ public class RunFDDataExample {
 
         Controler controler = new Controler(scenario);
 //        controler.addOverridingQSimModule(new FDQSimModule());
-        controler.addOverridingModule(new TrafficCharModule());
-        controler.addOverridingQSimModule(new TrafficCharQSimModule());
         controler.addOverridingModule(new FDModule(scenario));
+        controler.addOverridingQSimModule(new TrafficCharQSimModule());
         controler.run();
 
 //        FDUtils.cleanOutputDir(scenario.getConfig().controler().getOutputDirectory());

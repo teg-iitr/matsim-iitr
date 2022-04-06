@@ -39,6 +39,8 @@ public class TrafficCharConfigGroup extends ReflectiveConfigGroup {
     private static final Logger log = Logger.getLogger(TrafficCharConfigGroup.class);
 
     public static final String GROUP_NAME = "trafficChar";
+    public static final String ROAD_TYPE = "roadType";
+    public static final String ROAD_TYPE_DEFAULT = "default";
 
     private final Map<String, QSimConfigGroup> roadType2TrafficChar = new HashMap<>();
 

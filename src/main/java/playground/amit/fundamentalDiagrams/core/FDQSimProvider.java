@@ -41,6 +41,7 @@ public class FDQSimProvider implements Provider<Mobsim> {
 	
 	private final Scenario scenario;
 	private final EventsManager events;
+//  QNetworkFactory should only be bound via AbstractQSimModule AA, Apr22
 //	private final QNetworkFactory qnetworkFactory;
 	private final Map<String, VehicleType> modeToVehicleTypes ;
 	private final FDNetworkGenerator fdNetworkGenerator;

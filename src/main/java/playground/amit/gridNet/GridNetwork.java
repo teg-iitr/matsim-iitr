@@ -21,7 +21,7 @@ import java.util.Set;
 public class GridNetwork {
 
     public static final double LengthOfGrid = 10000.0;
-    public static final String NETWORK_FILE = "C:\\Users\\Amit\\Google Drive\\iitr_gmail_drive\\project_data\\matsim_grid\\gridNet.xml.gz";
+    public static final String NETWORK_FILE = "C:\\Users\\amit2\\Documents\\svn-repos\\shared\\data\\project_data\\matsim_grid_example\\gridNet.xml.gz";
 
     public GridNetwork() {
         Scenario scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
