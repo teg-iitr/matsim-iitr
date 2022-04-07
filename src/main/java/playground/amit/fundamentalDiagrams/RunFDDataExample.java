@@ -30,7 +30,6 @@ import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
 import playground.amit.fundamentalDiagrams.core.FDModule;
 import playground.amit.mixedTraffic.MixedTrafficVehiclesUtils;
-import playground.shivam.trafficChar.TrafficCharModule;
 import playground.shivam.trafficChar.TrafficCharQSimModule;
 import playground.shivam.trafficChar.core.TrafficCharConfigGroup;
 

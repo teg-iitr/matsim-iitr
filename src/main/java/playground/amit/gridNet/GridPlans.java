@@ -16,7 +16,7 @@ import java.util.Random;
  */
 public class GridPlans {
 
-    public final static String GRID_PLANS = "C:\\Users\\amit2\\Documents\\svn-repos\\shared\\data\\project_data\\matsim_grid_example\\gridPlans.xml.gz";
+    public final static String GRID_PLANS = "input/grid/gridPlans.xml.gz";
     private final Random random = MatsimRandom.getLocalInstance();
     private final Scenario scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
 

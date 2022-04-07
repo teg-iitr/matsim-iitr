@@ -33,8 +33,8 @@ public class RunGridScenario {
         Scenario scenario = ScenarioUtils.loadScenario(config);
         rgs.addVehicleTypes(scenario);
 
-        new ConfigWriter(config).write("C:\\Users\\amit2\\Documents\\svn-repos\\shared\\data\\project_data\\matsim_grid_example\\grid_config.xml");
-        new MatsimVehicleWriter(scenario.getVehicles()).writeFile("C:\\Users\\amit2\\Documents\\svn-repos\\shared\\data\\project_data\\matsim_grid_example\\grid_vehicles.xml.gz");
+        new ConfigWriter(config).write("output/GridScenarioTrafficChar/grid_config.xml");
+        new MatsimVehicleWriter(scenario.getVehicles()).writeFile("output/GridScenarioTrafficChar/grid_vehicles.xml.gz");
 //        org.matsim.core.controler.Controler controler = new org.matsim.core.controler.Controler(scenario);
 //        controler.run();
     }
@@ -72,7 +72,7 @@ public class RunGridScenario {
         config.plans().setInputFile(GridPlans.GRID_PLANS);
         config.network().setInputFile(GridNetwork.NETWORK_FILE);
 
-        config.controler().setOutputDirectory("C:\\Users\\amit2\\Downloads\\test\\output");
+        config.controler().setOutputDirectory("output/GridScenarioTrafficChar");
         config.controler().setLastIteration(40);
         config.controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
 

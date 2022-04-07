@@ -23,7 +23,7 @@ public class RunNetChangeGridScenario {
     private void run(){
         RunGridScenario rgs = new RunGridScenario();
         Config config = rgs.prepareConfig();
-        config.controler().setOutputDirectory("C:\\Users\\amit2\\Downloads\\test\\output");
+        config.controler().setOutputDirectory("output/GridScenarioTrafficChar");
 //        config.network().setTimeVariantNetwork(true);
 
         TrafficCharConfigGroup trafficCharConfigGroup = new TrafficCharConfigGroup();
