@@ -34,6 +34,7 @@ import org.matsim.vis.otfvis.OnTheFlyServer;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import playground.shivam.trafficChar.TrafficCharQSimModule;
 
 public class FDQSimProvider implements Provider<Mobsim> {
 	
@@ -68,15 +69,10 @@ public class FDQSimProvider implements Provider<Mobsim> {
 	public Mobsim get() {
 		final QSim qSim = new QSimBuilder(scenario.getConfig()) //
 				.useDefaults() //
+				.addOverridingQSimModule(new TrafficCharQSimModule())
 				.configureQSimComponents( components -> {
 						components.removeNamedComponent(PopulationModule.COMPONENT_NAME);
 					} )
-//				.addOverridingModule(new AbstractModule() {
-//					@Override
-//					public void install() {
-//						bind(QNetworkFactory.class).toInstance(qnetworkFactory);
-//					}
-//				}) //
 				.build(scenario, events);
 
 		FDModule.LOG.info("=======================");

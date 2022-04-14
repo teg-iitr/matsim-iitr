@@ -141,10 +141,7 @@ public class FDAgentsGeneratorImpl implements FDAgentsGenerator {
     @Override
     public void createPersons() {
         List<Integer> pointToRun;
-        if (fdDataContainer.getListOfPointsToRun().size() > 0)
-            pointToRun = fdDataContainer.getListOfPointsToRun().remove(0);
-        else
-            pointToRun = fdDataContainer.getListOfPointsToRun().get(0);
+        pointToRun = fdDataContainer.getListOfPointsToRun().remove(0);
 
         FDModule.LOG.info("===============");
         FDModule.LOG.info("Going into run where number of Agents are - \t"+pointToRun);

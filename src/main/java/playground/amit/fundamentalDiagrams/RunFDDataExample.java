@@ -21,7 +21,10 @@ package playground.amit.fundamentalDiagrams;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.ChangeModeConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -58,19 +61,10 @@ public class RunFDDataExample {
         String myDir = "output/FDDataExample";
         String outFolder ="/1lane/";
         scenario.getConfig().controler().setOutputDirectory(myDir+outFolder);
-
 //        scenario.getConfig().qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
 //        scenario.getConfig().qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.withHoles);
 
-        TrafficCharConfigGroup trafficCharConfigGroup = new TrafficCharConfigGroup();
-        QSimConfigGroup qSimConfigGroup = new QSimConfigGroup();
-        qSimConfigGroup.setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
-        qSimConfigGroup.setTrafficDynamics(QSimConfigGroup.TrafficDynamics.withHoles);
-        trafficCharConfigGroup.addQSimConfigGroup(qSimConfigGroup.getLinkDynamics().toString(), qSimConfigGroup);
 
-        trafficCharConfigGroup.addQSimConfigGroup(scenario.getConfig().qsim().getLinkDynamics().toString(), scenario.getConfig().qsim());
-
-        ConfigUtils.addOrGetModule(scenario.getConfig(), TrafficCharConfigGroup.class);
 
 
         QSimConfigGroup qsim = scenario.getConfig().qsim();
@@ -86,11 +80,21 @@ public class RunFDDataExample {
             veh.setNetworkMode(mode);
             vehicles.addVehicleType(veh);
         }
+        ChangeModeConfigGroup changeTripMode = scenario.getConfig().changeMode();
+        changeTripMode.setModes(new String [] {TransportMode.car,"bicycle"});
+
+        TrafficCharConfigGroup trafficCharConfigGroup = new TrafficCharConfigGroup();
+        QSimConfigGroup qSimConfigGroupPassingQ = new QSimConfigGroup();
+        qSimConfigGroupPassingQ.setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
+        trafficCharConfigGroup.addQSimConfigGroup("PassingQ", qSimConfigGroupPassingQ);
+
+        trafficCharConfigGroup.addQSimConfigGroup(TrafficCharConfigGroup.ROAD_TYPE_DEFAULT, scenario.getConfig().qsim());
+
+        scenario.getConfig().getModules().put(TrafficCharConfigGroup.GROUP_NAME, trafficCharConfigGroup);
 
         Controler controler = new Controler(scenario);
-//        controler.addOverridingQSimModule(new FDQSimModule());
         controler.addOverridingModule(new FDModule(scenario));
-        controler.addOverridingQSimModule(new TrafficCharQSimModule());
+//        controler.addOverridingQSimModule(new FDQSimModule());
         controler.run();
 
 //        FDUtils.cleanOutputDir(scenario.getConfig().controler().getOutputDirectory());

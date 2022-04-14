@@ -21,10 +21,7 @@
 package playground.amit.fundamentalDiagrams.core;
 
 import java.util.Arrays;
-import java.util.Collections;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -34,9 +31,9 @@ import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.PopulationWriter;
-import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
@@ -45,21 +42,18 @@ import org.matsim.core.config.groups.StrategyConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.controler.TerminationCriterion;
-import org.matsim.core.mobsim.qsim.agents.PopulationAgentSource;
-import org.matsim.core.mobsim.qsim.qnetsimengine.ConfigurableQNetworkFactory;
-import org.matsim.core.mobsim.qsim.qnetsimengine.QNetworkFactory;
-import org.matsim.core.mobsim.qsim.qnetsimengine.linkspeedcalculator.DefaultLinkSpeedCalculator;
 import org.matsim.core.network.VariableIntervalTimeVariantLinkFactory;
 import org.matsim.core.network.io.NetworkWriter;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.vehicles.MatsimVehicleWriter;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
-import org.matsim.vehicles.VehicleWriterV1;
 import playground.amit.fundamentalDiagrams.core.pointsToRun.FDAgentsGenerator;
 import playground.amit.fundamentalDiagrams.core.pointsToRun.FDAgentsGeneratorControlerListner;
 import playground.amit.fundamentalDiagrams.core.pointsToRun.FDDistributionAgentsGeneratorImpl;
 import playground.amit.fundamentalDiagrams.core.pointsToRun.FDAgentsGeneratorImpl;
+import playground.shivam.trafficChar.TrafficCharQSimModule;
+import playground.shivam.trafficChar.core.TrafficCharConfigGroup;
 
 /**
  * @author amit after ssix
@@ -85,6 +79,8 @@ public class FDModule extends AbstractModule {
 		this.scenario = scenario;
 		fdNetworkGenerator.createNetwork(this.scenario.getNetwork());
 
+		changeLinkDynamicsOnNetwork(this.scenario.getNetwork());
+
 		checkForConsistencyAndInitialize();
 		setUpConfig();
 
@@ -92,6 +88,15 @@ public class FDModule extends AbstractModule {
 		new NetworkWriter(scenario.getNetwork()).write(this.runDir+"/output_network.xml");
 		new MatsimVehicleWriter(scenario.getVehicles()).writeFile(this.runDir+"/output_vehicles.xml");
 		new PopulationWriter(scenario.getPopulation()).write(this.runDir + "/output_plans.xml");
+	}
+
+	private void changeLinkDynamicsOnNetwork(Network network) {
+		for (Link link: network.getLinks().values()) {
+			if (link.getId().equals(Id.createLinkId("1")) | link.getId().equals(Id.createLinkId("2")))
+				link.getAttributes().putAttribute(TrafficCharConfigGroup.ROAD_TYPE, "PassingQ");
+			else
+				link.getAttributes().putAttribute(TrafficCharConfigGroup.ROAD_TYPE, TrafficCharConfigGroup.ROAD_TYPE_DEFAULT);
+		}
 	}
 
 	private void checkForConsistencyAndInitialize(){
@@ -149,8 +154,10 @@ public class FDModule extends AbstractModule {
 		scenario.getConfig().qsim().setEndTime(100*3600.); // qsim should not go beyond 100 hrs it stability is not achieved.
 
 		// following is necessary, in order to achieve the data points at high density
-		if(this.travelModes.length==1 && this.travelModes[0].equals("car")) scenario.getConfig().qsim().setStuckTime(60.);
-		else  if (this.travelModes.length==1 && this.travelModes[0].equals("truck")) scenario.getConfig().qsim().setStuckTime(180.);
+		if (this.travelModes.length==1 && this.travelModes[0].equals("car"))
+			scenario.getConfig().qsim().setStuckTime(60.);
+		else  if (this.travelModes.length==1 && this.travelModes[0].equals("truck"))
+			scenario.getConfig().qsim().setStuckTime(180.);
 
 		//TODO probably, following is not required anymore.
 		if ( scenario.getConfig().network().isTimeVariantNetwork() ) {

@@ -30,7 +30,7 @@ public class RunNetChangeGridScenario {
         QSimConfigGroup qSimConfigGroupFIFO = new QSimConfigGroup();
         qSimConfigGroupFIFO.setLinkDynamics(QSimConfigGroup.LinkDynamics.FIFO);
         trafficCharConfigGroup.addQSimConfigGroup("FIFO", qSimConfigGroupFIFO);
-        trafficCharConfigGroup.addQSimConfigGroup("default", config.qsim());
+        trafficCharConfigGroup.addQSimConfigGroup(TrafficCharConfigGroup.ROAD_TYPE_DEFAULT, config.qsim());
         config.getModules().put(TrafficCharConfigGroup.GROUP_NAME, trafficCharConfigGroup);
 
         Scenario scenario = ScenarioUtils.loadScenario(config);

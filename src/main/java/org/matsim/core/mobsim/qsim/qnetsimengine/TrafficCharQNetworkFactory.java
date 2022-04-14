@@ -71,7 +71,7 @@ public final class TrafficCharQNetworkFactory implements QNetworkFactory {
 
 	@Override
 	public void initializeFactory(AgentCounter agentCounter, MobsimTimer mobsimTimer, QNetsimEngineI.NetsimInternalInterface netsimEngine1) {
-		this.netsimEngine = netsimEngine1;
+  		this.netsimEngine = netsimEngine1;
 		double effectiveCellSize = network.getEffectiveCellSize();
 		SnapshotLinkWidthCalculator linkWidthCalculator = new SnapshotLinkWidthCalculator();
 		linkWidthCalculator.setLinkWidthForVis( qsimConfig.getLinkWidthForVis() );

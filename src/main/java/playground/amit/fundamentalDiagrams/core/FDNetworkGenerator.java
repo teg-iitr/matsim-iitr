@@ -128,18 +128,12 @@ public final class FDNetworkGenerator {
 				firstLinkOfTrack = link.getId();
 			}
 			if (i == subdivisionFactor-1) {
-				link.setAllowedModes(Set.of("car", "bicycle"));
-				link.getAttributes().putAttribute("roadType", "PassingQ");
 				lastLinkOfBase = link.getId();
 			}
 			if (i ==  subdivisionFactor) {
-				link.setAllowedModes(Set.of("car", "bicycle"));
-				link.getAttributes().putAttribute("roadType", "PassingQ");
 				firstLinkOfMiddleSide = link.getId();
 			}
 			if (i== noOfSides * subdivisionFactor-1) {
-				link.getAttributes().putAttribute("roadType", "FIFO");
-				link.setAllowedModes(Set.of("car", "bicycle"));
 				lastLinkOfTrack = link.getId();
 			}
 		}
@@ -154,8 +148,6 @@ public final class FDNetworkGenerator {
 		startLink.setFreespeed(FDConfigGroup.getTrackLinkSpeed());
 		startLink.setLength(25.);
 		startLink.setNumberOfLanes(1.);
-		startLink.getAttributes().putAttribute("roadType", "FIFO");
-		startLink.setAllowedModes(Set.of("car", "bicycle"));
 		network.addLink(startLink);
 
 		Link endLink = network
@@ -166,8 +158,6 @@ public final class FDNetworkGenerator {
 		endLink.setFreespeed(FDConfigGroup.getTrackLinkSpeed());
 		endLink.setLength(25.);
 		endLink.setNumberOfLanes(1.);
-		endLink.getAttributes().putAttribute("roadType", "FIFO");
-		endLink.setAllowedModes(Set.of("car", "bicycle"));
 		network.addLink(endLink);
 	}
 
