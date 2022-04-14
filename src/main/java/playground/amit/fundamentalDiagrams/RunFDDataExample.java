@@ -19,13 +19,22 @@
 
 package playground.amit.fundamentalDiagrams;
 
+import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.vehicles.VehicleType;
+import org.matsim.vehicles.VehicleUtils;
+import org.matsim.vehicles.Vehicles;
 import playground.amit.fundamentalDiagrams.core.FDModule;
-import playground.amit.utils.FileUtils;
+import playground.amit.mixedTraffic.MixedTrafficVehiclesUtils;
+import playground.shivam.trafficChar.TrafficCharQSimModule;
+import playground.shivam.trafficChar.core.TrafficCharConfigGroup;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by amit on 16/02/2017.
@@ -40,21 +49,50 @@ public class RunFDDataExample {
         Scenario scenario ;
 
         if (runUsingConfig ) {
-            String configFile = "../../../Downloads/config.xml";
+            String configFile = "input/FD/output_config.xml";
             scenario = ScenarioUtils.loadScenario(ConfigUtils.loadConfig(configFile));
         } else {
             scenario = ScenarioUtils.loadScenario(ConfigUtils.createConfig());
         }
 
-        String myDir = "../../../Downloads/test";
+        String myDir = "output/FDDataExample";
         String outFolder ="/1lane/";
         scenario.getConfig().controler().setOutputDirectory(myDir+outFolder);
+
+//        scenario.getConfig().qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
+//        scenario.getConfig().qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.withHoles);
+
+        TrafficCharConfigGroup trafficCharConfigGroup = new TrafficCharConfigGroup();
+        QSimConfigGroup qSimConfigGroup = new QSimConfigGroup();
+        qSimConfigGroup.setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
+        qSimConfigGroup.setTrafficDynamics(QSimConfigGroup.TrafficDynamics.withHoles);
+        trafficCharConfigGroup.addQSimConfigGroup(qSimConfigGroup.getLinkDynamics().toString(), qSimConfigGroup);
+
+        trafficCharConfigGroup.addQSimConfigGroup(scenario.getConfig().qsim().getLinkDynamics().toString(), scenario.getConfig().qsim());
+
+        ConfigUtils.addOrGetModule(scenario.getConfig(), TrafficCharConfigGroup.class);
+
+
+        QSimConfigGroup qsim = scenario.getConfig().qsim();
+        List<String> mainModes = Arrays.asList("car", "bicycle");
+        qsim.setMainModes(mainModes);
+        Vehicles vehicles = scenario.getVehicles();
+        for (String mode : mainModes) {
+            VehicleType veh = VehicleUtils.createVehicleType(Id.create(mode,VehicleType.class));
+            veh.setPcuEquivalents(MixedTrafficVehiclesUtils.getPCU(mode));
+            veh.setMaximumVelocity(MixedTrafficVehiclesUtils.getSpeed(mode));
+            veh.setLength(MixedTrafficVehiclesUtils.getLength(mode));
+            veh.setLength(MixedTrafficVehiclesUtils.getStuckTime(mode));
+            veh.setNetworkMode(mode);
+            vehicles.addVehicleType(veh);
+        }
 
         Controler controler = new Controler(scenario);
 //        controler.addOverridingQSimModule(new FDQSimModule());
         controler.addOverridingModule(new FDModule(scenario));
+        controler.addOverridingQSimModule(new TrafficCharQSimModule());
         controler.run();
 
-        FDUtils.cleanOutputDir(scenario.getConfig().controler().getOutputDirectory());
+//        FDUtils.cleanOutputDir(scenario.getConfig().controler().getOutputDirectory());
     }
 }

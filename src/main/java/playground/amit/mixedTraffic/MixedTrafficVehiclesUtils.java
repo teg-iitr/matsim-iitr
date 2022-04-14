@@ -85,4 +85,20 @@ public class MixedTrafficVehiclesUtils {
 		}
 		throw new RuntimeException("Length fot "+travelMode+" is not found.");
 	}
+
+	public static double getStuckTime(final String travelMode) {
+		double stuckTime;
+		switch (travelMode) {
+			case TransportMode.car:
+			case "motorbike":
+				stuckTime = 60.; break;
+			case "bicycle":
+			case TransportMode.bike: stuckTime = 15.; break;
+			case TransportMode.walk: stuckTime = 6.; break;
+//		case PT :
+			case "truck": stuckTime = 180.; break;
+			default: throw new RuntimeException("No speed is set for travel mode "+travelMode+ ".");
+		}
+		return stuckTime;
+	}
 }
