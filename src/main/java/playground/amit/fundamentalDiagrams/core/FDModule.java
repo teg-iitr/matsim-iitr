@@ -79,7 +79,8 @@ public class FDModule extends AbstractModule {
 		this.scenario = scenario;
 		fdNetworkGenerator.createNetwork(this.scenario.getNetwork());
 
-		changeLinkDynamicsOnNetwork(this.scenario.getNetwork());
+		if (scenario.getConfig().getModules().containsKey(TrafficCharConfigGroup.GROUP_NAME))
+			changeLinkDynamicsOnNetwork(this.scenario.getNetwork());
 
 		checkForConsistencyAndInitialize();
 		setUpConfig();

@@ -35,6 +35,7 @@ import org.matsim.vis.otfvis.OnTheFlyServer;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import playground.shivam.trafficChar.TrafficCharQSimModule;
+import playground.shivam.trafficChar.core.TrafficCharConfigGroup;
 
 public class FDQSimProvider implements Provider<Mobsim> {
 	
@@ -67,13 +68,22 @@ public class FDQSimProvider implements Provider<Mobsim> {
 	
 	@Override
 	public Mobsim get() {
-		final QSim qSim = new QSimBuilder(scenario.getConfig()) //
-				.useDefaults() //
-				.addOverridingQSimModule(new TrafficCharQSimModule())
-				.configureQSimComponents( components -> {
+		final QSim qSim;
+		if (scenario.getConfig().getModules().containsKey(TrafficCharConfigGroup.GROUP_NAME))
+			qSim = new QSimBuilder(scenario.getConfig()) //
+					.useDefaults() //
+					.addOverridingQSimModule(new TrafficCharQSimModule())
+					.configureQSimComponents( components -> {
+							components.removeNamedComponent(PopulationModule.COMPONENT_NAME);
+						} )
+					.build(scenario, events);
+		else
+			qSim = new QSimBuilder(scenario.getConfig()) //
+					.useDefaults() //
+					.configureQSimComponents( components -> {
 						components.removeNamedComponent(PopulationModule.COMPONENT_NAME);
 					} )
-				.build(scenario, events);
+					.build(scenario, events);
 
 		FDModule.LOG.info("=======================");
 		FDModule.LOG.info("Mobsim agents' are directly added to AgentSource.");
