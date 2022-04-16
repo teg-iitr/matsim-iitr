@@ -54,9 +54,9 @@ public class RunDynamicPCUExample {
         boolean updatePCU = true;
         PCUMethod pcuMethod = PCUMethod.SPEED_AREA_RATIO;
 
-        String parentDir = "../../svnit/outputFiles/mixedModes/passing/staticPCU/";
+        String parentDir = "output/staticPCU/";
         if(updatePCU) {
-            parentDir = "../../svnit/outputFiles/mixedModes/passing/dynamicPCU/"+pcuMethod+"/";
+            parentDir = "output/dynamicPCU/"+pcuMethod+"/";
         }
 
         Config config = ConfigUtils.createConfig();

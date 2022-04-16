@@ -251,7 +251,7 @@ public class EvacuationPatnaScenarioGenerator {
 								)
 						);
 				List<? extends PlanElement> routeInfo = builder.build().calcRoute(
-						leg.getMode(), 
+						leg.getMode(),
 						FacilitiesUtils.toFacility(home, null),
 						FacilitiesUtils.toFacility(evacAct, null), 
 						home.getEndTime().seconds(),
