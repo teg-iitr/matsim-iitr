@@ -45,6 +45,7 @@ import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
+import org.matsim.core.utils.timing.TimeInterpretation;
 import playground.amit.InternalizationEmissionAndCongestion.EmissionCongestionTravelDisutilityCalculatorFactory;
 import playground.amit.InternalizationEmissionAndCongestion.InternalizeEmissionsCongestionControlerListener;
 import playground.amit.analysis.modalShare.ModalShareFromEvents;
@@ -112,7 +113,7 @@ public class SubPopMunichControler {
 					@Override
 					public PlanStrategy get() {
 						final Builder builder = new Builder(new RandomPlanSelector<>());
-						builder.addStrategyModule(new ReRoute(sc, tripRouterProvider));
+						builder.addStrategyModule(new ReRoute(sc, tripRouterProvider, TimeInterpretation.create(this.sc.getConfig())));
 						return builder.build();
 					}
 				});
@@ -141,7 +142,7 @@ public class SubPopMunichControler {
 //								false,
 //								0.0, //prob, 0.0 for backward compatiblity
 //								tripRouterProvider));
-						builder.addStrategyModule(new ReRoute(sc, tripRouterProvider));
+						builder.addStrategyModule(new ReRoute(sc, tripRouterProvider, TimeInterpretation.create(this.sc.getConfig())));
 						return builder.build();
 					}
 				});

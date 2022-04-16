@@ -33,6 +33,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.network.NetworkFactory;
 import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
@@ -161,10 +162,10 @@ public class FDModule extends AbstractModule {
 			scenario.getConfig().qsim().setStuckTime(180.);
 
 		//TODO probably, following is not required anymore.
-		if ( scenario.getConfig().network().isTimeVariantNetwork() ) {
-			Network netImpl = scenario.getNetwork();
-			netImpl.getFactory().setLinkFactory(new VariableIntervalTimeVariantLinkFactory());
-		}
+//		if ( scenario.getConfig().network().isTimeVariantNetwork() ) {
+//			Network netImpl = scenario.getNetwork();
+//			netImpl.getFactory().(new VariableIntervalTimeVariantLinkFactory());
+//		}
 
 		StrategyConfigGroup.StrategySettings ss = new StrategyConfigGroup.StrategySettings();
 		ss.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.KeepLastSelected);

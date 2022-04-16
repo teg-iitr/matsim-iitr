@@ -63,7 +63,7 @@ public class PatnaEmissionsWriter {
     private void writeEmissionEventsFile(final String outputDir){
 
         EmissionsConfigGroup ecg = new EmissionsConfigGroup();
-        ecg.setUsingDetailedEmissionCalculation(false);
+        ecg.setUsingDetailedEmissionCalculationStringSetter(false);
         ecg.setUsingVehicleTypeIdAsVehicleDescription(false);
         ecg.setAverageColdEmissionFactorsFile(avgColdEmissFile);
         ecg.setAverageWarmEmissionFactorsFile(avgWarmEmissFile);

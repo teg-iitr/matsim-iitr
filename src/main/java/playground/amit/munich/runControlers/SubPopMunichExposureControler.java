@@ -42,6 +42,7 @@ import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.timing.TimeInterpretation;
 import playground.amit.utils.FileUtils;
 import playground.vsp.airPollution.exposure.*;
 
@@ -113,7 +114,7 @@ public class SubPopMunichExposureControler {
 						final Builder builder = new Builder(new RandomPlanSelector<>());
 						//TODO following line is commented. See, what's changed. Amit 19.09.2020
 //						builder.addStrategyModule(new SubtourModeChoice(sc.getConfig().global().getNumberOfThreads(), availableModes, chainBasedModes, false, 0.0, tripRouterProvider));
-						builder.addStrategyModule(new ReRoute(sc, tripRouterProvider));
+						builder.addStrategyModule(new ReRoute(sc, tripRouterProvider, TimeInterpretation.create(this.sc.getConfig())));
 						return builder.build();
 					}
 				});

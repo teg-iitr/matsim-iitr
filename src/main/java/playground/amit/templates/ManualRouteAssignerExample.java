@@ -43,6 +43,7 @@ import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisut
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.trafficmonitoring.FreeSpeedTravelTime;
 
+import org.matsim.core.utils.timing.TimeInterpretation;
 import playground.amit.mixedTraffic.patnaIndia.router.FreeSpeedTravelTimeForBike;
 import playground.amit.mixedTraffic.patnaIndia.router.FreeSpeedTravelTimeForTruck;
 import playground.amit.utils.LoadMyScenarios;
@@ -78,7 +79,7 @@ public class ManualRouteAssignerExample {
             routerFactory.setTravelDisutility(new RandomizingTimeDistanceTravelDisutilityFactory(mode, scenario.getConfig()).createTravelDisutility(tt));
 
             final TripRouter tripRouter = routerFactory.build(scNetwork).get();
-            PlanAlgorithm router = new PlanRouter(tripRouter);
+            PlanAlgorithm router = new PlanRouter(tripRouter, TimeInterpretation.create(this.scenario.getConfig()));
 
             PersonPrepareForSim pp4s = new PersonPrepareForSim(router, scNetwork);
             mode2routers.put(mode, pp4s);

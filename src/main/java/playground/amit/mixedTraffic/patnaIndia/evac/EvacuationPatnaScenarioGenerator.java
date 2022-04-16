@@ -58,6 +58,7 @@ import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.evacuationgui.scenariogenerator.EvacuationNetworkGenerator;
 import org.matsim.facilities.FacilitiesUtils;
+import org.matsim.utils.objectattributes.attributable.Attributes;
 import org.opengis.feature.simple.SimpleFeature;
 
 import playground.amit.mixedTraffic.patnaIndia.input.urban.UrbanDemandGenerator;
@@ -250,11 +251,12 @@ public class EvacuationPatnaScenarioGenerator {
 								)
 						);
 				List<? extends PlanElement> routeInfo = builder.build().calcRoute(
-						leg.getMode(), 
+						leg.getMode(),
 						FacilitiesUtils.toFacility(home, null),
 						FacilitiesUtils.toFacility(evacAct, null), 
 						home.getEndTime().seconds(),
-						pOut);
+						pOut,
+						new Attributes());
 
 				Route route = ((Leg)routeInfo.get(0)).getRoute();
 				route.setStartLinkId(home.getLinkId());

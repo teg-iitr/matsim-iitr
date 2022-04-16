@@ -50,6 +50,7 @@ import org.matsim.core.router.TripRouterFactoryBuilderWithDefaults;
 import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.utils.io.IOUtils;
+import org.matsim.core.utils.timing.TimeInterpretation;
 import playground.amit.analysis.linkVolume.ModeFilterLinkVolumeHandler;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 
@@ -224,6 +225,6 @@ class BikeConnectorControlerListener implements StartupListener, IterationStarts
 //                new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.bike, scenario.getConfig().planCalcScore()).createTravelDisutility(travelTime));
 
         final TripRouter tripRouter = routerFactory.build(this.scenario).get();
-        return new PlanRouter(tripRouter);
+        return new PlanRouter(tripRouter, TimeInterpretation.create(this.scenario.getConfig()));
     }
 }

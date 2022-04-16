@@ -17,6 +17,7 @@ import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.facilities.FacilitiesUtils;
+import org.matsim.utils.objectattributes.attributable.Attributes;
 import playground.amit.utils.FileUtils;
 
 import java.io.BufferedReader;
@@ -89,7 +90,8 @@ public class GenerateRandomizedPTRoutes {
                 FacilitiesUtils.toFacility(origin, null),
                 FacilitiesUtils.toFacility(destination, null),
                 origin.getEndTime().seconds(),
-                person);
+                person,
+                new Attributes());
 
         System.out.println(((NetworkRoute) ((Leg) routeInfo.get(0)).getRoute()).getLinkIds());
     }
