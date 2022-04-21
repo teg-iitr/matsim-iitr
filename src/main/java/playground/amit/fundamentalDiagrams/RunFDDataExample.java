@@ -25,6 +25,7 @@ import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 import playground.amit.fundamentalDiagrams.core.FDModule;
+import playground.shivam.trafficChar.core.TrafficCharConfigGroup;
 
 /**
  * Created by amit on 16/02/2017.

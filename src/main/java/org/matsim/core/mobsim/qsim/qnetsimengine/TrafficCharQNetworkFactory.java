@@ -53,7 +53,6 @@ public final class TrafficCharQNetworkFactory implements QNetworkFactory {
 	private final EventsManager events;
 	private final Network network;
 	private final Scenario scenario;
-//	private NetsimEngineContext context;
 	private QNetsimEngineI.NetsimInternalInterface netsimEngine;
 	private LinkSpeedCalculator linkSpeedCalculator = new DefaultLinkSpeedCalculator();
 	private TurnAcceptanceLogic turnAcceptanceLogic = new DefaultTurnAcceptanceLogic();
@@ -90,7 +89,7 @@ public final class TrafficCharQNetworkFactory implements QNetworkFactory {
 		String rT = (String) link.getAttributes().getAttribute(TrafficCharConfigGroup.ROAD_TYPE);
 		NetsimEngineContext context = this.roadType2Contexts.get(rT);
 
-		QueueWithBuffer.Builder laneFactory = new QueueWithBuffer.Builder(context);
+		DynamicHeadwayQueueWithBuffer.Builder laneFactory = new DynamicHeadwayQueueWithBuffer.Builder(context);
 		QLinkImpl.Builder linkBuilder = new QLinkImpl.Builder(context, netsimEngine);
 		linkBuilder.setLaneFactory(laneFactory);
 		linkBuilder.setLinkSpeedCalculator( linkSpeedCalculator );

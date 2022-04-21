@@ -83,8 +83,9 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
     private final FDConfigGroup fdConfigGroup;
 
     @Inject
-    public ChandraSikdarPCUUpdator(final Scenario scenario, final FDNetworkGenerator fdNetworkGenerator
-    , FDDataContainer fdDataContainer, FDStabilityTester fdStabilityTester, FDConfigGroup fdConfigGroup){
+    public ChandraSikdarPCUUpdator(final Scenario scenario, final FDNetworkGenerator fdNetworkGenerator,
+                                   FDDataContainer fdDataContainer, FDStabilityTester fdStabilityTester,
+                                   FDConfigGroup fdConfigGroup){
         this.scenario = scenario;
         this.fdDataContainer = fdDataContainer;
         this.fdStabilityTester = fdStabilityTester;
@@ -127,7 +128,7 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
                     addVehicleTypeToPCU(mode, PCUMethod.SPEED_AREA_RATIO, pcu);
                 }
                 {
-                    // AREA_SPEED_RATIO_method
+                    // HEADWAY_RATIO_method
                     double pcu = NumberUtils.round(calculateHeadwayPCU(mode), 3);
                     addVehicleTypeToPCU(mode, PCUMethod.HEADWAY_RATIO, pcu);
 
@@ -182,11 +183,11 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
 //        if (  EnumUtils.isValidEnum(VehicleProjectedAreaRatio.class, mode) ){
 //            return VehicleProjectedAreaRatio.getProjectedAreaRatio(mode);
 //        } else {
-            return (double) ( scenario.getVehicles()
-                                                               .getVehicleTypes()
-                                                               .get(Id.create(mode, VehicleType.class))).getAttributes()
-                                                                                                        .getAttribute(
-                                                                                                                projected_area_ratio);
+            return (double) (scenario.getVehicles()
+                                     .getVehicleTypes()
+                                     .get(Id.create(mode, VehicleType.class))
+                        ).getAttributes()
+                         .getAttribute(projected_area_ratio);
 //        }
     }
 

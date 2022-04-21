@@ -1,22 +1,3 @@
-/* *********************************************************************** *
- * project: org.matsim.*
- *                                                                         *
- * *********************************************************************** *
- *                                                                         *
- * copyright       : (C) 2013 by the members listed in the COPYING,        *
- *                   LICENSE and WARRANTY file.                            *
- * email           : info at matsim dot org                                *
- *                                                                         *
- * *********************************************************************** *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *   See also COPYING, LICENSE and WARRANTY file                           *
- *                                                                         *
- * *********************************************************************** */
-
 package org.matsim.core.mobsim.qsim.qnetsimengine;
 
 import java.util.ArrayList;
@@ -38,7 +19,6 @@ import org.matsim.core.api.experimental.events.LaneLeaveEvent;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup.LinkDynamics;
 import org.matsim.core.config.groups.QSimConfigGroup.TrafficDynamics;
-import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.mobsim.framework.MobsimDriverAgent;
@@ -46,7 +26,6 @@ import org.matsim.core.mobsim.qsim.interfaces.MobsimVehicle;
 import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
 import org.matsim.core.mobsim.qsim.interfaces.SignalizeableItem;
 import org.matsim.core.mobsim.qsim.pt.TransitDriverAgent;
-import org.matsim.core.mobsim.qsim.qnetsimengine.AbstractQLink.HandleTransitStopResult;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QLinkImpl.LaneFactory;
 import org.matsim.core.mobsim.qsim.qnetsimengine.flow_efficiency.DefaultFlowEfficiencyCalculator;
 import org.matsim.core.mobsim.qsim.qnetsimengine.flow_efficiency.FlowEfficiencyCalculator;
@@ -162,7 +141,7 @@ final class DynamicHeadwayQueueWithBuffer implements QLaneI, SignalizeableItem {
 	 * pointer, and give access only to reduced number of methods (in particular not the full Link information). kai, feb'18
 	 * This is now done with the {@link AbstractQLink.QLinkInternalInterface}.  kai, feb'18
 	 */
-	private final AbstractQLink.QLinkInternalInterface qLink;
+	private final DynamicHeadwayAbstractQLink.QLinkInternalInterface qLink;
 	private final Id<Lane> id;
 	private static int spaceCapWarningCount = 0;
 	final static double HOLE_SPEED_KM_H = 15.0;
@@ -170,7 +149,7 @@ final class DynamicHeadwayQueueWithBuffer implements QLaneI, SignalizeableItem {
 	private final double length ;
 	private double unscaledFlowCapacity_s = Double.NaN ;
 	private double effectiveNumberOfLanes = Double.NaN ;
-
+	private double pcu;
 	/**
 	 * Points to the latest vehicle that entered the buffer and the entry time.
 	 */
@@ -192,7 +171,7 @@ final class DynamicHeadwayQueueWithBuffer implements QLaneI, SignalizeableItem {
 
 	private final FlowEfficiencyCalculator flowEfficiencyCalculator;
 
-	private DynamicHeadwayQueueWithBuffer(AbstractQLink.QLinkInternalInterface qlink, final VehicleQ<QVehicle> vehicleQueue, Id<Lane> laneId,
+	private DynamicHeadwayQueueWithBuffer(DynamicHeadwayAbstractQLink.QLinkInternalInterface qlink, final VehicleQ<QVehicle> vehicleQueue, Id<Lane> laneId,
 							double length, double effectiveNumberOfLanes, double flowCapacity_s, final NetsimEngineContext context,
 							FlowEfficiencyCalculator flowEfficiencyCalculator) {
 		// the general idea is to give this object no longer access to "everything".  Objects get back pointers (here qlink), but they
@@ -266,14 +245,14 @@ final class DynamicHeadwayQueueWithBuffer implements QLaneI, SignalizeableItem {
 			MobsimDriverAgent driver = veh.getDriver();
 
 			if (driver instanceof TransitDriverAgent) {
-				HandleTransitStopResult handleTransitStop = qLink.handleTransitStop(
+				AbstractQLink.HandleTransitStopResult handleTransitStop = qLink.handleTransitStop(
 						now, veh, (TransitDriverAgent) driver, this.qLink.getId()
 				);
-				if (handleTransitStop == HandleTransitStopResult.accepted) {
+				if (handleTransitStop == AbstractQLink.HandleTransitStopResult.accepted) {
 					// vehicle has been accepted into the transit vehicle queue of the link.
 					removeVehicleFromQueue(veh);
 					continue;
-				} else if (handleTransitStop == HandleTransitStopResult.rehandle) {
+				} else if (handleTransitStop == AbstractQLink.HandleTransitStopResult.rehandle) {
 					continue; // yy why "continue", and not "break" or "return"?  Seems to me that this
 					// is currently only working because qLink.handleTransitStop(...) also increases the
 					// earliestLinkExitTime for the present vehicle.  kai, oct'13
@@ -1006,7 +985,7 @@ final class DynamicHeadwayQueueWithBuffer implements QLaneI, SignalizeableItem {
 						inverseFlowCapacityPerTimeStep,
 						qLink.getFreespeed(now),
 //						NetworkUtils.getNumberOfLanesAsInt(now, qLink.getLink()),
-						qLink.getNumberOfLanesAsInt(now),
+						qLink.getNumberOfLanesAsInt(now) ,
 						holes
 				);
 
@@ -1072,11 +1051,17 @@ final class DynamicHeadwayQueueWithBuffer implements QLaneI, SignalizeableItem {
 		private Double effectiveNumberOfLanes = null;
 		private Double flowCapacity_s = null;
 		private FlowEfficiencyCalculator flowEfficiencyCalculator;
+		private Double pcu = null;
 
 		Builder(final NetsimEngineContext context) {
 			this.context = context;
-			context.qsimConfig.getLinkDynamics().toString();
-			context.qsimConfig.getLinkDynamics().toString();
+			if (context.qsimConfig.getLinkDynamics() == QSimConfigGroup.LinkDynamics.PassingQ ||
+					context.qsimConfig.getLinkDynamics() == QSimConfigGroup.LinkDynamics.SeepageQ) {
+				this.vehicleQueue = new PassingVehicleQ();
+			}
+		}
+		void setPcu(Double pcu) {
+			this.pcu = pcu;
 		}
 
 		void setVehicleQueue(VehicleQ<QVehicle> vehicleQueue) {
@@ -1103,8 +1088,8 @@ final class DynamicHeadwayQueueWithBuffer implements QLaneI, SignalizeableItem {
 			this.flowEfficiencyCalculator = flowEfficiencyCalculator;
 		}
 
-		@Override
-		public DynamicHeadwayQueueWithBuffer createLane(AbstractQLink qLink) {
+
+		public DynamicHeadwayQueueWithBuffer createDynnamicHeadwayLane(DynamicHeadwayAbstractQLink qLink) {
 			// a number of things I cannot configure before I have the qlink:
 			if (id == null) {
 				id = Id.create(qLink.getLink().getId(), Lane.class);
@@ -1122,6 +1107,11 @@ final class DynamicHeadwayQueueWithBuffer implements QLaneI, SignalizeableItem {
 				flowEfficiencyCalculator = new DefaultFlowEfficiencyCalculator();
 			}
 			return new DynamicHeadwayQueueWithBuffer(qLink.getInternalInterface(), vehicleQueue, id, length, effectiveNumberOfLanes, flowCapacity_s, context, flowEfficiencyCalculator ) ;
+		}
+
+		@Override
+		public QLaneI createLane(AbstractQLink abstractQLink) {
+			return null;
 		}
 	}
 

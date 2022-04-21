@@ -22,6 +22,8 @@ package playground.amit.fundamentalDiagrams;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.ChangeModeConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
@@ -60,7 +62,6 @@ public class RunFDTrafficCharExample {
         String outFolder ="/1lane/";
         scenario.getConfig().controler().setOutputDirectory(myDir+outFolder);
 
-
         QSimConfigGroup qsim = scenario.getConfig().qsim();
         List<String> mainModes = Arrays.asList("car", "bicycle");
         qsim.setMainModes(mainModes);
@@ -84,11 +85,10 @@ public class RunFDTrafficCharExample {
 
         trafficCharConfigGroup.addQSimConfigGroup(TrafficCharConfigGroup.ROAD_TYPE_DEFAULT, scenario.getConfig().qsim());
 
-//        scenario.getConfig().getModules().put(TrafficCharConfigGroup.GROUP_NAME, trafficCharConfigGroup);
+        scenario.getConfig().getModules().put(TrafficCharConfigGroup.GROUP_NAME, trafficCharConfigGroup);
 
         Controler controler = new Controler(scenario);
-        controler.addOverridingModule(new FDModule(scenario));
+        controler.addOverridingModule(new FDModule(scenario, "PassingQ"));
         controler.run();
-
     }
 }
