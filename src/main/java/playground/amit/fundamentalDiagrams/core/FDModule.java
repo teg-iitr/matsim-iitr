@@ -74,15 +74,13 @@ public class FDModule extends AbstractModule {
 	private String[] travelModes;
 	private final FDConfigGroup FDConfigGroup;
 
-	public FDModule(final Scenario scenario){
+	public FDModule(final Scenario scenario, String linkDynamics){
 		FDConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), FDConfigGroup.class);
 		fdNetworkGenerator = new FDNetworkGenerator(FDConfigGroup);
 		this.scenario = scenario;
 		fdNetworkGenerator.createNetwork(this.scenario.getNetwork());
 
-		if (scenario.getConfig().getModules().containsKey(TrafficCharConfigGroup.GROUP_NAME))
-			changeLinkDynamicsOnNetwork(this.scenario.getNetwork());
-
+		changeLinkDynamics(scenario.getNetwork(), linkDynamics);
 		checkForConsistencyAndInitialize();
 		setUpConfig();
 
@@ -91,16 +89,27 @@ public class FDModule extends AbstractModule {
 		new MatsimVehicleWriter(scenario.getVehicles()).writeFile(this.runDir+"/output_vehicles.xml");
 		new PopulationWriter(scenario.getPopulation()).write(this.runDir + "/output_plans.xml");
 	}
+	public FDModule(final Scenario scenario){
+		FDConfigGroup = ConfigUtils.addOrGetModule(scenario.getConfig(), FDConfigGroup.class);
+		fdNetworkGenerator = new FDNetworkGenerator(FDConfigGroup);
+		this.scenario = scenario;
+		fdNetworkGenerator.createNetwork(this.scenario.getNetwork());
+		checkForConsistencyAndInitialize();
+		setUpConfig();
 
-	private void changeLinkDynamicsOnNetwork(Network network) {
+		new ConfigWriter(scenario.getConfig()).write(this.runDir+"/output_config.xml");
+		new NetworkWriter(scenario.getNetwork()).write(this.runDir+"/output_network.xml");
+		new MatsimVehicleWriter(scenario.getVehicles()).writeFile(this.runDir+"/output_vehicles.xml");
+		new PopulationWriter(scenario.getPopulation()).write(this.runDir + "/output_plans.xml");
+	}
+	private void changeLinkDynamics(Network network, String linkDynamics) {
 		for (Link link: network.getLinks().values()) {
 			if (link.getId().equals(Id.createLinkId("1")) | link.getId().equals(Id.createLinkId("2")))
-				link.getAttributes().putAttribute(TrafficCharConfigGroup.ROAD_TYPE, "PassingQ");
+				link.getAttributes().putAttribute(TrafficCharConfigGroup.ROAD_TYPE, linkDynamics);
 			else
 				link.getAttributes().putAttribute(TrafficCharConfigGroup.ROAD_TYPE, TrafficCharConfigGroup.ROAD_TYPE_DEFAULT);
 		}
 	}
-
 	private void checkForConsistencyAndInitialize(){
 		this.runDir = scenario.getConfig().controler().getOutputDirectory();
 		if(runDir==null) throw new RuntimeException("Location to write data for FD is not set. Aborting...");

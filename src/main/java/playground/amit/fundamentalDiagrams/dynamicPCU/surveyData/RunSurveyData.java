@@ -19,7 +19,6 @@
 
 package playground.amit.fundamentalDiagrams.dynamicPCU.surveyData;
 
-import java.util.List;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
 import org.matsim.api.core.v01.Id;
@@ -41,6 +40,8 @@ import playground.amit.fundamentalDiagrams.core.FDModule;
 import playground.amit.fundamentalDiagrams.core.pointsToRun.FDAgentsGenerator;
 import playground.amit.fundamentalDiagrams.dynamicPCU.PCUMethod;
 import playground.amit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.estimation.ChandraSikdarPCUUpdator;
+
+import java.util.List;
 
 /**
  * Created by amit on 23.05.18.
