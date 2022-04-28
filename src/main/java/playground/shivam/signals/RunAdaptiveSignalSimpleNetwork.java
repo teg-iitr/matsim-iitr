@@ -11,9 +11,12 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.builder.MixedTrafficSignals;
 import org.matsim.contrib.signals.builder.Signals;
+import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerSignalController;
+import org.matsim.contrib.signals.controller.laemmerFix.MixedTrafficLaemmerSignalController;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlData;
@@ -27,6 +30,7 @@ import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalPlan;
 import org.matsim.contrib.signals.model.SignalSystem;
+import org.matsim.contrib.signals.otfvis.OTFVisWithSignalsLiveModule;
 import org.matsim.contrib.signals.utils.SignalUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -39,15 +43,13 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.vehicles.MatsimVehicleWriter;
-import org.matsim.vehicles.VehicleType;
-import org.matsim.vehicles.VehicleUtils;
-import org.matsim.vehicles.Vehicles;
+import org.matsim.vehicles.*;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import playground.amit.mixedTraffic.MixedTrafficVehiclesUtils;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 public class RunAdaptiveSignalSimpleNetwork {
     private final Controler controler;
@@ -59,8 +61,8 @@ public class RunAdaptiveSignalSimpleNetwork {
 
         /* the signals extensions works for planbased, sylvia and laemmer signal controller
          * by default and is pluggable for your own signal controller like this: */
-        new Signals.Configurator(controler).addSignalControllerFactory(LaemmerSignalController.IDENTIFIER,
-                LaemmerSignalController.LaemmerFactory.class);
+        (new MixedTrafficSignals.Configurator(this.controler)).addSignalControllerFactory(MixedTrafficLaemmerSignalController.IDENTIFIER,
+                MixedTrafficLaemmerSignalController.LaemmerFactory.class);
     }
 
     public static void main(String[] args) {
@@ -90,6 +92,7 @@ public class RunAdaptiveSignalSimpleNetwork {
             Link link = fac.createLink(Id.createLinkId(linkId),
                     net.getNodes().get(Id.createNodeId(fromNodeId)),
                     net.getNodes().get(Id.createNodeId(toNodeId)));
+            link.setAllowedModes(Set.of("car", "truck"));
             link.setCapacity(7200);
             link.setLength(1000);
             link.setFreespeed(10);
@@ -151,13 +154,9 @@ public class RunAdaptiveSignalSimpleNetwork {
         createNetwork(scenario);
         createPopulation(scenario);
         createSignals(scenario);
-//        new PopulationWriter(scenario.getPopulation()).write("pop.xml");
-
-        QSimConfigGroup qsim = scenario.getConfig().qsim();
+        Vehicles vehicles = scenario.getVehicles();
 
         List<String> mainModes = Arrays.asList("car", "truck");
-        qsim.setMainModes(mainModes);
-        Vehicles vehicles = scenario.getVehicles();
         for (String mode : mainModes) {
             VehicleType veh = VehicleUtils.createVehicleType(Id.create(mode, VehicleType.class));
             veh.setPcuEquivalents(MixedTrafficVehiclesUtils.getPCU(mode));
@@ -167,10 +166,7 @@ public class RunAdaptiveSignalSimpleNetwork {
             veh.setNetworkMode(mode);
             vehicles.addVehicleType(veh);
         }
-//        new MatsimVehicleWriter(scenario.getVehicles()).writeFile("vehi.xml");
-        ChangeModeConfigGroup changeTripMode = scenario.getConfig().changeMode();
-        changeTripMode.setModes(new String[]{"car", "truck"});
-        config.plansCalcRoute().setNetworkModes(mainModes);
+        new MatsimVehicleWriter(scenario.getVehicles()).writeFile("veh.xml");
         return scenario;
     }
 
@@ -178,19 +174,41 @@ public class RunAdaptiveSignalSimpleNetwork {
         Config config = ConfigUtils.createConfig();
         config.controler().setOutputDirectory("output/RunAdaptiveSignalSimpleNetwork/");
 
-        config.controler().setLastIteration(10);
+        config.controler().setLastIteration(100);
         config.qsim().setUsingFastCapacityUpdate(false);
+        config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
+        config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
 
         PlanCalcScoreConfigGroup.ActivityParams dummyAct = new PlanCalcScoreConfigGroup.ActivityParams("dummy");
         dummyAct.setTypicalDuration(12 * 3600);
         config.planCalcScore().addActivityParams(dummyAct);
         {
             StrategyConfigGroup.StrategySettings strat = new StrategyConfigGroup.StrategySettings();
-            strat.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.KeepLastSelected.toString());
+            strat.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta);
             strat.setWeight(0.0);
             strat.setDisableAfter(config.controler().getLastIteration());
             config.strategy().addStrategySettings(strat);
         }
+        // from Jaipur controller
+        PlanCalcScoreConfigGroup.ModeParams car = new PlanCalcScoreConfigGroup.ModeParams("car");
+        car.setMarginalUtilityOfTraveling(-6.0);
+        car.setConstant(-0.5);
+        config.planCalcScore().addModeParams(car);
+
+        PlanCalcScoreConfigGroup.ModeParams truck = new PlanCalcScoreConfigGroup.ModeParams("truck"); // using default for them.
+        truck.setConstant(-1.0);
+        truck.setMarginalUtilityOfTraveling(-7.0);
+        config.planCalcScore().addModeParams(truck);
+
+        QSimConfigGroup qsim = config.qsim();
+        List<String> mainModes = Arrays.asList("car", "truck");
+        qsim.setMainModes(mainModes);
+
+//        new MatsimVehicleWriter(scenario.getVehicles()).writeFile("vehi.xml");
+        ChangeModeConfigGroup changeTripMode = config.changeMode();
+        changeTripMode.setModes(new String[]{"car", "truck"});
+        config.plansCalcRoute().setNetworkModes(mainModes);
+
 
         OTFVisConfigGroup otfvisConfig = ConfigUtils.addOrGetModule(config, OTFVisConfigGroup.class);
         otfvisConfig.setDrawTime(true);
@@ -198,11 +216,11 @@ public class RunAdaptiveSignalSimpleNetwork {
         SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
         signalConfigGroup.setUseSignalSystems(true);
 
-        LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config,
-                LaemmerConfigGroup.GROUP_NAME, LaemmerConfigGroup.class);
-        laemmerConfigGroup.setActiveRegime(LaemmerConfigGroup.Regime.COMBINED);
+        LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config, LaemmerConfigGroup.GROUP_NAME, LaemmerConfigGroup.class);
+        laemmerConfigGroup.setActiveRegime(LaemmerConfigGroup.Regime.OPTIMIZING);
         laemmerConfigGroup.setDesiredCycleTime(90);
         laemmerConfigGroup.setMinGreenTime(5);
+        config.getModules().put(LaemmerConfigGroup.GROUP_NAME, laemmerConfigGroup);
 
         config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
         config.controler().setWriteEventsInterval(config.controler().getLastIteration());
@@ -211,16 +229,20 @@ public class RunAdaptiveSignalSimpleNetwork {
         config.planCalcScore().setWriteExperiencedPlans(true);
         config.controler().setCreateGraphs(true);
 
-
         return config;
     }
 
     private static void createSignals(Scenario scenario) {
         SignalsData signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
+
         SignalSystemsData signalSystems = signalsData.getSignalSystemsData();
+
         SignalSystemsDataFactory sysFac = new SignalSystemsDataFactoryImpl();
+
         SignalGroupsData signalGroups = signalsData.getSignalGroupsData();
+
         SignalControlData signalControl = signalsData.getSignalControlData();
+
         SignalControlDataFactory conFac = new SignalControlDataFactoryImpl();
 
         // create signal system
@@ -252,7 +274,7 @@ public class RunAdaptiveSignalSimpleNetwork {
 
         // create the signal control
         SignalSystemControllerData signalSystemControl = conFac.createSignalSystemControllerData(signalSystemId);
-        signalSystemControl.setControllerIdentifier(LaemmerSignalController.IDENTIFIER);
+        signalSystemControl.setControllerIdentifier(MixedTrafficLaemmerSignalController.IDENTIFIER);
         signalControl.addSignalSystemControllerData(signalSystemControl);
 
         // create a plan for the signal system (with defined cycle time and offset 0)
