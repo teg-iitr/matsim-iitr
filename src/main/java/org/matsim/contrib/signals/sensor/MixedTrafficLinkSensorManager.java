@@ -62,7 +62,7 @@ public final class MixedTrafficLinkSensorManager implements LinkEnterEventHandle
                 throw new IllegalStateException("Link with Id " + linkId + " is not in the network, can't register sensor");
             }
 
-            this.linkIdSensorMap.put(link.getId(), new MixedTrafficLinkSensor(link));
+            this.linkIdSensorMap.put(link.getId(), new MixedTrafficLinkSensor(link, vehicles.getVehicles()));
         }
 
         ((MixedTrafficLinkSensor)this.linkIdSensorMap.get(linkId)).registerDistanceToMonitor(distanceMeter);
@@ -142,7 +142,7 @@ public final class MixedTrafficLinkSensorManager implements LinkEnterEventHandle
                 throw new IllegalStateException("Link with Id " + linkId + " is not in the network, can't register sensor");
             }
 
-            this.linkIdSensorMap.put(link.getId(), new MixedTrafficLinkSensor(link));
+            this.linkIdSensorMap.put(link.getId(), new MixedTrafficLinkSensor(link, vehicles.getVehicles()));
         }
 
         ((MixedTrafficLinkSensor)this.linkIdSensorMap.get(linkId)).registerAverageVehiclesPerSecondToMonitor(lookBackTime, timeBucketCollectionDuration);
