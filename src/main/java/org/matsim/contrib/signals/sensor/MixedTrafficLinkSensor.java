@@ -19,6 +19,8 @@ import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import playground.amit.mixedTraffic.MixedTrafficVehiclesUtils;
 
+import javax.inject.Inject;
+
 final class MixedTrafficLinkSensor {
     private static final Logger log = Logger.getLogger(LinkSensor.class);
     private Link link = null;
@@ -34,11 +36,14 @@ final class MixedTrafficLinkSensor {
     private double currentBucketStartTime;
     private AtomicInteger currentBucket;
     private int numOfBucketsNeededForLookback;
-    private int countTrucks = 0;
-    private int countCars = 0;
-    public MixedTrafficLinkSensor(Link link) {
+    private Map<Id<Vehicle>, Vehicle> vehicles;
+    private double volume;
+
+    public MixedTrafficLinkSensor(Link link, Map<Id<Vehicle>, Vehicle> vehicles) {
         this.link = link;
+        this.vehicles = vehicles;
     }
+
 
     public void registerDistanceToMonitor(Double distanceMeter) {
         if (!this.doDistanceMonitoring) {
@@ -84,7 +89,6 @@ final class MixedTrafficLinkSensor {
                 ++count;
             }
         }
-
         return count;
     }
 
@@ -92,7 +96,7 @@ final class MixedTrafficLinkSensor {
         double avgVehPerSecond = 0.0D;
         if (now > this.monitoringStartTime) {
             if (this.lookBackTime == 1.0D / 0.0) {
-                avgVehPerSecond = (this.countCars * MixedTrafficVehiclesUtils.getPCU("car") + this.countTrucks * MixedTrafficVehiclesUtils.getPCU("truck")) / (now - this.monitoringStartTime + 1.0D);
+                avgVehPerSecond = this.volume / (now - this.monitoringStartTime + 1.0D);
 //                avgVehPerSecond = this.totalVehicles / (now - this.monitoringStartTime + 1.0D);
             } else {
                 this.updateBucketsUntil(now);
@@ -106,7 +110,7 @@ final class MixedTrafficLinkSensor {
             }
         }
 
-        return avgVehPerSecond;
+        return this.volume;
     }
 
     private void updateBucketsUntil(double now) {
@@ -165,10 +169,7 @@ final class MixedTrafficLinkSensor {
                 this.updateBucketsUntil(event.getTime());
                 this.currentBucket.incrementAndGet();
             }
-            if (event.getVehicleId().toString().contains("truck"))
-                ++this.countTrucks;
-            else
-                ++this.countCars;
+            this.volume += this.vehicles.get(event.getVehicleId()).getType().getPcuEquivalents();
             ++this.totalVehicles;
             if (this.totalVehicles == 1.0D) {
                 this.monitoringStartTime = event.getTime();
@@ -190,16 +191,14 @@ final class MixedTrafficLinkSensor {
 
     public void handleEvent(LinkLeaveEvent event) {
         this.vehicleLeftLink(event.getVehicleId());
+        this.volume -= this.vehicles.get(event.getVehicleId()).getType().getPcuEquivalents();
     }
 
     public void handleEvent(VehicleLeavesTrafficEvent event) {
         this.vehicleLeftLink(event.getVehicleId());
         if (this.doAverageVehiclesPerSecondMonitoring) {
             --this.totalVehicles;
-            if (event.getVehicleId().toString().contains("truck"))
-                --this.countTrucks;
-            else
-                --this.countCars;
+            this.volume -= this.vehicles.get(event.getVehicleId()).getType().getPcuEquivalents();
         }
 
     }

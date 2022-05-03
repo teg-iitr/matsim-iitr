@@ -11,11 +11,10 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.analysis.DelayAnalysisTool;
+import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
 import org.matsim.contrib.signals.builder.MixedTrafficSignals;
-import org.matsim.contrib.signals.builder.Signals;
-import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerSignalController;
 import org.matsim.contrib.signals.controller.laemmerFix.MixedTrafficLaemmerSignalController;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
@@ -30,7 +29,6 @@ import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalPlan;
 import org.matsim.contrib.signals.model.SignalSystem;
-import org.matsim.contrib.signals.otfvis.OTFVisWithSignalsLiveModule;
 import org.matsim.contrib.signals.utils.SignalUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -38,6 +36,7 @@ import org.matsim.core.config.groups.ChangeModeConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.StrategyConfigGroup;
+import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.gbl.MatsimRandom;
@@ -47,9 +46,10 @@ import org.matsim.vehicles.*;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import playground.amit.mixedTraffic.MixedTrafficVehiclesUtils;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
 
 public class RunAdaptiveSignalSimpleNetwork {
     private final Controler controler;
@@ -142,13 +142,41 @@ public class RunAdaptiveSignalSimpleNetwork {
 
     public void run() {
 //		controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
+        SignalAnalysisTool signalAnalyzer = new SignalAnalysisTool();
+        controler.addOverridingModule(new AbstractModule() {
+            @Override
+            public void install() {
+                this.addEventHandlerBinding().toInstance(signalAnalyzer);
+                this.addControlerListenerBinding().toInstance(signalAnalyzer);
+            }
+        });
+        // add general analysis tools
+        DelayAnalysisTool delayAnalysis = new DelayAnalysisTool(controler.getScenario().getNetwork());
+        controler.addOverridingModule(new AbstractModule() {
+            @Override
+            public void install() {
+                this.addEventHandlerBinding().toInstance(delayAnalysis);
+            }
+        });
         controler.run();
+
+        Map<Id<SignalGroup>, Double> totalSignalGreenTime = signalAnalyzer.getTotalSignalGreenTime();
+        Map<Id<Link>, Double> totalDelayPerLink = delayAnalysis.getTotalDelayPerLink();
+        initializeResult("output/RunAdaptiveSignalSimpleNetwork/greenTimes.csv", "signal_plan","green_time" );
+        for (var signalTime: totalSignalGreenTime.entrySet()) {
+            writeResult("output/RunAdaptiveSignalSimpleNetwork/greenTimes.csv", signalTime.getKey().toString(), signalTime.getValue());
+        }
+        initializeResult("output/RunAdaptiveSignalSimpleNetwork/delayPCU.csv", "link_id","delay");
+        for (var delay: totalDelayPerLink.entrySet()) {
+            writeResult("output/RunAdaptiveSignalSimpleNetwork/delayPCU.csv", delay.getKey().toString(), delay.getValue());
+        }
     }
 
     private static Scenario defineScenario(Config config) {
         Scenario scenario = ScenarioUtils.loadScenario(config);
         // add missing scenario elements
-        ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
+        SignalSystemsConfigGroup signalsConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
+        signalsConfigGroup.setUseSignalSystems(true);
         scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(config).loadSignalsData());
 
         createNetwork(scenario);
@@ -166,7 +194,6 @@ public class RunAdaptiveSignalSimpleNetwork {
             veh.setNetworkMode(mode);
             vehicles.addVehicleType(veh);
         }
-        new MatsimVehicleWriter(scenario.getVehicles()).writeFile("veh.xml");
         return scenario;
     }
 
@@ -174,7 +201,10 @@ public class RunAdaptiveSignalSimpleNetwork {
         Config config = ConfigUtils.createConfig();
         config.controler().setOutputDirectory("output/RunAdaptiveSignalSimpleNetwork/");
 
-        config.controler().setLastIteration(100);
+        config.controler().setLastIteration(40);
+        config.travelTimeCalculator().setMaxTime(18000);
+        config.qsim().setStartTime(0.0D);
+        config.qsim().setEndTime(18000.0D);
         config.qsim().setUsingFastCapacityUpdate(false);
         config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
         config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
@@ -204,7 +234,6 @@ public class RunAdaptiveSignalSimpleNetwork {
         List<String> mainModes = Arrays.asList("car", "truck");
         qsim.setMainModes(mainModes);
 
-//        new MatsimVehicleWriter(scenario.getVehicles()).writeFile("vehi.xml");
         ChangeModeConfigGroup changeTripMode = config.changeMode();
         changeTripMode.setModes(new String[]{"car", "truck"});
         config.plansCalcRoute().setNetworkModes(mainModes);
@@ -213,11 +242,8 @@ public class RunAdaptiveSignalSimpleNetwork {
         OTFVisConfigGroup otfvisConfig = ConfigUtils.addOrGetModule(config, OTFVisConfigGroup.class);
         otfvisConfig.setDrawTime(true);
 
-        SignalSystemsConfigGroup signalConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
-        signalConfigGroup.setUseSignalSystems(true);
-
         LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config, LaemmerConfigGroup.GROUP_NAME, LaemmerConfigGroup.class);
-        laemmerConfigGroup.setActiveRegime(LaemmerConfigGroup.Regime.OPTIMIZING);
+        laemmerConfigGroup.setActiveRegime(LaemmerConfigGroup.Regime.COMBINED);
         laemmerConfigGroup.setDesiredCycleTime(90);
         laemmerConfigGroup.setMinGreenTime(5);
         config.getModules().put(LaemmerConfigGroup.GROUP_NAME, laemmerConfigGroup);
@@ -227,14 +253,67 @@ public class RunAdaptiveSignalSimpleNetwork {
         config.controler().setWritePlansInterval(config.controler().getLastIteration());
         config.vspExperimental().setWritingOutputEvents(true);
         config.planCalcScore().setWriteExperiencedPlans(true);
-        config.controler().setCreateGraphs(true);
 
         return config;
     }
 
-    private static void createSignals(Scenario scenario) {
-        SignalsData signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
+    public static void initializeResult(String filename, String column1, String column2) {
+        FileWriter csvwriter;
+        BufferedWriter bufferedWriter = null;
+        try {
+            csvwriter = new FileWriter(filename, false);
+            bufferedWriter = new BufferedWriter(csvwriter);
+            StringJoiner stringJoiner = new StringJoiner(",");
+            stringJoiner
+                    .add(column1)
+                    .add(column2);
+            bufferedWriter.write(stringJoiner.toString());
+            bufferedWriter.newLine();	} catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {assert bufferedWriter != null;
+                bufferedWriter.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                bufferedWriter.close();
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
 
+    public static void writeResult(String filename, String id, double time) {
+        FileWriter csvwriter;
+        BufferedWriter bufferedWriter = null;
+        try {
+            csvwriter = new FileWriter(filename, true);
+            bufferedWriter = new BufferedWriter(csvwriter);
+            StringJoiner stringJoiner = new StringJoiner(",");
+            stringJoiner
+                    .add(id)
+                    .add(Double.toString(time));
+            bufferedWriter.write(stringJoiner.toString());
+            bufferedWriter.newLine();	} catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {assert bufferedWriter != null;
+                bufferedWriter.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                bufferedWriter.close();
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+    }
+    private static void createSignals(Scenario scenario) {
+        SignalsData signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME );
         SignalSystemsData signalSystems = signalsData.getSignalSystemsData();
 
         SignalSystemsDataFactory sysFac = new SignalSystemsDataFactoryImpl();
