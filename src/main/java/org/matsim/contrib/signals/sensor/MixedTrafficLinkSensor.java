@@ -7,6 +7,8 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -37,11 +39,21 @@ final class MixedTrafficLinkSensor {
     private AtomicInteger currentBucket;
     private int numOfBucketsNeededForLookback;
     private Map<Id<Vehicle>, Vehicle> vehicles;
-    private double volume;
+    private double volume = 0.0D;
+    private Map<String, Double> mode2PCUs;
+
+    public Map<String, Double> getMode2PCUs() {
+        return mode2PCUs;
+    }
+
 
     public MixedTrafficLinkSensor(Link link, Map<Id<Vehicle>, Vehicle> vehicles) {
         this.link = link;
         this.vehicles = vehicles;
+        this.mode2PCUs = vehicles
+                        .values()
+                        .stream()
+                        .collect(Collectors.toMap(v -> v.getId().toString(), vehicle -> vehicle.getType().getPcuEquivalents()));
     }
 
 
@@ -110,7 +122,7 @@ final class MixedTrafficLinkSensor {
             }
         }
 
-        return this.volume;
+        return avgVehPerSecond;
     }
 
     private void updateBucketsUntil(double now) {
@@ -146,7 +158,7 @@ final class MixedTrafficLinkSensor {
             else
                 ++this.countCars;
             ++this.totalVehicles;
-            if (this.totalVehicles == 1.0D) {
+            if (this.volume == 1.0D) {
                 this.monitoringStartTime = event.getTime();
             }
         }
@@ -171,7 +183,7 @@ final class MixedTrafficLinkSensor {
             }
             this.volume += this.vehicles.get(event.getVehicleId()).getType().getPcuEquivalents();
             ++this.totalVehicles;
-            if (this.totalVehicles == 1.0D) {
+            if (this.volume == 1.0D) {
                 this.monitoringStartTime = event.getTime();
             }
         }
