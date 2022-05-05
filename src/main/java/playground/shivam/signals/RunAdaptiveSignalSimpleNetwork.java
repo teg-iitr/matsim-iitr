@@ -12,7 +12,8 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.analysis.DelayAnalysisTool;
-import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
+import org.matsim.contrib.signals.analysis.MixedTrafficDelayAnalysisTool;
+import org.matsim.contrib.signals.analysis.MixedTrafficSignalAnalysisTool;
 import org.matsim.contrib.signals.builder.MixedTrafficSignals;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
 import org.matsim.contrib.signals.controller.laemmerFix.MixedTrafficLaemmerSignalController;
@@ -142,7 +143,8 @@ public class RunAdaptiveSignalSimpleNetwork {
 
     public void run() {
 //		controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
-        SignalAnalysisTool signalAnalyzer = new SignalAnalysisTool();
+        SignalsData signalsData = (SignalsData) controler.getScenario().getScenarioElement(SignalsData.ELEMENT_NAME);
+        MixedTrafficSignalAnalysisTool signalAnalyzer = new MixedTrafficSignalAnalysisTool(signalsData);
         controler.addOverridingModule(new AbstractModule() {
             @Override
             public void install() {
@@ -151,7 +153,7 @@ public class RunAdaptiveSignalSimpleNetwork {
             }
         });
         // add general analysis tools
-        DelayAnalysisTool delayAnalysis = new DelayAnalysisTool(controler.getScenario().getNetwork());
+        MixedTrafficDelayAnalysisTool delayAnalysis = new MixedTrafficDelayAnalysisTool(controler.getScenario().getNetwork(), controler.getScenario().getVehicles().getVehicles());
         controler.addOverridingModule(new AbstractModule() {
             @Override
             public void install() {
@@ -161,15 +163,156 @@ public class RunAdaptiveSignalSimpleNetwork {
         controler.run();
 
         Map<Id<SignalGroup>, Double> totalSignalGreenTime = signalAnalyzer.getTotalSignalGreenTime();
-        Map<Id<Link>, Double> totalDelayPerLink = delayAnalysis.getTotalDelayPerLink();
-        initializeResult("output/RunAdaptiveSignalSimpleNetwork/greenTimes.csv", "signal_plan","green_time" );
-        for (var signalTime: totalSignalGreenTime.entrySet()) {
-            writeResult("output/RunAdaptiveSignalSimpleNetwork/greenTimes.csv", signalTime.getKey().toString(), signalTime.getValue());
+        Map<Double, Map<Id<SignalGroup>, Double>> signalGreenTimePerCycle = calculateSignalGreenTimePerCycle(signalAnalyzer);
+
+        SignalGroupsData signalGroups = signalsData.getSignalGroupsData();
+
+        Map<Id<SignalSystem>, Map<Id<SignalGroup>, SignalGroupData>> signalGroupDataBySignalSystemId = signalGroups.getSignalGroupDataBySignalSystemId();
+        List<Id<Signal>> signalIds = new ArrayList<>();
+        List<Id<SignalSystem>> signalSystemIds = new ArrayList<>();
+
+        initializeResult("output/RunAdaptiveSignalSimpleNetwork/greenTimesSignal.csv", "signal_system", "signal_group", "signal", "green_time");
+
+        for (var outerEntry : signalGroupDataBySignalSystemId.entrySet()) {
+            signalSystemIds.add(outerEntry.getKey());
+            for (var innerEntry : outerEntry.getValue().entrySet()) {
+                for (Id<Signal> signalId : innerEntry.getValue().getSignalIds()) {
+                    signalIds.add(signalId);
+                    writeResult("output/RunAdaptiveSignalSimpleNetwork/greenTimesSignal.csv", outerEntry.getKey().toString(), innerEntry.getKey().toString(), signalId.toString(), totalSignalGreenTime.get(innerEntry.getKey()));
+                }
+            }
         }
-        initializeResult("output/RunAdaptiveSignalSimpleNetwork/delayPCU.csv", "link_id","delay");
-        for (var delay: totalDelayPerLink.entrySet()) {
+
+
+        initializeResult("output/RunAdaptiveSignalSimpleNetwork/greenTimesSignalPerCycle.csv", "cycle_time", "signal_group", "green_time");
+
+        for (var outerEntry : signalGreenTimePerCycle.entrySet()) {
+            for (var innerEntry : outerEntry.getValue().entrySet()) {
+                writeResult("output/RunAdaptiveSignalSimpleNetwork/greenTimesSignalPerCycle.csv", outerEntry.getKey().toString(), innerEntry.getKey().toString(), innerEntry.getValue());
+            }
+        }
+
+        initializeResult("output/RunAdaptiveSignalSimpleNetwork/greenTimesSignalGroup.csv", "signal_plan", "green_time");
+
+        for (var signalTime : totalSignalGreenTime.entrySet()) {
+            writeResult("output/RunAdaptiveSignalSimpleNetwork/greenTimesSignalGroup.csv", signalTime.getKey().toString(), signalTime.getValue());
+        }
+
+
+        Map<Id<Link>, Double> totalDelayPerLink = delayAnalysis.getTotalDelayPerLink();
+        Map<Double, Map<Id<SignalGroup>, Double>> delayPerCycle = calculateDelayPerCycle(delayAnalysis, signalAnalyzer, signalIds);
+        Map<Double, Map<Id<SignalGroup>, Double>> flowPerCycle = calculateFlowPerCycle(delayAnalysis, signalAnalyzer, signalIds);
+        Map<Id<Link>, Double> flowPerLink = delayAnalysis.getFlowPerLink();
+
+        initializeResult("output/RunAdaptiveSignalSimpleNetwork/delayPCU.csv", "link_id", "delay");
+
+        for (var delay : totalDelayPerLink.entrySet()) {
             writeResult("output/RunAdaptiveSignalSimpleNetwork/delayPCU.csv", delay.getKey().toString(), delay.getValue());
         }
+
+        initializeResult("output/RunAdaptiveSignalSimpleNetwork/flowPCU.csv", "link_id", "flow");
+
+        for (var flow : flowPerLink.entrySet()) {
+            writeResult("output/RunAdaptiveSignalSimpleNetwork/flowPCU.csv", flow.getKey().toString(), flow.getValue());
+        }
+
+        initializeResult("output/RunAdaptiveSignalSimpleNetwork/delayPerCycle.csv", "cycle_time", "signal_group", "delay");
+
+        for (var outerEntry : delayPerCycle.entrySet()) {
+            for (var innerEntry : outerEntry.getValue().entrySet()) {
+                writeResult("output/RunAdaptiveSignalSimpleNetwork/delayPerCycle.csv", outerEntry.getKey().toString(), innerEntry.getKey().toString(), innerEntry.getValue());
+            }
+        }
+
+        initializeResult("output/RunAdaptiveSignalSimpleNetwork/flowPerCycle.csv", "cycle_time", "signal_group", "flow");
+
+        for (var outerEntry : flowPerCycle.entrySet()) {
+            for (var innerEntry : outerEntry.getValue().entrySet()) {
+                writeResult("output/RunAdaptiveSignalSimpleNetwork/flowPerCycle.csv", outerEntry.getKey().toString(), innerEntry.getKey().toString(), innerEntry.getValue());
+            }
+        }
+    }
+
+    private Map<Double, Map<Id<SignalGroup>, Double>> calculateDelayPerCycle(MixedTrafficDelayAnalysisTool delayAnalysis, MixedTrafficSignalAnalysisTool signalAnalysisTool, List<Id<Signal>> signalIds) {
+        Map<Double, Map<Id<SignalGroup>, Double>> delayPerCycle = new HashMap<>();
+        double totalDelayForApproachSignals = 0.0D;
+
+        for (var entry : delayAnalysis.getTotalDelayPerLink().entrySet()) {
+
+            for (Id<Signal> id : signalIds) {
+                if (id.toString().contains(entry.getKey().toString())) {
+                    totalDelayForApproachSignals += entry.getValue();
+                }
+            }
+        }
+
+        for (Double cycleTimeValue : signalAnalysisTool.getCycleTimes()) {
+
+            Map<Id<SignalGroup>, Double> delayPerGroup = new HashMap();
+
+            for (var innerEntry : signalAnalysisTool.getSignalGroup2signalSystemId().entrySet()) {
+
+                Id<SignalGroup> signalGroupId = innerEntry.getKey();
+                Id<SignalSystem> signalSystemId = innerEntry.getValue();
+                double delay = (totalDelayForApproachSignals * cycleTimeValue) / signalAnalysisTool.getSumOfSystemCycleTimes().get(signalSystemId);
+                delayPerGroup.put(signalGroupId, delay);
+            }
+
+            delayPerCycle.put(cycleTimeValue, delayPerGroup);
+        }
+
+        return delayPerCycle;
+    }
+
+    private Map<Double, Map<Id<SignalGroup>, Double>> calculateFlowPerCycle(MixedTrafficDelayAnalysisTool delayAnalysis, MixedTrafficSignalAnalysisTool signalAnalysisTool, List<Id<Signal>> signalIds) {
+        Map<Double, Map<Id<SignalGroup>, Double>> flowPerCycle = new HashMap<>();
+        double totalFlow = 0.0D;
+
+        for (var entry : delayAnalysis.getFlowPerLink().entrySet()) {
+
+            for (Id<Signal> id : signalIds) {
+                if (id.toString().contains(entry.getKey().toString())) {
+                    totalFlow += entry.getValue();
+                }
+            }
+        }
+
+        for (Double cycleTimeValue : signalAnalysisTool.getCycleTimes()) {
+
+            Map<Id<SignalGroup>, Double> flowPerGroup = new HashMap();
+
+            for (var innerEntry : signalAnalysisTool.getSignalGroup2signalSystemId().entrySet()) {
+
+                Id<SignalGroup> signalGroupId = innerEntry.getKey();
+                Id<SignalSystem> signalSystemId = innerEntry.getValue();
+                double delay = (totalFlow * cycleTimeValue) / signalAnalysisTool.getSumOfSystemCycleTimes().get(signalSystemId);
+                flowPerGroup.put(signalGroupId, delay);
+            }
+
+            flowPerCycle.put(cycleTimeValue, flowPerGroup);
+        }
+
+        return flowPerCycle;
+    }
+
+    public Map<Double, Map<Id<SignalGroup>, Double>> calculateSignalGreenTimePerCycle(MixedTrafficSignalAnalysisTool signalAnalyzer) {
+        Map<Double, Map<Id<SignalGroup>, Double>> signalGreenTimesPerCycle = new HashMap<>();
+
+        for (Double cycleTimeValue : signalAnalyzer.getCycleTimes()) {
+
+            Map<Id<SignalGroup>, Double> signalGreenTimePerGroup = new HashMap();
+
+            for (var entry : signalAnalyzer.getTotalSignalGreenTime().entrySet()) {
+                Id<SignalGroup> signalGroupId = entry.getKey();
+                Id<SignalSystem> signalSystemId = signalAnalyzer.getSignalGroup2signalSystemId().get(signalGroupId);
+                double signalGreenTime = (entry.getValue() * cycleTimeValue) / signalAnalyzer.getSumOfSystemCycleTimes().get(signalSystemId);
+                signalGreenTimePerGroup.put(signalGroupId, signalGreenTime);
+            }
+
+            signalGreenTimesPerCycle.put(cycleTimeValue, signalGreenTimePerGroup);
+        }
+
+        return signalGreenTimesPerCycle;
     }
 
     private static Scenario defineScenario(Config config) {
@@ -257,7 +400,37 @@ public class RunAdaptiveSignalSimpleNetwork {
         return config;
     }
 
-    public static void initializeResult(String filename, String column1, String column2) {
+    public static void initializeResult(String filename, String column1, String column2, String column3) {
+        FileWriter csvwriter;
+        BufferedWriter bufferedWriter = null;
+        try {
+            csvwriter = new FileWriter(filename, false);
+            bufferedWriter = new BufferedWriter(csvwriter);
+            StringJoiner stringJoiner = new StringJoiner(",");
+            stringJoiner
+                    .add(column1)
+                    .add(column2)
+                    .add(column3);
+            bufferedWriter.write(stringJoiner.toString());
+            bufferedWriter.newLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                assert bufferedWriter != null;
+                bufferedWriter.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                bufferedWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void initializeResult(String filename, String column1, String column2) {
         FileWriter csvwriter;
         BufferedWriter bufferedWriter = null;
         try {
@@ -268,24 +441,56 @@ public class RunAdaptiveSignalSimpleNetwork {
                     .add(column1)
                     .add(column2);
             bufferedWriter.write(stringJoiner.toString());
-            bufferedWriter.newLine();	} catch (IOException e) {
+            bufferedWriter.newLine();
+        } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            try {assert bufferedWriter != null;
+            try {
+                assert bufferedWriter != null;
                 bufferedWriter.flush();
             } catch (IOException e) {
                 e.printStackTrace();
             }
             try {
                 bufferedWriter.close();
-            } catch (IOException e)
-            {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public static void writeResult(String filename, String id, double time) {
+    public static void initializeResult(String filename, String column1, String column2, String column3, String column4) {
+        FileWriter csvwriter;
+        BufferedWriter bufferedWriter = null;
+        try {
+            csvwriter = new FileWriter(filename, false);
+            bufferedWriter = new BufferedWriter(csvwriter);
+            StringJoiner stringJoiner = new StringJoiner(",");
+            stringJoiner
+                    .add(column1)
+                    .add(column2)
+                    .add(column3)
+                    .add(column4);
+            bufferedWriter.write(stringJoiner.toString());
+            bufferedWriter.newLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                assert bufferedWriter != null;
+                bufferedWriter.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                bufferedWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void writeResult(String filename, String s, Double value) {
         FileWriter csvwriter;
         BufferedWriter bufferedWriter = null;
         try {
@@ -293,27 +498,90 @@ public class RunAdaptiveSignalSimpleNetwork {
             bufferedWriter = new BufferedWriter(csvwriter);
             StringJoiner stringJoiner = new StringJoiner(",");
             stringJoiner
-                    .add(id)
-                    .add(Double.toString(time));
+                    .add(s)
+                    .add(Double.toString(value));
             bufferedWriter.write(stringJoiner.toString());
-            bufferedWriter.newLine();	} catch (IOException e) {
+            bufferedWriter.newLine();
+        } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            try {assert bufferedWriter != null;
+            try {
+                assert bufferedWriter != null;
                 bufferedWriter.flush();
             } catch (IOException e) {
                 e.printStackTrace();
             }
             try {
                 bufferedWriter.close();
-            } catch (IOException e)
-            {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
+
+    public static void writeResult(String filename, String s, String id, double time) {
+        FileWriter csvwriter;
+        BufferedWriter bufferedWriter = null;
+        try {
+            csvwriter = new FileWriter(filename, true);
+            bufferedWriter = new BufferedWriter(csvwriter);
+            StringJoiner stringJoiner = new StringJoiner(",");
+            stringJoiner
+                    .add(s)
+                    .add(id)
+                    .add(Double.toString(time));
+            bufferedWriter.write(stringJoiner.toString());
+            bufferedWriter.newLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                assert bufferedWriter != null;
+                bufferedWriter.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                bufferedWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void writeResult(String filename, String signalSystem, String siganlGroup, String signal, double time) {
+        FileWriter csvwriter;
+        BufferedWriter bufferedWriter = null;
+        try {
+            csvwriter = new FileWriter(filename, true);
+            bufferedWriter = new BufferedWriter(csvwriter);
+            StringJoiner stringJoiner = new StringJoiner(",");
+            stringJoiner
+                    .add(signalSystem)
+                    .add(siganlGroup)
+                    .add(signal)
+                    .add(Double.toString(time));
+            bufferedWriter.write(stringJoiner.toString());
+            bufferedWriter.newLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                assert bufferedWriter != null;
+                bufferedWriter.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                bufferedWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     private static void createSignals(Scenario scenario) {
-        SignalsData signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME );
+        SignalsData signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
         SignalSystemsData signalSystems = signalsData.getSignalSystemsData();
 
         SignalSystemsDataFactory sysFac = new SignalSystemsDataFactoryImpl();
