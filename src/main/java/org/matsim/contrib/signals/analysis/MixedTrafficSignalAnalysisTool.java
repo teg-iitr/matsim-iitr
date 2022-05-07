@@ -14,7 +14,6 @@ import org.matsim.api.core.v01.events.handler.ActivityStartEventHandler;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.events.SignalGroupStateChangedEvent;
 import org.matsim.contrib.signals.events.SignalGroupStateChangedEventHandler;
-import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -25,8 +24,8 @@ import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
 
 @Singleton
 public class MixedTrafficSignalAnalysisTool implements SignalGroupStateChangedEventHandler, AfterMobsimListener, ActivityStartEventHandler, ActivityEndEventHandler {
-    private final SignalsData signalsData;
     private Map<Id<SignalGroup>, Double> totalSignalGreenTime;
+    private Map<Double, Map<Id<SignalGroup>, Double>> summedBygoneSignalGreenTimesPerCycle;
     private List<Double> cycleTimes;
     private Map<Id<SignalSystem>, Integer> numberOfCyclesPerSystem;
     private Map<Id<SignalSystem>, Double> sumOfSystemCycleTimes;
@@ -38,6 +37,7 @@ public class MixedTrafficSignalAnalysisTool implements SignalGroupStateChangedEv
     private Map<Id<SignalSystem>, Id<SignalGroup>> firstSignalGroupOfSignalSystem;
     private double lastActStartTime;
     private Double firstActEndTime;
+    private double currentCycleTime;
 
 
     public Map<Id<SignalGroup>, Id<SignalSystem>> getSignalGroup2signalSystemId() {
@@ -49,13 +49,11 @@ public class MixedTrafficSignalAnalysisTool implements SignalGroupStateChangedEv
     public List<Double> getCycleTimes() {
         return cycleTimes;
     }
-    public MixedTrafficSignalAnalysisTool(SignalsData signalsData) {
-        this.signalsData = signalsData;
+    public MixedTrafficSignalAnalysisTool() {
     }
 
     @Inject
-    public MixedTrafficSignalAnalysisTool(EventsManager em, ControlerListenerManager clm, SignalsData signalsData) {
-        this(signalsData);
+    public MixedTrafficSignalAnalysisTool(EventsManager em, ControlerListenerManager clm) {
         em.addHandler(this);
         clm.addControlerListener(this);
     }
@@ -67,10 +65,12 @@ public class MixedTrafficSignalAnalysisTool implements SignalGroupStateChangedEv
         this.firstSignalGroupOfSignalSystem = new HashMap();
         this.sumOfSystemCycleTimes = new HashMap();
         this.summedBygoneSignalGreenTimesPerSecond = new TreeMap();
+        this.summedBygoneSignalGreenTimesPerCycle = new TreeMap<>();
         this.lastSwitchesToGreen = new HashMap();
         this.lastSwitchesToRed = new HashMap();
         this.lastCycleStartPerSystem = new HashMap();
         this.cycleTimes = new ArrayList<>();
+        cycleTimes.add(0.0);
     }
 
     public void handleEvent(ActivityStartEvent event) {
@@ -137,7 +137,6 @@ public class MixedTrafficSignalAnalysisTool implements SignalGroupStateChangedEv
             if (!this.summedBygoneSignalGreenTimesPerSecond.containsKey(event.getTime())) {
                 this.summedBygoneSignalGreenTimesPerSecond.put(event.getTime(), new HashMap());
             }
-
             ((Map)this.summedBygoneSignalGreenTimesPerSecond.get(event.getTime())).put(event.getSignalGroupId(), 0.0D);
         } else {
             int increment = 0;
@@ -147,6 +146,9 @@ public class MixedTrafficSignalAnalysisTool implements SignalGroupStateChangedEv
             }
 
             this.fillBygoneGreenTimeMapForEverySecondSinceLastSwitch(event.getSignalGroupId(), event.getTime(), lastSwitch, increment);
+        }
+        if (event.getTime() <= this.currentCycleTime) {
+            this.summedBygoneSignalGreenTimesPerCycle.put(this.currentCycleTime, new HashMap<>());
         }
 
     }
@@ -169,9 +171,12 @@ public class MixedTrafficSignalAnalysisTool implements SignalGroupStateChangedEv
         if (!this.totalSignalGreenTime.containsKey(signalGroupId)) {
             this.totalSignalGreenTime.put(signalGroupId, 0.0D);
         }
-
+        if (!this.summedBygoneSignalGreenTimesPerCycle.get(this.currentCycleTime).containsKey(signalGroupId)) {
+            this.summedBygoneSignalGreenTimesPerCycle.get(this.currentCycleTime).put(signalGroupId, 0.0D);
+        }
         double greenTime = redSwitch - lastGreenSwitch;
         this.totalSignalGreenTime.put(signalGroupId, (Double)this.totalSignalGreenTime.get(signalGroupId) + greenTime);
+        this.summedBygoneSignalGreenTimesPerCycle.get(this.currentCycleTime).put(signalGroupId, greenTime);
     }
 
     private void doCycleAnalysis(SignalGroupStateChangedEvent event) {
@@ -185,7 +190,8 @@ public class MixedTrafficSignalAnalysisTool implements SignalGroupStateChangedEv
             if (this.lastCycleStartPerSystem.containsKey(event.getSignalSystemId())) {
                 this.addLastSystemCycleTime(event.getSignalSystemId(), event.getTime());
             }
-
+            cycleTimes.add(event.getTime());
+            this.currentCycleTime = event.getTime();
             this.lastCycleStartPerSystem.put(event.getSignalSystemId(), event.getTime());
         }
 
@@ -199,7 +205,6 @@ public class MixedTrafficSignalAnalysisTool implements SignalGroupStateChangedEv
         double lastCycleTime = cycleStartTime - (Double)this.lastCycleStartPerSystem.get(signalSystemId);
         double cycleTime = this.sumOfSystemCycleTimes.get(signalSystemId) + lastCycleTime;
         this.sumOfSystemCycleTimes.put(signalSystemId, cycleTime);
-        this.cycleTimes.add(cycleTime);
     }
 
     public Map<Id<SignalGroup>, Double> getTotalSignalGreenTime() {
@@ -249,4 +254,10 @@ public class MixedTrafficSignalAnalysisTool implements SignalGroupStateChangedEv
 
         return signalGreenTimeRatios;
     }
+
+    public Map<Double, Map<Id<SignalGroup>, Double>> getSummedBygoneSignalGreenTimesPerCycle() {
+        return summedBygoneSignalGreenTimesPerCycle;
+    }
+
 }
+
