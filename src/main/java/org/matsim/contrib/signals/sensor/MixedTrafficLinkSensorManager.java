@@ -29,13 +29,15 @@ public final class MixedTrafficLinkSensorManager implements LinkEnterEventHandle
     private static final Logger log = Logger.getLogger(LinkSensorManager.class);
     private Map<Id<Link>, MixedTrafficLinkSensor> linkIdSensorMap = new HashMap();
     private Map<Id<Link>, Map<Id<Lane>, MixedTrafficLaneSensor>> linkIdLaneIdSensorMap = new HashMap();
-    private Network network;
+    private final Network network;
+    private final Vehicles vehicles;
     private Lanes laneDefinitions = null;
     private Map<Id<Person>, Id<Link>> personDepartureLinks = new HashMap();
 
     @Inject
     public MixedTrafficLinkSensorManager(Scenario scenario, EventsManager events) {
         this.network = scenario.getNetwork();
+        this.vehicles = scenario.getVehicles();
         if (scenario.getConfig().network().getLaneDefinitionsFile() != null || scenario.getConfig().qsim().isUseLanes()) {
             this.laneDefinitions = scenario.getLanes();
         }
@@ -50,14 +52,14 @@ public final class MixedTrafficLinkSensorManager implements LinkEnterEventHandle
                 throw new IllegalStateException("Link with Id " + linkId + " is not in the network, can't register sensor");
             }
 
-            this.linkIdSensorMap.put(linkId, new MixedTrafficLinkSensor(link));
+            this.linkIdSensorMap.put(linkId, new MixedTrafficLinkSensor(link, vehicles.getVehicles()));
         }
 
     }
 
     public void registerNumberOfCarsInDistanceMonitoring(Id<Link> linkId, Double distanceMeter) {
         if (!this.linkIdSensorMap.containsKey(linkId)) {
-            Link link = (Link)this.network.getLinks().get(linkId);
+            Link link = this.network.getLinks().get(linkId);
             if (link == null) {
                 throw new IllegalStateException("Link with Id " + linkId + " is not in the network, can't register sensor");
             }

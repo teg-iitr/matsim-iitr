@@ -153,10 +153,7 @@ final class MixedTrafficLinkSensor {
                 this.updateBucketsUntil(event.getTime());
                 this.currentBucket.incrementAndGet();
             }
-            if (event.getVehicleId().toString().contains("truck"))
-                ++this.countTrucks;
-            else
-                ++this.countCars;
+            this.volume += this.vehicles.get(event.getVehicleId()).getType().getPcuEquivalents();
             ++this.totalVehicles;
             if (this.volume == 1.0D) {
                 this.monitoringStartTime = event.getTime();
