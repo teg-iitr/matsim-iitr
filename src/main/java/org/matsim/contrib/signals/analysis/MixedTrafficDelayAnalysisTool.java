@@ -194,7 +194,6 @@ public class MixedTrafficDelayAnalysisTool implements SignalGroupStateChangedEve
     }
 
     public void handleEvent(SignalGroupStateChangedEvent event) {
-
         switch(event.getNewState()) {
             case RED:
                 this.lastSwitchesToRed.put(event.getSignalGroupId(), event.getTime());

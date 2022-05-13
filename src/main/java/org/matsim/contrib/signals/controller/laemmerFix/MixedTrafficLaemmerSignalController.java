@@ -98,7 +98,7 @@ public final class MixedTrafficLaemmerSignalController extends AbstractSignalCon
     private void updateActiveRegulation(double now) {
         if (this.activeRequest != null && !this.regulationQueue.isEmpty() && ((MixedTrafficLaemmerSignalController.LaemmerSignal)this.regulationQueue.peek()).equals(this.activeRequest.signal)) {
             MixedTrafficLaemmerSignalController.LaemmerSignal signal = (MixedTrafficLaemmerSignalController.LaemmerSignal)this.regulationQueue.peek();
-            int n;
+            double n;
             if (signal.determiningLane != null) {
                 n = this.getNumberOfExpectedVehiclesOnLane(now, signal.determiningLink, signal.determiningLane);
             } else {
@@ -173,11 +173,11 @@ public final class MixedTrafficLaemmerSignalController extends AbstractSignalCon
         this.tIdle = Math.max(0.0D, this.tIdle);
     }
 
-    private int getNumberOfExpectedVehiclesOnLink(double now, Id<Link> linkId) {
+    private double getNumberOfExpectedVehiclesOnLink(double now, Id<Link> linkId) {
         return this.sensorManager.getNumberOfCarsInDistance(linkId, 0.0D, now);
     }
 
-    private int getNumberOfExpectedVehiclesOnLane(double now, Id<Link> linkId, Id<Lane> laneId) {
+    private double getNumberOfExpectedVehiclesOnLane(double now, Id<Link> linkId, Id<Lane> laneId) {
         return ((LanesToLinkAssignment)this.lanes.getLanesToLinkAssignments().get(linkId)).getLanes().size() == 1 ? this.getNumberOfExpectedVehiclesOnLink(now, linkId) : this.sensorManager.getNumberOfCarsInDistanceOnLane(linkId, laneId, 0.0D, now);
     }
 

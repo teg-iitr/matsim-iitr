@@ -28,10 +28,13 @@ final class MixedTrafficLaneSensor {
     private double currentBucketStartTime;
     private AtomicInteger currentBucket;
     private int numOfBucketsNeededForLookback;
+    private double volume = 0.0D;
+    private Map<Id<Vehicle>, Vehicle> vehicles;
 
-    public MixedTrafficLaneSensor(Link link, Lane lane) {
+    public MixedTrafficLaneSensor(Link link, Lane lane, Map<Id<Vehicle>, Vehicle> vehicles) {
         this.link = link;
         this.lane = lane;
+        this.vehicles = vehicles;
     }
 
     public void registerDistanceToMonitor(Double distanceMeter) {
@@ -52,6 +55,7 @@ final class MixedTrafficLaneSensor {
             }
 
             ++this.totalVehicles;
+            this.volume += this.vehicles.get(event.getVehicleId()).getType().getPcuEquivalents();
             if (this.totalVehicles == 1.0D) {
                 this.monitoringStartTime = event.getTime();
             }
@@ -87,11 +91,16 @@ final class MixedTrafficLaneSensor {
         Map<Id<Vehicle>, CarLocator> distSpecificCarLocators = (Map)this.distanceMeterCarLocatorMap.get(distanceMeter);
         int count = 0;
 
-        for (CarLocator cl : distSpecificCarLocators.values()) {
-            if (cl.isCarinDistance(now)) {
-                ++count;
+        for (var entry: distSpecificCarLocators.entrySet()) {
+            if (entry.getValue().isCarinDistance(now)) {
+                count = (int) (count + this.vehicles.get(entry.getKey()).getType().getPcuEquivalents());
             }
         }
+//        for (CarLocator cl : distSpecificCarLocators.values()) {
+//            if (cl.isCarinDistance(now)) {
+//                ++count;
+//            }
+//        }
 
         return count;
     }
@@ -100,7 +109,8 @@ final class MixedTrafficLaneSensor {
         double avgVehPerSecond = 0.0D;
         if (now > this.monitoringStartTime) {
             if (this.lookBackTime == 1.0D / 0.0) {
-                avgVehPerSecond = this.totalVehicles / (now - this.monitoringStartTime + 1.0D);
+//                avgVehPerSecond = this.totalVehicles / (now - this.monitoringStartTime + 1.0D);
+                avgVehPerSecond = this.volume / (now - this.monitoringStartTime + 1.0D);
             } else {
                 this.updateBucketsUntil(now);
                 if (this.timeBuckets.size() > 0) {
@@ -113,7 +123,7 @@ final class MixedTrafficLaneSensor {
             }
         }
 
-        return avgVehPerSecond;
+        return this.volume / (now - this.monitoringStartTime + 1.0D);
     }
 
     public void registerAverageVehiclesPerSecondToMonitor() {
