@@ -81,7 +81,7 @@ public final class MixedTrafficLinkSensorManager implements LinkEnterEventHandle
 
             if (!((Map)this.linkIdLaneIdSensorMap.get(linkId)).containsKey(laneId)) {
                 Lane lane = (Lane)((LanesToLinkAssignment)this.laneDefinitions.getLanesToLinkAssignments().get(linkId)).getLanes().get(laneId);
-                ((Map)this.linkIdLaneIdSensorMap.get(linkId)).put(laneId, new MixedTrafficLaneSensor(link, lane));
+                ((Map)this.linkIdLaneIdSensorMap.get(linkId)).put(laneId, new MixedTrafficLaneSensor(link, lane, vehicles.getVehicles()));
             }
 
             ((MixedTrafficLaneSensor)((Map)this.linkIdLaneIdSensorMap.get(linkId)).get(laneId)).registerDistanceToMonitor(distanceMeter);
@@ -101,7 +101,7 @@ public final class MixedTrafficLinkSensorManager implements LinkEnterEventHandle
 
             if (!((Map)this.linkIdLaneIdSensorMap.get(linkId)).containsKey(laneId)) {
                 Lane lane = (Lane)((LanesToLinkAssignment)this.laneDefinitions.getLanesToLinkAssignments().get(linkId)).getLanes().get(laneId);
-                ((Map)this.linkIdLaneIdSensorMap.get(linkId)).put(laneId, new MixedTrafficLaneSensor(link, lane));
+                ((Map)this.linkIdLaneIdSensorMap.get(linkId)).put(laneId, new MixedTrafficLaneSensor(link, lane, vehicles.getVehicles()));
             }
 
         } else {
@@ -124,7 +124,7 @@ public final class MixedTrafficLinkSensorManager implements LinkEnterEventHandle
 
             if (!((Map)this.linkIdLaneIdSensorMap.get(linkId)).containsKey(laneId)) {
                 Lane lane = (Lane)((LanesToLinkAssignment)this.laneDefinitions.getLanesToLinkAssignments().get(linkId)).getLanes().get(laneId);
-                ((Map)this.linkIdLaneIdSensorMap.get(linkId)).put(laneId, new MixedTrafficLaneSensor(link, lane));
+                ((Map)this.linkIdLaneIdSensorMap.get(linkId)).put(laneId, new MixedTrafficLaneSensor(link, lane, vehicles.getVehicles()));
             }
 
             ((MixedTrafficLaneSensor)((Map)this.linkIdLaneIdSensorMap.get(linkId)).get(laneId)).registerAverageVehiclesPerSecondToMonitor(lookBackTime, timeBucketCollectionDuration);
@@ -171,7 +171,7 @@ public final class MixedTrafficLinkSensorManager implements LinkEnterEventHandle
         }
     }
 
-    public int getNumberOfCarsInDistance(Id<Link> linkId, Double distanceMeter, double timeSeconds) {
+    public double getNumberOfCarsInDistance(Id<Link> linkId, Double distanceMeter, double timeSeconds) {
         if (!this.linkIdSensorMap.containsKey(linkId)) {
             throw new IllegalStateException("No sensor on link " + linkId + "! Register measurement for this link by calling one of the 'register...' methods of this class first.");
         } else {
@@ -179,7 +179,7 @@ public final class MixedTrafficLinkSensorManager implements LinkEnterEventHandle
         }
     }
 
-    public int getNumberOfCarsInDistanceOnLane(Id<Link> linkId, Id<Lane> laneId, Double distanceMeter, double timeSeconds) {
+    public double getNumberOfCarsInDistanceOnLane(Id<Link> linkId, Id<Lane> laneId, Double distanceMeter, double timeSeconds) {
         if (!this.linkIdLaneIdSensorMap.containsKey(linkId)) {
             throw new IllegalStateException("No sensor on link " + linkId + "! Register measurement for this link by calling one of the 'register...' methods of this class first.");
         } else {

@@ -1,5 +1,7 @@
 package playground.shivam.signals;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.hc.core5.util.TextUtils;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -56,7 +58,7 @@ import java.util.stream.Collectors;
 
 public class RunAdaptiveSignalSimpleNetwork {
     private final Controler controler;
-
+    static String outputDirectory = "output/RunAdaptiveSignalSimpleNetworkAllCars/";
     public RunAdaptiveSignalSimpleNetwork() {
         final Config config = defineConfig();
         final Scenario scenario = defineScenario(config);
@@ -139,22 +141,21 @@ public class RunAdaptiveSignalSimpleNetwork {
     }
 
     private static String getTravelMode(int number) {
-        if (number < 80) return "car";
+        if (number < 100) return "car";
         else return "truck";
     }
 
     public void run() {
-		controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
+//		controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
         SignalsData signalsData = (SignalsData) controler.getScenario().getScenarioElement(SignalsData.ELEMENT_NAME);
         List<Id<SignalSystem>> signalSystemIds = new ArrayList<>(signalsData.getSignalGroupsData().getSignalGroupDataBySignalSystemId().keySet());
         List<Id<Signal>> signalIds = new ArrayList<>();
-        List<Id<SignalGroup>> signalGroupIds = new ArrayList<>();
-        for (var signalSystemId : signalSystemIds) {
-            Map<Id<SignalGroup>, SignalGroupData> signalGroupDataBySystemId = signalsData.getSignalGroupsData().getSignalGroupDataBySystemId(signalSystemId);
-            signalGroupDataBySystemId.values().forEach(signalGroupData -> signalIds.addAll(new ArrayList<>(signalGroupData.getSignalIds())));
-            signalGroupIds.addAll(signalsData.getSignalGroupsData().getSignalGroupDataBySignalSystemId().get(signalSystemId).keySet());
-        }
+        List<SignalData> signalData = new ArrayList<>();
 
+        List<Id<SignalGroup>> signalGroupIds = new ArrayList<>();
+        Map<Id<Link>, Id<Signal>> linkId2signalId = new HashMap<>();
+        Map<Id<Signal>, Id<SignalGroup>> signalId2signalGroupId = new HashMap<>();
+        Map<Id<Link>, Id<SignalGroup>> linkId2signalGroupId = new HashMap<>();
 
         MixedTrafficSignalAnalysisTool signalAnalyzer = new MixedTrafficSignalAnalysisTool();
         controler.addOverridingModule(new AbstractModule() {
@@ -173,37 +174,54 @@ public class RunAdaptiveSignalSimpleNetwork {
             }
         });
         controler.run();
+        for (var signalSystemId : signalSystemIds) {
+            Map<Id<SignalGroup>, SignalGroupData> signalGroupDataBySystemId = signalsData.getSignalGroupsData().getSignalGroupDataBySystemId(signalSystemId);
+            signalGroupDataBySystemId.values().forEach(signalGroupData -> signalIds.addAll(new ArrayList<>(signalGroupData.getSignalIds())));
+            signalGroupIds.addAll(signalsData.getSignalGroupsData().getSignalGroupDataBySignalSystemId().get(signalSystemId).keySet());
+            signalsData.getSignalSystemsData().getSignalSystemData().values().forEach(signalSystemData -> signalData.addAll(signalSystemData.getSignalData().values()));
+            signalGroupDataBySystemId.values().forEach(signalGroupData -> signalGroupData.getSignalIds().forEach(signalId -> signalId2signalGroupId.put(signalId, signalGroupData.getId())));
+        }
+        signalData.forEach(signalD -> linkId2signalId.put(signalD.getLinkId(), signalD.getId()));
+        linkId2signalId.forEach((linkId, signalId) -> linkId2signalGroupId.put(linkId, signalId2signalGroupId.get(signalId)));
+
 
         Map<Double, Map<Id<SignalGroup>, Double>> greenTimePerCycle = signalAnalyzer.getSummedBygoneSignalGreenTimesPerCycle();
         Map<Double, Map<Id<Link>, Double>> delayPerCycle = delayAnalysis.getSummedBygoneDelayPerCycle();
         Map<Double, Map<Id<Link>, Map<Id<VehicleType>, Double>>> flowPerCycle = delayAnalysis.getSummedBygoneFlowPerLinkPerVehicleTypePerCycle();
 
-        writeResult("output/RunAdaptiveSignalSimpleNetwork/greenTimesPerCycle.csv", List.of(new String[]{"cycle_time", "signal_group", "green_time"}), false);
+        writeResult(outputDirectory + "greenTimesPerCycle.csv", List.of(new String[]{"cycle_time", "signal_group", "link_ids", "green_time"}), false);
 
         for (var outerEntry : greenTimePerCycle.entrySet()) {
             for (var innerEntry : outerEntry.getValue().entrySet()) {
-                writeResult("output/RunAdaptiveSignalSimpleNetwork/greenTimesPerCycle.csv", List.of(new String[]{outerEntry.getKey().toString(), innerEntry.getKey().toString(), String.valueOf(innerEntry.getValue())}), true);
+                List<Id<Link>> linkIds = new ArrayList<>();
+                StringBuilder stringBuilder = new StringBuilder();
+                for (var linkSignalGroupId : linkId2signalGroupId.entrySet()) {
+                    if (linkSignalGroupId.getValue().equals(innerEntry.getKey()))
+                        linkIds.add(linkSignalGroupId.getKey());
+                }
+                for (var linkId: linkIds)
+                    stringBuilder.append(linkId).append("|");
+                writeResult(outputDirectory + "greenTimesPerCycle.csv", List.of(new String[]{outerEntry.getKey().toString(), innerEntry.getKey().toString(), stringBuilder.substring(0, stringBuilder.length() - 1), String.valueOf(innerEntry.getValue())}), true);
             }
         }
 
-        writeResult("output/RunAdaptiveSignalSimpleNetwork/delayPerCycle.csv", List.of(new String[]{"cycle_time", "link_id", "delay"}), false);
+        writeResult(outputDirectory + "delayPerCycle.csv", List.of(new String[]{"cycle_time", "link_id", "delay"}), false);
 
         for (var outerEntry : delayPerCycle.entrySet()) {
             for (var innerEntry : outerEntry.getValue().entrySet()) {
-                writeResult("output/RunAdaptiveSignalSimpleNetwork/delayPerCycle.csv", List.of(new String[]{outerEntry.getKey().toString(), innerEntry.getKey().toString(), String.valueOf(innerEntry.getValue())}), true);
+                writeResult(outputDirectory + "delayPerCycle.csv", List.of(new String[]{outerEntry.getKey().toString(), innerEntry.getKey().toString(), String.valueOf(innerEntry.getValue())}), true);
             }
         }
 
         List<String> flowColumns = new ArrayList();
         flowColumns.add("cycle_time");
-        List<String> linkIds = new ArrayList(controler.getScenario().getNetwork().getLinks().keySet());
-        for (var vehicleType: controler.getScenario().getVehicles().getVehicleTypes().values()) {
-            for (var linkId: linkIds) {
-                String linkIdWithVehicleType = linkId + "_" + vehicleType;
+        for (var vehicleType: controler.getScenario().getVehicles().getVehicleTypes().keySet()) {
+            for (var linkId: controler.getScenario().getNetwork().getLinks().keySet()) {
+                String linkIdWithVehicleType = linkId.toString() + "_" + vehicleType.toString();
                 flowColumns.add(linkIdWithVehicleType);
             }
         }
-        writeResult("output/RunAdaptiveSignalSimpleNetwork/flowPerCycle.csv", flowColumns, false);
+        writeResult(outputDirectory + "flowPerCycle.csv", flowColumns, false);
 
         for (var outerEntry : flowPerCycle.entrySet()) {
             List<String> linkIdWithFlowValues = new ArrayList<>();
@@ -213,7 +231,7 @@ public class RunAdaptiveSignalSimpleNetwork {
                     linkIdWithFlowValues.add(innerInnerEntry.getValue().toString());
                 }
             }
-            writeResult("output/RunAdaptiveSignalSimpleNetwork/flowPerCycle.csv", linkIdWithFlowValues, true);
+            writeResult(outputDirectory + "flowPerCycle.csv", linkIdWithFlowValues, true);
         }
     }
 
@@ -244,7 +262,8 @@ public class RunAdaptiveSignalSimpleNetwork {
 
     private static Config defineConfig() {
         Config config = ConfigUtils.createConfig();
-        config.controler().setOutputDirectory("output/RunAdaptiveSignalSimpleNetwork/");
+
+        config.controler().setOutputDirectory(outputDirectory);
 
         config.controler().setLastIteration(40);
         config.travelTimeCalculator().setMaxTime(18000);

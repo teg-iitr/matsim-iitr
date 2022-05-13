@@ -94,13 +94,18 @@ final class MixedTrafficLinkSensor {
     public int getNumberOfCarsInDistance(Double distanceMeter, double now) {
         Map<Id<Vehicle>, CarLocator> distSpecificCarLocators = (Map)this.distanceMeterCarLocatorMap.get(distanceMeter);
         int count = 0;
-        Iterator var6 = distSpecificCarLocators.values().iterator();
-        while (var6.hasNext()) {
-            CarLocator cl = (CarLocator) var6.next();
-            if (cl.isCarinDistance(now)) {
-                ++count;
+
+        for (var entry: distSpecificCarLocators.entrySet()) {
+            if (entry.getValue().isCarinDistance(now)) {
+                count = (int) (count + this.vehicles.get(entry.getKey()).getType().getPcuEquivalents());
             }
         }
+//        for (CarLocator cl : distSpecificCarLocators.values()) {
+//            if (cl.isCarinDistance(now)) {
+//                ++count;
+//            }
+//        }
+
         return count;
     }
 
@@ -122,7 +127,7 @@ final class MixedTrafficLinkSensor {
             }
         }
 
-        return avgVehPerSecond;
+        return this.volume / (now - this.monitoringStartTime + 1.0D);
     }
 
     private void updateBucketsUntil(double now) {

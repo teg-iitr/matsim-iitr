@@ -133,6 +133,9 @@ public class MixedTrafficSignalAnalysisTool implements SignalGroupStateChangedEv
     }
 
     private void doBygoneGreenTimeAnalysis(SignalGroupStateChangedEvent event, Double lastSwitch) {
+        if (event.getTime() <= this.currentCycleTime) {
+            this.summedBygoneSignalGreenTimesPerCycle.put(this.currentCycleTime, new HashMap<>());
+        }
         if (lastSwitch == null) {
             if (!this.summedBygoneSignalGreenTimesPerSecond.containsKey(event.getTime())) {
                 this.summedBygoneSignalGreenTimesPerSecond.put(event.getTime(), new HashMap());
@@ -146,9 +149,6 @@ public class MixedTrafficSignalAnalysisTool implements SignalGroupStateChangedEv
             }
 
             this.fillBygoneGreenTimeMapForEverySecondSinceLastSwitch(event.getSignalGroupId(), event.getTime(), lastSwitch, increment);
-        }
-        if (event.getTime() <= this.currentCycleTime) {
-            this.summedBygoneSignalGreenTimesPerCycle.put(this.currentCycleTime, new HashMap<>());
         }
 
     }
@@ -171,9 +171,7 @@ public class MixedTrafficSignalAnalysisTool implements SignalGroupStateChangedEv
         if (!this.totalSignalGreenTime.containsKey(signalGroupId)) {
             this.totalSignalGreenTime.put(signalGroupId, 0.0D);
         }
-        if (!this.summedBygoneSignalGreenTimesPerCycle.get(this.currentCycleTime).containsKey(signalGroupId)) {
-            this.summedBygoneSignalGreenTimesPerCycle.get(this.currentCycleTime).put(signalGroupId, 0.0D);
-        }
+
         double greenTime = redSwitch - lastGreenSwitch;
         this.totalSignalGreenTime.put(signalGroupId, (Double)this.totalSignalGreenTime.get(signalGroupId) + greenTime);
         this.summedBygoneSignalGreenTimesPerCycle.get(this.currentCycleTime).put(signalGroupId, greenTime);
@@ -201,7 +199,6 @@ public class MixedTrafficSignalAnalysisTool implements SignalGroupStateChangedEv
         if (!this.sumOfSystemCycleTimes.containsKey(signalSystemId)) {
             this.sumOfSystemCycleTimes.put(signalSystemId, 0.0D);
         }
-
         double lastCycleTime = cycleStartTime - (Double)this.lastCycleStartPerSystem.get(signalSystemId);
         double cycleTime = this.sumOfSystemCycleTimes.get(signalSystemId) + lastCycleTime;
         this.sumOfSystemCycleTimes.put(signalSystemId, cycleTime);
