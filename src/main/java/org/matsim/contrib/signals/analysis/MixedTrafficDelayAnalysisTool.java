@@ -77,6 +77,7 @@ public class MixedTrafficDelayAnalysisTool implements SignalGroupStateChangedEve
         this.flowPerLinkPerVehicleType.clear();
         this.flow = 0.0D;
         this.lastSwitchesToGreen = new HashMap();
+        this.summedBygoneFlowPerLinkPerVehicleTypePerCycle.clear();
         this.lastSwitchesToRed = new HashMap();
     }
 
@@ -96,10 +97,24 @@ public class MixedTrafficDelayAnalysisTool implements SignalGroupStateChangedEve
         Link currentLink = (Link) this.network.getLinks().get(event.getLinkId());
         double freespeedTt = currentLink.getLength() / currentLink.getFreespeed();
         double matsimFreespeedTT = Math.floor(freespeedTt + 1.0D);
-
+        if (event.getTime() == 4706)
+            System.out.println();
+        this.summedBygoneFlowPerLinkPerVehicleTypePerCycle.putIfAbsent(this.currentCycleTime, new TreeMap<>());
+        if (!this.summedBygoneFlowPerLinkPerVehicleTypePerCycle.get(this.currentCycleTime).containsKey(event.getLinkId())) {
+            this.summedBygoneFlowPerLinkPerVehicleTypePerCycle.get(this.currentCycleTime).putIfAbsent(event.getLinkId(), new HashMap<>());
+            for (var vehicleType : vehicleTypes)
+                this.summedBygoneFlowPerLinkPerVehicleTypePerCycle.get(this.currentCycleTime).get(event.getLinkId()).putIfAbsent(vehicleType, 0.0D);
+        }
         for (Object o : this.vehicleIdToPassengerIds.get(event.getVehicleId())) {
             Id<Person> passengerId = (Id) o;
             this.earliestLinkExitTimePerAgent.put(passengerId, event.getTime() + matsimFreespeedTT);
+        }
+        this.flow += this.vehicleMap.get(event.getVehicleId()).getType().getPcuEquivalents();
+        for (var vehicleType : vehicleTypes) {
+            if (this.vehicleMap.get(event.getVehicleId()).getType().getId().equals(vehicleType)) {
+//                this.flowPerLinkPerVehicleType.get(event.getLinkId()).put(vehicleType, this.flowPerLinkPerVehicleType.get(event.getLinkId()).get(vehicleType) + this.vehicleMap.get(event.getVehicleId()).getType().getPcuEquivalents());
+                this.summedBygoneFlowPerLinkPerVehicleTypePerCycle.get(this.currentCycleTime).get(event.getLinkId()).put(vehicleType, this.summedBygoneFlowPerLinkPerVehicleTypePerCycle.get(this.currentCycleTime).get(event.getLinkId()).get(vehicleType) + this.vehicleMap.get(event.getVehicleId()).getType().getPcuEquivalents());
+            }
         }
 
     }
@@ -109,31 +124,22 @@ public class MixedTrafficDelayAnalysisTool implements SignalGroupStateChangedEve
             this.totalDelayPerLink.put(event.getLinkId(), 0.0D);
             this.numberOfAgentsPerLink.put(event.getLinkId(), 0);
         }
+        this.summedBygoneDelayPerCycle.putIfAbsent(this.currentCycleTime, new HashMap<>());
         if (!this.summedBygoneDelayPerCycle.get(this.currentCycleTime).containsKey(event.getLinkId())) {
             this.summedBygoneDelayPerCycle.get(this.currentCycleTime).put(event.getLinkId(), 0.0D);
         }
-        if (!this.flowPerLinkPerVehicleType.containsKey(event.getLinkId())) {
-            this.flowPerLinkPerVehicleType.put(event.getLinkId(), new HashMap<>());
-            for (var vehicleType: vehicleTypes)
-                this.flowPerLinkPerVehicleType.get(event.getLinkId()).put(vehicleType, 0.0D);
-        }
-        if (!this.summedBygoneFlowPerLinkPerVehicleTypePerCycle.get(this.currentCycleTime).containsKey(event.getLinkId())) {
-            this.summedBygoneFlowPerLinkPerVehicleTypePerCycle.get(this.currentCycleTime).put(event.getLinkId(), new HashMap<>());
-            for (var vehicleType: vehicleTypes)
-                this.summedBygoneFlowPerLinkPerVehicleTypePerCycle.get(this.currentCycleTime).get(event.getLinkId()).put(vehicleType, 0.0D);
-        }
+//        if (!this.flowPerLinkPerVehicleType.containsKey(event.getLinkId())) {
+//            this.flowPerLinkPerVehicleType.put(event.getLinkId(), new HashMap<>());
+//            for (var vehicleType: vehicleTypes)
+//                this.flowPerLinkPerVehicleType.get(event.getLinkId()).put(vehicleType, 0.0D);
+//        }
+
         Iterator var2 = ((Set) this.vehicleIdToPassengerIds.get(event.getVehicleId())).iterator();
 
         while (var2.hasNext()) {
             Id<Person> passengerId = (Id) var2.next();
             double currentDelay = event.getTime() - (Double) this.earliestLinkExitTimePerAgent.remove(passengerId);
-            this.flow += this.vehicleMap.get(event.getVehicleId()).getType().getPcuEquivalents();
-            for (var vehicleType: vehicleTypes) {
-                if (this.vehicleMap.get(event.getVehicleId()).getType().getId().equals(vehicleType)) {
-                    this.flowPerLinkPerVehicleType.get(event.getLinkId()).put(vehicleType, this.flowPerLinkPerVehicleType.get(event.getLinkId()).get(vehicleType) + this.vehicleMap.get(event.getVehicleId()).getType().getPcuEquivalents());
-                    this.summedBygoneFlowPerLinkPerVehicleTypePerCycle.get(this.currentCycleTime).get(event.getLinkId()).put(vehicleType, this.summedBygoneFlowPerLinkPerVehicleTypePerCycle.get(this.currentCycleTime).get(event.getLinkId()).get(vehicleType) + this.vehicleMap.get(event.getVehicleId()).getType().getPcuEquivalents());
-                }
-            }
+
             this.totalDelayPerLink.put(event.getLinkId(), (Double) this.totalDelayPerLink.get(event.getLinkId()) + currentDelay);
             this.summedBygoneDelayPerCycle.get(this.currentCycleTime).put(event.getLinkId(), currentDelay);
             this.totalDelay += currentDelay;
@@ -194,16 +200,17 @@ public class MixedTrafficDelayAnalysisTool implements SignalGroupStateChangedEve
     }
 
     public void handleEvent(SignalGroupStateChangedEvent event) {
-        switch(event.getNewState()) {
+
+        switch (event.getNewState()) {
             case RED:
                 this.lastSwitchesToRed.put(event.getSignalGroupId(), event.getTime());
-                Double lastSwitchToGreen = (Double)this.lastSwitchesToGreen.remove(event.getSignalGroupId());
+                Double lastSwitchToGreen = (Double) this.lastSwitchesToGreen.remove(event.getSignalGroupId());
                 this.doBygoneGreenTimeAnalysis(event, lastSwitchToGreen);
                 break;
             case GREEN:
                 this.lastSwitchesToGreen.put(event.getSignalGroupId(), event.getTime());
                 this.doCycleAnalysis(event);
-                Double lastSwitchToRed = (Double)this.lastSwitchesToRed.remove(event.getSignalGroupId());
+                Double lastSwitchToRed = (Double) this.lastSwitchesToRed.remove(event.getSignalGroupId());
                 this.doBygoneGreenTimeAnalysis(event, lastSwitchToRed);
         }
 
@@ -218,11 +225,9 @@ public class MixedTrafficDelayAnalysisTool implements SignalGroupStateChangedEve
         }
 
     }
+
     private void doBygoneGreenTimeAnalysis(SignalGroupStateChangedEvent event, Double lastSwitch) {
-        if (event.getTime() <= this.currentCycleTime) {
-            this.summedBygoneDelayPerCycle.put(this.currentCycleTime, new HashMap<>());
-            this.summedBygoneFlowPerLinkPerVehicleTypePerCycle.put(this.currentCycleTime, new TreeMap<>());
-        }
+
 
     }
 

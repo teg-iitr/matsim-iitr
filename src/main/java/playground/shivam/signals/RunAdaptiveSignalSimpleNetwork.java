@@ -17,6 +17,7 @@ import org.matsim.contrib.signals.analysis.MixedTrafficDelayAnalysisTool;
 import org.matsim.contrib.signals.analysis.MixedTrafficSignalAnalysisTool;
 import org.matsim.contrib.signals.builder.MixedTrafficSignals;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerSignalController;
 import org.matsim.contrib.signals.controller.laemmerFix.MixedTrafficLaemmerSignalController;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
@@ -141,7 +142,7 @@ public class RunAdaptiveSignalSimpleNetwork {
     }
 
     private static String getTravelMode(int number) {
-        if (number < 100) return "car";
+        if (number < 102) return "car";
         else return "truck";
     }
 
@@ -215,14 +216,26 @@ public class RunAdaptiveSignalSimpleNetwork {
 
         List<String> flowColumns = new ArrayList();
         flowColumns.add("cycle_time");
-        for (var vehicleType: controler.getScenario().getVehicles().getVehicleTypes().keySet()) {
-            for (var linkId: controler.getScenario().getNetwork().getLinks().keySet()) {
+        List<Id<Link>> linkIdList = new ArrayList<>(controler.getScenario().getNetwork().getLinks().keySet());
+        Collections.sort(linkIdList);
+        for (var linkId: linkIdList) {
+            for (var vehicleType: controler.getScenario().getVehicles().getVehicleTypes().keySet()) {
                 String linkIdWithVehicleType = linkId.toString() + "_" + vehicleType.toString();
                 flowColumns.add(linkIdWithVehicleType);
             }
         }
         writeResult(outputDirectory + "flowPerCycle.csv", flowColumns, false);
+        Map<Id<VehicleType>, Double> emptyFlow = new HashMap<>();
+        // filling non-present linkIds
+        for (var vehicleType: controler.getScenario().getVehicles().getVehicleTypes().keySet()) {
+            emptyFlow.putIfAbsent(vehicleType, 0.0);
+        }
 
+        for (var linkId: controler.getScenario().getNetwork().getLinks().keySet()) {
+            for (var outerEntry : flowPerCycle.entrySet()) {
+                flowPerCycle.get(outerEntry.getKey()).putIfAbsent(linkId, emptyFlow);
+            }
+        }
         for (var outerEntry : flowPerCycle.entrySet()) {
             List<String> linkIdWithFlowValues = new ArrayList<>();
             linkIdWithFlowValues.add(outerEntry.getKey().toString());
@@ -307,7 +320,6 @@ public class RunAdaptiveSignalSimpleNetwork {
         otfvisConfig.setDrawTime(true);
 
         LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config, LaemmerConfigGroup.GROUP_NAME, LaemmerConfigGroup.class);
-        laemmerConfigGroup.setActiveRegime(LaemmerConfigGroup.Regime.COMBINED);
         laemmerConfigGroup.setDesiredCycleTime(90);
         laemmerConfigGroup.setMinGreenTime(5);
         config.getModules().put(LaemmerConfigGroup.GROUP_NAME, laemmerConfigGroup);
@@ -376,19 +388,29 @@ public class RunAdaptiveSignalSimpleNetwork {
         }
 
         // group signals with non conflicting streams
-        Id<SignalGroup> signalGroupId1 = Id.create("SignalGroup1", SignalGroup.class);
-        SignalGroupData signalGroup1 = signalGroups.getFactory()
-                .createSignalGroupData(signalSystemId, signalGroupId1);
-        signalGroup1.addSignalId(Id.create("Signal2_3", Signal.class));
-        signalGroup1.addSignalId(Id.create("Signal4_3", Signal.class));
-        signalGroups.addSignalGroupData(signalGroup1);
+        Id<SignalGroup> signalGroupId2_3 = Id.create("SignalGroup2_3", SignalGroup.class);
+        SignalGroupData signalGroup2_3 = signalGroups.getFactory()
+                .createSignalGroupData(signalSystemId, signalGroupId2_3);
+        signalGroup2_3.addSignalId(Id.create("Signal2_3", Signal.class));
+        signalGroups.addSignalGroupData(signalGroup2_3);
 
-        Id<SignalGroup> signalGroupId2 = Id.create("SignalGroup2", SignalGroup.class);
-        SignalGroupData signalGroup2 = signalGroups.getFactory()
-                .createSignalGroupData(signalSystemId, signalGroupId2);
-        signalGroup2.addSignalId(Id.create("Signal7_3", Signal.class));
-        signalGroup2.addSignalId(Id.create("Signal8_3", Signal.class));
-        signalGroups.addSignalGroupData(signalGroup2);
+        Id<SignalGroup> signalGroupId4_3 = Id.create("SignalGroup4_3", SignalGroup.class);
+        SignalGroupData signalGroup4_3 = signalGroups.getFactory()
+                .createSignalGroupData(signalSystemId, signalGroupId4_3);
+        signalGroup4_3.addSignalId(Id.create("Signal4_3", Signal.class));
+        signalGroups.addSignalGroupData(signalGroup4_3);
+
+        Id<SignalGroup> signalGroupId7_3 = Id.create("SignalGroup7_3", SignalGroup.class);
+        SignalGroupData signalGroup7_3 = signalGroups.getFactory()
+                .createSignalGroupData(signalSystemId, signalGroupId7_3);
+        signalGroup7_3.addSignalId(Id.create("Signal7_3", Signal.class));
+        signalGroups.addSignalGroupData(signalGroup7_3);
+
+        Id<SignalGroup> signalGroupId8_3 = Id.create("SignalGroup8_3", SignalGroup.class);
+        SignalGroupData signalGroup8_3 = signalGroups.getFactory()
+                .createSignalGroupData(signalSystemId, signalGroupId8_3);
+        signalGroup8_3.addSignalId(Id.create("Signal8_3", Signal.class));
+        signalGroups.addSignalGroupData(signalGroup8_3);
 
         // create the signal control
         SignalSystemControllerData signalSystemControl = conFac.createSignalSystemControllerData(signalSystemId);
@@ -396,12 +418,12 @@ public class RunAdaptiveSignalSimpleNetwork {
         signalControl.addSignalSystemControllerData(signalSystemControl);
 
         // create a plan for the signal system (with defined cycle time and offset 0)
-        SignalPlanData signalPlan = SignalUtils.createSignalPlan(conFac, 60, 0, Id.create("SignalPlan1", SignalPlan.class));
-        signalSystemControl.addSignalPlanData(signalPlan);
-
-        // specify signal group settings for both signal groups
-        signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(conFac, signalGroupId1, 0, 5));
-        signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(conFac, signalGroupId2, 10, 55));
-        signalPlan.setOffset(0);
+//        SignalPlanData signalPlan = SignalUtils.createSignalPlan(conFac, 60, 0, Id.create("SignalPlan1", SignalPlan.class));
+//        signalSystemControl.addSignalPlanData(signalPlan);
+//
+//        // specify signal group settings for both signal groups
+//        signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(conFac, signalGroupId1, 0, 5));
+//        signalPlan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(conFac, signalGroupId2, 10, 55));
+//        signalPlan.setOffset(0);
     }
 }

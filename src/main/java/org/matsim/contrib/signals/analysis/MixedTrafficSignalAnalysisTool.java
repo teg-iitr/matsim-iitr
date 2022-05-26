@@ -133,9 +133,6 @@ public class MixedTrafficSignalAnalysisTool implements SignalGroupStateChangedEv
     }
 
     private void doBygoneGreenTimeAnalysis(SignalGroupStateChangedEvent event, Double lastSwitch) {
-        if (event.getTime() <= this.currentCycleTime) {
-            this.summedBygoneSignalGreenTimesPerCycle.put(this.currentCycleTime, new HashMap<>());
-        }
         if (lastSwitch == null) {
             if (!this.summedBygoneSignalGreenTimesPerSecond.containsKey(event.getTime())) {
                 this.summedBygoneSignalGreenTimesPerSecond.put(event.getTime(), new HashMap());
@@ -174,6 +171,7 @@ public class MixedTrafficSignalAnalysisTool implements SignalGroupStateChangedEv
 
         double greenTime = redSwitch - lastGreenSwitch;
         this.totalSignalGreenTime.put(signalGroupId, (Double)this.totalSignalGreenTime.get(signalGroupId) + greenTime);
+        this.summedBygoneSignalGreenTimesPerCycle.putIfAbsent(this.currentCycleTime, new HashMap<>());
         this.summedBygoneSignalGreenTimesPerCycle.get(this.currentCycleTime).put(signalGroupId, greenTime);
     }
 
