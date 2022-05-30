@@ -15,6 +15,7 @@ import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.analysis.MixedTrafficDelayAnalysisTool;
 import org.matsim.contrib.signals.analysis.MixedTrafficSignalAnalysisTool;
+import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
 import org.matsim.contrib.signals.builder.MixedTrafficSignals;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerSignalController;
@@ -59,7 +60,7 @@ import java.util.stream.Collectors;
 
 public class RunAdaptiveSignalSimpleNetwork {
     private final Controler controler;
-    static String outputDirectory = "output/RunAdaptiveSignalSimpleNetworkAllCars/";
+    static String outputDirectory = "output/RunAdaptiveSignalSimpleNetwork/";
     public RunAdaptiveSignalSimpleNetwork() {
         final Config config = defineConfig();
         final Scenario scenario = defineScenario(config);
@@ -142,7 +143,7 @@ public class RunAdaptiveSignalSimpleNetwork {
     }
 
     private static String getTravelMode(int number) {
-        if (number < 102) return "car";
+        if (number < 60) return "car";
         else return "truck";
     }
 
@@ -278,10 +279,11 @@ public class RunAdaptiveSignalSimpleNetwork {
 
         config.controler().setOutputDirectory(outputDirectory);
 
-        config.controler().setLastIteration(40);
+        config.controler().setLastIteration(10);
         config.travelTimeCalculator().setMaxTime(18000);
         config.qsim().setStartTime(0.0D);
         config.qsim().setEndTime(18000.0D);
+        config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
         config.qsim().setUsingFastCapacityUpdate(false);
         config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
         config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
@@ -322,6 +324,7 @@ public class RunAdaptiveSignalSimpleNetwork {
         LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config, LaemmerConfigGroup.GROUP_NAME, LaemmerConfigGroup.class);
         laemmerConfigGroup.setDesiredCycleTime(90);
         laemmerConfigGroup.setMinGreenTime(5);
+        laemmerConfigGroup.setActiveRegime(LaemmerConfigGroup.Regime.COMBINED);
         config.getModules().put(LaemmerConfigGroup.GROUP_NAME, laemmerConfigGroup);
 
         config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);

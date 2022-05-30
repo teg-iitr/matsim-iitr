@@ -123,7 +123,7 @@ final class MixedTrafficLaneSensor {
             }
         }
 
-        return this.volume / (now - this.monitoringStartTime + 1.0D);
+        return avgVehPerSecond;
     }
 
     public void registerAverageVehiclesPerSecondToMonitor() {

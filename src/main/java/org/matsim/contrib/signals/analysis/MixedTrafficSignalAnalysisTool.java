@@ -19,7 +19,9 @@ import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.controler.ControlerListenerManager;
 import org.matsim.core.controler.events.AfterMobsimEvent;
+import org.matsim.core.controler.events.IterationEndsEvent;
 import org.matsim.core.controler.listener.AfterMobsimListener;
+import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
 
 @Singleton
@@ -65,12 +67,13 @@ public class MixedTrafficSignalAnalysisTool implements SignalGroupStateChangedEv
         this.firstSignalGroupOfSignalSystem = new HashMap();
         this.sumOfSystemCycleTimes = new HashMap();
         this.summedBygoneSignalGreenTimesPerSecond = new TreeMap();
-        this.summedBygoneSignalGreenTimesPerCycle = new TreeMap<>();
         this.lastSwitchesToGreen = new HashMap();
         this.lastSwitchesToRed = new HashMap();
         this.lastCycleStartPerSystem = new HashMap();
+        this.summedBygoneSignalGreenTimesPerCycle = new TreeMap<>();
         this.cycleTimes = new ArrayList<>();
         cycleTimes.add(0.0);
+        this.currentCycleTime = 0;
     }
 
     public void handleEvent(ActivityStartEvent event) {
@@ -88,7 +91,8 @@ public class MixedTrafficSignalAnalysisTool implements SignalGroupStateChangedEv
         if (!this.signalGroup2signalSystemId.containsKey(event.getSignalGroupId())) {
             this.signalGroup2signalSystemId.put(event.getSignalGroupId(), event.getSignalSystemId());
         }
-
+        this.summedBygoneSignalGreenTimesPerCycle.putIfAbsent(this.currentCycleTime, new HashMap<>());
+        this.summedBygoneSignalGreenTimesPerCycle.get(this.currentCycleTime).putIfAbsent(event.getSignalGroupId(), 0.0D);
         switch(event.getNewState()) {
             case RED:
                 this.lastSwitchesToRed.put(event.getSignalGroupId(), event.getTime());
@@ -108,7 +112,6 @@ public class MixedTrafficSignalAnalysisTool implements SignalGroupStateChangedEv
     public void notifyAfterMobsim(AfterMobsimEvent event) {
         double simEndTime = this.lastActStartTime;
         Iterator var4 = this.lastSwitchesToGreen.keySet().iterator();
-
         Id signalSystemId;
         while(var4.hasNext()) {
             signalSystemId = (Id)var4.next();
@@ -121,6 +124,7 @@ public class MixedTrafficSignalAnalysisTool implements SignalGroupStateChangedEv
 
         while(var4.hasNext()) {
             signalSystemId = (Id)var4.next();
+//            this.calculateLastGreenTimeOfTheGroupAndAddToTotalGreen(signalSystemId, simEndTime, (Double)this.lastSwitchesToRed.get(signalSystemId));
             this.fillBygoneGreenTimeMapForEverySecondSinceLastSwitch(signalSystemId, simEndTime, (Double)this.lastSwitchesToRed.get(signalSystemId), 0);
         }
 
@@ -171,8 +175,7 @@ public class MixedTrafficSignalAnalysisTool implements SignalGroupStateChangedEv
 
         double greenTime = redSwitch - lastGreenSwitch;
         this.totalSignalGreenTime.put(signalGroupId, (Double)this.totalSignalGreenTime.get(signalGroupId) + greenTime);
-        this.summedBygoneSignalGreenTimesPerCycle.putIfAbsent(this.currentCycleTime, new HashMap<>());
-        this.summedBygoneSignalGreenTimesPerCycle.get(this.currentCycleTime).put(signalGroupId, greenTime);
+        this.summedBygoneSignalGreenTimesPerCycle.get(this.currentCycleTime).put(signalGroupId, this.summedBygoneSignalGreenTimesPerCycle.get(this.currentCycleTime).get(signalGroupId) + greenTime);
     }
 
     private void doCycleAnalysis(SignalGroupStateChangedEvent event) {
@@ -182,12 +185,12 @@ public class MixedTrafficSignalAnalysisTool implements SignalGroupStateChangedEv
         }
 
         if (event.getSignalGroupId().equals(this.firstSignalGroupOfSignalSystem.get(event.getSignalSystemId()))) {
+            this.currentCycleTime = event.getTime();
             this.numberOfCyclesPerSystem.put(event.getSignalSystemId(), (Integer)this.numberOfCyclesPerSystem.get(event.getSignalSystemId()) + 1);
             if (this.lastCycleStartPerSystem.containsKey(event.getSignalSystemId())) {
                 this.addLastSystemCycleTime(event.getSignalSystemId(), event.getTime());
             }
             cycleTimes.add(event.getTime());
-            this.currentCycleTime = event.getTime();
             this.lastCycleStartPerSystem.put(event.getSignalSystemId(), event.getTime());
         }
 

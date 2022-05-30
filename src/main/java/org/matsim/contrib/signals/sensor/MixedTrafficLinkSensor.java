@@ -127,7 +127,7 @@ final class MixedTrafficLinkSensor {
             }
         }
 
-        return this.volume / (now - this.monitoringStartTime + 1.0D);
+        return avgVehPerSecond;
     }
 
     private void updateBucketsUntil(double now) {
