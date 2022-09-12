@@ -22,8 +22,11 @@ package playground.amit.pt.connectionScan;
 import java.util.List;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.core.router.RoutingRequest;
 import org.matsim.facilities.Facility;
 import org.matsim.pt.router.TransitRouter;
+import org.matsim.utils.objectattributes.attributable.Attributes;
 
 /**
  * Created by amit on 16.05.17.
@@ -31,8 +34,9 @@ import org.matsim.pt.router.TransitRouter;
 
 
 public class ConnectionScanRouter implements TransitRouter {
+
     @Override
-    public List<Leg> calcRoute( Facility fromFacility, Facility toFacility, double departureTime, Person person) {
+    public List<? extends PlanElement> calcRoute(RoutingRequest routingRequest) {
         return null;
     }
 }
