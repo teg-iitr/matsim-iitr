@@ -24,7 +24,6 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ReflectiveConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
 
-import javax.validation.constraints.NotBlank;
 import java.util.*;
 
 public class TrafficCharConfigGroup extends ReflectiveConfigGroup {

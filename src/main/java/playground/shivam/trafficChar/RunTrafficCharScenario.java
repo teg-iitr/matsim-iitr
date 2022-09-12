@@ -120,7 +120,6 @@ public class RunTrafficCharScenario {
 			else
 				link.getAttributes().putAttribute(TrafficCharConfigGroup.ROAD_TYPE, TrafficCharConfigGroup.ROAD_TYPE_DEFAULT);
 		}
-		new NetworkWriter(network).write("/Users/shivam4896/Downloads/network.xml");
 
 		VehicleType car = scenario.getVehicles().getFactory().createVehicleType(Id.create("car", VehicleType.class));
 		car.setPcuEquivalents(1.0);

@@ -14,6 +14,7 @@ import org.matsim.core.replanning.modules.AbstractMultithreadedModule;
 import org.matsim.core.replanning.modules.ReRoute;
 import org.matsim.core.replanning.selectors.RandomPlanSelector;
 import org.matsim.core.router.TripRouter;
+import org.matsim.core.utils.timing.TimeInterpretation;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -41,12 +42,14 @@ public class WorkFromHomeModule extends AbstractModule {
                 Scenario sc;
                 @Inject
                 Provider<TripRouter> tripRouterProvider ;
+                @Inject
+                TimeInterpretation timeInterpretation;
 
                 @Override
                 public PlanStrategy get() {
                     final PlanStrategyImpl.Builder builder = new PlanStrategyImpl.Builder(new RandomPlanSelector<>());
                     builder.addStrategyModule(new WorkFromHome(sc.getConfig().global(), actTypes, wfhMode));
-                    builder.addStrategyModule(new ReRoute(sc, tripRouterProvider));
+                    builder.addStrategyModule(new ReRoute(sc, tripRouterProvider, timeInterpretation));
                     return builder.build();
                 }
             });
