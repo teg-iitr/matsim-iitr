@@ -35,6 +35,7 @@ jobs:
         
     - name: Build jars
       run: mvn -B package --file pom.xml
+
   
     env:
       MAVEN_OPTS: -Xmx2g
