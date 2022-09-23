@@ -4,18 +4,19 @@ name: test
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
-  pull_request_target: 
-    branches:
-      - master
-    types:
-      - closed
+#  pull_request:
+#    branches: [ "master" ]
+#  pull_request_target:
+#    branches:
+#      - master
+#    types:
+#      - closed
 
 
 jobs:
   build:
-    if: github.event_name == 'push' || github.event.pull_request.merged == true
+#    if: github.event_name == 'push' || github.event.pull_request.merged == true
+    if: github.event_name == 'push'
 
     runs-on: ubuntu-latest
 
