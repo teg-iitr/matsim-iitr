@@ -34,7 +34,7 @@ jobs:
         server-password: MAVEN_PASSWORD
         
     - name: Build jars
-      run: mvn -B package --batch-mode -DskipTests --file pom.xml
+      run: mvn -B package --file pom.xml
   
     env:
       MAVEN_OPTS: -Xmx2g
