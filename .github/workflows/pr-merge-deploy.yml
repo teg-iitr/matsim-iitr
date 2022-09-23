@@ -1,0 +1,51 @@
+
+name: test
+
+on:
+  push:
+    branches-ignore:
+      - 'master' # no need to run after merging to master
+    tags-ignore:
+        - '*'
+  pull_request:
+
+
+
+jobs:
+  build:
+    if: github.event_name == 'push' || github.event.pull_request.merged == true
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout git repo
+      uses: actions/checkout@v3
+        
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'zulu'
+        cache: maven
+        server-id: ${{ github.event_name == 'push' && 'matsim-snapshots' || 'matsim-releases' }} #choose mvn repo
+        server-username: MAVEN_USERNAME
+        server-password: MAVEN_PASSWORD
+        
+    - name: Build jars
+      run: mvn -B package -DskipTests -Dmaven.resources.skip=true -Dmaven.install.skip=true --file pom.xml
+  
+    env:
+      MAVEN_OPTS: -Xmx2g
+
+  verify-all-jobs-successful:
+    # always() - to ensure this job is executed (regardless of the status of the previous job)
+    # run if push or pull_requests from fork
+    if: always() && (github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository)
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: check if the whole job matrix is successful
+        if: needs.build.result != 'success'
+        run: exit 1 # fail if "build" was not successful
+

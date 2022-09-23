@@ -42,6 +42,7 @@ import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.timing.TimeInterpretation;
 import playground.amit.utils.FileUtils;
 import playground.vsp.airPollution.exposure.*;
 
@@ -107,13 +108,14 @@ public class SubPopMunichExposureControler {
 					final String[] chainBasedModes = {"car", "bike"};
 					@Inject
 					Scenario sc;
-
+					@Inject
+					TimeInterpretation timeInterpretation;
 					@Override
 					public PlanStrategy get() {
 						final Builder builder = new Builder(new RandomPlanSelector<>());
 						//TODO following line is commented. See, what's changed. Amit 19.09.2020
 //						builder.addStrategyModule(new SubtourModeChoice(sc.getConfig().global().getNumberOfThreads(), availableModes, chainBasedModes, false, 0.0, tripRouterProvider));
-						builder.addStrategyModule(new ReRoute(sc, tripRouterProvider));
+						builder.addStrategyModule(new ReRoute(sc, tripRouterProvider, timeInterpretation));
 						return builder.build();
 					}
 				});
@@ -123,7 +125,7 @@ public class SubPopMunichExposureControler {
 		EmissionsConfigGroup ecg = new EmissionsConfigGroup();
 		controler.getConfig().addModule(ecg);
 		
-		ecg.setUsingDetailedEmissionCalculation(true);
+//		ecg.setUsingDetailedEmissionCalculation(true);
 		
 		String hbefaDirectory;
 

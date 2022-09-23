@@ -150,7 +150,7 @@ public class BerlinEmissionAnalyzer {
         config.vehicles().setVehiclesFile(vehiclesFile); // need to create vehicles file
 
         EmissionsConfigGroup emissionsConfigGroup  = ConfigUtils.addOrGetModule(config, EmissionsConfigGroup.class);
-        emissionsConfigGroup.setUsingDetailedEmissionCalculation(false);
+//        emissionsConfigGroup.setUsingDetailedEmissionCalculation(false);
         emissionsConfigGroup.setEmissionRoadTypeMappingFile(roadTypeMappingFile);
         emissionsConfigGroup.setAverageColdEmissionFactorsFile(averageFleetColdEmissionFactorsFile);
         emissionsConfigGroup.setAverageWarmEmissionFactorsFile(averageFleetWarmEmissionFactorsFile);

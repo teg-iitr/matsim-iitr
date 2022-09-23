@@ -161,10 +161,10 @@ public class FDModule extends AbstractModule {
 			scenario.getConfig().qsim().setStuckTime(180.);
 
 		//TODO probably, following is not required anymore.
-		if ( scenario.getConfig().network().isTimeVariantNetwork() ) {
-			Network netImpl = scenario.getNetwork();
-			netImpl.getFactory().setLinkFactory(new VariableIntervalTimeVariantLinkFactory());
-		}
+//		if ( scenario.getConfig().network().isTimeVariantNetwork() ) {
+//			Network netImpl = scenario.getNetwork();
+//			netImpl.getFactory().setLinkFactory(new VariableIntervalTimeVariantLinkFactory());
+//		}
 
 		StrategyConfigGroup.StrategySettings ss = new StrategyConfigGroup.StrategySettings();
 		ss.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.KeepLastSelected);
