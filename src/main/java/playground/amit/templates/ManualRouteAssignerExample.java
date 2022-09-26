@@ -79,8 +79,7 @@ public class ManualRouteAssignerExample {
             routerFactory.setTravelDisutility(new RandomizingTimeDistanceTravelDisutilityFactory(mode, scenario.getConfig()).createTravelDisutility(tt));
 
             final TripRouter tripRouter = routerFactory.build(scNetwork).get();
-            final TimeInterpretation timeInterpretation = TimeInterpretation.create(scNetwork.getConfig());
-            PlanAlgorithm router = new PlanRouter(tripRouter, timeInterpretation);
+            PlanAlgorithm router = new PlanRouter(tripRouter, TimeInterpretation.create(this.scenario.getConfig()));
 
             PersonPrepareForSim pp4s = new PersonPrepareForSim(router, scNetwork);
             mode2routers.put(mode, pp4s);

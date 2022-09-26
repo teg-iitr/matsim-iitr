@@ -21,9 +21,9 @@ public class MyChangeTripMode implements Provider<PlanStrategy> {
 
     private final GlobalConfigGroup globalConfigGroup;
     private final ChangeModeConfigGroup changeLegModeConfigGroup;
-    private Provider<TripRouter> tripRouterProvider;
-    private ActivityFacilities activityFacilities;
-    private TimeInterpretation timeInterpretation;
+    private final Provider<TripRouter> tripRouterProvider;
+    private final ActivityFacilities activityFacilities;
+    private final TimeInterpretation timeInterpretation;
 
     @Inject
     protected MyChangeTripMode(GlobalConfigGroup globalConfigGroup, ChangeModeConfigGroup changeLegModeConfigGroup, ActivityFacilities activityFacilities, Provider<TripRouter> tripRouterProvider, TimeInterpretation timeInterpretation) {

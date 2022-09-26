@@ -110,13 +110,10 @@ public class SubPopMunichControler {
 					Scenario sc;
 					@Inject
 					Provider<TripRouter> tripRouterProvider;
-					@Inject
-					TimeInterpretation timeInterpretation;
-
 					@Override
 					public PlanStrategy get() {
 						final Builder builder = new Builder(new RandomPlanSelector<>());
-						builder.addStrategyModule(new ReRoute(sc, tripRouterProvider, timeInterpretation));
+						builder.addStrategyModule(new ReRoute(sc, tripRouterProvider, TimeInterpretation.create(this.sc.getConfig())));
 						return builder.build();
 					}
 				});
@@ -134,8 +131,7 @@ public class SubPopMunichControler {
 					Scenario sc;
 					@Inject
 					Provider<TripRouter> tripRouterProvider;
-					@Inject
-					TimeInterpretation timeInterpretation;
+
 					@Override
 					public PlanStrategy get() {
 						final Builder builder = new Builder(new RandomPlanSelector<>());
@@ -146,7 +142,7 @@ public class SubPopMunichControler {
 //								false,
 //								0.0, //prob, 0.0 for backward compatiblity
 //								tripRouterProvider));
-						builder.addStrategyModule(new ReRoute(sc, tripRouterProvider, timeInterpretation));
+						builder.addStrategyModule(new ReRoute(sc, tripRouterProvider, TimeInterpretation.create(this.sc.getConfig())));
 						return builder.build();
 					}
 				});

@@ -71,7 +71,7 @@ public class PatnaOnlineEmissionsWriter {
         config.vspExperimental().setVspDefaultsCheckingLevel(VspExperimentalConfigGroup.VspDefaultsCheckingLevel.warn);
 
         EmissionsConfigGroup ecg = ConfigUtils.addOrGetModule(config, EmissionsConfigGroup.class);
-//        ecg.setUsingDetailedEmissionCalculation(false);
+        ecg.setUsingDetailedEmissionCalculationStringSetter(false);
         ecg.setUsingVehicleTypeIdAsVehicleDescription(false);
         ecg.setAverageColdEmissionFactorsFile(avgColdEmissFile);
         ecg.setAverageWarmEmissionFactorsFile(avgWarmEmissFile);

@@ -108,14 +108,13 @@ public class SubPopMunichExposureControler {
 					final String[] chainBasedModes = {"car", "bike"};
 					@Inject
 					Scenario sc;
-					@Inject
-					TimeInterpretation timeInterpretation;
+
 					@Override
 					public PlanStrategy get() {
 						final Builder builder = new Builder(new RandomPlanSelector<>());
 						//TODO following line is commented. See, what's changed. Amit 19.09.2020
 //						builder.addStrategyModule(new SubtourModeChoice(sc.getConfig().global().getNumberOfThreads(), availableModes, chainBasedModes, false, 0.0, tripRouterProvider));
-						builder.addStrategyModule(new ReRoute(sc, tripRouterProvider, timeInterpretation));
+						builder.addStrategyModule(new ReRoute(sc, tripRouterProvider, TimeInterpretation.create(this.sc.getConfig())));
 						return builder.build();
 					}
 				});
@@ -125,7 +124,7 @@ public class SubPopMunichExposureControler {
 		EmissionsConfigGroup ecg = new EmissionsConfigGroup();
 		controler.getConfig().addModule(ecg);
 		
-//		ecg.setUsingDetailedEmissionCalculation(true);
+		ecg.setUsingDetailedEmissionCalculation(true);
 		
 		String hbefaDirectory;
 

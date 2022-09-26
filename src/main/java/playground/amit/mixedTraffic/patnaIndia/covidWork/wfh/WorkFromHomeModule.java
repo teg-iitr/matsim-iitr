@@ -42,14 +42,12 @@ public class WorkFromHomeModule extends AbstractModule {
                 Scenario sc;
                 @Inject
                 Provider<TripRouter> tripRouterProvider ;
-                @Inject
-                TimeInterpretation timeInterpretation;
 
                 @Override
                 public PlanStrategy get() {
                     final PlanStrategyImpl.Builder builder = new PlanStrategyImpl.Builder(new RandomPlanSelector<>());
                     builder.addStrategyModule(new WorkFromHome(sc.getConfig().global(), actTypes, wfhMode));
-                    builder.addStrategyModule(new ReRoute(sc, tripRouterProvider, timeInterpretation));
+                    builder.addStrategyModule(new ReRoute(sc, tripRouterProvider, TimeInterpretation.create(this.sc.getConfig())));
                     return builder.build();
                 }
             });

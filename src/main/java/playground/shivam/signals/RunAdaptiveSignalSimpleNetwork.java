@@ -126,8 +126,8 @@ public class RunAdaptiveSignalSimpleNetwork {
                 Plan plan = population.getFactory().createPlan();
                 person.addPlan(plan);
 
-                // create a home activity at the from link
-                Activity homeAct = population.getFactory().createActivityFromLinkId("home", Id.createLinkId(fromLinkId));
+                // create a start activity at the from link
+                Activity homeAct = population.getFactory().createActivityFromLinkId("dummy", Id.createLinkId(fromLinkId));
                 // distribute agents uniformly during one hour.
                 homeAct.setEndTime(i);
                 plan.addActivity(homeAct);
@@ -136,7 +136,7 @@ public class RunAdaptiveSignalSimpleNetwork {
                 plan.addLeg(population.getFactory().createLeg(getTravelMode(MatsimRandom.getLocalInstance().nextInt(100))));
 
                 // create a work activity at the to link
-                Activity workAct = population.getFactory().createActivityFromLinkId("work", Id.createLinkId(toLinkId));
+                Activity workAct = population.getFactory().createActivityFromLinkId("dummy", Id.createLinkId(toLinkId));
                 plan.addActivity(workAct);
             }
         }
