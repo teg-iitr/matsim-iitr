@@ -3,7 +3,8 @@ package org.matsim.contrib.signals.sensor;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.*;
@@ -26,7 +27,7 @@ import java.util.Map;
 
 @Singleton
 public final class MixedTrafficLinkSensorManager implements LinkEnterEventHandler, LinkLeaveEventHandler, VehicleLeavesTrafficEventHandler, PersonEntersVehicleEventHandler, PersonDepartureEventHandler, LaneEnterEventHandler, LaneLeaveEventHandler {
-    private static final Logger log = Logger.getLogger(LinkSensorManager.class);
+    private static final Logger log = LogManager.getLogger(LinkSensorManager.class);
     private Map<Id<Link>, MixedTrafficLinkSensor> linkIdSensorMap = new HashMap();
     private Map<Id<Link>, Map<Id<Lane>, MixedTrafficLaneSensor>> linkIdLaneIdSensorMap = new HashMap();
     private final Network network;

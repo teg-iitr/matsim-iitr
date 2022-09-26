@@ -84,7 +84,7 @@ public class Metro2021ScenarioASCCalibration {
                 List<Double> ascs_metro = new ArrayList<>();
                 for (int i = 0; i<HaridwarRishikeshScenarioRunner.numberOfPoints2DrawInEachZone; i ++){
                     if(sum_exp_util_except_metro.get(i)==0.) {
-//                        Logger.getLogger(Metro2021ScenarioASCCalibration.class).warn("The sum of exponential of utility of all modes except metro is zero for OD " + od.getId() + ". This means everyone will use metro. This should not happen.");
+//                        LogManager.getLogger(Metro2021ScenarioASCCalibration.class).warn("The sum of exponential of utility of all modes except metro is zero for OD " + od.getId() + ". This means everyone will use metro. This should not happen.");
 //                        od.getAttributes().putAttribute(METRO_ASC, Double.NaN);
                     } else {
 //                        TripChar metroTC = ghNetworkDistanceCalculator.getTripDistanceInKmTimeInHrFromAvgSpeeds(DehradunUtils.Reverse_transformation.transform(origin.get(i)),

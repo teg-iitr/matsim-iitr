@@ -15,7 +15,8 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
 import org.matsim.api.core.v01.events.PersonStuckEvent;
@@ -40,7 +41,7 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.vehicles.Vehicle;
 
 abstract class DynamicHeadwayAbstractQLink implements QLinkI {
-    private static final Logger log = Logger.getLogger(DynamicHeadwayAbstractQLink.class);
+    private static final Logger log = LogManager.getLogger(DynamicHeadwayAbstractQLink.class);
     private final Link link;
     private NetElementActivationRegistry netElementActivationRegistry;
     private final Map<String, Object> customAttributes = new HashMap();

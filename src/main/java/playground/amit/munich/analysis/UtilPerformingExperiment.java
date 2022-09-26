@@ -18,14 +18,8 @@
  * *********************************************************************** */
 package playground.amit.munich.analysis;
 
-import java.io.BufferedWriter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
@@ -35,10 +29,12 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.events.handler.EventHandler;
 import org.matsim.core.utils.io.IOUtils;
-
 import playground.amit.analysis.activity.LegModeActivityEndTimeAndActDurationHandler;
 import playground.amit.utils.LoadMyScenarios;
 import playground.vsp.analysis.modules.AbstractAnalysisModule;
+
+import java.io.BufferedWriter;
+import java.util.*;
 
 /**
  * @author amit
@@ -48,7 +44,7 @@ public class UtilPerformingExperiment extends AbstractAnalysisModule {
 	private final LegModeActivityEndTimeAndActDurationHandler actDurationUtilHandler;
 	private final String eventsFile;
 	private final String outputDir;
-	private static final Logger LOG = Logger.getLogger(UtilPerformingExperiment.class);
+	private static final Logger LOG = LogManager.getLogger(UtilPerformingExperiment.class);
 
 	private final Map<String, Double> actType2TypicalDuration ;
 	private double marginalUtilPerformingSec ;

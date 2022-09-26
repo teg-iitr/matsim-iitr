@@ -18,12 +18,13 @@
  * *********************************************************************** */
 package playground.amit.analysis.spatial;
 
-import java.io.File;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-
 import playground.amit.analysis.spatial.GeneralGrid.GridType;
 import playground.amit.utils.LoadMyScenarios;
+
+import java.io.File;
 
 /**
  * All inputs parameters required for spatial analysis are listed and set here.
@@ -34,7 +35,7 @@ public class SpatialDataInputs {
 
 	public enum LinkWeightMethod {line, point}
 
-    public final static Logger LOG = Logger.getLogger(SpatialDataInputs.class);
+    public final static Logger LOG = LogManager.getLogger(SpatialDataInputs.class);
 	
 	private final LinkWeightMethod linkWeigthMethod;
 	

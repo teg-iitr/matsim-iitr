@@ -28,7 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
@@ -55,7 +56,7 @@ import playground.amit.utils.PersonFilter;
  * @author amit
  */
 public class OutputPlansConsistencyCheck {
-    private static final Logger LOG = Logger.getLogger(OutputPlansConsistencyCheck.class);
+    private static final Logger LOG = LogManager.getLogger(OutputPlansConsistencyCheck.class);
     private final Scenario sc;
 
     private final Map<Person, List<List<String>>> person2PlanIndex2ActivityTypes = new HashMap<>();

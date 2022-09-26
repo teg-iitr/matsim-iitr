@@ -20,7 +20,8 @@
 package playground.amit.emissions.flatEmissions;
 
 import com.google.inject.name.Names;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -75,7 +76,7 @@ public class EquilMixedTrafficEmissionIT {
 
 	@Rule
 	public final MatsimTestUtils helper = new MatsimTestUtils();
-	private static final Logger logger = Logger.getLogger(EquilMixedTrafficEmissionIT.class);
+	private static final Logger logger = LogManager.getLogger(EquilMixedTrafficEmissionIT.class);
 
 	private final String classOutputDir = "test/output/" + EquilMixedTrafficEmissionIT.class.getCanonicalName().replace('.', '/') + "/";
 

@@ -19,13 +19,15 @@
 
 package playground.amit.berlin.berlinBVG09;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 import playground.amit.utils.PersonFilter;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by amit on 11.06.17.
@@ -34,7 +36,7 @@ import playground.amit.utils.PersonFilter;
 
 public class BerlinPersonFilter implements PersonFilter {
 
-    private static final Logger LOGGER = Logger.getLogger(BerlinPersonFilter.class);
+    private static final Logger LOGGER = LogManager.getLogger(BerlinPersonFilter.class);
 
     public enum BerlinUserGroup {
         carUsers_berlin, carUsers_brandenburger, carUsers_tourists, carUsers_airport,

@@ -9,7 +9,8 @@ import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
@@ -24,7 +25,7 @@ import playground.amit.mixedTraffic.MixedTrafficVehiclesUtils;
 import javax.inject.Inject;
 
 final class MixedTrafficLinkSensor {
-    private static final Logger log = Logger.getLogger(LinkSensor.class);
+    private static final Logger log = LogManager.getLogger(LinkSensor.class);
     private Link link = null;
     public int vehiclesOnLink = 0;
     private double totalVehicles = 0.0D;

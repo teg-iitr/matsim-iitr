@@ -1,17 +1,11 @@
 package org.matsim.contrib.signals.analysis;
 
 import com.google.inject.Inject;
-
-import java.util.*;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.*;
-import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
-import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
-import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
-import org.matsim.api.core.v01.events.handler.PersonEntersVehicleEventHandler;
-import org.matsim.api.core.v01.events.handler.PersonStuckEventHandler;
+import org.matsim.api.core.v01.events.handler.*;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
@@ -23,13 +17,14 @@ import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.controler.events.AfterMobsimEvent;
 import org.matsim.core.controler.events.IterationEndsEvent;
 import org.matsim.core.controler.listener.AfterMobsimListener;
-import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.Vehicles;
 
+import java.util.*;
+
 public class MixedTrafficDelayAnalysisTool implements SignalGroupStateChangedEventHandler, PersonDepartureEventHandler, PersonEntersVehicleEventHandler, LinkEnterEventHandler, LinkLeaveEventHandler, PersonStuckEventHandler, AfterMobsimListener {
-    private static final Logger LOG = Logger.getLogger(DelayAnalysisTool.class);
+    private static final Logger LOG = LogManager.getLogger(DelayAnalysisTool.class);
     private final Network network;
     private boolean considerStuckedAgents;
     private double totalDelay;

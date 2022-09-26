@@ -1,6 +1,7 @@
 package playground.amit.Delhi.overlap.algo.optimizer;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.pt2matsim.gtfs.GtfsFeed;
@@ -20,7 +21,7 @@ import java.util.*;
  */
 public class OverlapOptimizer {
 
-    public static final Logger LOG = Logger.getLogger(OverlapOptimizer.class);
+    public static final Logger LOG = LogManager.getLogger(OverlapOptimizer.class);
 
 //    public enum OptimizingElements{vehicle, GTFS}
 

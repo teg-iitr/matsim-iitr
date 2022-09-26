@@ -26,8 +26,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.locationtech.jts.geom.Point;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -56,7 +56,7 @@ import playground.amit.utils.geometry.GeometryUtils;
  */
 public class UrbanDemandGenerator {
 
-	private static final Logger LOG = Logger.getLogger(UrbanDemandGenerator.class);
+	private static final Logger LOG = LogManager.getLogger(UrbanDemandGenerator.class);
 	private static final Random RAND = MatsimRandom.getLocalInstance();
 
 	private Scenario scenario;

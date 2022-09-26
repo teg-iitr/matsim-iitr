@@ -1,7 +1,5 @@
 package playground.shivam.signals;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.hc.core5.util.TextUtils;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -15,26 +13,20 @@ import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.analysis.MixedTrafficDelayAnalysisTool;
 import org.matsim.contrib.signals.analysis.MixedTrafficSignalAnalysisTool;
-import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
 import org.matsim.contrib.signals.builder.MixedTrafficSignals;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerSignalController;
 import org.matsim.contrib.signals.controller.laemmerFix.MixedTrafficLaemmerSignalController;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsDataLoader;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlData;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlDataFactory;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlDataFactoryImpl;
-import org.matsim.contrib.signals.data.signalcontrol.v20.SignalPlanData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupsData;
 import org.matsim.contrib.signals.data.signalsystems.v20.*;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
-import org.matsim.contrib.signals.model.SignalPlan;
 import org.matsim.contrib.signals.model.SignalSystem;
-import org.matsim.contrib.signals.otfvis.OTFVisWithSignalsLiveModule;
-import org.matsim.contrib.signals.utils.SignalUtils;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.ChangeModeConfigGroup;
@@ -47,16 +39,16 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.vehicles.*;
+import org.matsim.vehicles.VehicleType;
+import org.matsim.vehicles.VehicleUtils;
+import org.matsim.vehicles.Vehicles;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import playground.amit.mixedTraffic.MixedTrafficVehiclesUtils;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class RunAdaptiveSignalSimpleNetwork {
     private final Controler controler;

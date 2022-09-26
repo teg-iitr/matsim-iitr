@@ -17,8 +17,8 @@
  *                                                                         *
  * *********************************************************************** */
 package playground.amit.analysis.activity.scoring;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.Event;
@@ -45,7 +45,7 @@ import java.util.*;
  */
 
 public class Person2ActivityPerformingWriter {
-	private static final Logger LOG = Logger.getLogger(Person2ActivityPerformingWriter.class);
+	private static final Logger LOG = LogManager.getLogger(Person2ActivityPerformingWriter.class);
 	private static final String outputFilesDir = FileUtils.RUNS_SVN+"/detEval/emissionCongestionInternalization/output/1pct/run0/baseCaseCtd/";
 	private final Map<Id<Person>,Map<String, Double>> personId2Act2UtilPerf = new HashMap<>();
 	private final Set<String> actTypes = new HashSet<>();

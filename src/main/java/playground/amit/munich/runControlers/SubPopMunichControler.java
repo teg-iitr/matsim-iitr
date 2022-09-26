@@ -18,12 +18,7 @@
  * *********************************************************************** */
 package playground.amit.munich.runControlers;
 
-import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
-import javax.inject.Inject;
-import javax.inject.Provider;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
@@ -38,7 +33,6 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.replanning.PlanStrategy;
 import org.matsim.core.replanning.PlanStrategyImpl.Builder;
 import org.matsim.core.replanning.modules.ReRoute;
-import org.matsim.core.replanning.modules.SubtourModeChoice;
 import org.matsim.core.replanning.selectors.RandomPlanSelector;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.router.TripRouter;
@@ -60,6 +54,12 @@ import playground.vsp.congestion.controler.MarginalCongestionPricingContolerList
 import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
 import playground.vsp.congestion.handlers.TollHandler;
 import playground.vsp.congestion.routing.TollDisutilityCalculatorFactory;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author amit
@@ -223,7 +223,7 @@ public class SubPopMunichControler {
 		String OUTPUT_DIR = config.controler().getOutputDirectory();
 		for (int index =firstIt+1; index <lastIt; index ++){
 			String dirToDel = OUTPUT_DIR+"/ITERS/it."+index;
-			Logger.getLogger(JointCalibrationControler.class).info("Deleting the directory "+dirToDel);
+			LogManager.getLogger(JointCalibrationControler.class).info("Deleting the directory "+dirToDel);
 			IOUtils.deleteDirectoryRecursively(new File(dirToDel).toPath());
 		}
 

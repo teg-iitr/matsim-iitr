@@ -27,7 +27,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -52,7 +53,7 @@ import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 
 public class PatnaNetworkFromTransCadDataGenerator {       
 
-	private static final Logger LOG = Logger.getLogger(PatnaNetworkFromTransCadDataGenerator.class);
+	private static final Logger LOG = LogManager.getLogger(PatnaNetworkFromTransCadDataGenerator.class);
 	private Scenario scenario;
 
 	public static void main(String[] args) throws IOException  {  

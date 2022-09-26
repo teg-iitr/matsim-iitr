@@ -19,36 +19,24 @@
 
 package playground.amit.analysis.toll;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedMap;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.locationtech.jts.geom.Geometry;
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.events.LinkLeaveEvent;
-import org.matsim.api.core.v01.events.PersonDepartureEvent;
-import org.matsim.api.core.v01.events.PersonMoneyEvent;
-import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
-import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
-import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
-import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
-import org.matsim.api.core.v01.events.handler.PersonMoneyEventHandler;
-import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
-import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
+import org.matsim.api.core.v01.events.*;
+import org.matsim.api.core.v01.events.handler.*;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.events.algorithms.Vehicle2DriverEventHandler;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
-
 import playground.amit.munich.utils.MunichPersonFilter;
 import playground.amit.utils.geometry.GeometryUtils;
 import playground.vsp.congestion.events.CongestionEvent;
 import playground.vsp.congestion.handlers.CongestionEventHandler;
+
+import java.util.*;
 
 /**
  * @author amit
@@ -56,7 +44,7 @@ import playground.vsp.congestion.handlers.CongestionEventHandler;
 
 public class FilteredTollHandler implements PersonMoneyEventHandler, PersonDepartureEventHandler, LinkLeaveEventHandler, CongestionEventHandler,
 VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
-	private static final Logger LOGGER = Logger.getLogger(FilteredTollHandler.class.getName());
+	private static final Logger LOGGER = LogManager.getLogger(FilteredTollHandler.class.getName());
 
 	private final TollInfoHandler delegate;
 	private final Vehicle2DriverEventHandler veh2DriverDelegate = new Vehicle2DriverEventHandler();

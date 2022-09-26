@@ -18,12 +18,8 @@
  * *********************************************************************** */
 package playground.amit.mixedTraffic.qPositionPlots;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.util.Map;
-import java.util.SortedMap;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
@@ -32,8 +28,12 @@ import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.io.IOUtils;
-
 import playground.amit.utils.LoadMyScenarios;
+
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.Map;
+import java.util.SortedMap;
 
 /**
  * @author amit
@@ -52,7 +52,7 @@ public class QPositionDataWriterForR {
 	private Tuple<Id<Person>, Double> lastDepartedPerson = new Tuple<>(null, 0.);
 	private final boolean isWritingDataAfterDepartureOfLastPerson = false;
 	
-	private final static Logger LOG = Logger.getLogger(QPositionDataWriterForR.class);
+	private final static Logger LOG = LogManager.getLogger(QPositionDataWriterForR.class);
 
 	public void run(){
 		scenario  = LoadMyScenarios.loadScenarioFromNetwork(networkFile);

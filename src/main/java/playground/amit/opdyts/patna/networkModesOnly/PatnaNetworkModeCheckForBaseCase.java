@@ -19,9 +19,8 @@
 
 package playground.amit.opdyts.patna.networkModesOnly;
 
-import java.util.Arrays;
-import java.util.List;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -29,13 +28,16 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
+import playground.amit.opdyts.OpdytsScenario;
+import playground.amit.opdyts.analysis.OpdytsModalStatsControlerListener;
+import playground.amit.utils.FileUtils;
 import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
-import playground.amit.opdyts.OpdytsScenario;
-import playground.amit.opdyts.analysis.OpdytsModalStatsControlerListener;
-import playground.amit.utils.FileUtils;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by amit on 12.06.17.
@@ -44,7 +46,7 @@ import playground.amit.utils.FileUtils;
 
 public class PatnaNetworkModeCheckForBaseCase {
 
-    private static final Logger LOGGER = Logger.getLogger(PatnaNetworkModeCheckForBaseCase.class);
+    private static final Logger LOGGER = LogManager.getLogger(PatnaNetworkModeCheckForBaseCase.class);
 
     public static void main(String[] args) {
 

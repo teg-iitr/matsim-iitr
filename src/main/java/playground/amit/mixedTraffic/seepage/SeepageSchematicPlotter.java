@@ -21,7 +21,8 @@ package playground.amit.mixedTraffic.seepage;
 
 import java.util.*;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -63,7 +64,7 @@ import org.matsim.vehicles.VehicleUtils;
  * 
  */
 public class SeepageSchematicPlotter {
-	static private final Logger log = Logger.getLogger( SeepageSchematicPlotter.class);
+	static private final Logger log = LogManager.getLogger( SeepageSchematicPlotter.class);
 
 	public static void main(String [] args){
 

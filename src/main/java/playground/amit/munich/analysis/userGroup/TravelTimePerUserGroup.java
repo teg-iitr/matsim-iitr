@@ -18,14 +18,8 @@
  * *********************************************************************** */
 package playground.amit.munich.analysis.userGroup;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -36,6 +30,13 @@ import playground.amit.analysis.tripTime.ModalTravelTimeAnalyzer;
 import playground.amit.munich.utils.MunichPersonFilter;
 import playground.amit.munich.utils.UserGroupUtilsExtended;
 import playground.amit.utils.LoadMyScenarios;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * @author amit
@@ -58,7 +59,7 @@ public class TravelTimePerUserGroup  {
 
 	private final ModalTravelTimeAnalyzer travelTimeAnalyzer;
 	private final Scenario sc; 
-	private static final Logger LOGGER = Logger.getLogger(TravelTimePerUserGroup.class);
+	private static final Logger LOGGER = LogManager.getLogger(TravelTimePerUserGroup.class);
 	private Map<String, Map<Id<Person>, List<Double>>> mode2PersonId2TravelTimes;
 	
 	private final String outputDir = "../../../../repos/runs-svn/detEval/emissionCongestionInternalization/otherRuns/output/1pct/run10/policies/backcasting/exposure/25ExI/";

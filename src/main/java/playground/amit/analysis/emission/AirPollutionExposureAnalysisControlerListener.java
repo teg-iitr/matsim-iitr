@@ -19,12 +19,9 @@
 
 package playground.amit.analysis.emission;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.util.Map;
-
-import org.apache.log4j.Logger;
+import com.google.inject.Inject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.contrib.emissions.events.EmissionEventsReader;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.groups.ControlerConfigGroup;
@@ -35,14 +32,16 @@ import org.matsim.core.controler.listener.ShutdownListener;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.utils.io.IOUtils;
-
-import com.google.inject.Inject;
-
 import playground.amit.analysis.emission.experienced.ExperiencedEmissionCostHandler;
 import playground.amit.utils.MapUtils;
 import playground.vsp.airPollution.exposure.GridTools;
 import playground.vsp.airPollution.exposure.IntervalHandler;
 import playground.vsp.airPollution.exposure.ResponsibilityGridTools;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.util.Map;
 
 /**
  * Created by amit on 01/12/2016.
@@ -50,7 +49,7 @@ import playground.vsp.airPollution.exposure.ResponsibilityGridTools;
 
 public class AirPollutionExposureAnalysisControlerListener implements  ShutdownListener {
 
-    private static final Logger LOG = Logger.getLogger(AirPollutionExposureAnalysisControlerListener.class);
+    private static final Logger LOG = LogManager.getLogger(AirPollutionExposureAnalysisControlerListener.class);
 
     @Inject
     private OutputDirectoryHierarchy controlerIO;

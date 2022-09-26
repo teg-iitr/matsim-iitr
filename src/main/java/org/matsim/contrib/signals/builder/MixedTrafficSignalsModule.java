@@ -4,10 +4,8 @@ package org.matsim.contrib.signals.builder;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.analysis.SignalEvents2ViaCSVWriter;
 import org.matsim.contrib.signals.controller.SignalControllerFactory;
@@ -23,8 +21,12 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.network.algorithms.NetworkTurnInfoBuilderI;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 class MixedTrafficSignalsModule extends AbstractModule {
-    private static final Logger log = Logger.getLogger(SignalsModule.class);
+    private static final Logger log = LogManager.getLogger(SignalsModule.class);
     private MapBinder<String, SignalControllerFactory> signalControllerFactoryMultibinder;
     private Map<String, Class<? extends SignalControllerFactory>> signalControllerFactoryClassNames = new HashMap();
 

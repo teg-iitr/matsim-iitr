@@ -19,26 +19,18 @@
 
 package playground.amit.mixedTraffic.patnaIndia.input.urban.scenarioSetup;
 
-import java.io.BufferedWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.api.core.v01.population.*;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.io.IOUtils;
-
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.amit.utils.LoadMyScenarios;
+
+import java.io.BufferedWriter;
+import java.util.*;
 
 /**
  * @author amit
@@ -46,7 +38,7 @@ import playground.amit.utils.LoadMyScenarios;
 
 public class BeelineDistanceFromActivitiesAnalyzer {
 
-	private static final Logger LOG = Logger.getLogger(BeelineDistanceFromActivitiesAnalyzer.class);
+	private static final Logger LOG = LogManager.getLogger(BeelineDistanceFromActivitiesAnalyzer.class);
 
 	private final List<Integer> distanceClasses = new ArrayList<>(Arrays.asList( 2000, 4000, 6000, 8000, 10000, 20000000 // last dist class sufficiently high
 			));

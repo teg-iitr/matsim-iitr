@@ -18,7 +18,7 @@
  * *********************************************************************** */
 package playground.amit.mixedTraffic.patnaIndia.input.joint;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
@@ -149,7 +149,7 @@ public class JointCalibrationControler {
 		int lastIt = controler.getConfig().controler().getLastIteration();
 		for (int index =firstIt+1; index <lastIt; index ++){
 			String dirToDel = OUTPUT_DIR+"/ITERS/it."+index;
-			Logger.getLogger(JointCalibrationControler.class).info("Deleting the directory "+dirToDel);
+			LogManager.getLogger(JointCalibrationControler.class).info("Deleting the directory "+dirToDel);
 			IOUtils.deleteDirectoryRecursively(new File(dirToDel).toPath());
 		}
 

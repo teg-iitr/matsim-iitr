@@ -19,18 +19,8 @@
 
 package playground.amit.mixedTraffic.patnaIndia.OnRoadExposure;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.locationtech.jts.geom.Geometry;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -49,7 +39,6 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.IOUtils;
 import org.opengis.feature.simple.SimpleFeature;
-
 import playground.amit.emissions.onRoadExposure.OnRoadExposureConfigGroup;
 import playground.amit.emissions.onRoadExposure.OnRoadExposureHandler;
 import playground.amit.emissions.onRoadExposure.OnRoadExposureTable.OnRoadTripExposureInfo;
@@ -58,6 +47,12 @@ import playground.amit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.amit.utils.FileUtils;
 import playground.amit.utils.LoadMyScenarios;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by amit on 17.11.17.
@@ -70,7 +65,7 @@ public class PatnaOnRoadExposure {
     private static final CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation(PatnaUtils.EPSG, TransformationFactory.WGS84);
     private static final String networkFile = "";
 
-    private static final Logger LOG = Logger.getLogger(PatnaOnRoadExposure.class);
+    private static final Logger LOG = LogManager.getLogger(PatnaOnRoadExposure.class);
     private static final boolean writeEmissionEventsFirst = false;
 
 //    private static final String data_dates [] = {"none","_22Nov2017","_22Jan2018","_22Mar2018","_22May2018"};

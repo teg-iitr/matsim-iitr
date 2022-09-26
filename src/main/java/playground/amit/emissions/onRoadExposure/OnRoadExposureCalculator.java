@@ -19,11 +19,13 @@
 
 package playground.amit.emissions.onRoadExposure;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.matsim.contrib.emissions.Pollutant;
+
+import javax.inject.Inject;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javax.inject.Inject;
-import org.apache.log4j.Logger;
-import org.matsim.contrib.emissions.Pollutant;
 
 /**
  * Created by amit on 08.11.17.
@@ -31,7 +33,7 @@ import org.matsim.contrib.emissions.Pollutant;
 
 public class OnRoadExposureCalculator {
 
-    private static final Logger LOGGER = Logger.getLogger(OnRoadExposureCalculator.class);
+    private static final Logger LOGGER = LogManager.getLogger(OnRoadExposureCalculator.class);
 
     private final OnRoadExposureConfigGroup config;
 

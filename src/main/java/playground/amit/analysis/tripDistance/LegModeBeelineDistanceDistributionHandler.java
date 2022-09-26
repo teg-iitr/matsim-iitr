@@ -19,8 +19,8 @@
 
 package playground.amit.analysis.tripDistance;
 
-import java.util.*;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.PersonArrivalEvent;
@@ -31,13 +31,15 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.utils.geometry.CoordUtils;
 
+import java.util.*;
+
 /**
  * Created by amit on 20/10/16.
  */
 
 public class LegModeBeelineDistanceDistributionHandler implements PersonDepartureEventHandler, PersonArrivalEventHandler {
 
-    private static final Logger LOG = Logger.getLogger(LegModeBeelineDistanceDistributionHandler.class);
+    private static final Logger LOG = LogManager.getLogger(LegModeBeelineDistanceDistributionHandler.class);
 
     private final SortedMap<String, Map<Id<Person>, List<Double>>> mode2PersonId2distances = new TreeMap<>();
 

@@ -1,6 +1,7 @@
 package playground.amit.mixedTraffic.patnaIndia.covidWork.wfh;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.groups.ControlerConfigGroup;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
@@ -22,7 +23,7 @@ import java.util.stream.Collectors;
  */
 public class WFHCounterControlerListner implements IterationEndsListener, ShutdownListener {
 
-    public static final Logger LOGGER = Logger.getLogger(WFHCounterControlerListner.class);
+    public static final Logger LOGGER = LogManager.getLogger(WFHCounterControlerListner.class);
 
     public static final String FILENAME = "workFromHomeStats";
 

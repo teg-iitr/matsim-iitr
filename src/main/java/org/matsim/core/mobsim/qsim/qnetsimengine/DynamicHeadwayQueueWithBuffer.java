@@ -8,7 +8,8 @@ import java.util.Queue;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.PersonStuckEvent;
@@ -56,7 +57,7 @@ import org.matsim.vis.snapshotwriters.VisVehicle;
  * @author nagel
  */
 final class DynamicHeadwayQueueWithBuffer implements QLaneI, SignalizeableItem {
-	private static final Logger log = Logger.getLogger( DynamicHeadwayQueueWithBuffer.class ) ;
+	private static final Logger log = LogManager.getLogger( DynamicHeadwayQueueWithBuffer.class ) ;
 
 	@Override
 	public final void addFromWait(final QVehicle veh) {

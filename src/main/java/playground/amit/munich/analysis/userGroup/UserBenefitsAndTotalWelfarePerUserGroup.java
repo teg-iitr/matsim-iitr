@@ -18,15 +18,8 @@
  * *********************************************************************** */
 package playground.amit.munich.analysis.userGroup;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
@@ -36,7 +29,6 @@ import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.events.handler.EventHandler;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.utils.io.IOUtils;
-
 import playground.amit.analysis.userBenefits.MyUserBenefitsAnalyzer;
 import playground.amit.munich.utils.MunichPersonFilter;
 import playground.amit.munich.utils.MunichPersonFilter.MunichUserGroup;
@@ -45,13 +37,17 @@ import playground.amit.utils.LoadMyScenarios;
 import playground.vsp.analysis.modules.monetaryTransferPayments.MonetaryPaymentsAnalyzer;
 import playground.vsp.analysis.modules.userBenefits.WelfareMeasure;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.*;
+
 /**
  * A class to get user benefits and user welfare_money for each user group.
  * @author amit
  */
 public class UserBenefitsAndTotalWelfarePerUserGroup {
 
-	public static final Logger LOG = Logger.getLogger(UserBenefitsAndTotalWelfarePerUserGroup.class);
+	public static final Logger LOG = LogManager.getLogger(UserBenefitsAndTotalWelfarePerUserGroup.class);
 	private final String outputDir;
 	private Map<Id<Person>, Double> personId2UserWelfareUtils;
 	private Map<Id<Person>, Double> personId2MonetarizedUserWelfare;

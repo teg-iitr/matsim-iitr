@@ -18,12 +18,9 @@
  * *********************************************************************** */
 package playground.amit.munich.controlerListener;
 
-import java.io.BufferedWriter;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.google.inject.Inject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Person;
@@ -34,18 +31,21 @@ import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.controler.listener.StartupListener;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.utils.io.IOUtils;
-
 import playground.amit.analysis.congestion.ExperiencedDelayHandler;
 import playground.amit.analysis.emission.caused.CausedEmissionCostHandler;
 import playground.vsp.airPollution.flatEmissions.EmissionCostModule;
 import playground.vsp.analysis.modules.monetaryTransferPayments.MoneyEventHandler;
+
+import java.io.BufferedWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author amit
  */
 
 public class MyEmissionCongestionMoneyEventControlerListener implements StartupListener, IterationEndsListener{
-	public static final Logger log =Logger.getLogger(MyEmissionCongestionMoneyEventControlerListener.class);
+	public static final Logger log =LogManager.getLogger(MyEmissionCongestionMoneyEventControlerListener.class);
 
 	private Map<Id<Person>, Double> pId2WarmEmissionsCosts= new HashMap<>();
 	private Map<Id<Person>, Double> pId2CongestionCosts= new HashMap<>();

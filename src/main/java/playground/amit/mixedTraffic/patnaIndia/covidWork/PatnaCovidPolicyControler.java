@@ -1,6 +1,6 @@
 package playground.amit.mixedTraffic.patnaIndia.covidWork;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.Config;
@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 
 public class PatnaCovidPolicyControler {
 
-    public static final Logger logger = Logger.getLogger(PatnaCovidPolicyControler.class);
+    public static final Logger logger = LogManager.getLogger(PatnaCovidPolicyControler.class);
 //    private static final String wfh_walk = "WFHwalk";
 
     public static void main(String[] args) {

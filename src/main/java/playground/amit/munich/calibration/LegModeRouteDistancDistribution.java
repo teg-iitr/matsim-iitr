@@ -18,13 +18,15 @@
  * *********************************************************************** */
 package playground.amit.munich.calibration;
 
-import java.io.File;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import playground.amit.analysis.tripDistance.LegModeRouteDistanceDistributionAnalyzer;
 import playground.amit.munich.utils.MunichPersonFilter;
 import playground.amit.utils.LoadMyScenarios;
 import playground.vsp.analysis.modules.legModeDistanceDistribution.LegModeDistanceDistribution;
+
+import java.io.File;
 
 /**
  * @author amit
@@ -33,7 +35,7 @@ public class LegModeRouteDistancDistribution {
 
 	private final static String RUN_DIR = "../../../repos/runs-svn/detEval/emissionCongestionInternalization/output/1pct/run10/policies/";
 	private final static String [] RUNS_CASES = {"bau","ei","ci","eci","10ei"};
-	private static final Logger LOG = Logger.getLogger(LegModeRouteDistancDistribution.class);
+	private static final Logger LOG = LogManager.getLogger(LegModeRouteDistancDistribution.class);
 
 	public static void main(String[] args) {
 		LegModeRouteDistancDistribution ms= new LegModeRouteDistancDistribution();

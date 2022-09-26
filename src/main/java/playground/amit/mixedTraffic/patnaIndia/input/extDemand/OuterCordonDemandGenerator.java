@@ -26,8 +26,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.locationtech.jts.geom.Point;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -55,7 +55,7 @@ import playground.amit.utils.geometry.GeometryUtils;
  */
 
 public class OuterCordonDemandGenerator {
-	private static final Logger LOG = Logger.getLogger(OuterCordonDemandGenerator.class);
+	private static final Logger LOG = LogManager.getLogger(OuterCordonDemandGenerator.class);
 	private Scenario scenario;
 	private final String inputFilesDir = PatnaUtils.INPUT_FILES_DIR+"/raw/counts/externalDemandCountsFile/";
 	private final Random random = MatsimRandom.getRandom();

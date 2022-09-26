@@ -19,10 +19,8 @@
 
 package playground.amit.analysis.activity.departureArrival;
 
-import java.util.Map;
-import java.util.SortedMap;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.events.ActivityStartEvent;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
 import org.matsim.api.core.v01.events.PersonStuckEvent;
@@ -31,8 +29,10 @@ import org.matsim.api.core.v01.events.handler.ActivityStartEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonStuckEventHandler;
 import org.matsim.api.core.v01.events.handler.TransitDriverStartsEventHandler;
-
 import playground.amit.munich.utils.MunichPersonFilter;
+
+import java.util.Map;
+import java.util.SortedMap;
 
 /**
  * @author amit
@@ -44,7 +44,7 @@ ActivityStartEventHandler, PersonStuckEventHandler {
 	private final DepartureTimeHandler delegate ;
 	private final MunichPersonFilter pf = new MunichPersonFilter();
 	private final String userGroup ;
-	private static final Logger LOG = Logger.getLogger(FilteredDepartureTimeHandler.class);
+	private static final Logger LOG = LogManager.getLogger(FilteredDepartureTimeHandler.class);
 
 	/**
 	 * @param userGroup

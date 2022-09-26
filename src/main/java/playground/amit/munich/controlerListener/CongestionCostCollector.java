@@ -18,24 +18,24 @@
  * *********************************************************************** */
 package playground.amit.munich.controlerListener;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.scenario.MutableScenario;
-
 import playground.vsp.congestion.events.CongestionEvent;
 import playground.vsp.congestion.handlers.CongestionEventHandler;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author amit
  */
 
 public class CongestionCostCollector implements CongestionEventHandler {
-	private final static Logger LOG = Logger.getLogger(CongestionCostCollector.class);
+	private final static Logger LOG = LogManager.getLogger(CongestionCostCollector.class);
 
 	private final double vttsCar;
 	private double amountSum = 0.;

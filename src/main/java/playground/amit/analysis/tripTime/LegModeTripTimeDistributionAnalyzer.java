@@ -20,7 +20,8 @@ package playground.amit.analysis.tripTime;
 
 import java.io.BufferedWriter;
 import java.util.*;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -41,7 +42,7 @@ public class LegModeTripTimeDistributionAnalyzer extends AbstractAnalysisModule 
 
 	private final List<Integer> timeClasses = new ArrayList<>();
 	private final SortedSet<String> usedModes = new TreeSet<>();
-	private static final Logger LOG = Logger.getLogger(LegModeTripTimeDistributionAnalyzer.class);
+	private static final Logger LOG = LogManager.getLogger(LegModeTripTimeDistributionAnalyzer.class);
 
 	private final SortedMap<String, SortedMap<Integer, Integer>> mode2timeClass2LegCount = new TreeMap<>();
 	private final SortedMap<String, Map<Id<Person>, List<Double>>> mode2PersonId2tripTimes = new TreeMap<>();

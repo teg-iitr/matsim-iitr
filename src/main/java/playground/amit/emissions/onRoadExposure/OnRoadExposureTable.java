@@ -22,7 +22,8 @@ package playground.amit.emissions.onRoadExposure;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
@@ -34,7 +35,7 @@ import org.matsim.contrib.emissions.Pollutant;
 
 public class OnRoadExposureTable {
 
-    private static final Logger LOG = Logger.getLogger(OnRoadExposureTable.class);
+    private static final Logger LOG = LogManager.getLogger(OnRoadExposureTable.class);
     private Map<Id<Person>, List<OnRoadTripExposureInfo>> personInfo = new HashMap<>();
 
     /**

@@ -18,15 +18,8 @@
  * *********************************************************************** */
 package playground.amit.analysis.modeSwitcherRetainer;
 
-import java.io.BufferedWriter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
@@ -42,6 +35,9 @@ import playground.amit.munich.utils.MunichPersonFilter;
 import playground.amit.utils.LoadMyScenarios;
 import playground.amit.utils.PersonFilter;
 
+import java.io.BufferedWriter;
+import java.util.*;
+
 
 /**
  * This will first find mode switchers and then returns trip distances in groups. 
@@ -51,7 +47,7 @@ import playground.amit.utils.PersonFilter;
 
 public class ModeSwitchersTripDistance {
 
-	private static final Logger LOG = Logger.getLogger(ModeSwitchersTripDistance.class);
+	private static final Logger LOG = LogManager.getLogger(ModeSwitchersTripDistance.class);
 
 	public ModeSwitchersTripDistance(){
 		this(null, null, TripDistanceType.ROUTE_DISTANCE);

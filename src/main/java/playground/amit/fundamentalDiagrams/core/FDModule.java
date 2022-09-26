@@ -22,7 +22,8 @@ package playground.amit.fundamentalDiagrams.core;
 
 import java.util.Arrays;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -62,7 +63,7 @@ import playground.shivam.trafficChar.core.TrafficCharConfigGroup;
 
 public class FDModule extends AbstractModule {
 
-	public static final Logger LOG = Logger.getLogger(FDModule.class);
+	public static final Logger LOG = LogManager.getLogger(FDModule.class);
 
 	public static final double MAX_ACT_END_TIME = 1800.;
 

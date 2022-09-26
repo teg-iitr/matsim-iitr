@@ -18,7 +18,8 @@
  * *********************************************************************** */
 package playground.amit.mixedTraffic.patnaIndia.simTime;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.Config;
@@ -51,7 +52,7 @@ import java.util.List;
 
 public class PatnaSimulationTimeWriter {
 
-	private static final Logger LOG = Logger.getLogger(PatnaSimulationTimeWriter.class);
+	private static final Logger LOG = LogManager.getLogger(PatnaSimulationTimeWriter.class);
 	private static final int [] randomSeeds = {4711, 6835, 1847, 4144, 4628, 2632, 5982, 3218, 5736, 7573,4389, 1344} ;
 	private static String runDir = FileUtils.RUNS_SVN+"/patnaIndia/run110/";
 	private static String inputFilesDir = runDir+"/inputs/";

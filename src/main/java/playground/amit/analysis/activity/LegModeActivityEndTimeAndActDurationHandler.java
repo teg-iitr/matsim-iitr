@@ -18,16 +18,8 @@
  * *********************************************************************** */
 package playground.amit.analysis.activity;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.ActivityEndEvent;
@@ -41,6 +33,8 @@ import org.matsim.api.core.v01.events.handler.PersonStuckEventHandler;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.gbl.Gbl;
 
+import java.util.*;
+
 /**
  * Handles activity end and start events and returns the leg mode distribution data for activity end and activity duration.
  * @author amit
@@ -49,7 +43,7 @@ import org.matsim.core.gbl.Gbl;
 public class LegModeActivityEndTimeAndActDurationHandler implements PersonDepartureEventHandler, 
 ActivityEndEventHandler, ActivityStartEventHandler, PersonStuckEventHandler {
 
-	private final static Logger LOG = Logger.getLogger(LegModeActivityEndTimeAndActDurationHandler.class);
+	private final static Logger LOG = LogManager.getLogger(LegModeActivityEndTimeAndActDurationHandler.class);
 	private SortedMap<String, Map<Id<Person>, List<Double>>> mode2PersonId2ActEndTimes = new TreeMap<>();
 	private SortedMap<String, Map<Id<Person>, List<Double>>> mode2PersonId2ActDurations = new TreeMap<>();
 	private final Map<Id<Person>, SortedMap<String, Double>> personId2ActEndTimes = new HashMap<>();

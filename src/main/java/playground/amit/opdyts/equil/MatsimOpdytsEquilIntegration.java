@@ -177,7 +177,7 @@
 //									try {
 //										Files.copy(new File(sourceFile), new File(sinkFile));
 //									} catch (IOException e) {
-//										Logger.getLogger(MatsimOpdytsEquilIntegration.class).warn("Data is not copied. Reason : " + e);
+//										LogManager.getLogger(MatsimOpdytsEquilIntegration.class).warn("Data is not copied. Reason : " + e);
 //									}
 //								}
 //								{
@@ -186,7 +186,7 @@
 //									try {
 //										Files.copy(new File(sourceFile), new File(sinkFile));
 //									} catch (IOException e) {
-//										Logger.getLogger(MatsimOpdytsEquilIntegration.class).warn("Data is not copied. Reason : " + e);
+//										LogManager.getLogger(MatsimOpdytsEquilIntegration.class).warn("Data is not copied. Reason : " + e);
 //									}
 //								}
 //							}
