@@ -58,25 +58,25 @@ public class RunDadarEvacScenario {
             String destinationID = od.getDestination();
             double numberOfTrips = od.getNumberOfTrips();
 
+            SimpleFeature origin_feature = null;
+            SimpleFeature destination_feature = null;
+
+            for (SimpleFeature feature : features) {
+                String zone_key = "name";
+                String zoneID = String.valueOf(feature.getAttribute(zone_key));
+                if (zoneID.equals(originID)) origin_feature = feature;
+                else if (zoneID.equals(destinationID)) destination_feature = feature;
+            }
+
+            if (origin_feature == null || destination_feature == null) {
+                System.out.println("Origin zone " + originID);
+                System.out.println("Destination zone " + originID);
+                continue;
+            }
+
             for (int i = 0; i < numberOfTrips; i++) {
 
 //                create matsim plans --> origin coord, destination coord, time, mode,
-
-                SimpleFeature origin_feature = null;
-                SimpleFeature destination_feature = null;
-
-                for (SimpleFeature feature : features) {
-                    String zone_key = "i";
-                    String zoneID = String.valueOf(feature.getAttribute(zone_key));
-                    if (zoneID.equals(originID)) origin_feature = feature;
-                    else if (zoneID.equals(destinationID)) destination_feature = feature;
-                }
-
-                if (origin_feature == null || destination_feature == null) {
-                    System.out.println("Origin zone " + originID);
-                    System.out.println("Destination zone " + originID);
-                    continue;
-                }
 
                 Point originPoint = GeometryUtils.getRandomPointInsideFeature(origin_feature);
                 Point destinationPoint = GeometryUtils.getRandomPointInsideFeature(destination_feature);
