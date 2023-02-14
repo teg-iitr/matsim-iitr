@@ -102,7 +102,7 @@ public class ODMatrixGenerator {
 
     }
 
-    private static Map<Id<OD>, OD> generateOD(String inputFile){
+    public static Map<Id<OD>, OD> generateOD(String inputFile){
         Map<Id<OD>, OD> odMap = new HashMap<>();
         BufferedReader reader = IOUtils.getBufferedReader(inputFile);
         try {

@@ -59,7 +59,7 @@ public class EvacPatnaControler {
 
 		if(args.length==0){
 			// configFile = FileUtils.RUNS_SVN+"/patnaIndia/run109/1pct/input/evac_config.xml.gz";
-			configFile = "input/input.evacTest/config_patna_evac_7759.xml.gz";
+			configFile = "input/evacTest/config_patna_evac_7759.xml.gz";
 			// outDir = FileUtils.RUNS_SVN+"/patnaIndia/run109/1pct/withoutHoles/";
 			outDir = "output/evacTest";
 			linkDynamics = LinkDynamics.PassingQ;

@@ -1,0 +1,89 @@
+/* *********************************************************************** *
+ * project: org.matsim.*
+ * MyMapViewer.java
+ *                                                                         *
+ * *********************************************************************** *
+ *                                                                         *
+ * copyright       : (C) 2012 by the members listed in the COPYING,        *
+ *                   LICENSE and WARRANTY file.                            *
+ * email           : info at matsim dot org                                *
+ *                                                                         *
+ * *********************************************************************** *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *   See also COPYING, LICENSE and WARRANTY file                           *
+ *                                                                         *
+ * *********************************************************************** */
+
+package org.matsim.evacuationgui.model.shape;
+
+
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.Polygon;
+import org.matsim.evacuationgui.model.shape.Shape;
+
+import java.awt.geom.Point2D;
+import java.util.List;
+
+
+public class PolygonShape extends org.matsim.evacuationgui.model.shape.Shape
+{
+	private Polygon polygon;
+	private java.awt.Polygon pixelPolygon;
+	
+	public PolygonShape(int layerID, Polygon polygon)
+	{
+		this.layerID = layerID;
+		this.polygon = polygon;
+		
+		this.id = (++org.matsim.evacuationgui.model.shape.Shape.currentNumberId) + "_poly";
+
+	}
+	
+	public PolygonShape(List<Point2D> points, int layerID)
+	{
+		this.layerID = layerID;
+		
+		Coordinate[] coords = new Coordinate[points.size()+1];
+		for (int i = 0; i < points.size(); i++)
+			coords[i] = new Coordinate(points.get(i).getY(), points.get(i).getX());
+		
+		coords[coords.length - 1] = coords[0];
+
+		GeometryFactory geofac = new GeometryFactory();
+		LinearRing shell = geofac.createLinearRing(coords);
+		this.polygon = geofac.createPolygon(shell, null);
+		
+		this.id = (++Shape.currentNumberId) + "_poly";
+		
+		
+	}
+
+	public Polygon getPolygon()
+	{
+		return polygon;
+	}
+	
+	public java.awt.Polygon getPixelPolygon()
+	{
+		return pixelPolygon;
+	}
+	
+	public void setPixelPolygon(java.awt.Polygon pixelPolygon)
+	{
+		this.pixelPolygon = pixelPolygon;
+	}
+
+	public void setPolygon(Polygon polygon)
+	{
+		this.polygon = polygon;
+	}
+	
+
+
+}

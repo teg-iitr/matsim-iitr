@@ -30,7 +30,6 @@ import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
@@ -41,7 +40,6 @@ import org.matsim.api.core.v01.population.PopulationFactory;
 import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.api.core.v01.population.Route;
 import org.matsim.core.config.Config;
-import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
@@ -53,22 +51,18 @@ import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
+import org.matsim.evacuationgui.scenariogenerator.EvacuationNetworkGenerator;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.NetworkWriter;
 import org.matsim.core.router.DefaultRoutingModules;
 import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.costcalculators.OnlyTimeDependentTravelDisutility;
-import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.trafficmonitoring.FreeSpeedTravelTime;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
-import org.matsim.core.utils.geometry.transformations.AtlantisToWGS84;
-import org.matsim.core.utils.geometry.transformations.GeotoolsTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
-import org.matsim.evacuationgui.model.config.EvacuationConfigModule;
-import org.matsim.evacuationgui.scenariogenerator.EvacuationNetworkGenerator;
 import org.matsim.evacuationgui.utils.ScenarioCRSTransformation;
 import org.matsim.facilities.FacilitiesUtils;
 import org.matsim.utils.objectattributes.attributable.Attributes;
@@ -77,13 +71,10 @@ import org.opengis.feature.simple.SimpleFeature;
 import playground.amit.analysis.modalShare.ModalShareFromEvents;
 import playground.amit.analysis.tripTime.ModalTravelTimeAnalyzer;
 import playground.amit.mixedTraffic.patnaIndia.input.others.PatnaVehiclesGenerator;
-import playground.amit.mixedTraffic.patnaIndia.input.urban.UrbanDemandGenerator;
-import playground.amit.mixedTraffic.patnaIndia.utils.OuterCordonUtils.PatnaNetworkType;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.amit.utils.FileUtils;
 import playground.amit.utils.LoadMyScenarios;
-import playground.amit.utils.geometry.GeometryUtils;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
 
@@ -95,9 +86,9 @@ public class EvacuationPatnaScenarioGenerator {
 
     private final String dir = FileUtils.RUNS_SVN + "/patnaIndia/run109/";
 
-    private final String networkFile = "input/input.evacTest/network_7759.xml.gz";
+    private final String networkFile = "input/evacTest/network_7759.xml.gz";
     private final String outNetworkFile = "network_patna_evac_7759.xml.gz";
-    private final String populationFile = "input/input.evacTest/baseCaseOutput_plans.xml.gz";
+    private final String populationFile = "input/evacTest/baseCaseOutput_plans.xml.gz";
     private final String outPopFile = "plans_patna_evac_7759.xml.gz";
 
     private final Id<Link> safeLinkId = Id.createLinkId("safeLink_Patna");
@@ -233,7 +224,7 @@ public class EvacuationPatnaScenarioGenerator {
         msc.writeResults(outputDir+"/analysis/modalShareFromEvents_"+userGroup+".txt");
 
         String outConfigFile = "config_patna_evac_7759.xml.gz";
-        new ConfigWriter(config).write("input/input.evacTest/" + outConfigFile);
+        new ConfigWriter(config).write("input/evacTest/" + outConfigFile);
     }
 
     private void createEvacNetwork(Scenario sc) {
@@ -242,7 +233,7 @@ public class EvacuationPatnaScenarioGenerator {
         //read shape file and get area
         ShapeFileReader reader = new ShapeFileReader();
         // String areaShapeFile = "area_epsg24345.shp";
-        Collection<SimpleFeature> features = reader.readFileAndInitialize("input/input.evacTest/patna_polygon_7759.shp");
+        Collection<SimpleFeature> features = reader.readFileAndInitialize("input/evacTest/patna_polygon_7759.shp");
         evavcuationArea = (Geometry) features.iterator().next().getDefaultGeometry();
         // GeometryUtils.getGeometryFromListOfFeatures()
 
@@ -258,7 +249,7 @@ public class EvacuationPatnaScenarioGenerator {
             l.setAllowedModes(allowedModes);
         }
 
-        new NetworkWriter(sc.getNetwork()).write("input/input.evacTest/" + outNetworkFile);
+        new NetworkWriter(sc.getNetwork()).write("input/evacTest/" + outNetworkFile);
     }
 
     private void createEvacPopulation(Scenario sc) {
@@ -374,6 +365,6 @@ public class EvacuationPatnaScenarioGenerator {
                 popOut.addPerson(pOut);
 
         }
-        new PopulationWriter(popOut).write("input/input.evacTest/" + outPopFile);
+        new PopulationWriter(popOut).write("input/evacTest/" + outPopFile);
     }
 }

@@ -160,6 +160,11 @@
 			<version>${matsim.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.matsim.contrib</groupId>
+			<artifactId>analysis</artifactId>
+			<version>${matsim.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>com.github.matsim-org</groupId>
 			<artifactId>evacuation-gui</artifactId>
 			<version>-5a05baa049-1</version>
@@ -201,6 +206,7 @@
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>osm</artifactId>
 			<version>${matsim.version}</version>
+			<scope>import</scope>
 		</dependency>
 <!--	<dependency>-->
 <!--			<groupId>com.github.matsim-org</groupId>-->
