@@ -1,9 +1,0 @@
-language: java
-dist: trusty
-jdk: oraclejdk11
-
-env:
-  global:
-    - MAVEN_OPTS="-Xmx2g"
-
-script: mvn install -Dmaven.test.redirectTestOutputToFile -Dmatsim.preferLocalDtds=true
