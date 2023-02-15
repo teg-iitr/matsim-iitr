@@ -14,7 +14,14 @@ import org.matsim.contrib.osm.networkReader.OsmTags;
 import org.matsim.contrib.osm.networkReader.SupersonicOsmNetworkReader;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+import org.matsim.core.config.groups.PlansConfigGroup;
+import org.matsim.core.config.groups.StrategyConfigGroup;
+import org.matsim.core.controler.Controler;
+import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.gbl.MatsimRandom;
+import org.matsim.core.network.algorithms.NetworkCleaner;
+import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
@@ -31,18 +38,64 @@ import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
+/**
+ * @author Shivam
+ */
 public class RunDadarEvacScenario {
-    private static final String boundaryShapeFile = "input/evacDadar/boundaryDadar.shp";
+    private static final String filesPath = "C:\\Users\\amit2\\Downloads\\evacDadar\\evacDadar\\";
+    private static final String boundaryShapeFile = filesPath+"boundaryDadar.shp";
+//    private static final String boundaryShapeFile = "input/evacDadar/boundaryDadar.shp";
     public static final String ORIGIN_ACTIVITY = "origin";
     public static final String DESTINATION_ACTIVITY = "destination";
 
+    public static final String outputMATSimNetworkFile = filesPath+"dadar-network_smaller.xml.gz";
+    public static final String ODMatrixFile = filesPath+"dadar_od_10_10_22.csv";
+    public static final String plansFile = filesPath+"dadar-plans.xml.gz";
+
     public static void main(String[] args) {
         // getMATSimNetworkFromOSM();
-        getPlansFromOD();
+//        getPlansFromOD();
+
+        Config config = ConfigUtils.createConfig();
+        config.network().setInputFile(outputMATSimNetworkFile);
+        config.plans().setInputFile(plansFile);
+        config.controler().setLastIteration(10);
+        config.controler().setOutputDirectory(filesPath+"output");
+        config.controler().setDumpDataAtEnd(true);
+        config.controler().setCreateGraphs(true);
+        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+
+        PlanCalcScoreConfigGroup pcg = config.planCalcScore();
+        PlanCalcScoreConfigGroup.ActivityParams originAct = new PlanCalcScoreConfigGroup.ActivityParams(ORIGIN_ACTIVITY);
+        originAct.setScoringThisActivityAtAll(false);
+        pcg.addActivityParams(originAct);
+
+        PlanCalcScoreConfigGroup.ActivityParams destinationAct = new PlanCalcScoreConfigGroup.ActivityParams(DESTINATION_ACTIVITY);
+        destinationAct.setScoringThisActivityAtAll(false);
+        pcg.addActivityParams(destinationAct);
+
+        StrategyConfigGroup scg = config.strategy();
+        StrategyConfigGroup.StrategySettings reRoute = new StrategyConfigGroup.StrategySettings();
+        reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
+        reRoute.setWeight(0.2);
+        scg.addStrategySettings(reRoute);
+
+        StrategyConfigGroup.StrategySettings tam = new StrategyConfigGroup.StrategySettings();
+        tam.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator);
+        tam.setWeight(0.1);
+        scg.addStrategySettings(tam);
+
+        Scenario scenario = ScenarioUtils.loadScenario(config);
+        //clean the network
+        new NetworkCleaner().run(scenario.getNetwork());
+
+        Controler controler = new Controler(scenario);
+        controler.run();
     }
 
     private static void getPlansFromOD() {
-        String ODMatrixFile = "input/evacDadar/dadar_od_10_10_22.csv";
+//        String ODMatrixFile = "input/evacDadar/dadar_od_10_10_22.csv";
+
 
         Map<Id<OD>, OD> remaining_OD = ODMatrixGenerator.generateOD(ODMatrixFile);
 
@@ -58,19 +111,20 @@ public class RunDadarEvacScenario {
             String destinationID = od.getDestination();
             double numberOfTrips = od.getNumberOfTrips();
 
+            if (numberOfTrips ==0 ) continue;
+
             SimpleFeature origin_feature = null;
             SimpleFeature destination_feature = null;
 
             for (SimpleFeature feature : features) {
                 String zone_key = "name";
                 String zoneID = String.valueOf(feature.getAttribute(zone_key));
-                if (zoneID.equals(originID)) origin_feature = feature;
-                else if (zoneID.equals(destinationID)) destination_feature = feature;
+                if (origin_feature == null && zoneID.equals(originID)) origin_feature = feature;
+                else if (destination_feature == null && zoneID.equals(destinationID)) destination_feature = feature;
             }
 
             if (origin_feature == null || destination_feature == null) {
-                System.out.println("Origin zone " + originID);
-                System.out.println("Destination zone " + originID);
+                System.out.println("Either of the origin zone " + originID + " or destination zone "+destinationID+" is null.");
                 continue;
             }
 
@@ -88,7 +142,7 @@ public class RunDadarEvacScenario {
                 Plan plan = factory.createPlan();
 
                 Activity origAct = factory.createActivityFromCoord(ORIGIN_ACTIVITY, origin);
-                origAct.setEndTime(6. * 3600. + MatsimRandom.getLocalInstance().nextInt(2 * 3600));
+                origAct.setEndTime(6. * 3600. + MatsimRandom.getRandom().nextInt(2 * 3600));
                 plan.addActivity(origAct);
 
                 Leg leg = factory.createLeg("car");
@@ -103,15 +157,15 @@ public class RunDadarEvacScenario {
             }
         }
 
-        new PopulationWriter(population).write("input/evacDadar/dadar-plans.xml.gz");
+        new PopulationWriter(population).write(plansFile);
 
     }
 
     private static void getMATSimNetworkFromOSM() {
         Set<String> modes = EnumSet.allOf(DadarUtils.DadarTrafficCountMode2023.class).stream().map(DadarUtils.DadarTrafficCountMode2023::toString).collect(Collectors.toSet());
 
-        String outputMATSimNetworkFile = "input/evacDadar/dadar-network_smaller.xml.gz";
-        String inputOSMFile = "input/evacDadar/dadar.osm.pbf";
+
+        String inputOSMFile = filesPath+"dadar.osm.pbf";
 
 
         Collection<SimpleFeature> features = ShapeFileReader.getAllFeatures(boundaryShapeFile);
@@ -144,6 +198,6 @@ public class RunDadarEvacScenario {
                 .build()
                 .read(inputOSMFile);
 
-        (new NetworkWriter(network)).write(outputMATSimNetworkFile);
+        new NetworkWriter(network).write(outputMATSimNetworkFile);
     }
 }
