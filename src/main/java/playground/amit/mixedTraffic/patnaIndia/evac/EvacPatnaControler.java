@@ -18,28 +18,31 @@
  * *********************************************************************** */
 package playground.amit.mixedTraffic.patnaIndia.evac;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.Collection;
-
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.QSimConfigGroup.LinkDynamics;
 import org.matsim.core.config.groups.QSimConfigGroup.VehiclesSource;
+import org.matsim.core.config.groups.VspExperimentalConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
-
+import org.matsim.evacuationgui.control.Controller;
+import org.matsim.evacuationgui.model.config.EvacuationConfigModule;
+import org.matsim.evacuationgui.utils.ScenarioCRSTransformation;
 import playground.amit.analysis.modalShare.ModalShareFromEvents;
 import playground.amit.analysis.tripTime.ModalTravelTimeAnalyzer;
 import playground.amit.mixedTraffic.patnaIndia.input.others.PatnaVehiclesGenerator;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter.PatnaUserGroup;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
-import playground.amit.utils.FileUtils;
+import playground.amit.utils.LoadMyScenarios;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * @author amit
@@ -55,8 +58,10 @@ public class EvacPatnaControler {
 		boolean isSeepModeStorageFree ;
 
 		if(args.length==0){
-			configFile = FileUtils.RUNS_SVN+"/patnaIndia/run109/1pct/input/evac_config.xml.gz";
-			outDir = FileUtils.RUNS_SVN+"/patnaIndia/run109/1pct/withoutHoles/";
+			// configFile = FileUtils.RUNS_SVN+"/patnaIndia/run109/1pct/input/evac_config.xml.gz";
+			configFile = "input/evacTest/config_patna_evac_7759.xml.gz";
+			// outDir = FileUtils.RUNS_SVN+"/patnaIndia/run109/1pct/withoutHoles/";
+			outDir = "output/evacTest";
 			linkDynamics = LinkDynamics.PassingQ;
 			isSeepModeStorageFree = false;
 		} else {
