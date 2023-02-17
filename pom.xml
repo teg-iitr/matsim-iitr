@@ -162,7 +162,7 @@
 		<dependency>
 			<groupId>com.github.matsim-org</groupId>
 			<artifactId>evacuation-gui</artifactId>
-			<version>master-7c3f181eca-1</version>
+			<version>master-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 		<groupId>org.matsim.contrib</groupId>
