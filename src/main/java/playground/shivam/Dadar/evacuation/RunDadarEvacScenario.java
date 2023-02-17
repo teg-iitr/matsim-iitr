@@ -42,15 +42,15 @@ import java.util.stream.Collectors;
  * @author Shivam
  */
 public class RunDadarEvacScenario {
-    private static final String filesPath = "C:\\Users\\amit2\\Downloads\\evacDadar\\evacDadar\\";
-    private static final String boundaryShapeFile = filesPath+"boundaryDadar.shp";
+    private static final String filesPath = "input/evacDadar/";
+    private static final String boundaryShapeFile = filesPath + "boundaryDadar.shp";
 //    private static final String boundaryShapeFile = "input/evacDadar/boundaryDadar.shp";
     public static final String ORIGIN_ACTIVITY = "origin";
     public static final String DESTINATION_ACTIVITY = "destination";
 
-    public static final String outputMATSimNetworkFile = filesPath+"dadar-network_smaller.xml.gz";
-    public static final String ODMatrixFile = filesPath+"dadar_od_10_10_22.csv";
-    public static final String plansFile = filesPath+"dadar-plans.xml.gz";
+    public static final String outputMATSimNetworkFile = filesPath + "dadar-network_smaller.xml.gz";
+    public static final String ODMatrixFile = filesPath + "dadar_od_10_10_22.csv";
+    public static final String plansFile = filesPath + "dadar-plans.xml.gz";
 
     public static void main(String[] args) {
         // getMATSimNetworkFromOSM();
@@ -60,10 +60,15 @@ public class RunDadarEvacScenario {
         config.network().setInputFile(outputMATSimNetworkFile);
         config.plans().setInputFile(plansFile);
         config.controler().setLastIteration(10);
-        config.controler().setOutputDirectory(filesPath+"output");
+        config.controler().setOutputDirectory(filesPath + "output");
         config.controler().setDumpDataAtEnd(true);
         config.controler().setCreateGraphs(true);
         config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+        config.vspExperimental().setWritingOutputEvents(true);
+
+        // TODO: testing with half flow
+        config.qsim().setStorageCapFactor(0.5);
+        config.qsim().setFlowCapFactor(0.5);
 
         PlanCalcScoreConfigGroup pcg = config.planCalcScore();
         PlanCalcScoreConfigGroup.ActivityParams originAct = new PlanCalcScoreConfigGroup.ActivityParams(ORIGIN_ACTIVITY);
@@ -181,16 +186,16 @@ public class RunDadarEvacScenario {
 
         Network network = (new SupersonicOsmNetworkReader.Builder())
                 .setCoordinateTransformation(DadarUtils.transformation)
-                .addOverridingLinkProperties(OsmTags.MOTORWAY, new LinkProperties(LinkProperties.LEVEL_MOTORWAY, 2, 120.0 / 3.6, 2000, true))
-                .addOverridingLinkProperties(OsmTags.MOTORWAY_LINK, new LinkProperties(LinkProperties.LEVEL_MOTORWAY, 2, 120.0 / 3.6, 1800, true))
-                .addOverridingLinkProperties(OsmTags.TRUNK, new LinkProperties(LinkProperties.LEVEL_TRUNK, 2, 120.0 / 3.6, 2000, false))
-                .addOverridingLinkProperties(OsmTags.TRUNK_LINK, new LinkProperties(LinkProperties.LEVEL_TRUNK, 2, 80.0 / 3.6, 1800, false))
-                .addOverridingLinkProperties(OsmTags.PRIMARY, new LinkProperties(LinkProperties.LEVEL_PRIMARY, 2, 80.0 / 3.6, 1800, false))
-                .addOverridingLinkProperties(OsmTags.PRIMARY_LINK, new LinkProperties(LinkProperties.LEVEL_PRIMARY, 2, 80.0 / 3.6, 1800, false))
-                .addOverridingLinkProperties(OsmTags.SECONDARY, new LinkProperties(LinkProperties.LEVEL_SECONDARY, 2, 4, 800, false))
-                .addOverridingLinkProperties(OsmTags.SECONDARY_LINK, new LinkProperties(LinkProperties.LEVEL_SECONDARY, 2, 4, 800, false))
-                .addOverridingLinkProperties(OsmTags.TERTIARY, new LinkProperties(LinkProperties.LEVEL_TERTIARY, 2, 4, 600, false))
-                .addOverridingLinkProperties(OsmTags.TERTIARY_LINK, new LinkProperties(LinkProperties.LEVEL_TERTIARY, 2, 4, 600, false))
+//                .addOverridingLinkProperties(OsmTags.MOTORWAY, new LinkProperties(LinkProperties.LEVEL_MOTORWAY, 2, 120.0 / 3.6, 2000, true))
+//                .addOverridingLinkProperties(OsmTags.MOTORWAY_LINK, new LinkProperties(LinkProperties.LEVEL_MOTORWAY, 2, 120.0 / 3.6, 1800, true))
+//                .addOverridingLinkProperties(OsmTags.TRUNK, new LinkProperties(LinkProperties.LEVEL_TRUNK, 2, 120.0 / 3.6, 2000, false))
+//                .addOverridingLinkProperties(OsmTags.TRUNK_LINK, new LinkProperties(LinkProperties.LEVEL_TRUNK, 2, 80.0 / 3.6, 1800, false))
+//                .addOverridingLinkProperties(OsmTags.PRIMARY, new LinkProperties(LinkProperties.LEVEL_PRIMARY, 2, 80.0 / 3.6, 1800, false))
+//                .addOverridingLinkProperties(OsmTags.PRIMARY_LINK, new LinkProperties(LinkProperties.LEVEL_PRIMARY, 2, 80.0 / 3.6, 1800, false))
+//                .addOverridingLinkProperties(OsmTags.SECONDARY, new LinkProperties(LinkProperties.LEVEL_SECONDARY, 2, 4, 800, false))
+//                .addOverridingLinkProperties(OsmTags.SECONDARY_LINK, new LinkProperties(LinkProperties.LEVEL_SECONDARY, 2, 4, 800, false))
+//                .addOverridingLinkProperties(OsmTags.TERTIARY, new LinkProperties(LinkProperties.LEVEL_TERTIARY, 2, 4, 600, false))
+//                .addOverridingLinkProperties(OsmTags.TERTIARY_LINK, new LinkProperties(LinkProperties.LEVEL_TERTIARY, 2, 4, 600, false))
                 .setIncludeLinkAtCoordWithHierarchy(includeLinkAtCoordWithHierarchy)
                 .setAfterLinkCreated((link, osmTags, isReversed) -> {
                     link.setAllowedModes(modes);

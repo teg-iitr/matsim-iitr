@@ -124,7 +124,7 @@ public class EvacuationPatnaScenarioGenerator {
 
 
         config.global().setCoordinateSystem("EPSG:7759");
-        ScenarioCRSTransformation.transform(this.scenario, "EPSG:7759");
+
         config.travelTimeCalculator().setTraveltimeBinSize(900);
 
         config.qsim().setSnapshotPeriod(5 * 60);
