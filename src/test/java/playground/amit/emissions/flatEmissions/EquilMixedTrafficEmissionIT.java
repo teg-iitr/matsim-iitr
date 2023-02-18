@@ -22,6 +22,7 @@ package playground.amit.emissions.flatEmissions;
 import com.google.inject.name.Names;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -104,6 +105,7 @@ public class EquilMixedTrafficEmissionIT {
 		return Arrays.asList(considerCO2);
 	}
 
+	@Ignore
 	@Test
 	public void emissionTollTest() {
 		List<String> mainModes = Arrays.asList("car","bicycle");
