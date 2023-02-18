@@ -167,7 +167,8 @@
 		<dependency>
 		<groupId>org.matsim.contrib</groupId>
 		<artifactId>cadytsIntegration</artifactId>
-		<version>13.0</version>
+<!--use the latest version available at https://repo.matsim.org/service/rest/repository/browse/matsim/org/matsim/contrib/cadytsIntegration/-->
+		<version>13.1-SNAPSHOT</version>
 	</dependency>
 		
 <!--	<dependency>-->
@@ -179,7 +180,7 @@
 	<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>vsp</artifactId>
-			<version>13.0</version>
+			<version>${matsim.version}</version>
 		</dependency>
 <!--		<dependency>-->
 <!--			<groupId>org.matsim.contrib</groupId>-->
@@ -195,13 +196,13 @@
 			<groupId>org.matsim</groupId>
 			<artifactId>matsim-examples</artifactId>
 			<version>${matsim.version}</version>
-			<scope>test</scope>
+<!--			<scope>test</scope>-->
 		</dependency>
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>osm</artifactId>
 			<version>${matsim.version}</version>
-			<scope>import</scope>
+<!--			<scope>import</scope>-->
 		</dependency>
 <!--	<dependency>-->
 <!--			<groupId>com.github.matsim-org</groupId>-->

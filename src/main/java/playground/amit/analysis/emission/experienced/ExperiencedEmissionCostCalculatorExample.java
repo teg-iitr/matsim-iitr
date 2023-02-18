@@ -137,29 +137,29 @@ public class ExperiencedEmissionCostCalculatorExample {
                     emissionsConfigGroup.setConsideringCO2Costs(true);
                     emissionsConfigGroup.setEmissionCostMultiplicationFactor(1.);
 
-                    EmissionResponsibilityCostModule emissionCostModule = new EmissionResponsibilityCostModule(emissionsConfigGroup, rgt);
-                    ExperiencedEmissionCostHandler handler = new ExperiencedEmissionCostHandler(emissionCostModule, new MunichPersonFilter(),simulationEndtime, 1);
-
-                    EventsManager events = EventsUtils.createEventsManager();
-                    events.addHandler(handler);
-                    EmissionEventsReader reader = new EmissionEventsReader(events);
-                    reader.readFile(eventsFile);
-
-                    handler.getUserGroup2TotalEmissionCosts()
-                           .forEach((key, value) -> System.out.println(key + "\t" + value));
-                    writer.write(str+"\t"+itr+"\t"+ MapUtils.doubleValueSum(handler.getUserGroup2TotalEmissionCosts())+"\t");
-
-                    writer.write(MapUtils.doubleValueSum(person2toll)+"\n");
-
-                    // writing time bin 2 costs
-                    BufferedWriter bufferedWriter = IOUtils.getBufferedWriter(dir+"timeBin2AirPollutionExposureCosts_"+str+".txt");
-
-                    Map<Double, Double> time2costs = handler.getTimeBin2TotalCosts();
-                    bufferedWriter.write("timeBin\tairPollutionExposureCostsEUR\n");
-                    for(Double d : time2costs.keySet()) {
-                        bufferedWriter.write(d+"\t"+time2costs.get(d)+"\n");
-                    }
-                    bufferedWriter.close();
+//                    EmissionResponsibilityCostModule emissionCostModule = new EmissionResponsibilityCostModule(emissionsConfigGroup, rgt);
+//                    ExperiencedEmissionCostHandler handler = new ExperiencedEmissionCostHandler(emissionCostModule, new MunichPersonFilter(),simulationEndtime, 1);
+//
+//                    EventsManager events = EventsUtils.createEventsManager();
+//                    events.addHandler(handler);
+//                    EmissionEventsReader reader = new EmissionEventsReader(events);
+//                    reader.readFile(eventsFile);
+//
+//                    handler.getUserGroup2TotalEmissionCosts()
+//                           .forEach((key, value) -> System.out.println(key + "\t" + value));
+//                    writer.write(str+"\t"+itr+"\t"+ MapUtils.doubleValueSum(handler.getUserGroup2TotalEmissionCosts())+"\t");
+//
+//                    writer.write(MapUtils.doubleValueSum(person2toll)+"\n");
+//
+//                    // writing time bin 2 costs
+//                    BufferedWriter bufferedWriter = IOUtils.getBufferedWriter(dir+"timeBin2AirPollutionExposureCosts_"+str+".txt");
+//
+//                    Map<Double, Double> time2costs = handler.getTimeBin2TotalCosts();
+//                    bufferedWriter.write("timeBin\tairPollutionExposureCostsEUR\n");
+//                    for(Double d : time2costs.keySet()) {
+//                        bufferedWriter.write(d+"\t"+time2costs.get(d)+"\n");
+//                    }
+//                    bufferedWriter.close();
                 }
             }
             writer.close();
