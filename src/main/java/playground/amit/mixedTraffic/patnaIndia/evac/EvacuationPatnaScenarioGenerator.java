@@ -63,7 +63,6 @@ import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
-import org.matsim.evacuationgui.utils.ScenarioCRSTransformation;
 import org.matsim.facilities.FacilitiesUtils;
 import org.matsim.utils.objectattributes.attributable.Attributes;
 import org.opengis.feature.simple.SimpleFeature;
@@ -93,7 +92,7 @@ public class EvacuationPatnaScenarioGenerator {
 
     private final Id<Link> safeLinkId = Id.createLinkId("safeLink_Patna");
     private Scenario scenario;
-    private Geometry evavcuationArea;
+    private Geometry evacuationArea;
 
     public static void main(String[] args) {
         new EvacuationPatnaScenarioGenerator().run();
@@ -229,18 +228,17 @@ public class EvacuationPatnaScenarioGenerator {
 
     private void createEvacNetwork(Scenario sc) {
 
-
         //read shape file and get area
         ShapeFileReader reader = new ShapeFileReader();
         // String areaShapeFile = "area_epsg24345.shp";
         Collection<SimpleFeature> features = reader.readFileAndInitialize("input/evacTest/patna_polygon_7759.shp");
-        evavcuationArea = (Geometry) features.iterator().next().getDefaultGeometry();
+        evacuationArea = (Geometry) features.iterator().next().getDefaultGeometry();
         // GeometryUtils.getGeometryFromListOfFeatures()
 
         // will create a network connecting with safe node.
         // Amit, I added this cast to prevent compilation errors.
         // Preferably, evacuationgui needs to be adapted to the more recent version of geotools. michal mar'19
-        EvacuationNetworkGenerator net = new EvacuationNetworkGenerator(sc, evavcuationArea, safeLinkId);
+        EvacuationNetworkGenerator net = new EvacuationNetworkGenerator(sc, evacuationArea, safeLinkId);
         net.run();
 
         //since the original network is multi-mode, the new links should also allow all modes
@@ -294,7 +292,7 @@ public class EvacuationPatnaScenarioGenerator {
 
                     //check if the person is in the area shape, if not leave them out
 
-                    if (actCoord != null && !evavcuationArea.contains(MGC.coord2Point(actCoord))) {
+                    if (actCoord != null && !evacuationArea.contains(MGC.coord2Point(actCoord))) {
                         continue;
                     }
 
