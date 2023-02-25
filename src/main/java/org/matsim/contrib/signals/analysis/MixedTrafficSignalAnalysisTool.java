@@ -54,11 +54,11 @@ public class MixedTrafficSignalAnalysisTool implements SignalGroupStateChangedEv
     public MixedTrafficSignalAnalysisTool() {
     }
 
-    @Inject
-    public MixedTrafficSignalAnalysisTool(EventsManager em, ControlerListenerManager clm) {
-        em.addHandler(this);
-        clm.addControlerListener(this);
-    }
+//    @Inject
+//    public MixedTrafficSignalAnalysisTool(EventsManager em, ControlerListenerManager clm) {
+//        em.addHandler(this);
+//        clm.addControlerListener(this);
+//    }
 
     public void reset(int iteration) {
         this.totalSignalGreenTime = new HashMap();

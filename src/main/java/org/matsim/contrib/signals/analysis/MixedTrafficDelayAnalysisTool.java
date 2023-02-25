@@ -57,11 +57,11 @@ public class MixedTrafficDelayAnalysisTool implements SignalGroupStateChangedEve
         this.firstSignalGroupOfSignalSystem = new HashMap<>();
     }
 
-    @Inject
-    public MixedTrafficDelayAnalysisTool(Network network, EventsManager em, Vehicles vehicles) {
-        this(network, vehicles);
-        em.addHandler(this);
-    }
+//    @Inject
+//    public MixedTrafficDelayAnalysisTool(Network network, EventsManager em, Vehicles vehicles) {
+//        this(network, vehicles);
+//        em.addHandler(this);
+//    }
 
     public void reset(int iteration) {
         this.totalDelay = 0.0D;

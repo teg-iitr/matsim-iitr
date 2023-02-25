@@ -124,7 +124,7 @@ public class SubPopMunichExposureControler {
 		EmissionsConfigGroup ecg = new EmissionsConfigGroup();
 		controler.getConfig().addModule(ecg);
 		
-		ecg.setUsingDetailedEmissionCalculation(true);
+		// ecg.setUsingDetailedEmissionCalculation(true);
 		
 		String hbefaDirectory;
 
