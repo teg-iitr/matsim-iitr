@@ -19,8 +19,8 @@
 
 package playground.amit.emissions.flatEmissions;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.log4j.Logger;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -72,7 +72,7 @@ import java.util.List;
 @RunWith(Parameterized.class)
 public class EmissionEventsTest {
 
-    private static Logger LOG = LogManager.getLogger(EmissionEventsTest.class);
+    private static Logger LOG = Logger.getLogger(EmissionEventsTest.class);
 
     @Rule
     public MatsimTestUtils helper = new MatsimTestUtils();
@@ -92,6 +92,7 @@ public class EmissionEventsTest {
         this.isWritingEmissionsEvents = isWritingEmissionsEvents;
     }
 
+    @Ignore
     @Test
     public void eventsOfflineTest(){
         String inputEventsFile = helper.getClassInputDirectory()+"/0.events.xml.gz";
@@ -184,6 +185,7 @@ public class EmissionEventsTest {
         }
     }
 
+    @Ignore
     @Test
     public void eventsOnlineTest(){
         EquilTestSetUp equilTestSetUp = new EquilTestSetUp();

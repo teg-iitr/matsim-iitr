@@ -16,11 +16,13 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<matsim.version>15.0-SNAPSHOT</matsim.version>
-		<old.matsim.version>13.0</old.matsim.version>
+		<matsim.version>14.0</matsim.version>
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
+		<log4j.version>2.18.0</log4j.version>
+		<geotools.version>28.1</geotools.version>
 	</properties>
+
 	<repositories>
 		<repository>
 			<id>matsim</id>
@@ -81,6 +83,51 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>${log4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>${log4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-main</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-referencing</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-shapefile</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-epsg-hsql</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-epsg-extension</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.geotools.jdbc</groupId>
+			<artifactId>gt-jdbc-postgis</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.13.1</version>
@@ -115,12 +162,13 @@
 		<dependency>
 			<groupId>com.github.matsim-org</groupId>
 			<artifactId>evacuation-gui</artifactId>
-			<version>-5a05baa049-1</version>
+			<version>master-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 		<groupId>org.matsim.contrib</groupId>
 		<artifactId>cadytsIntegration</artifactId>
-		<version>${old.matsim.version}</version>
+<!--use the latest version available at https://repo.matsim.org/service/rest/repository/browse/matsim/org/matsim/contrib/cadytsIntegration/-->
+		<version>13.1-SNAPSHOT</version>
 	</dependency>
 		
 <!--	<dependency>-->
@@ -132,7 +180,7 @@
 	<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>vsp</artifactId>
-			<version>${old.matsim.version}</version>
+			<version>${matsim.version}</version>
 		</dependency>
 <!--		<dependency>-->
 <!--			<groupId>org.matsim.contrib</groupId>-->
@@ -147,13 +195,14 @@
 		<dependency>
 			<groupId>org.matsim</groupId>
 			<artifactId>matsim-examples</artifactId>
-			<version>${old.matsim.version}</version>
-			<scope>test</scope>
+			<version>${matsim.version}</version>
+<!--			<scope>test</scope>-->
 		</dependency>
 		<dependency>
 			<groupId>org.matsim.contrib</groupId>
 			<artifactId>osm</artifactId>
 			<version>${matsim.version}</version>
+<!--			<scope>import</scope>-->
 		</dependency>
 <!--	<dependency>-->
 <!--			<groupId>com.github.matsim-org</groupId>-->
@@ -199,6 +248,16 @@
 			<artifactId>pt2matsim</artifactId>
 			<version>v20.8</version>
 		</dependency>
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-referencing</artifactId>
+			<version>${geotools.version}</version>
+			</dependency>
+		<dependency>
+			<groupId>org.geotools</groupId>
+			<artifactId>gt-epsg-hsql</artifactId>
+			<version>${geotools.version}</version>
+		</dependency>
 	</dependencies>
 
 
@@ -227,9 +286,9 @@
 					<enableAssertions>false</enableAssertions> <!-- this should be set to true, but we still have some tests that don't work otherwise... -->
 				</configuration>
 			</plugin>
-			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-			</plugin>
+<!--			<plugin>-->
+<!--				<artifactId>maven-assembly-plugin</artifactId>-->
+<!--			</plugin>-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
@@ -345,7 +404,7 @@
 			<dependency>
 				<groupId>commons-io</groupId>
 				<artifactId>commons-io</artifactId>
-				<version>2.4</version>
+				<version>2.7</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

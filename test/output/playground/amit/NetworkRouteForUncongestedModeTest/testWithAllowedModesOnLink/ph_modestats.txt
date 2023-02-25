@@ -1,0 +1,3 @@
+Iteration	car_travel	car_wait	ride_travel	ride_wait	stageActivity_travel	stageActivity_wait
+0	1	0	0	0	0	0
+1	1	0	0	0	0	0

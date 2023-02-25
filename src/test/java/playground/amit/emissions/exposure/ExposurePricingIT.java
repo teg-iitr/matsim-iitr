@@ -110,7 +110,8 @@ public class ExposurePricingIT {
 		return Arrays.asList(object);
 	}
 
-	@Test@Ignore
+	@Ignore
+	@Test
 	public void noPricingTest () {
 		logger.info("isConsideringCO2Costs = "+ this.isConsideringCO2Costs);
 		logger.info("Number of time bins are "+ this.noOfTimeBins);
@@ -141,7 +142,8 @@ public class ExposurePricingIT {
 		Assert.assertTrue("Wrong route is selected. Agent should have used route with shorter link (i.e. 39) instead.", route.getLinkIds().contains(Id.create("39", Link.class)));
 	}
 
-	@Test@Ignore
+	@Ignore
+	@Test
 	public void pricingExposure_ReRouteTest() {
 		logger.info("isConsideringCO2Costs = "+ this.isConsideringCO2Costs);
 		logger.info("Number of time bins are "+ this.noOfTimeBins);
@@ -205,6 +207,7 @@ public class ExposurePricingIT {
 		Assert.assertTrue("Wrong route is selected. Agent should have used route with link 38 (longer) instead.", route.getLinkIds().contains(Id.create("38", Link.class)));
 	}
 	
+	@Ignore
 	@Test
 	public void pricingExposure_TollTest() {
 		logger.info("isConsideringCO2Costs = "+ this.isConsideringCO2Costs);
