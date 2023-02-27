@@ -167,6 +167,7 @@ public class RunAdaptiveSignalSimpleNetwork {
                 this.addEventHandlerBinding().toInstance(delayAnalysis);
             }
         });
+
         controler.run();
         for (var signalSystemId : signalSystemIds) {
             Map<Id<SignalGroup>, SignalGroupData> signalGroupDataBySystemId = signalsData.getSignalGroupsData().getSignalGroupDataBySystemId(signalSystemId);
