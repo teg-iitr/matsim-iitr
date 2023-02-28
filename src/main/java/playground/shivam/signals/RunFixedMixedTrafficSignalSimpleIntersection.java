@@ -186,14 +186,16 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
     private void createPopulation(Scenario scenario) {
         Population population = scenario.getPopulation();
 
-        String[] odRelations = {"2_3-3_7", "2_3-3_4", "2_3-3_8", "7_3-3_4", "7_3-3_8", "7_3-3_2",
-                                "4_3-3_8", "4_3-3_2", "4_3-3_7", "8_3-3_2", "8_3-3_7", "8_3-3_4", };
+//        String[] odRelations = {"2_3-3_7", "2_3-3_4", "2_3-3_8", "7_3-3_4", "7_3-3_8", "7_3-3_2",
+//                                "4_3-3_8", "4_3-3_2", "4_3-3_7", "8_3-3_2", "8_3-3_7", "8_3-3_4", };
+        String[] odRelations = {"1_2-7_6", "1_2-4_5", "1_2-8_9", "6_7-4_5", "6_7-8_9", "6_7-2_1",
+                "5_4-8_9", "5_4-2_1", "5_4-7_6", "9_8-2_1", "9_8-7_6", "9_8-4_5", };
 
         for (String od : odRelations) {
             String fromLinkId = od.split("-")[0];
             String toLinkId = od.split("-")[1];
 
-            for (int i = 0; i < 1800; i++) {
+            for (int i = 0; i < 1500; i++) {
                 // create a person
                 Person person = population.getFactory().createPerson(Id.createPersonId(od + "-" + i));
 
@@ -221,7 +223,7 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
         new PopulationWriter(population).write(outputDirectory + "population.xml.gz");
     }
     private static String getTravelMode(int number) {
-        if (number < 60) return "car";
+        if (number <= 60) return "car";
         else return "truck";
     }
 
@@ -234,10 +236,10 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
         config.controler().setOutputDirectory(outputDirectory);
         config.controler().setLastIteration(50);
 
-        config.travelTimeCalculator().setMaxTime(18000);
+        config.travelTimeCalculator().setMaxTime(5 * 60 * 60);
 
-        config.qsim().setStartTime(0.0D);
-        config.qsim().setEndTime(18000.0D);
+        config.qsim().setStartTime(0);
+        config.qsim().setEndTime(5 * 60 * 60);
         config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
         config.qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.withHoles);
         config.qsim().setNodeOffset(20.0);
@@ -276,8 +278,8 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
         changeTripMode.setModes(new String[]{"car", "truck"});
         config.plansCalcRoute().setNetworkModes(mainModes);
 
-        OTFVisConfigGroup otfvisConfig = ConfigUtils.addOrGetModule(config, OTFVisConfigGroup.class);
-        otfvisConfig.setDrawTime(true);
+//        OTFVisConfigGroup otfvisConfig = ConfigUtils.addOrGetModule(config, OTFVisConfigGroup.class);
+//        otfvisConfig.setDrawTime(true);
 
         config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
         config.controler().setWriteEventsInterval(config.controler().getLastIteration());
@@ -285,9 +287,6 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
 
         config.vspExperimental().setWritingOutputEvents(true);
         config.planCalcScore().setWriteExperiencedPlans(true);
-
-//        // set output filenames
-//        config.network().setLaneDefinitionsFile(outputDirectory + "lane_definitions_v2.0.xml");
 
         //write config to file
         String configFile = outputDirectory + "config.xml";
@@ -306,28 +305,28 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
         SignalUtils.createAndAddSignal(sys, factory, Id.create("1", Signal.class), Id.createLinkId("2_3"),
                 Arrays.asList(Id.create("2_3.l", Lane.class)));
         SignalUtils.createAndAddSignal(sys, factory, Id.create("2", Signal.class), Id.createLinkId("2_3"),
-                Arrays.asList(Id.create("2_3.ol", Lane.class)));
+                Arrays.asList(Id.create("2_3.s", Lane.class)));
         SignalUtils.createAndAddSignal(sys, factory, Id.create("3", Signal.class), Id.createLinkId("2_3"),
                 Arrays.asList(Id.create("2_3.r", Lane.class)));
 
         SignalUtils.createAndAddSignal(sys, factory, Id.create("4", Signal.class), Id.createLinkId("7_3"),
                 Arrays.asList(Id.create("7_3.l", Lane.class)));
         SignalUtils.createAndAddSignal(sys, factory, Id.create("5", Signal.class), Id.createLinkId("7_3"),
-                Arrays.asList(Id.create("7_3.ol", Lane.class)));
+                Arrays.asList(Id.create("7_3.s", Lane.class)));
         SignalUtils.createAndAddSignal(sys, factory, Id.create("6", Signal.class), Id.createLinkId("7_3"),
                 Arrays.asList(Id.create("7_3.r", Lane.class)));
 
         SignalUtils.createAndAddSignal(sys, factory, Id.create("7", Signal.class), Id.createLinkId("4_3"),
                 Arrays.asList(Id.create("4_3.l", Lane.class)));
         SignalUtils.createAndAddSignal(sys, factory, Id.create("8", Signal.class), Id.createLinkId("4_3"),
-                Arrays.asList(Id.create("4_3.ol", Lane.class)));
+                Arrays.asList(Id.create("4_3.s", Lane.class)));
         SignalUtils.createAndAddSignal(sys, factory, Id.create("9", Signal.class), Id.createLinkId("4_3"),
                 Arrays.asList(Id.create("4_3.r", Lane.class)));
 
         SignalUtils.createAndAddSignal(sys, factory, Id.create("10", Signal.class), Id.createLinkId("8_3"),
                 Arrays.asList(Id.create("8_3.l", Lane.class)));
         SignalUtils.createAndAddSignal(sys, factory, Id.create("11", Signal.class), Id.createLinkId("8_3"),
-                Arrays.asList(Id.create("8_3.ol", Lane.class)));
+                Arrays.asList(Id.create("8_3.s", Lane.class)));
         SignalUtils.createAndAddSignal(sys, factory, Id.create("12", Signal.class), Id.createLinkId("8_3"),
                 Arrays.asList(Id.create("8_3.r", Lane.class)));
 
@@ -346,12 +345,17 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
         // original lane, i.e. lane that starts at the link from node and leads to all other lanes of the link
         LanesUtils.createAndAddLane(lanesForLink23, factory,
                 Id.create("2_3.ol", Lane.class), LANE_CAPACITY, LINK_LENGTH, 0, NO_LANES,
-                null, Arrays.asList(Id.create("2_3.l", Lane.class), Id.create("2_3.r", Lane.class)));
+                null, Arrays.asList(Id.create("2_3.l", Lane.class), Id.create("2_3.s", Lane.class), Id.create("2_3.r", Lane.class)));
 
         // left turning lane (alignment 1)
         LanesUtils.createAndAddLane(lanesForLink23, factory,
                 Id.create("2_3.l", Lane.class), LANE_CAPACITY, LANE_LENGTH, 1, NO_LANES,
                 Collections.singletonList(Id.create("3_7", Link.class)), null);
+
+        // straight lane (alignment 1)
+        LanesUtils.createAndAddLane(lanesForLink23, factory,
+                Id.create("2_3.s", Lane.class), LANE_CAPACITY, LANE_LENGTH, 0, NO_LANES,
+                Collections.singletonList(Id.create("3_4", Link.class)), null);
 
         // right turning lane (alignment -1)
         LanesUtils.createAndAddLane(lanesForLink23, factory,
@@ -367,12 +371,17 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
         // original lane, i.e. lane that starts at the link from node and leads to all other lanes of the link
         LanesUtils.createAndAddLane(lanesForLink73, factory,
                 Id.create("7_3.ol", Lane.class), LANE_CAPACITY, LINK_LENGTH, 0, NO_LANES,
-                null, Arrays.asList(Id.create("7_3.l", Lane.class), Id.create("7_3.r", Lane.class)));
+                null, Arrays.asList(Id.create("7_3.l", Lane.class), Id.create("7_3.s", Lane.class),  Id.create("7_3.r", Lane.class)));
 
         // left turning lane (alignment 1)
         LanesUtils.createAndAddLane(lanesForLink73, factory,
                 Id.create("7_3.l", Lane.class), LANE_CAPACITY, LANE_LENGTH, 1, NO_LANES,
                 Collections.singletonList(Id.create("3_4", Link.class)), null);
+
+        // straight lane (alignment 0)
+        LanesUtils.createAndAddLane(lanesForLink73, factory,
+                Id.create("7_3.s", Lane.class), LANE_CAPACITY, LANE_LENGTH, 0, NO_LANES,
+                Collections.singletonList(Id.create("3_8", Link.class)), null);
 
         // right turning lane (alignment -1)
         LanesUtils.createAndAddLane(lanesForLink73, factory,
@@ -388,12 +397,17 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
         // original lane, i.e. lane that starts at the link from node and leads to all other lanes of the link
         LanesUtils.createAndAddLane(lanesForLink43, factory,
                 Id.create("4_3.ol", Lane.class), LANE_CAPACITY, LINK_LENGTH, 0, NO_LANES,
-                null, Arrays.asList(Id.create("4_3.l", Lane.class), Id.create("4_3.r", Lane.class)));
+                null, Arrays.asList(Id.create("4_3.l", Lane.class), Id.create("4_3.s", Lane.class), Id.create("4_3.r", Lane.class)));
 
         // left turning lane (alignment 1)
         LanesUtils.createAndAddLane(lanesForLink43, factory,
                 Id.create("4_3.l", Lane.class), LANE_CAPACITY, LANE_LENGTH, 1, NO_LANES,
                 Collections.singletonList(Id.create("3_8", Link.class)), null);
+
+        // straight lane (alignment 1)
+        LanesUtils.createAndAddLane(lanesForLink43, factory,
+                Id.create("4_3.s", Lane.class), LANE_CAPACITY, LANE_LENGTH, 0, NO_LANES,
+                Collections.singletonList(Id.create("3_2", Link.class)), null);
 
         // right turning lane (alignment -1)
         LanesUtils.createAndAddLane(lanesForLink43, factory,
@@ -409,12 +423,17 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
         // original lane, i.e. lane that starts at the link from node and leads to all other lanes of the link
         LanesUtils.createAndAddLane(lanesForLink83, factory,
                 Id.create("8_3.ol", Lane.class), LANE_CAPACITY, LINK_LENGTH, 0, NO_LANES,
-                null, Arrays.asList(Id.create("8_3.l", Lane.class), Id.create("8_3.r", Lane.class)));
+                null, Arrays.asList(Id.create("8_3.l", Lane.class), Id.create("8_3.s", Lane.class),  Id.create("8_3.r", Lane.class)));
 
         // left turning lane (alignment 1)
         LanesUtils.createAndAddLane(lanesForLink83, factory,
                 Id.create("8_3.l", Lane.class), LANE_CAPACITY, LANE_LENGTH, 1, NO_LANES,
                 Collections.singletonList(Id.create("3_2", Link.class)), null);
+
+        // straight lane (alignment 1)
+        LanesUtils.createAndAddLane(lanesForLink83, factory,
+                Id.create("8_3.s", Lane.class), LANE_CAPACITY, LANE_LENGTH, 0, NO_LANES,
+                Collections.singletonList(Id.create("3_7", Link.class)), null);
 
         // right turning lane (alignment -1)
         LanesUtils.createAndAddLane(lanesForLink83, factory,
