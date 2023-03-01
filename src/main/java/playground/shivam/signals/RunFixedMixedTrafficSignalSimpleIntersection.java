@@ -3,11 +3,14 @@ package playground.shivam.signals;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.events.PersonStuckEvent;
+import org.matsim.api.core.v01.events.handler.PersonStuckEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkFactory;
 import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.api.core.v01.population.*;
+import org.matsim.contrib.otfvis.OTFVis;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.builder.Signals;
 import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
@@ -26,6 +29,7 @@ import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.contrib.signals.otfvis.OTFVisWithSignalsLiveModule;
 import org.matsim.contrib.signals.utils.SignalUtils;
+import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
@@ -35,37 +39,42 @@ import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.StrategyConfigGroup;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
+import org.matsim.core.controler.PrepareForSimUtils;
+import org.matsim.core.events.EventsUtils;
 import org.matsim.core.gbl.MatsimRandom;
+import org.matsim.core.mobsim.qsim.QSim;
+import org.matsim.core.mobsim.qsim.QSimBuilder;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.lanes.*;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
+import org.matsim.vis.otfvis.OTFClientLive;
 import org.matsim.vis.otfvis.OTFVisConfigGroup;
+import org.matsim.vis.otfvis.OnTheFlyServer;
 import playground.amit.mixedTraffic.MixedTrafficVehiclesUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class RunFixedMixedTrafficSignalSimpleIntersection {
     private Controler controler;
     static String outputDirectory = "output/RunFixedMixedTrafficSignalSimpleIntersection/";
 
-    private static final double LANE_LENGTH = 250.0;
+    private static final double LANE_LENGTH = 1000;
     private static final int LANE_CAPACITY = 1800;
     private static final int NO_LANES = 1;
-    private static final double LINK_LENGTH = 500;
+    private static final double LINK_LENGTH = 1000;
 
     private static final int LINK_CAPACITY = 1800;
     private int CYCLE = 120;
     private final int ONSET = 0;
-    private final int DROPPING = 55;
+    private final int DROPPING = 60;
+
+    private final int AGENTS_PER_LINK = 900;
 
     public RunFixedMixedTrafficSignalSimpleIntersection() throws IOException {
         final Config config = defineConfig();
@@ -79,15 +88,31 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
 
     public static void main(String[] args) throws IOException {
         RunFixedMixedTrafficSignalSimpleIntersection fixedMixedTrafficSignalSimpleIntersection = new RunFixedMixedTrafficSignalSimpleIntersection();
-        fixedMixedTrafficSignalSimpleIntersection.run(false);
+        fixedMixedTrafficSignalSimpleIntersection.run(true);
     }
 
     private void run(boolean startOtfvis) {
+
+        EventsManager manager = EventsUtils.createEventsManager();
+
+        PrepareForSimUtils.createDefaultPrepareForSim(controler.getScenario()).run();
+        QSim qSim = new QSimBuilder(controler.getScenario().getConfig()).useDefaults().build(controler.getScenario(), manager);
+
         if (startOtfvis) {
+                
+                // otfvis configuration.  There is more you can do here than via file!
+                final OTFVisConfigGroup otfVisConfig = ConfigUtils.addOrGetModule(qSim.getScenario().getConfig(), OTFVisConfigGroup.GROUP_NAME, OTFVisConfigGroup.class);
+                otfVisConfig.setDrawTransitFacilities(false) ; // this DOES work
+                otfVisConfig.setColoringScheme(OTFVisConfigGroup.ColoringScheme.byId);
+
+                OnTheFlyServer server = OTFVis.startServerAndRegisterWithQSim(controler.getScenario().getConfig(), controler.getScenario(), manager, qSim);
+                OTFClientLive.run(controler.getScenario().getConfig(), server);
+
             // add the module that start the otfvis visualization with signals
-            controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
+            // controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
         }
-        controler.run();
+        qSim.run();
+        //controler.run();
     }
     private Scenario defineScenario(Config config) {
         Scenario scenario = ScenarioUtils.loadScenario(config);
@@ -195,7 +220,7 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
             String fromLinkId = od.split("-")[0];
             String toLinkId = od.split("-")[1];
 
-            for (int i = 0; i < 1500; i++) {
+            for (int i = 0; i < AGENTS_PER_LINK; i++) {
                 // create a person
                 Person person = population.getFactory().createPerson(Id.createPersonId(od + "-" + i));
 
@@ -278,8 +303,6 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
         changeTripMode.setModes(new String[]{"car", "truck"});
         config.plansCalcRoute().setNetworkModes(mainModes);
 
-//        OTFVisConfigGroup otfvisConfig = ConfigUtils.addOrGetModule(config, OTFVisConfigGroup.class);
-//        otfvisConfig.setDrawTime(true);
 
         config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
         config.controler().setWriteEventsInterval(config.controler().getLastIteration());
