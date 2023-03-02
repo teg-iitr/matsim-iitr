@@ -18,13 +18,14 @@
  * *********************************************************************** */
 package playground.amit.utils;
 
-import java.io.File;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigReader;
 import org.matsim.core.scenario.ScenarioUtils;
+
+import java.io.File;
 
 /**
  * return different scenarios used in almost every analysis code.
@@ -34,7 +35,7 @@ public final class LoadMyScenarios {
 	
 	private LoadMyScenarios(){}
 	
-	private final static Logger LOG = Logger.getLogger(LoadMyScenarios.class);
+	private final static Logger LOG = LogManager.getLogger(LoadMyScenarios.class);
 	
 	/**
 	 * Returns scenario specified plans, network and config file.

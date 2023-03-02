@@ -19,21 +19,21 @@
 
 package playground.amit.analysis.congestion;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
-
 import playground.amit.utils.AreaFilter;
 import playground.amit.utils.PersonFilter;
 import playground.vsp.congestion.events.CongestionEvent;
 import playground.vsp.congestion.handlers.CongestionEventHandler;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
 
 /**
  * @author amit
@@ -41,7 +41,7 @@ import playground.vsp.congestion.handlers.CongestionEventHandler;
 
 public class FilteredCausedDelayHandler implements CongestionEventHandler {
 	
-	private static final Logger LOGGER = Logger.getLogger(FilteredCausedDelayHandler.class);
+	private static final Logger LOGGER = LogManager.getLogger(FilteredCausedDelayHandler.class);
 	private final CausedDelayHandler delegate ;
 	private final PersonFilter pf ;
 	private final AreaFilter af;

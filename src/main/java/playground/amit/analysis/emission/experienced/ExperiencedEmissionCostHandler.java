@@ -23,8 +23,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
 import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
@@ -51,7 +51,7 @@ import playground.vsp.airPollution.exposure.EmissionResponsibilityCostModule;
 
 public class ExperiencedEmissionCostHandler implements VehicleEntersTrafficEventHandler, WarmEmissionEventHandler, ColdEmissionEventHandler, EmissionCostHandler{
 
-	private static final Logger LOG = Logger.getLogger(ExperiencedEmissionCostHandler.class);
+	private static final Logger LOG = LogManager.getLogger(ExperiencedEmissionCostHandler.class);
 
 	private final Map<Double, Map<Id<Vehicle>, Double>> vehicleId2ColdEmissCosts = new HashMap<>();
 	private final Map<Double, Map<Id<Vehicle>, Double>> vehicleId2WarmEmissCosts = new HashMap<>();

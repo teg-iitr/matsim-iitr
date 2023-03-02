@@ -18,11 +18,8 @@
  * *********************************************************************** */
 package playground.amit.mixedTraffic.qPositionPlots;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.util.*;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
@@ -40,8 +37,11 @@ import org.matsim.core.utils.io.tabularFileParser.TabularFileParser;
 import org.matsim.core.utils.io.tabularFileParser.TabularFileParserConfig;
 import org.matsim.run.Events2Snapshot;
 import org.matsim.vis.snapshotwriters.TransimsSnapshotWriter.Labels;
-
 import playground.amit.utils.LoadMyScenarios;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.util.*;
 
 /**
  * 1) Create Transims snapshot file from events or use given Transims snapshot file. 
@@ -62,7 +62,7 @@ import playground.amit.utils.LoadMyScenarios;
 @Deprecated
 public class AgentPositionWriterOld {
 
-	private final static Logger LOGGER = Logger.getLogger(AgentPositionWriterOld.class);
+	private final static Logger LOGGER = LogManager.getLogger(AgentPositionWriterOld.class);
 	private final static boolean IS_WRITING_TRANSIM_FILE = false;
 	private final double trackLength = 3000;
 	private final double maxSpeed = 60/3.6;

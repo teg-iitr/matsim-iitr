@@ -19,8 +19,8 @@
  * *********************************************************************** */
 
 package playground.amit.berlin.berlinBVG09;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
@@ -35,7 +35,7 @@ import playground.amit.utils.FileUtils;
  *
  */
 public class BerlinEmissionVehicleFromPlans {
-	private static final Logger logger = Logger.getLogger(BerlinEmissionVehicleFromEvents.class);
+	private static final Logger logger = LogManager.getLogger(BerlinEmissionVehicleFromEvents.class);
 
 	private final String populationFile = FileUtils.RUNS_SVN+"/berlin-bvg09/bvg.run189.10pct/ITERS/it.100/bvg.run189.10pct.100.plans.filtered.selected.xml.gz";
 	private final String netFile = FileUtils.RUNS_SVN+"/berlin-bvg09/bvg.run189.10pct/emissionsRelatedFiles/rev554B-bvg00-0.1sample.network_withRoadTypes.xml";

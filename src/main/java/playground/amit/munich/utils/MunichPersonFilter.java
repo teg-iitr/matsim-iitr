@@ -18,16 +18,17 @@
  * *********************************************************************** */
 package playground.amit.munich.utils;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author amit
@@ -35,7 +36,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 
 public class MunichPersonFilter implements playground.amit.utils.PersonFilter{
 
-	private static final Logger LOG = Logger.getLogger(MunichPersonFilter.class);
+	private static final Logger LOG = LogManager.getLogger(MunichPersonFilter.class);
 	public enum MunichUserGroup {Urban, Rev_Commuter, Freight}
 
 	public MunichPersonFilter (){}

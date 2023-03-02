@@ -19,15 +19,8 @@
 
 package playground.amit.mixedTraffic.snapshot;
 
-import java.awt.geom.Point2D;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import javax.inject.Inject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -40,6 +33,15 @@ import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 import org.matsim.vis.snapshotwriters.SnapshotWriter;
 import playground.amit.utils.NumberUtils;
 
+import javax.inject.Inject;
+import java.awt.geom.Point2D;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+
 /**
 * @author amit
 */
@@ -50,7 +52,7 @@ public class MyPositionSnapShotWriter implements SnapshotWriter {
 	private double currentTime = -1;
 	private final Scenario scenario;
 	private final Map<Id<Person>, Id<Link>> person2link = new HashMap<>();
-	private final static Logger LOG = Logger.getLogger(MyPositionSnapShotWriter.class);
+	private final static Logger LOG = LogManager.getLogger(MyPositionSnapShotWriter.class);
 
 	public enum Labels { TIME, VEHICLE, LINK_ID, DISTANCE_FROM_FROMNODE, SPEED }
 

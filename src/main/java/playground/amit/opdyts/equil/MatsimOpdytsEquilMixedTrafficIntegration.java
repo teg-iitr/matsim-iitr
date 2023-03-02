@@ -159,7 +159,7 @@
 //									try {
 //										Files.copy(new File(sourceFile), new File(sinkFile));
 //									} catch (IOException e) {
-//										Logger.getLogger(MatsimOpdytsEquilMixedTrafficIntegration.class).warn("Data is not copied. Reason : " + e);
+//										LogManager.getLogger(MatsimOpdytsEquilMixedTrafficIntegration.class).warn("Data is not copied. Reason : " + e);
 //									}
 //								}
 //							}

@@ -19,8 +19,6 @@
 
 package playground.amit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod;
 
-import java.util.Arrays;
-import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -41,6 +39,10 @@ import playground.amit.fundamentalDiagrams.dynamicPCU.PCUMethod;
 import playground.amit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.estimation.ChandraSikdarPCUUpdator;
 import playground.amit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.projectedArea.VehicleProjectedAreaRatio;
 import playground.amit.mixedTraffic.MixedTrafficVehiclesUtils;
+import playground.shivam.trafficChar.core.TrafficCharConfigGroup;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by amit on 29.06.17.
@@ -54,9 +56,9 @@ public class RunDynamicPCUExample {
         boolean updatePCU = true;
         PCUMethod pcuMethod = PCUMethod.SPEED_AREA_RATIO;
 
-        String parentDir = "../../svnit/outputFiles/mixedModes/passing/staticPCU/";
+        String parentDir = "output/staticPCU/";
         if(updatePCU) {
-            parentDir = "../../svnit/outputFiles/mixedModes/passing/dynamicPCU/"+pcuMethod+"/";
+            parentDir = "output/dynamicPCU/"+pcuMethod+"/";
         }
 
         Config config = ConfigUtils.createConfig();
@@ -90,8 +92,18 @@ public class RunDynamicPCUExample {
             vehicles.addVehicleType(veh);
         }
 
+        TrafficCharConfigGroup trafficCharConfigGroup = new TrafficCharConfigGroup();
+        QSimConfigGroup qSimConfigGroupPassingQ = new QSimConfigGroup();
+        qSimConfigGroupPassingQ.setLinkDynamics(QSimConfigGroup.LinkDynamics.FIFO);
+        trafficCharConfigGroup.addQSimConfigGroup("FIFO", qSimConfigGroupPassingQ);
+
+        trafficCharConfigGroup.addQSimConfigGroup(TrafficCharConfigGroup.ROAD_TYPE_DEFAULT, scenario.getConfig().qsim());
+
+        scenario.getConfig().getModules().put(TrafficCharConfigGroup.GROUP_NAME, trafficCharConfigGroup);
+
+
         Controler controler = new Controler(scenario);
-        controler.addOverridingModule(new FDModule(scenario));
+        controler.addOverridingModule(new FDModule(scenario, "FIFO"));
         controler.addOverridingModule(new AbstractModule() {
             @Override
             public void install() {
@@ -107,4 +119,5 @@ public class RunDynamicPCUExample {
 
         FDUtils.cleanOutputDir(scenario.getConfig().controler().getOutputDirectory());
     }
+
 }

@@ -1,7 +1,8 @@
 package playground.amit.mixedTraffic.patnaIndia.covidWork.wfh;
 
 import com.google.inject.Inject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.*;
 import org.matsim.api.core.v01.events.handler.ActivityEndEventHandler;
@@ -28,7 +29,7 @@ import java.util.Map;
  */
 public class WFHPricing implements ActivityStartEventHandler, ActivityEndEventHandler, AfterMobsimListener {
 
-    private final static Logger LOGGER = Logger.getLogger(WFHPricing.class);
+    private final static Logger LOGGER = LogManager.getLogger(WFHPricing.class);
 
     private final String TYPE = "PENALTY_WORKING_HOME";
     private final String PARTNER = "SELF";

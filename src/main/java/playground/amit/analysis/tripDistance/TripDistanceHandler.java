@@ -28,7 +28,8 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -56,7 +57,7 @@ import org.matsim.core.events.algorithms.Vehicle2DriverEventHandler;
  */
 public class TripDistanceHandler implements PersonDepartureEventHandler, LinkLeaveEventHandler,
 		PersonArrivalEventHandler, TeleportationArrivalEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
-	private final static Logger LOG = Logger.getLogger(TripDistanceHandler.class);
+	private final static Logger LOG = LogManager.getLogger(TripDistanceHandler.class);
 
 	private final Network network;
 	private final SortedMap<String, Map<Id<Person>, List<Double>>> mode2PersonId2distances = new TreeMap<>();

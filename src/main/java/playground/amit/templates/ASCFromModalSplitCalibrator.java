@@ -19,14 +19,9 @@
 
 package playground.amit.templates;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import com.google.inject.Inject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
 import org.matsim.core.controler.events.IterationEndsEvent;
@@ -35,8 +30,11 @@ import org.matsim.core.controler.events.StartupEvent;
 import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.controler.listener.IterationStartsListener;
 import org.matsim.core.controler.listener.StartupListener;
-import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
 import playground.amit.utils.MapUtils;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * This is just a template which needs to be updated before use. For e.g. run it
@@ -46,7 +44,7 @@ import playground.amit.utils.MapUtils;
 
 public class ASCFromModalSplitCalibrator implements StartupListener, IterationStartsListener, IterationEndsListener {
 
-	private static final Logger LOG = Logger.getLogger(ASCFromModalSplitCalibrator.class);
+	private static final Logger LOG = LogManager.getLogger(ASCFromModalSplitCalibrator.class);
 	
 	private final SortedMap<String, Double> initialMode2share = new TreeMap<>(); // if empty, take from it.0
 	private SortedMap<String, Double> previousASC ; // all zeros

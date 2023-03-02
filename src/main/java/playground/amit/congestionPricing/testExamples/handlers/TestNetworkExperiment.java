@@ -27,7 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -66,7 +67,7 @@ import playground.vsp.congestion.handlers.CongestionHandlerImplV4;
  * @author amit
  */
 class TestNetworkExperiment {
-	final Logger log = Logger.getLogger(TestNetworkExperiment.class);
+	final Logger log = LogManager.getLogger(TestNetworkExperiment.class);
 
 
 	public static void main(String[] args) {

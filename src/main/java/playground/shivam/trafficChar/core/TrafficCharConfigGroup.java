@@ -19,7 +19,8 @@
 
 package playground.shivam.trafficChar.core;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ReflectiveConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
@@ -35,7 +36,7 @@ public class TrafficCharConfigGroup extends ReflectiveConfigGroup {
         return (TrafficCharConfigGroup) config.getModules().get(TrafficCharConfigGroup.GROUP_NAME);
     }
 
-    private static final Logger log = Logger.getLogger(TrafficCharConfigGroup.class);
+    private static final Logger log = LogManager.getLogger(TrafficCharConfigGroup.class);
 
     public static final String GROUP_NAME = "trafficChar";
     public static final String ROAD_TYPE = "roadType";

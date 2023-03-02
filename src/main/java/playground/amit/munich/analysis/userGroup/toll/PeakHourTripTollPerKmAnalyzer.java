@@ -18,10 +18,8 @@
  * *********************************************************************** */
 package playground.amit.munich.analysis.userGroup.toll;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.util.*;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
@@ -40,13 +38,17 @@ import playground.amit.utils.FileUtils;
 import playground.amit.utils.ListUtils;
 import playground.amit.utils.LoadMyScenarios;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.util.*;
+
 /**
  * @author amit
  */
 
 public class PeakHourTripTollPerKmAnalyzer {
 	
-	private static final Logger LOG = Logger.getLogger(PeakHourTripTollPerKmAnalyzer.class);
+	private static final Logger LOG = LogManager.getLogger(PeakHourTripTollPerKmAnalyzer.class);
 	private final TripTollHandler tollHandler ;
 	private final ModeFilterTripDistanceHandler distHandler;
 

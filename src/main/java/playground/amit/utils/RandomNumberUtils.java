@@ -19,17 +19,12 @@
 
 package playground.amit.utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Random;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.core.gbl.MatsimRandom;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * A class to generate pseudo random numbers for given discrete probability distribution and 
@@ -45,7 +40,7 @@ import org.matsim.core.gbl.MatsimRandom;
 public class RandomNumberUtils {
 
 	private static final Random rnd = MatsimRandom.getRandom();
-	private static final Logger LOG = Logger.getLogger(RandomNumberUtils.class);
+	private static final Logger LOG = LogManager.getLogger(RandomNumberUtils.class);
 
 	private RandomNumberUtils(){}
 	

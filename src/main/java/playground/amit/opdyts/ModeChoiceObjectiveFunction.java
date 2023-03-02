@@ -54,7 +54,7 @@
 // *
 // */
 //public class ModeChoiceObjectiveFunction implements ObjectiveFunction {
-//    private static final Logger log = Logger.getLogger( ModeChoiceObjectiveFunction.class );
+//    private static final Logger log = LogManager.getLogger( ModeChoiceObjectiveFunction.class );
 //
 //    private final MainModeIdentifier mainModeIdentifier ;
 //

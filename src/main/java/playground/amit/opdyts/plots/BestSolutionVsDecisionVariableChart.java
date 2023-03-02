@@ -19,16 +19,18 @@
 
 package playground.amit.opdyts.plots;
 
-import java.awt.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.*;
-import java.util.List;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.core.utils.charts.XYScatterChart;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.core.utils.io.IOUtils;
 import playground.amit.utils.FileUtils;
+
+import java.awt.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.List;
+import java.util.*;
 
 /**
  * A class to extract the currentBestDevisionVariable and currentBestObjectiveFunction.
@@ -38,7 +40,7 @@ import playground.amit.utils.FileUtils;
 
 public class BestSolutionVsDecisionVariableChart {
 
-    private static final Logger LOGGER = Logger.getLogger(BestSolutionVsDecisionVariableChart.class);
+    private static final Logger LOGGER = LogManager.getLogger(BestSolutionVsDecisionVariableChart.class);
 
     public BestSolutionVsDecisionVariableChart(final Collection<String> modesToGetASC) {
         this.modesToGetASC = modesToGetASC;

@@ -18,11 +18,13 @@
  * *********************************************************************** */
 package playground.amit.analysis.modeSwitcherRetainer;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A class to store all information of mode switchers/retainers
@@ -31,7 +33,7 @@ import org.matsim.api.core.v01.population.Person;
 
  class ModeSwitcherInfoCollector {
 
-	private static final Logger LOG = Logger.getLogger(ModeSwitcherInfoCollector.class);
+	private static final Logger LOG = LogManager.getLogger(ModeSwitcherInfoCollector.class);
 
 	private final List<Id<Person>> personIds = new ArrayList<>();
 	private double firstIterationStat = 0.;

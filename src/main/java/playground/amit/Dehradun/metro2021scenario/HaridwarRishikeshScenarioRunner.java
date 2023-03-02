@@ -1,6 +1,7 @@
 package playground.amit.Dehradun.metro2021scenario;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import playground.amit.Dehradun.DMAZonesProcessor;
 import playground.amit.Dehradun.GHNetworkDistanceCalculator;
@@ -14,7 +15,7 @@ import java.util.Map;
  */
 
 public class HaridwarRishikeshScenarioRunner {
-    public static final Logger LOG = Logger.getLogger(HaridwarRishikeshScenarioRunner.class);
+    public static final Logger LOG = LogManager.getLogger(HaridwarRishikeshScenarioRunner.class);
 
     private static final String date = "15-12-2021_7-30";
     public static final String OD_2_metro_trips_characteristics = FileUtils.SVN_PROJECT_DATA_DRIVE + "DehradunMetroArea_MetroNeo_data/atIITR/HR/OD2MetroTripChars_"+date+".txt";

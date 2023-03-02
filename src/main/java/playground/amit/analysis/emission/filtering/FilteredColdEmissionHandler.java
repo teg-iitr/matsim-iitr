@@ -18,9 +18,8 @@
  * *********************************************************************** */
 package playground.amit.analysis.emission.filtering;
 
-import java.util.HashMap;
-import java.util.Map;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
 import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
@@ -38,12 +37,15 @@ import playground.amit.munich.analysis.userGroup.EmissionsPerPersonPerUserGroup;
 import playground.amit.utils.AreaFilter;
 import playground.amit.utils.PersonFilter;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author amit
  */
 
 public class FilteredColdEmissionHandler implements VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler, ColdEmissionEventHandler{
-	private static final Logger LOGGER = Logger.getLogger(FilteredColdEmissionHandler.class.getName());
+	private static final Logger LOGGER = LogManager.getLogger(FilteredColdEmissionHandler.class.getName());
 
 	private final EmissionsPerLinkColdEventHandler delegate;
 	private final PersonFilter pf ;

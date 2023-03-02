@@ -18,28 +18,21 @@
  * *********************************************************************** */
 package playground.amit.munich.inputs;
 
-import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.api.core.v01.population.Population;
-import org.matsim.api.core.v01.population.PopulationFactory;
-import org.matsim.api.core.v01.population.PopulationWriter;
+import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.collections.Tuple;
-
 import playground.amit.munich.utils.MunichPersonFilter;
 import playground.amit.munich.utils.MunichPersonFilter.MunichUserGroup;
+
+import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * It classifies activities into sub-activities for Munich scenario by assuming stated activities as typical duration.
@@ -57,7 +50,7 @@ import playground.amit.munich.utils.MunichPersonFilter.MunichUserGroup;
 		//TODO : might make more sense if I check above for all intermediate activities as well.
 	}
 
-	public static final Logger LOG = Logger.getLogger(ActivityClassifier.class.getSimpleName());
+	public static final Logger LOG = LogManager.getLogger(ActivityClassifier.class.getSimpleName());
 	private final Scenario sc ;
 	private int zeroDurCount =0;
 	private final SortedMap<String, Double> actType2TypDur;

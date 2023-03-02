@@ -19,24 +19,17 @@
 
 package playground.amit.mixedTraffic.patnaIndia.input.urban.scenarioSetup;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.core.utils.io.IOUtils;
-
 import playground.amit.mixedTraffic.patnaIndia.input.urban.scenarioSetup.PatnaCalibrationUtils.PatnaDemandLabels;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.amit.utils.MapUtils;
 import playground.amit.utils.RandomNumberUtils;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * @author amit
@@ -44,7 +37,7 @@ import playground.amit.utils.RandomNumberUtils;
 
 public class PatnaDemandImputer {
 
-	public static final Logger LOG = Logger.getLogger(PatnaCalibrationUtils.class);
+	public static final Logger LOG = LogManager.getLogger(PatnaCalibrationUtils.class);
 
 	final Map<String,Integer> mode2counter = new HashMap<>();
 	final Map<String,Integer> inc2counter = new HashMap<>();

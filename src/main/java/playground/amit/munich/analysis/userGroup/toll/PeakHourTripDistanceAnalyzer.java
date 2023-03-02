@@ -18,9 +18,8 @@
  * *********************************************************************** */
 package playground.amit.munich.analysis.userGroup.toll;
 
-import java.io.BufferedWriter;
-import java.util.*;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
@@ -37,6 +36,9 @@ import playground.amit.utils.FileUtils;
 import playground.amit.utils.ListUtils;
 import playground.amit.utils.LoadMyScenarios;
 
+import java.io.BufferedWriter;
+import java.util.*;
+
 /**
  * @author amit
  */
@@ -51,7 +53,7 @@ public class PeakHourTripDistanceAnalyzer  {
 	private final Map<Id<Person>,Integer> person2TripCountsOffPkHr = new HashMap<>();
 	private final SortedMap<String, Tuple<Double,Double>> usrGrp2Dists = new TreeMap<>();
 	private final SortedMap<String, Tuple<Integer,Integer>> usrGrp2TripCounts = new TreeMap<>();
-	private static final Logger LOG = Logger.getLogger(PeakHourTripDistanceAnalyzer.class);
+	private static final Logger LOG = LogManager.getLogger(PeakHourTripDistanceAnalyzer.class);
 
 	public PeakHourTripDistanceAnalyzer(Network network, double simulationEndTime, int noOfTimeBins) {
 		LOG.warn("Peak hours are assumed as 07:00-10:00 and 15:00-18:00 by looking on the travel demand for BAU scenario.");

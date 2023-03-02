@@ -19,10 +19,12 @@
 
 package playground.amit.utils;
 
-import java.io.File;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.core.utils.io.IOUtils;
 import playground.amit.mixedTraffic.patnaIndia.input.joint.JointCalibrationControler;
+
+import java.io.File;
 
 /**
  * I think, after introduction of URL and for uniformity, pass absolute path.
@@ -35,7 +37,7 @@ import playground.amit.mixedTraffic.patnaIndia.input.joint.JointCalibrationContr
 
 public final class FileUtils {
 
-    public static final Logger LOGGER = Logger.getLogger(FileUtils.class);
+    public static final Logger LOGGER = LogManager.getLogger(FileUtils.class);
 
     public static final String RUNS_SVN = System.getProperty("user.name").equalsIgnoreCase("amit") ? "C:/Users/Amit Agarwal/Google Drive/iitr_gmail_drive/project_data/" : "../../runs-svn/";
     public static final String SHARED_SVN = System.getProperty("user.name").equalsIgnoreCase("amit") ? "C:/Users/Amit Agarwal/Google Drive/iitr_gmail_drive/project_data/" : "../../shared-svn/";
@@ -51,7 +53,7 @@ public final class FileUtils {
         for (int index =firstIteration+1; index <lastIteration; index ++){
             String dirToDel = outputDir+"/ITERS/it."+index;
             if (! new File(dirToDel).exists()) continue;
-            Logger.getLogger(JointCalibrationControler.class).info("Deleting the directory "+dirToDel);
+            LogManager.getLogger(JointCalibrationControler.class).info("Deleting the directory "+dirToDel);
             IOUtils.deleteDirectoryRecursively(new File(dirToDel).toPath());
         }
     }

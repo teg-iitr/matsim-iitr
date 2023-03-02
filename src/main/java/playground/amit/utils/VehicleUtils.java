@@ -19,7 +19,8 @@
 
 package playground.amit.utils;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.vehicles.MatsimVehicleReader;
 import org.matsim.vehicles.VehicleType;
@@ -32,7 +33,7 @@ import org.matsim.vehicles.Vehicles;
 
 public final class VehicleUtils {
 
-    private static final Logger LOGGER = Logger.getLogger(VehicleUtils.class);
+    private static final Logger LOGGER = LogManager.getLogger(VehicleUtils.class);
 
     public static void addVehiclesToScenarioFromVehicleFile(final String vehiclesFile, final Scenario scenario){
         Vehicles vehs = org.matsim.vehicles.VehicleUtils.createVehiclesContainer();

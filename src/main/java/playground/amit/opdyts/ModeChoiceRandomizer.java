@@ -39,7 +39,7 @@
 // */
 //
 //public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<ModeChoiceDecisionVariable> {
-//    private static final Logger log = Logger.getLogger(ModeChoiceRandomizer.class);
+//    private static final Logger log = LogManager.getLogger(ModeChoiceRandomizer.class);
 //
 //    public enum ASCRandomizerStyle {
 //        axial_randomVariation, // combinations like (0,+), (0,-), (+,0), (-,0)

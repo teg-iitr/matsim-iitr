@@ -19,11 +19,13 @@
 
 package playground.amit.analysis;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.matsim.core.utils.io.IOUtils;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import org.apache.log4j.Logger;
-import org.matsim.core.utils.io.IOUtils;
 
 /**
  * Created by amit on 11.06.17.
@@ -32,7 +34,7 @@ import org.matsim.core.utils.io.IOUtils;
 
 public class FileMerger {
 
-    private static final Logger LOG = Logger.getLogger(FileMerger.class);
+    private static final Logger LOG = LogManager.getLogger(FileMerger.class);
 
     public FileMerger(final String headerFileInitializer) {
         LOG.info("Header file will be written only once at start.");

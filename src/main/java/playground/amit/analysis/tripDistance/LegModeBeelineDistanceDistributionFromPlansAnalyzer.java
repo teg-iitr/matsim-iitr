@@ -19,29 +19,13 @@
  * *********************************************************************** */
 package playground.amit.analysis.tripDistance;
 
-import java.io.BufferedWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.api.core.v01.population.Population;
-import org.matsim.api.core.v01.population.Route;
+import org.matsim.api.core.v01.population.*;
 import org.matsim.core.events.handler.EventHandler;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
@@ -49,6 +33,10 @@ import org.matsim.core.utils.io.IOUtils;
 import org.matsim.pt.PtConstants;
 import playground.amit.utils.PersonFilter;
 import playground.vsp.analysis.modules.AbstractAnalysisModule;
+
+import java.io.BufferedWriter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Provides leg mode distance distribution, distances are calculated from routes of selected plans
@@ -58,7 +46,7 @@ import playground.vsp.analysis.modules.AbstractAnalysisModule;
  * @author amit
  */
 public class LegModeBeelineDistanceDistributionFromPlansAnalyzer extends AbstractAnalysisModule{
-	private final static Logger LOG = Logger.getLogger(LegModeBeelineDistanceDistributionFromPlansAnalyzer.class);
+	private final static Logger LOG = LogManager.getLogger(LegModeBeelineDistanceDistributionFromPlansAnalyzer.class);
 
 	private Scenario scenario;
 	private final List<Double> distanceClasses;

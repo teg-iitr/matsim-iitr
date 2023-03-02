@@ -18,10 +18,8 @@
  * *********************************************************************** */
 package playground.amit.analysis.emission.caused;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
 import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
@@ -39,6 +37,10 @@ import playground.amit.utils.MapUtils;
 import playground.amit.utils.PersonFilter;
 import playground.vsp.airPollution.flatEmissions.EmissionCostModule;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 /**
  * Emission costs (flat emission cost module is used).
  *
@@ -47,7 +49,7 @@ import playground.vsp.airPollution.flatEmissions.EmissionCostModule;
 
 public class CausedEmissionCostHandler implements VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler, WarmEmissionEventHandler, ColdEmissionEventHandler, EmissionCostHandler{
 
-	private static final Logger LOG = Logger.getLogger(CausedEmissionCostHandler.class);
+	private static final Logger LOG = LogManager.getLogger(CausedEmissionCostHandler.class);
 
 	private final EmissionCostModule emissionCostModule;
 	private final Map<Id<Vehicle>, Double> vehicleId2ColdEmissCosts = new HashMap<>();

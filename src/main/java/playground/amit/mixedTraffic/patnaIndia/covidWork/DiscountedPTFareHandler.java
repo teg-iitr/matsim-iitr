@@ -19,11 +19,9 @@
 
 package playground.amit.mixedTraffic.patnaIndia.covidWork;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.log4j.Logger;
+import com.google.inject.Inject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.events.Event;
@@ -34,10 +32,11 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.api.experimental.events.TeleportationArrivalEvent;
 import org.matsim.core.api.experimental.events.handler.TeleportationArrivalEventHandler;
-
-import com.google.inject.Inject;
-
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The fare calculation is taken from KumarEtc2004PTCost.
@@ -47,7 +46,7 @@ import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 
 public class DiscountedPTFareHandler implements PersonDepartureEventHandler, TeleportationArrivalEventHandler{
 
-    public static final Logger logger = Logger.getLogger(DiscountedPTFareHandler.class);
+    public static final Logger logger = LogManager.getLogger(DiscountedPTFareHandler.class);
 
     private final Map<Id<Person>,String> person2mode = new HashMap<>();
     //peak is 7 to 10 and 15 to 18; in the form of 1 to 24.

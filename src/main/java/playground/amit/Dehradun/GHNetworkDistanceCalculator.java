@@ -1,6 +1,6 @@
 package playground.amit.Dehradun;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -17,7 +17,6 @@ import java.net.BindException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Scanner;
-import java.util.function.Predicate;
 
 /**
  * @author Amit, created on 20-09-2021
@@ -122,12 +121,12 @@ public class GHNetworkDistanceCalculator {
 
 
         if (origin==destination) {
-//            Logger.getLogger(GHNetworkDistanceCalculator.class).warn("Identical origin and destination.");
+//            LogManager.getLogger(GHNetworkDistanceCalculator.class).warn("Identical origin and destination.");
             return new TripChar(0.0,0.0);
         }
 
         if (mode == null ) {
-            Logger.getLogger(GHNetworkDistanceCalculator.class).warn("Transport mode is null. Setting to "+"car");
+            LogManager.getLogger(GHNetworkDistanceCalculator.class).warn("Transport mode is null. Setting to "+"car");
             mode = "car";
         } else if (mode.equals("motorbike")) mode = "motorcycle";
         else if (mode.equals("metro")) mode = "metro";

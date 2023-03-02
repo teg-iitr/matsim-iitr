@@ -19,12 +19,8 @@
 
 package playground.amit.mixedTraffic.patnaIndia.policies.bikeTrack;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
-import javax.inject.Inject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -54,6 +50,12 @@ import org.matsim.core.utils.timing.TimeInterpretation;
 import playground.amit.analysis.linkVolume.ModeFilterLinkVolumeHandler;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 
+import javax.inject.Inject;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
+
 /**
  * The idea is to first connect the proposed bike track to regular network by all possible connectors
  * and then start removing one by one connector.
@@ -63,7 +65,7 @@ import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 
 class BikeConnectorControlerListener implements StartupListener, IterationStartsListener, IterationEndsListener, ShutdownListener {
 
-    private static final Logger LOG = Logger.getLogger(PatnaBikeTrackConnectionControler.class);
+    private static final Logger LOG = LogManager.getLogger(PatnaBikeTrackConnectionControler.class);
     private static final List<String> allowedModes = Arrays.asList(TransportMode.bike);
 
     private final int numberOfBikeConnectorsRequired;
@@ -225,7 +227,6 @@ class BikeConnectorControlerListener implements StartupListener, IterationStarts
 //                new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.bike, scenario.getConfig().planCalcScore()).createTravelDisutility(travelTime));
 
         final TripRouter tripRouter = routerFactory.build(this.scenario).get();
-        final TimeInterpretation timeInterpretation = TimeInterpretation.create(this.scenario.getConfig());
-        return new PlanRouter(tripRouter, timeInterpretation);
+        return new PlanRouter(tripRouter, TimeInterpretation.create(this.scenario.getConfig()));
     }
 }

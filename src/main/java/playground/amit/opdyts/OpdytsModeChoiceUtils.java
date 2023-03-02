@@ -19,10 +19,9 @@
 
 package playground.amit.opdyts;
 
-import java.io.File;
-import java.io.IOException;
 import com.google.common.io.Files;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.core.config.groups.StrategyConfigGroup;
 import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
 import org.matsim.core.controler.events.ShutdownEvent;
@@ -30,6 +29,9 @@ import org.matsim.core.controler.listener.ShutdownListener;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultSelector;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
 import org.matsim.core.utils.io.IOUtils;
+
+import java.io.File;
+import java.io.IOException;
 //import playground.amit.opdyts.patna.networkModesOnly.PatnaNetworkModesOpdytsCalibrator;
 
 /**
@@ -37,7 +39,7 @@ import org.matsim.core.utils.io.IOUtils;
  */
 
 public class OpdytsModeChoiceUtils {
-    private static final Logger log = Logger.getLogger(OpdytsModeChoiceUtils.class);
+    private static final Logger log = LogManager.getLogger(OpdytsModeChoiceUtils.class);
 
     /*
      * random replanning probability is the probability that
@@ -94,7 +96,7 @@ public class OpdytsModeChoiceUtils {
                             try {
                                 Files.copy(new File(sourceFile), new File(sinkFile));
                             } catch (IOException e) {
-//                                Logger.getLogger(PatnaNetworkModesOpdytsCalibrator.class).warn("Data is not copied. Reason : " + e);
+//                                LogManager.getLogger(PatnaNetworkModesOpdytsCalibrator.class).warn("Data is not copied. Reason : " + e);
                             }
                         }
                         {

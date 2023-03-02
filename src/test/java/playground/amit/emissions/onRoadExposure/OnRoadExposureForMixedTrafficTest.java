@@ -19,7 +19,8 @@
 
 package playground.amit.emissions.onRoadExposure;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -61,7 +62,7 @@ public class OnRoadExposureForMixedTrafficTest {
 
     @Rule
     public final MatsimTestUtils helper = new MatsimTestUtils();
-    private static final Logger logger = Logger.getLogger(OnRoadExposureForMixedTrafficTest.class);
+    private static final Logger logger = LogManager.getLogger(OnRoadExposureForMixedTrafficTest.class);
 
     private final boolean isConsideringCO2Costs = false; // no local exposure for co2
 

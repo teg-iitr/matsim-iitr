@@ -18,12 +18,8 @@
  * *********************************************************************** */
 package playground.amit.analysis.congestion;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -37,6 +33,12 @@ import playground.amit.utils.MapUtils;
 import playground.amit.utils.PersonFilter;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 /**
  * This analyzer calculates delay from link enter and link leave events and therefore provides only experienced delay.
  * <p> In order to get the caused delay for each person, see {@link CausedDelayAnalyzer}
@@ -45,7 +47,7 @@ import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
  */
 public class ExperiencedDelayAnalyzer {
 	
-	private final static Logger LOGGER = Logger.getLogger(ExperiencedDelayAnalyzer.class);
+	private final static Logger LOGGER = LogManager.getLogger(ExperiencedDelayAnalyzer.class);
 	private final String eventsFile;
 	private final FilteredExperienceDelayHandler congestionHandler;
 	private final Scenario scenario;

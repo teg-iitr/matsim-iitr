@@ -19,12 +19,8 @@
 
 package playground.amit.analysis.tripDistance;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.*;
 import org.matsim.api.core.v01.events.handler.*;
@@ -40,6 +36,12 @@ import playground.amit.utils.FileUtils;
 import playground.amit.utils.LoadMyScenarios;
 import playground.amit.utils.PersonFilter;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+
 /**
  * Created by amit on 31/12/2016.
  */
@@ -47,7 +49,7 @@ import playground.amit.utils.PersonFilter;
 public class FilteredTripRouteDistanceHandler implements PersonDepartureEventHandler, LinkLeaveEventHandler,
         PersonArrivalEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
 
-    private static final Logger LOGGER = Logger.getLogger(FilteredTripRouteDistanceHandler.class);
+    private static final Logger LOGGER = LogManager.getLogger(FilteredTripRouteDistanceHandler.class);
     private final Vehicle2DriverEventHandler veh2DriverDelegate = new Vehicle2DriverEventHandler();
 
     private final TripRouteDistanceInTimeBinHandler delegate;
