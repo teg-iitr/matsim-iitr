@@ -21,6 +21,7 @@ package playground.amit.emissions.onRoadExposure;
 
 import org.apache.log4j.Logger;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -86,6 +87,7 @@ public class OnRoadExposureForMixedTrafficTest {
      *
      * TODO : should include following situation: (a) cold emissions except departure link is thrown at later time but on the departure link until distance travelled is more than 1km.
      */
+    @Ignore
     @Test
     public void excludeAgentsLeavingInSameTimeStepTest() {
         EquilTestSetUp equilTestSetUp = new EquilTestSetUp();

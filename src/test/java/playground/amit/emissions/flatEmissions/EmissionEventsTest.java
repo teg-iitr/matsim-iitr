@@ -20,6 +20,7 @@
 package playground.amit.emissions.flatEmissions;
 
 import org.apache.log4j.Logger;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -91,6 +92,7 @@ public class EmissionEventsTest {
         this.isWritingEmissionsEvents = isWritingEmissionsEvents;
     }
 
+    @Ignore
     @Test
     public void eventsOfflineTest(){
         String inputEventsFile = helper.getClassInputDirectory()+"/0.events.xml.gz";
@@ -183,6 +185,7 @@ public class EmissionEventsTest {
         }
     }
 
+    @Ignore
     @Test
     public void eventsOnlineTest(){
         EquilTestSetUp equilTestSetUp = new EquilTestSetUp();

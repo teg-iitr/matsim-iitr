@@ -209,6 +209,12 @@ public class RunDadarEvacScenario {
         config.qsim().setMainModes(dadarModes);
         config.qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.withHoles);
 
+        //TODO we are using 0.5 just to see some congestion.
+        config.qsim().setFlowCapFactor(0.5);
+        config.qsim().setStorageCapFactor(0.5);
+
+        config.vspExperimental().setWritingOutputEvents(true);
+
         PlanCalcScoreConfigGroup pcg = config.planCalcScore();
         PlanCalcScoreConfigGroup.ActivityParams originAct = new PlanCalcScoreConfigGroup.ActivityParams(ORIGIN_ACTIVITY);
         originAct.setScoringThisActivityAtAll(false);
@@ -333,7 +339,7 @@ public class RunDadarEvacScenario {
                 Plan plan = factory.createPlan();
 
                 Activity origAct = factory.createActivityFromCoord(ORIGIN_ACTIVITY, origin);
-                origAct.setEndTime(6. * 3600. + MatsimRandom.getRandom().nextInt(2 * 3600));
+                origAct.setEndTime(6. * 3600. + MatsimRandom.getRandom().nextInt( 3600));
                 plan.addActivity(origAct);
 
                 Leg leg = factory.createLeg("car");
