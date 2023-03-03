@@ -94,7 +94,6 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
     private void run(boolean startOtfvis) {
 
         EventsManager manager = EventsUtils.createEventsManager();
-
         PrepareForSimUtils.createDefaultPrepareForSim(controler.getScenario()).run();
         QSim qSim = new QSimBuilder(controler.getScenario().getConfig()).useDefaults().build(controler.getScenario(), manager);
 
@@ -260,6 +259,8 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
 
         config.controler().setOutputDirectory(outputDirectory);
         config.controler().setLastIteration(50);
+
+
 
         config.travelTimeCalculator().setMaxTime(5 * 60 * 60);
 
