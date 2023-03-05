@@ -14,6 +14,6 @@ public class DadarUtils {
             .getCoordinateTransformation(TransformationFactory.WGS84, Dadar_EPSG);
 
     public enum DadarTrafficCountMode2023 {
-        motorbike, bus, car, lcv, truck, bicycle, cart;
+        motorbike, car, auto,  bus, lcv, truck, cycle, cart;
     }
 }

@@ -57,6 +57,9 @@ public class MixedTrafficVehiclesUtils {
             case "truck":
                 pcu = 3.0;
                 break;
+            case "auto":
+                pcu = 3.0;
+                break;
             default:
                 throw new RuntimeException("No PCU is set for travel mode " + travelMode + ".");
         }
@@ -95,6 +98,9 @@ public class MixedTrafficVehiclesUtils {
             case "bus":
                 speed = 10;
                 break;
+            case "auto":
+                speed = 8.33;
+                break;
             default:
                 throw new RuntimeException("No speed is set for travel mode " + travelMode + ".");
         }
@@ -127,6 +133,8 @@ public class MixedTrafficVehiclesUtils {
                 return 7.5;
             case "bus":
                 return 7.5;
+            case "auto":
+                return 2.5;
 
         }
         throw new RuntimeException("Length fot " + travelMode + " is not found.");
@@ -158,6 +166,9 @@ public class MixedTrafficVehiclesUtils {
                 break;
             case "bus":
                 stuckTime = 150;
+                break;
+            case "auto":
+                stuckTime = 40;
                 break;
             default:
                 throw new RuntimeException("No speed is set for travel mode " + travelMode + ".");
