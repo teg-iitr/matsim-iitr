@@ -1,23 +1,28 @@
 package playground.shivam.signals;
 
 
+import org.matsim.api.core.v01.events.EventsManagerImpl;
+
 import org.matsim.core.api.experimental.events.EventsManager;
-import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 
 public class RunEventHandlerLanes{
     public static void main(String[] args){
-        // give the path of events file. for this you first need to run a simulation
+        // Give the path of events file. for this you first need to run a simulation
 
         String inputfile = "output/RunFixedMixedTrafficSignalSimpleIntersection/output_events.xml.gz"; // events file
 
         //create an events object
-        EventsManager events = EventsUtils.createEventsManager();
+//        EventsManager events = new EventsManagerImpl();
 
-        //create the handler and add it
-
+        // Create the handler and add it
         EventHandlerLanes eventHandler = new EventHandlerLanes();
+//        events.addHandler(eventHandler);
+
+        EventsManager events = new EventsManagerImpl();
         events.addHandler(eventHandler);
+//        eventHandler.handleEvent();
+
 
         //create the reader and read the file
         events.initProcessing();
