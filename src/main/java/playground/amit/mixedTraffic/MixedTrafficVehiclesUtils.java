@@ -60,6 +60,9 @@ public class MixedTrafficVehiclesUtils {
             case "auto":
                 pcu = 3.0;
                 break;
+            case "cycle":
+                pcu = 0.5;
+                break;
             default:
                 throw new RuntimeException("No PCU is set for travel mode " + travelMode + ".");
         }

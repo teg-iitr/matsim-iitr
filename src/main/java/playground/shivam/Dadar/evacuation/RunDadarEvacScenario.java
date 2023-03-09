@@ -66,6 +66,7 @@ public class RunDadarEvacScenario {
     private static String fromSafePointSystem;
     private static String toSafePointSystem;
     private static final String boundaryShapeFileWGS84 = filesPath + "boundaryDadar.shp";
+    private static final String evacuationZonesShapefile = filesPath + "evacuationZones.shp";
     private static final String zonesShapeFile = filesPath + "zonesDadar.shp";
     //    private static final String boundaryShapeFile = "input/evacDadar/boundaryDadar.shp";
     private static final String ORIGIN_ACTIVITY = "origin";
@@ -75,6 +76,8 @@ public class RunDadarEvacScenario {
 
     private static final String safePointsPath = filesPath + "dadarSafePoints.shp";
     private static final String ODMatrixFile = filesPath + "dadar_od_10_10_22.csv";
+
+    private static final String modeShareFilePath = filesPath + "dadar_mode_share/";
 
     private static final String outputMATSimPlansFile = filesPath + "dadar-plans.xml.gz";
 
@@ -87,6 +90,7 @@ public class RunDadarEvacScenario {
 
     public void run() {
         createDadarNetworkFromOSM();
+
         scenario = LoadMyScenarios.loadScenarioFromNetwork(outputMATSimNetworkFile);
 
         safePoints();
@@ -95,11 +99,12 @@ public class RunDadarEvacScenario {
 
         createPlansFromDadarOD();
 //
-//        createDadarEvacPlans(LoadMyScenarios.loadScenarioFromPlans(outputMATSimPlansFile));
+        createDadarEvacPlans(LoadMyScenarios.loadScenarioFromPlans(outputMATSimPlansFile));
 
-//        createDadarEvacConfig();
+        createDadarEvacConfig();
 
     }
+
 
     private void createDadarEvacPlans(Scenario scenarioPop) {
         Population dadarPop = scenarioPop.getPopulation();
@@ -107,67 +112,69 @@ public class RunDadarEvacScenario {
 
         Population evacPop = this.scenario.getPopulation();
 
-        Person evacPerson;
-        for (Person person : dadarPop.getPersons().values()) {
-            PlanElement actPe = person.getSelectedPlan().getPlanElements().get(0); // first plan element is of activity
-            Activity originExisting = (Activity) actPe;
-            Coord actCoord = originExisting.getCoord();
+        Person evacPerson = null;
+        for (int i = 1; i <= numberOfSafePointsNeeded; i++) {
+            for (Person person : dadarPop.getPersons().values()) {
+                PlanElement actPe = person.getSelectedPlan().getPlanElements().get(0); // first plan element is of activity
+                Activity originExisting = (Activity) actPe;
+                Coord originExistingCoord = originExisting.getCoord();
 
-            Link link = NetworkUtils.getNearestLink(scenario.getNetwork(), originExisting.getCoord());
-            Activity origin = popFact.createActivityFromLinkId(originExisting.getType(), link.getId());
+                Link link = NetworkUtils.getNearestLink(scenario.getNetwork(), originExisting.getCoord());
+                Activity origin = popFact.createActivityFromLinkId(originExisting.getType(), link.getId());
 
-            //check if the person is in the area shape, if not leave them out
-            if (actCoord != null && !evacuationArea.contains(MGC.coord2Point(actCoord)))
-                continue;
+                //check if the person is in the area shape, if not leave them out
+                if (originExistingCoord != null && !evacuationArea.contains(MGC.coord2Point(originExistingCoord)))
+                    continue;
 
-            // also exclude any origin activity starting on link which is not included in evac network
-            if (!scenario.getNetwork().getLinks().containsKey(origin.getLinkId()))
-                continue;
+                // also exclude any origin activity starting on link which is not included in evac network
+                if (!scenario.getNetwork().getLinks().containsKey(origin.getLinkId()))
+                    continue;
 
-            evacPerson = popFact.createPerson(person.getId());
-            Plan planOut = popFact.createPlan();
-            evacPerson.addPlan(planOut);
+                evacPerson = popFact.createPerson(person.getId());
+                Plan planOut = popFact.createPlan();
+                evacPerson.addPlan(planOut);
 
-            planOut.addActivity(origin);
-            origin.setEndTime(9 * 3600);
+                planOut.addActivity(origin);
+                // TODO: check in simulation
+                origin.setEndTime(9 * 3600);
 
-            PlanElement legPe = person.getSelectedPlan().getPlanElements().get(1);
-            Leg leg = popFact.createLeg(((Leg) legPe).getMode());
-            planOut.addLeg(leg);
+                PlanElement legPe = person.getSelectedPlan().getPlanElements().get(1);
+                Leg leg = popFact.createLeg(((Leg) legPe).getMode());
+                planOut.addLeg(leg);
 
-            Activity evacAct = popFact.createActivityFromLinkId("evac", safeLinkId);
-            planOut.addActivity(evacAct);
+                Activity evacAct = popFact.createActivityFromLinkId("evac", Id.createLinkId((safeLinkId.toString() + "_" + i)));
+                planOut.addActivity(evacAct);
 
-            if (dadarModes.contains(leg.getMode())) {
-                TripRouter.Builder builder = new TripRouter.Builder(scenario.getConfig());
-                builder.setRoutingModule(
-                        leg.getMode(),
-                        DefaultRoutingModules.createPureNetworkRouter(
-                                leg.getMode(),
-                                popFact,
-                                scenario.getNetwork(),
-                                new DijkstraFactory().createPathCalculator(scenario.getNetwork(),
-                                        new OnlyTimeDependentTravelDisutility(new FreeSpeedTravelTime()),
-                                        new FreeSpeedTravelTime())
-                        )
-                );
-                List<? extends PlanElement> routeInfo = builder.build().calcRoute(
-                        leg.getMode(),
-                        FacilitiesUtils.toFacility(origin, null),
-                        FacilitiesUtils.toFacility(evacAct, null),
-                        origin.getEndTime().seconds(),
-                        evacPerson,
-                        new Attributes());
+                if (dadarModes.contains(leg.getMode())) {
+                    TripRouter.Builder builder = new TripRouter.Builder(scenario.getConfig());
+                    builder.setRoutingModule(
+                            leg.getMode(),
+                            DefaultRoutingModules.createPureNetworkRouter(
+                                    leg.getMode(),
+                                    popFact,
+                                    scenario.getNetwork(),
+                                    new DijkstraFactory().createPathCalculator(scenario.getNetwork(),
+                                            new OnlyTimeDependentTravelDisutility(new FreeSpeedTravelTime()),
+                                            new FreeSpeedTravelTime())
+                            )
+                    );
+                    List<? extends PlanElement> routeInfo = builder.build().calcRoute(
+                            leg.getMode(),
+                            FacilitiesUtils.toFacility(origin, null),
+                            FacilitiesUtils.toFacility(evacAct, null),
+                            origin.getEndTime().seconds(),
+                            evacPerson,
+                            new Attributes());
 
-                Route route = ((Leg) routeInfo.get(0)).getRoute();
-                route.setStartLinkId(origin.getLinkId());
-                route.setEndLinkId(evacAct.getLinkId());
+                    Route route = ((Leg) routeInfo.get(0)).getRoute();
+                    route.setStartLinkId(origin.getLinkId());
+                    route.setEndLinkId(evacAct.getLinkId());
 
-                leg.setRoute(route);
-                leg.setTravelTime(((Leg) routeInfo.get(0)).getTravelTime().seconds());
+                    leg.setRoute(route);
+                    leg.setTravelTime(((Leg) routeInfo.get(0)).getTravelTime().seconds());
+                } else
+                    continue;
             }
-            else
-                continue;
             evacPop.addPerson(evacPerson);
         }
         new PopulationWriter(evacPop).write(outputEvacPlansFile);
@@ -175,7 +182,7 @@ public class RunDadarEvacScenario {
 
     private void createDadarEvacNetwork(Scenario scenario) {
         // TODO: right now we are testing the whole network as evac zone
-        Geometry transformEvacuationArea = (Geometry) ShapeFileReader.getAllFeatures(boundaryShapeFileWGS84).iterator().next().getDefaultGeometry();// --> EPSG:7767
+        Geometry transformEvacuationArea = (Geometry) ShapeFileReader.getAllFeatures(evacuationZonesShapefile).iterator().next().getDefaultGeometry();// --> EPSG:7767
 
         try {
             evacuationArea = JTS.transform(transformEvacuationArea, CRS.findMathTransform(MGC.getCRS(TransformationFactory.WGS84), MGC.getCRS(DadarUtils.Dadar_EPSG), true));
@@ -197,7 +204,7 @@ public class RunDadarEvacScenario {
     private void createDadarEvacConfig() {
         Config config = scenario.getConfig();
         config.network().setInputFile(outputEvacNetworkFile);
-        config.plans().setInputFile(outputEvacPlansFile);
+        config.plans().setInputFile(outputMATSimPlansFile);
         config.controler().setLastIteration(10);
         config.controler().setOutputDirectory(filesPath + "output");
         config.controler().setDumpDataAtEnd(true);
@@ -243,15 +250,22 @@ public class RunDadarEvacScenario {
 
         StrategyConfigGroup scg = config.strategy();
 
-        StrategyConfigGroup.StrategySettings reRoute = new StrategyConfigGroup.StrategySettings();
-        reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
-        reRoute.setWeight(0.2);
-        scg.addStrategySettings(reRoute);
+//        StrategyConfigGroup.StrategySettings reRoute = new StrategyConfigGroup.StrategySettings();
+//        reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
+//        reRoute.setWeight(0.2);
+//        scg.addStrategySettings(reRoute);
 
         StrategyConfigGroup.StrategySettings tam = new StrategyConfigGroup.StrategySettings();
         tam.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator);
         tam.setWeight(0.1);
         scg.addStrategySettings(tam);
+
+
+        for (String mode : dadarModes) {
+            PlanCalcScoreConfigGroup.ModeParams modeParams = new PlanCalcScoreConfigGroup.ModeParams(mode);
+            config.planCalcScore().addModeParams(modeParams);
+        }
+
 
 //        StrategyConfigGroup.StrategySettings ceb = new StrategyConfigGroup.StrategySettings();
 //        ceb.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta);
@@ -322,34 +336,40 @@ public class RunDadarEvacScenario {
 
     private void safePoints() {
         safePoints = ShapeFileReader.getAllFeatures(safePointsPath);
+
         Collection<SimpleFeature> duplicate = new ArrayList<>(safePoints);
-        System.out.println(safePoints.size());
+
         int c = 0;
-        for (SimpleFeature simpleFeature: duplicate) {
+
+        for (SimpleFeature simpleFeature : duplicate) {
             safePoints.removeIf(e -> (Objects.equals(e.getID(), simpleFeature.getID())));
+
             c++;
+
             if (c == (duplicate.size() - numberOfSafePointsNeeded))
                 break;
         }
-        System.out.println(safePoints.size());
+
         fromSafePointSystem = "EPSG:32643";
+
         toSafePointSystem = DadarUtils.Dadar_EPSG;
-
     }
-    private void createPlansFromDadarOD() {
-        Map<Id<OD>, OD> remaining_OD = ODMatrixGenerator.generateOD(ODMatrixFile);
 
-        Collection<SimpleFeature> zones = ShapeFileReader.getAllFeatures(zonesShapeFile);
+    private void createPlansFromDadarOD() {
 
         Config config = ConfigUtils.createConfig();
         Scenario scenario = ScenarioUtils.loadScenario(config);
         Population population = scenario.getPopulation();
         PopulationFactory factory = population.getFactory();
 
-        for (OD od : remaining_OD.values()) {
-            String originID = od.getOrigin();
-            String destinationID = od.getDestination();
-            double numberOfTrips = od.getNumberOfTrips();
+        Map<Id<OD>, OD> tripMatrix = ODMatrixGenerator.generateOD(ODMatrixFile);
+        Collection<SimpleFeature> zones = ShapeFileReader.getAllFeatures(zonesShapeFile);
+
+        for (OD tripOd : tripMatrix.values()) {
+
+            String originID = tripOd.getOrigin();
+            String destinationID = tripOd.getDestination();
+            double numberOfTrips = tripOd.getNumberOfTrips();
 
             if (numberOfTrips == 0) continue;
 
@@ -383,27 +403,49 @@ public class RunDadarEvacScenario {
 
                 Activity origAct = factory.createActivityFromCoord(ORIGIN_ACTIVITY, origin);
                 // all agents leave around 6 am.
-                origAct.setEndTime(6 * 3600 + MatsimRandom.getRandom().nextInt( 3600));
+                origAct.setEndTime(6 * 3600 + MatsimRandom.getRandom().nextInt(3600));
                 plan.addActivity(origAct);
 
-                Leg leg = factory.createLeg("car");
+                Leg leg = factory.createLeg(getTravelMode(MatsimRandom.getLocalInstance().nextInt(100)));
                 plan.addLeg(leg);
 
                 Activity destinAct = factory.createActivityFromCoord(DESTINATION_ACTIVITY, destination);
                 plan.addActivity(destinAct);
+
+//                            plan.addLeg(leg);
+//
+//                            Activity dummyAct1 = factory.createActivityFromCoord("dummy", dummy1);
+//                            dummyAct1.setEndTime( MatsimRandom.getRandom().nextInt(3600));
+//                            plan.addActivity(dummyAct1);
+//
+//                            plan.addLeg(leg);
+//
+//                            Activity dummyAct2 = factory.createActivityFromCoord("dummy", dummy2);
+//                            plan.addActivity(dummyAct2);
 
                 person.addPlan(plan);
                 population.addPerson(person);
 
             }
         }
-
-
         new PopulationWriter(population).write(outputMATSimPlansFile);
     }
+
     private static String getTravelMode(int number) {
-        if (number <= 60) return "car";
-        else return "truck";
+        if (number <= 45) return DadarUtils.DadarTrafficCountMode2023.motorbike.toString();
+        else if (number <= 85) {
+            return DadarUtils.DadarTrafficCountMode2023.car.toString();
+        } else if (number <= 89) {
+            return DadarUtils.DadarTrafficCountMode2023.bus.toString();
+        } else if (number <= 91) {
+            return DadarUtils.DadarTrafficCountMode2023.lcv.toString();
+        } else if (number <= 95) {
+            return DadarUtils.DadarTrafficCountMode2023.truck.toString();
+        } else if (number <= 97) {
+            return DadarUtils.DadarTrafficCountMode2023.bicycle.toString();
+        } else if (number <= 99) {
+            return DadarUtils.DadarTrafficCountMode2023.auto.toString();
+        } else return DadarUtils.DadarTrafficCountMode2023.cart.toString();
     }
     /**
      * Creates a Network from OSM

@@ -114,7 +114,7 @@ public class ODMatrixGenerator {
                     destinations = Arrays.asList(parts);
                 } else {
                     String origin = parts[0];
-                    for (int index = 1; index<destinations.size()-1;index++){
+                    for (int index = 1; index<destinations.size();index++){
                         OD od = new OD(origin, destinations.get(index));
                         od.setNumberOfTrips( (int) Math.round(Integer.parseInt(parts[index]) ) );
                         odMap.put(od.getId(), od);
@@ -128,5 +128,30 @@ public class ODMatrixGenerator {
         return odMap;
     }
 
+    public static Map<Id<OD>, OD> readCSV(String inputFile){
+        Map<Id<OD>, OD> odMap = new HashMap<>();
+        BufferedReader reader = IOUtils.getBufferedReader(inputFile);
+        try {
+            String line = reader.readLine();
+            List<String> destinations = null;
+            while (line!=null){
+                String [] parts = line.split(",");
+                if (destinations == null ){
+                    destinations = Arrays.asList(parts);
+                } else {
+                    String origin = parts[0];
+                    for (int index = 1; index<destinations.size();index++){
+                        OD od = new OD(origin, destinations.get(index));
+                        od.setValue( Double.parseDouble(parts[index]));
+                        odMap.put(od.getId(), od);
+                    }
+                }
+                line = reader.readLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return odMap;
+    }
 
 }
