@@ -11,6 +11,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkWriter;
+import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.*;
 import org.matsim.contrib.osm.networkReader.SupersonicOsmNetworkReader;
 import org.matsim.core.config.Config;
@@ -65,6 +66,7 @@ import java.util.stream.Collectors;
 public class RunDadarEvacScenario {
     private  final String filesPath = "input/evacDadar/";
     private  final Map<Id<Link>, Geometry> transformedSafePoints = new HashMap<>();
+    private Collection<Id<Node>> safeNodeAIds = new ArrayList<>();
     private  final String boundaryShapeFileWGS84 = filesPath + "boundaryDadar.shp";
     private  final String evacuationZonesShapefile = filesPath + "evacuationZones.shp";
     private  final String zonesShapeFile = filesPath + "zonesDadar.shp";
@@ -129,6 +131,10 @@ public class RunDadarEvacScenario {
             if (!scenario.getNetwork().getLinks().containsKey(origin.getLinkId()))
                 continue;
 
+            // should skip when coord is one of the safeNodeAId
+            if (safeNodeAIds.contains(link.getToNode().getId()))
+                continue;
+
             evacPerson = popFact.createPerson(person.getId());
             for (Id<Link> safeLinkIdFromSafePoint: transformedSafePoints.keySet()) {
                 Plan planOut = popFact.createPlan();
@@ -145,7 +151,7 @@ public class RunDadarEvacScenario {
                 planOut.addActivity(evacAct);
 
                 evacPerson.addPlan(planOut);
-                /*if (dadarModes.contains(leg.getMode())) {
+                if (dadarModes.contains(leg.getMode())) {
                     TripRouter.Builder builder = new TripRouter.Builder(scenario.getConfig());
                     builder.setRoutingModule(
                             leg.getMode(),
@@ -173,7 +179,7 @@ public class RunDadarEvacScenario {
                     leg.setRoute(route);
                     leg.setTravelTime(((Leg) routeInfo.get(0)).getTravelTime().seconds());
                 } else
-                    continue;*/
+                    continue;
             }
             evacPop.addPerson(evacPerson);
 
@@ -193,6 +199,7 @@ public class RunDadarEvacScenario {
 
         EvacuationNetworkGenerator net = new EvacuationNetworkGenerator(scenario, evacuationArea, safeLinkId);
         net.run(transformedSafePoints);
+        this.safeNodeAIds = net.getSafeNodeAIds();
 
         for (Link l : scenario.getNetwork().getLinks().values()) {
             Set<String> allowedModes = new HashSet<>(dadarModes);
