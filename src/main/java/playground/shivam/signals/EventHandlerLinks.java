@@ -15,7 +15,7 @@ public class EventHandlerLinks implements LinkEnterEventHandler, LinkLeaveEventH
     public void handleEvent(LinkEnterEvent linkEnterEvent) {
         String linkId = linkEnterEvent.getLinkId().toString();
         if(linkId.equals("2_3") || linkId.equals("8_3") || linkId.equals("4_3") || linkId.equals("7_3")){
-            System.out.println("LinkId: " + linkEnterEvent.getLinkId() + "  LinkEnterEvent  " + "Time  " + linkEnterEvent.getTime());
+//            System.out.println("LinkId: " + linkEnterEvent.getLinkId() + "  LinkEnterEvent  " + "Time  " + linkEnterEvent.getTime());
             double travelTime = entryTime.getOrDefault(linkId, 0.0);
             entryTime.put(linkId, travelTime + linkEnterEvent.getTime());
         }
@@ -25,7 +25,7 @@ public class EventHandlerLinks implements LinkEnterEventHandler, LinkLeaveEventH
     public void handleEvent(LinkLeaveEvent linkLeaveEvent) {
         String linkId = linkLeaveEvent.getLinkId().toString();
         if(linkId.equals("2_3") || linkId.equals("8_3") || linkId.equals("4_3") || linkId.equals("7_3")){
-            System.out.println("LinkId: " + linkLeaveEvent.getLinkId() + "  LinkLeaveEvent  " + "Time  " + linkLeaveEvent.getTime());
+//            System.out.println("LinkId: " + linkLeaveEvent.getLinkId() + "  LinkLeaveEvent  " + "Time  " + linkLeaveEvent.getTime());
             double travelTime = exitTime.getOrDefault(linkId, 0.0);
             exitTime.put(linkId, travelTime+linkLeaveEvent.getTime());
 

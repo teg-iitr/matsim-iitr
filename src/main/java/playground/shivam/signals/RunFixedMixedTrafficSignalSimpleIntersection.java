@@ -64,55 +64,86 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
     private Controler controler;
     static String outputDirectory = "output/RunFixedMixedTrafficSignalSimpleIntersection/";
 
-    private static final double LANE_LENGTH = 1000;
-    private static final int LANE_CAPACITY = 1800;
+    private static final double LANE_LENGTH = 500;
+    private static final int LANE_CAPACITY = 1000;
     private static final int NO_LANES = 1;
     private static final double LINK_LENGTH = 1000;
 
-    private static final int LINK_CAPACITY = 1800;
+    private static final int LINK_CAPACITY = 1000;
     private int CYCLE = 120;
     private final int ONSET = 0;
     private final int DROPPING = 60;
 
-    private final int AGENTS_PER_LINK = 900;
+    private final int AGENTS_PER_LEFT_APPROACH = 200;
+    // seconds
+    private final int OFFSET_LEFT_APPROACH = 60;
+    private final int DROPPING_LEFT_APPROACH = 80;
+    private final int AGENTS_PER_TOP_APPROACH = 800;
+    private final int OFFSET_TOP_APPROACH = 20;
+    private final int DROPPING_TOP_APPROACH = 100;
+    private final int AGENTS_PER_RIGHT_APPROACH = 400;
+    private final int OFFSET_RIGHT_APPROACH = 60;
+    private final int DROPPING_RIGHT_APPROACH = 100;
+    private final int AGENTS_PER_BOTTOM_APPROACH = 600;
+    private final int OFFSET_BOTTOM_APPROACH = 10;
+    private final int DROPPING_BOTTOM_APPROACH = 70;
 
     public RunFixedMixedTrafficSignalSimpleIntersection() throws IOException {
         final Config config = defineConfig();
         final Scenario scenario = defineScenario(config);
 
+
         controler = new Controler(scenario);
 
-        Signals.configure( controler );
+        Signals.configure(controler);
 
+        // create the path to the output directory if it does not exist yet
+        Files.createDirectories(Paths.get(outputDirectory));
+
+        config.controler().setOutputDirectory(outputDirectory);
+        config.controler().setLastIteration(50);
+
+        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+        config.controler().setWriteEventsInterval(config.controler().getLastIteration());
+        config.controler().setWritePlansInterval(config.controler().getLastIteration());
+
+        config.vspExperimental().setWritingOutputEvents(true);
+        config.planCalcScore().setWriteExperiencedPlans(true);
+        //write config to file
+        String configFile = outputDirectory + "config.xml";
+        ConfigWriter configWriter = new ConfigWriter(config);
+        configWriter.write(configFile);
     }
 
     public static void main(String[] args) throws IOException {
         RunFixedMixedTrafficSignalSimpleIntersection fixedMixedTrafficSignalSimpleIntersection = new RunFixedMixedTrafficSignalSimpleIntersection();
-        fixedMixedTrafficSignalSimpleIntersection.run(true);
+        fixedMixedTrafficSignalSimpleIntersection.run(false);
     }
 
     private void run(boolean startOtfvis) {
 
         EventsManager manager = EventsUtils.createEventsManager();
+
         PrepareForSimUtils.createDefaultPrepareForSim(controler.getScenario()).run();
         QSim qSim = new QSimBuilder(controler.getScenario().getConfig()).useDefaults().build(controler.getScenario(), manager);
 
         if (startOtfvis) {
-                
-                // otfvis configuration.  There is more you can do here than via file!
-                final OTFVisConfigGroup otfVisConfig = ConfigUtils.addOrGetModule(qSim.getScenario().getConfig(), OTFVisConfigGroup.GROUP_NAME, OTFVisConfigGroup.class);
-                otfVisConfig.setDrawTransitFacilities(false) ; // this DOES work
-                otfVisConfig.setColoringScheme(OTFVisConfigGroup.ColoringScheme.byId);
 
-                OnTheFlyServer server = OTFVis.startServerAndRegisterWithQSim(controler.getScenario().getConfig(), controler.getScenario(), manager, qSim);
-                OTFClientLive.run(controler.getScenario().getConfig(), server);
+            // otfvis configuration.  There is more you can do here than via file!
+//                final OTFVisConfigGroup otfVisConfig = ConfigUtils.addOrGetModule(qSim.getScenario().getConfig(), OTFVisConfigGroup.GROUP_NAME, OTFVisConfigGroup.class);
+//                otfVisConfig.setDrawTransitFacilities(false) ; // this DOES work
+//                otfVisConfig.setColoringScheme(OTFVisConfigGroup.ColoringScheme.byId);
+//
+//                OnTheFlyServer server = OTFVis.startServerAndRegisterWithQSim(controler.getScenario().getConfig(), controler.getScenario(), manager, qSim);
+//                OTFClientLive.run(controler.getScenario().getConfig(), server);
 
             // add the module that start the otfvis visualization with signals
-            // controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
+            controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
         }
-        qSim.run();
-        //controler.run();
+        //qSim.run();
+        controler.run();
     }
+
     private Scenario defineScenario(Config config) {
         Scenario scenario = ScenarioUtils.loadScenario(config);
         // add missing scenario elements
@@ -148,7 +179,7 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
                 ONSET, DROPPING);
 
         // set output files
-        scenario.getConfig().network().setLaneDefinitionsFile(outputDirectory + "lane_definitions_v2.0.xml");
+        scenario.getConfig().network().setLaneDefinitionsFile("lane_definitions_v2.0.xml");
         signalSystemsConfigGroup.setSignalSystemFile(outputDirectory + "signal_systems.xml");
         signalSystemsConfigGroup.setSignalGroupsFile(outputDirectory + "signal_groups.xml");
         signalSystemsConfigGroup.setSignalControlFile(outputDirectory + "signal_control.xml");
@@ -166,6 +197,7 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
 
         return scenario;
     }
+
     private void createSystemControl(SignalControlData control, Id<SignalSystem> signalSystemId,
                                      int onset, int dropping) {
         SignalControlDataFactory fac = control.getFactory();
@@ -181,45 +213,64 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
 
         // create and add control settings for signal groups
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
-                Id.create("1", SignalGroup.class), onset, dropping));
+                Id.create("1", SignalGroup.class), OFFSET_LEFT_APPROACH, DROPPING_LEFT_APPROACH));
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
-                Id.create("2", SignalGroup.class), onset, dropping));
+                Id.create("2", SignalGroup.class), OFFSET_LEFT_APPROACH, DROPPING_LEFT_APPROACH));
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
-                Id.create("3", SignalGroup.class), onset, dropping));
+                Id.create("3", SignalGroup.class), OFFSET_LEFT_APPROACH, DROPPING_LEFT_APPROACH));
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
-                Id.create("4", SignalGroup.class), onset, dropping));
+                Id.create("4", SignalGroup.class), OFFSET_TOP_APPROACH, DROPPING_TOP_APPROACH));
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
-                Id.create("5", SignalGroup.class), onset, dropping));
+                Id.create("5", SignalGroup.class), OFFSET_TOP_APPROACH, DROPPING_TOP_APPROACH));
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
-                Id.create("6", SignalGroup.class), onset, dropping));
+                Id.create("6", SignalGroup.class), OFFSET_TOP_APPROACH, DROPPING_TOP_APPROACH));
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
-                Id.create("7", SignalGroup.class), onset, dropping));
+                Id.create("7", SignalGroup.class), OFFSET_RIGHT_APPROACH, DROPPING_RIGHT_APPROACH));
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
-                Id.create("8", SignalGroup.class), onset, dropping));
+                Id.create("8", SignalGroup.class), OFFSET_RIGHT_APPROACH, DROPPING_RIGHT_APPROACH));
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
-                Id.create("9", SignalGroup.class), onset, dropping));
+                Id.create("9", SignalGroup.class), OFFSET_RIGHT_APPROACH, DROPPING_RIGHT_APPROACH));
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
-                Id.create("10", SignalGroup.class), onset, dropping));
+                Id.create("10", SignalGroup.class), OFFSET_BOTTOM_APPROACH, DROPPING_BOTTOM_APPROACH));
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
-                Id.create("11", SignalGroup.class), onset, dropping));
+                Id.create("11", SignalGroup.class), OFFSET_BOTTOM_APPROACH, DROPPING_BOTTOM_APPROACH));
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
-                Id.create("12", SignalGroup.class), onset, dropping));
+                Id.create("12", SignalGroup.class), OFFSET_BOTTOM_APPROACH, DROPPING_BOTTOM_APPROACH));
     }
 
 
     private void createPopulation(Scenario scenario) {
         Population population = scenario.getPopulation();
 
-//        String[] odRelations = {"2_3-3_7", "2_3-3_4", "2_3-3_8", "7_3-3_4", "7_3-3_8", "7_3-3_2",
-//                                "4_3-3_8", "4_3-3_2", "4_3-3_7", "8_3-3_2", "8_3-3_7", "8_3-3_4", };
-        String[] odRelations = {"1_2-7_6", "1_2-4_5", "1_2-8_9", "6_7-4_5", "6_7-8_9", "6_7-2_1",
-                "5_4-8_9", "5_4-2_1", "5_4-7_6", "9_8-2_1", "9_8-7_6", "9_8-4_5", };
+        String[] odRelations = {"1_2-7_6-L", "1_2-4_5-L", "1_2-8_9-L", "6_7-4_5-T", "6_7-8_9-T", "6_7-2_1-T",
+                "5_4-8_9-R", "5_4-2_1-R", "5_4-7_6-R", "9_8-2_1-B", "9_8-7_6-B", "9_8-4_5-B",};
+
 
         for (String od : odRelations) {
             String fromLinkId = od.split("-")[0];
             String toLinkId = od.split("-")[1];
 
-            for (int i = 0; i < AGENTS_PER_LINK; i++) {
+            String approach = od.split("-")[2];
+            int agentsPerApproach;
+            int offset;
+
+            if (approach.equalsIgnoreCase("L")) {
+                agentsPerApproach = AGENTS_PER_LEFT_APPROACH;
+                offset = OFFSET_LEFT_APPROACH;
+            }
+            else if (approach.equalsIgnoreCase("T")) {
+                agentsPerApproach = AGENTS_PER_TOP_APPROACH;
+                offset = OFFSET_TOP_APPROACH;
+            }
+            else if (approach.equalsIgnoreCase("R")) {
+                agentsPerApproach = AGENTS_PER_RIGHT_APPROACH;
+                offset = OFFSET_RIGHT_APPROACH;
+            }
+            else {
+                agentsPerApproach = AGENTS_PER_BOTTOM_APPROACH;
+                offset = OFFSET_BOTTOM_APPROACH;
+            }
+            for (int i = 0; i < agentsPerApproach; i++) {
                 // create a person
                 Person person = population.getFactory().createPerson(Id.createPersonId(od + "-" + i));
 
@@ -230,7 +281,7 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
                 // create a start activity at the from link
                 Activity homeAct = population.getFactory().createActivityFromLinkId("dummy", Id.createLinkId(fromLinkId));
                 // distribute agents uniformly during one hour.
-                homeAct.setEndTime(i);
+                homeAct.setEndTime(i + offset);
                 plan.addActivity(homeAct);
 
                 // create a dummy leg
@@ -246,6 +297,7 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
         }
         new PopulationWriter(population).write(outputDirectory + "population.xml.gz");
     }
+
     private static String getTravelMode(int number) {
         if (number <= 60) return "car";
         else return "truck";
@@ -253,14 +305,6 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
 
     private Config defineConfig() throws IOException {
         Config config = ConfigUtils.createConfig();
-
-        // create the path to the output directory if it does not exist yet
-        Files.createDirectories(Paths.get(outputDirectory));
-
-        config.controler().setOutputDirectory(outputDirectory);
-        config.controler().setLastIteration(50);
-
-
 
         config.travelTimeCalculator().setMaxTime(5 * 60 * 60);
 
@@ -305,19 +349,6 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
         config.plansCalcRoute().setNetworkModes(mainModes);
 
 
-        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
-        config.controler().setWriteEventsInterval(config.controler().getLastIteration());
-        config.controler().setWritePlansInterval(config.controler().getLastIteration());
-
-        config.vspExperimental().setWritingOutputEvents(true);
-        config.planCalcScore().setWriteExperiencedPlans(true);
-
-        //write config to file
-        String configFile = outputDirectory + "config.xml";
-        ConfigWriter configWriter = new ConfigWriter(config);
-        configWriter.write(configFile);
-
-
         return config;
     }
 
@@ -357,6 +388,7 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
         // create a signal group for every signal
         SignalUtils.createAndAddSignalGroups4Signals(signalGroupsData, sys);
     }
+
     private void createLanes(Scenario scenario) {
         Lanes lanes = scenario.getLanes();
         LanesFactory factory = lanes.getFactory();
@@ -395,7 +427,7 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
         // original lane, i.e. lane that starts at the link from node and leads to all other lanes of the link
         LanesUtils.createAndAddLane(lanesForLink73, factory,
                 Id.create("7_3.ol", Lane.class), LANE_CAPACITY, LINK_LENGTH, 0, NO_LANES,
-                null, Arrays.asList(Id.create("7_3.l", Lane.class), Id.create("7_3.s", Lane.class),  Id.create("7_3.r", Lane.class)));
+                null, Arrays.asList(Id.create("7_3.l", Lane.class), Id.create("7_3.s", Lane.class), Id.create("7_3.r", Lane.class)));
 
         // left turning lane (alignment 1)
         LanesUtils.createAndAddLane(lanesForLink73, factory,
@@ -447,7 +479,7 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
         // original lane, i.e. lane that starts at the link from node and leads to all other lanes of the link
         LanesUtils.createAndAddLane(lanesForLink83, factory,
                 Id.create("8_3.ol", Lane.class), LANE_CAPACITY, LINK_LENGTH, 0, NO_LANES,
-                null, Arrays.asList(Id.create("8_3.l", Lane.class), Id.create("8_3.s", Lane.class),  Id.create("8_3.r", Lane.class)));
+                null, Arrays.asList(Id.create("8_3.l", Lane.class), Id.create("8_3.s", Lane.class), Id.create("8_3.r", Lane.class)));
 
         // left turning lane (alignment 1)
         LanesUtils.createAndAddLane(lanesForLink83, factory,
@@ -464,6 +496,7 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
                 Id.create("8_3.r", Lane.class), LANE_CAPACITY, LANE_LENGTH, -1, NO_LANES,
                 Collections.singletonList(Id.create("3_4", Link.class)), null);
     }
+
     private void createNetwork(Scenario scenario) {
         Network net = scenario.getNetwork();
         NetworkFactory fac = net.getFactory();
@@ -491,7 +524,7 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
 
             link.setCapacity(LINK_CAPACITY);
             link.setLength(LINK_LENGTH);
-            link.setFreespeed(15);
+            link.setFreespeed(10);
             net.addLink(link);
         }
         new NetworkWriter(net).write(outputDirectory + "network.xml.gz");
