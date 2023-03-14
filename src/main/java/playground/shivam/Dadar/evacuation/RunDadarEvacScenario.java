@@ -17,6 +17,7 @@ import org.matsim.contrib.osm.networkReader.SupersonicOsmNetworkReader;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
+import org.matsim.core.config.groups.CountsConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.StrategyConfigGroup;
@@ -38,8 +39,6 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.evacuationgui.scenariogenerator.EvacuationNetworkGenerator;
 import org.matsim.facilities.FacilitiesUtils;
-import org.matsim.lanes.LanesReader;
-import org.matsim.lanes.LanesUtils;
 import org.matsim.utils.objectattributes.attributable.Attributes;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
@@ -48,14 +47,24 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 import playground.amit.Dehradun.OD;
+import playground.amit.analysis.StatsWriter;
+import playground.amit.analysis.modalShare.ModalShareFromEvents;
+import playground.amit.analysis.modalShare.ModalShareFromPlans;
+import playground.amit.analysis.tripTime.ModalTravelTimeAnalyzer;
 import playground.amit.jaipur.plans.ODMatrixGenerator;
 import playground.amit.mixedTraffic.MixedTrafficVehiclesUtils;
+import playground.amit.mixedTraffic.patnaIndia.covidWork.PatnaCovidPolicyControler;
+import playground.amit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter;
+import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.amit.utils.LoadMyScenarios;
 import playground.amit.utils.geometry.GeometryUtils;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
-import si.uom.SI;
+import playground.vsp.cadyts.multiModeCadyts.MultiModeCountsControlerListener;
 
+import java.io.File;
 import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
@@ -64,28 +73,28 @@ import java.util.stream.Collectors;
  * @author Shivam
  */
 public class RunDadarEvacScenario {
-    private  final String filesPath = "input/evacDadar/";
-    private  final Map<Id<Link>, Geometry> transformedSafePoints = new HashMap<>();
+    private  final String INPUT_FILES_PATH = "input/evacDadar/";
+    private  final String OUTPUT_FILES_PATH = "output/evacDadar/";
+    private  final Map<Id<Link>, Geometry> SAFE_POINTS = new HashMap<>();
     private Collection<Id<Node>> safeNodeAIds = new ArrayList<>();
-    private  final String boundaryShapeFileWGS84 = filesPath + "boundaryDadar.shp";
-    private  final String evacuationZonesShapefile = filesPath + "evacuationZones.shp";
-    private  final String zonesShapeFile = filesPath + "zonesDadar.shp";
+    private  final String BOUNDARY_SHAPEFILE = INPUT_FILES_PATH + "boundaryDadar.shp";
+    private  final String EVACUATION_ZONES_SHAPEFILE = INPUT_FILES_PATH + "evacuationZones.shp";
+    private  final String ZONES_SHAPEFILE = INPUT_FILES_PATH + "zonesDadar.shp";
     //    private static final String boundaryShapeFile = "input/evacDadar/boundaryDadar.shp";
     private  final String ORIGIN_ACTIVITY = "origin";
     private  final String DESTINATION_ACTIVITY = "destination";
-    private  final String outputMATSimNetworkFile = filesPath + "dadar-network_smaller.xml.gz";
-    private final String outputEvacNetworkFile = filesPath + "dadar_evac_network.xml.gz";
+    private  final String MATSIM_NETWORK = INPUT_FILES_PATH + "dadar-network_smaller.xml.gz";
+    private final String EVACUATION_NETWORK = INPUT_FILES_PATH + "dadar_evac_network.xml.gz";
 
-    private  final String safePointsPath = filesPath + "dadarSafePoints.shp";
-    private  final String ODMatrixFile = filesPath + "dadar_od_10_10_22.csv";
+    private  final String SAFE_POINT_SHAPEFILE = INPUT_FILES_PATH + "dadarSafePoints.shp";
+    private  final String OD_MATRIX = INPUT_FILES_PATH + "dadar_od_10_10_22.csv";
 
-    private  final String modeShareFilePath = filesPath + "dadar_mode_share/";
+    private  final String modeShareFilePath = INPUT_FILES_PATH + "dadar_mode_share/";
 
-    private  final String outputMATSimPlansFile = filesPath + "dadar-plans.xml.gz";
+    private  final String MATSIM_PLANS = INPUT_FILES_PATH + "dadar-plans.xml.gz";
 
-    private  final String outputEvacPlansFile = filesPath + "dadar_evac_plans.xml.gz";
-    private final Set<String> dadarModes = EnumSet.allOf(DadarUtils.DadarTrafficCountMode2023.class).stream().map(DadarUtils.DadarTrafficCountMode2023::toString).collect(Collectors.toSet());
-
+    private  final String EVACUATION_PLANS = INPUT_FILES_PATH + "dadar_evac_plans.xml.gz";
+    private final Collection<String> DADAR_ALL_MODES = DadarUtils.ALL_MAIN_MODES;
     private Scenario scenario;
     private Geometry evacuationArea;
     private final Id<Link> safeLinkId = Id.createLinkId("safeLink_Dadar");
@@ -93,7 +102,7 @@ public class RunDadarEvacScenario {
     public void run() {
         createDadarNetworkFromOSM();
 
-        scenario = LoadMyScenarios.loadScenarioFromNetwork(outputMATSimNetworkFile);
+        scenario = LoadMyScenarios.loadScenarioFromNetwork(MATSIM_NETWORK);
 
         safePoints();
 
@@ -101,7 +110,7 @@ public class RunDadarEvacScenario {
 
         createPlansFromDadarOD();
 //
-        createDadarEvacPlans(LoadMyScenarios.loadScenarioFromPlans(outputMATSimPlansFile));
+        createDadarEvacPlans(LoadMyScenarios.loadScenarioFromPlans(MATSIM_PLANS));
 
         createDadarEvacConfig();
 
@@ -136,7 +145,7 @@ public class RunDadarEvacScenario {
                 continue;
 
             evacPerson = popFact.createPerson(person.getId());
-            for (Id<Link> safeLinkIdFromSafePoint: transformedSafePoints.keySet()) {
+            for (Id<Link> safeLinkIdFromSafePoint: SAFE_POINTS.keySet()) {
                 Plan planOut = popFact.createPlan();
 
                 planOut.addActivity(origin);
@@ -151,7 +160,7 @@ public class RunDadarEvacScenario {
                 planOut.addActivity(evacAct);
 
                 evacPerson.addPlan(planOut);
-                if (dadarModes.contains(leg.getMode())) {
+                if (DADAR_ALL_MODES.contains(leg.getMode())) {
                     TripRouter.Builder builder = new TripRouter.Builder(scenario.getConfig());
                     builder.setRoutingModule(
                             leg.getMode(),
@@ -184,12 +193,12 @@ public class RunDadarEvacScenario {
             evacPop.addPerson(evacPerson);
 
         }
-        new PopulationWriter(evacPop).write(outputEvacPlansFile);
+        new PopulationWriter(evacPop).write(EVACUATION_PLANS);
     }
 
     private void createDadarEvacNetwork(Scenario scenario) {
         // TODO: right now we are testing the whole network as evac zone
-        Geometry transformEvacuationArea = (Geometry) ShapeFileReader.getAllFeatures(evacuationZonesShapefile).iterator().next().getDefaultGeometry();// --> WGS84
+        Geometry transformEvacuationArea = (Geometry) ShapeFileReader.getAllFeatures(EVACUATION_ZONES_SHAPEFILE).iterator().next().getDefaultGeometry();// --> WGS84
 
         try {
             evacuationArea = JTS.transform(transformEvacuationArea, CRS.findMathTransform(MGC.getCRS(TransformationFactory.WGS84), MGC.getCRS(DadarUtils.Dadar_EPSG), true));
@@ -198,23 +207,23 @@ public class RunDadarEvacScenario {
         }
 
         EvacuationNetworkGenerator net = new EvacuationNetworkGenerator(scenario, evacuationArea, safeLinkId);
-        net.run(transformedSafePoints);
+        net.run(SAFE_POINTS);
         this.safeNodeAIds = net.getSafeNodeAIds();
 
         for (Link l : scenario.getNetwork().getLinks().values()) {
-            Set<String> allowedModes = new HashSet<>(dadarModes);
+            Set<String> allowedModes = new HashSet<>(DADAR_ALL_MODES);
             l.setAllowedModes(allowedModes);
         }
 
-        new NetworkWriter(scenario.getNetwork()).write(outputEvacNetworkFile);
+        new NetworkWriter(scenario.getNetwork()).write(EVACUATION_NETWORK);
     }
 
     private void createDadarEvacConfig() {
         Config config = scenario.getConfig();
-        config.network().setInputFile(outputEvacNetworkFile);
-        config.plans().setInputFile(outputEvacPlansFile);
+        config.network().setInputFile(EVACUATION_NETWORK);
+        config.plans().setInputFile(EVACUATION_PLANS);
         config.controler().setLastIteration(10);
-        config.controler().setOutputDirectory(filesPath + "output");
+        config.controler().setOutputDirectory(OUTPUT_FILES_PATH);
         config.controler().setDumpDataAtEnd(true);
         config.controler().setCreateGraphs(true);
         config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
@@ -226,7 +235,7 @@ public class RunDadarEvacScenario {
         config.qsim().setEndTime(30 * 3600);
         config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
         config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
-        config.qsim().setMainModes(dadarModes);
+        config.qsim().setMainModes(DADAR_ALL_MODES);
         config.qsim().setUsingFastCapacityUpdate(false);
         config.qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.withHoles);
         config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
@@ -237,7 +246,12 @@ public class RunDadarEvacScenario {
 
         config.vspExperimental().setWritingOutputEvents(true);
 
-        config.plansCalcRoute().setNetworkModes(dadarModes);
+        config.plansCalcRoute().setNetworkModes(DADAR_ALL_MODES);
+
+        config.travelTimeCalculator().setFilterModes(true);
+        //config.travelTimeCalculator().setSeparateModes(true);
+        config.travelTimeCalculator().setAnalyzedModes((new HashSet<>(PatnaUtils.ALL_MAIN_MODES)));
+
 
         PlanCalcScoreConfigGroup pcg = config.planCalcScore();
         PlanCalcScoreConfigGroup.ActivityParams originAct = new PlanCalcScoreConfigGroup.ActivityParams(ORIGIN_ACTIVITY);
@@ -268,9 +282,11 @@ public class RunDadarEvacScenario {
         tam.setWeight(0.1);
         scg.addStrategySettings(tam);
 
+        config.timeAllocationMutator().setAffectingDuration(false);
 
-        for (String mode : dadarModes) {
+        for (String mode: DADAR_ALL_MODES) {
             PlanCalcScoreConfigGroup.ModeParams modeParams = new PlanCalcScoreConfigGroup.ModeParams(mode);
+            modeParams.setConstant(DadarUtils.setConstant(mode));
             config.planCalcScore().addModeParams(modeParams);
         }
 
@@ -284,15 +300,13 @@ public class RunDadarEvacScenario {
 //        tam.setWeight(0.1);
 //        scg.addStrategySettings(tam);
 
-        // TODO: check why this doesn't work
-        // config.strategy().setFractionOfIterationsToDisableInnovation(0.75);
-
+        config.strategy().setFractionOfIterationsToDisableInnovation(0.75);
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
 
         Vehicles vehicles = scenario.getVehicles();
 
-        for (String mode : dadarModes) {
+        for (String mode : DADAR_ALL_MODES) {
             VehicleType veh = VehicleUtils.createVehicleType(Id.create(mode, VehicleType.class));
             veh.setPcuEquivalents(MixedTrafficVehiclesUtils.getPCU(mode));
             veh.setMaximumVelocity(MixedTrafficVehiclesUtils.getSpeed(mode));
@@ -302,12 +316,13 @@ public class RunDadarEvacScenario {
             vehicles.addVehicleType(veh);
         }
 
-        new ConfigWriter(config).write(filesPath + "config.xml");
+        new ConfigWriter(config).write(INPUT_FILES_PATH + "config.xml");
 
         Controler controler = new Controler(scenario);
 
-
-        controler.addOverridingModule(new AbstractModule() {
+        controler.getConfig().controler().setDumpDataAtEnd(true);
+        controler.getConfig().strategy().setMaxAgentPlanMemorySize(5);
+        /*controler.addOverridingModule(new AbstractModule() {
             @Override
             public void install() {
 
@@ -317,25 +332,30 @@ public class RunDadarEvacScenario {
                 addTravelTimeBinding("motorbike").to(networkTravelTime());
                 addTravelDisutilityFactoryBinding("motorbike").to(carTravelDisutilityFactoryKey());
 
-                addControlerListenerBinding().toInstance(new IterationStartsListener() {
-                    @Override
-                    public void notifyIterationStarts(IterationStartsEvent event) {
-                        if (event.getIteration() == 8) {
-                            System.out.println(event.getIteration());
-                        }
-                    }
-                });
             }
-        });
+        });*/
 
         controler.addOverridingModule(new AbstractModule() { // ploting modal share over iterations
             @Override
             public void install() {
+                this.bind(ModalShareEventHandler.class);
+                this.addControlerListenerBinding().to(ModalShareControlerListener.class);
+
                 this.bind(ModalTripTravelTimeHandler.class);
                 this.addControlerListenerBinding().to(ModalTravelTimeControlerListener.class);
+
+                this.addControlerListenerBinding().to(MultiModeCountsControlerListener.class);
             }
         });
+
+
         controler.run();
+
+        String outputEventsFile = OUTPUT_FILES_PATH + "/output_events.xml.gz";
+        String userGroup = DadarUtils.DadarUserGroup.urban.toString();
+
+        new ModalShareFromEvents(outputEventsFile, userGroup, new  DadarPersonFilter());
+
     }
 
     public static void main(String[] args) {
@@ -345,7 +365,7 @@ public class RunDadarEvacScenario {
     private void safePoints() {
         int numberOfSafePointsNeeded = 2;
 
-        Collection<SimpleFeature> safePoints = ShapeFileReader.getAllFeatures(safePointsPath);
+        Collection<SimpleFeature> safePoints = ShapeFileReader.getAllFeatures(SAFE_POINT_SHAPEFILE);
 
         safePoints.removeIf(e -> (e.getDefaultGeometry() == null));
 
@@ -371,7 +391,7 @@ public class RunDadarEvacScenario {
 
             try {
                 Geometry transformedSafePoint = JTS.transform(safePointDefaultGeometry, CRS.findMathTransform(MGC.getCRS(fromSafePointSystem), MGC.getCRS(toSafePointSystem), true));
-                transformedSafePoints.put(Id.createLinkId(safeLinkId.toString() + safePoint.getID()), transformedSafePoint);
+                SAFE_POINTS.put(Id.createLinkId(safeLinkId.toString() + safePoint.getID()), transformedSafePoint);
             } catch (TransformException | FactoryException e) {
                 throw new RuntimeException("Transformation isn't successful" + e);
             }
@@ -385,8 +405,8 @@ public class RunDadarEvacScenario {
         Population population = scenario.getPopulation();
         PopulationFactory factory = population.getFactory();
 
-        Map<Id<OD>, OD> tripMatrix = ODMatrixGenerator.generateOD(ODMatrixFile);
-        Collection<SimpleFeature> zones = ShapeFileReader.getAllFeatures(zonesShapeFile);
+        Map<Id<OD>, OD> tripMatrix = ODMatrixGenerator.generateOD(OD_MATRIX);
+        Collection<SimpleFeature> zones = ShapeFileReader.getAllFeatures(ZONES_SHAPEFILE);
 
         for (OD tripOd : tripMatrix.values()) {
 
@@ -418,8 +438,8 @@ public class RunDadarEvacScenario {
                 Point originPoint = GeometryUtils.getRandomPointInsideFeature(origin_zone);
                 Point destinationPoint = GeometryUtils.getRandomPointInsideFeature(destination_zone);
 
-                Coord origin = DadarUtils.transformationFromWSG84.transform(MGC.point2Coord(originPoint));
-                Coord destination = DadarUtils.transformationFromWSG84.transform(MGC.point2Coord(destinationPoint));
+                Coord origin = DadarUtils.TRANSFORMATION_FROM_WSG_84.transform(MGC.point2Coord(originPoint));
+                Coord destination = DadarUtils.TRANSFORMATION_FROM_WSG_84.transform(MGC.point2Coord(destinationPoint));
 
                 Person person = factory.createPerson(Id.createPersonId(population.getPersons().size()));
                 Plan plan = factory.createPlan();
@@ -451,7 +471,7 @@ public class RunDadarEvacScenario {
 
             }
         }
-        new PopulationWriter(population).write(outputMATSimPlansFile);
+        new PopulationWriter(population).write(MATSIM_PLANS);
     }
 
     private static String getTravelMode(int number) {
@@ -477,19 +497,20 @@ public class RunDadarEvacScenario {
      * @return path of MATSIm network
      */
     private void createDadarNetworkFromOSM() {
-        String inputOSMFile = filesPath + "dadar.osm.pbf";
+        String inputOSMFile = INPUT_FILES_PATH + "dadar.osm.pbf";
 
-        Geometry wholeGeometry = (Geometry) ShapeFileReader.getAllFeatures(boundaryShapeFileWGS84).iterator().next().getDefaultGeometry(); // --> WGS:84
+        Geometry wholeGeometry = (Geometry) ShapeFileReader.getAllFeatures(BOUNDARY_SHAPEFILE).iterator().next().getDefaultGeometry(); // --> WGS:84
 
         BiPredicate<Coord, Integer> includeLinkAtCoordWithHierarchy = (cord, hierarchyLevel) -> {
             if (hierarchyLevel <= 4)
                 return true; //keep all roads upto level 4.
             else
-                return (hierarchyLevel <= 5 && wholeGeometry.contains(MGC.coord2Point(DadarUtils.transformationFromWSG84.transform(cord))));
+                return (hierarchyLevel <= 5 && wholeGeometry.contains(MGC.coord2Point(DadarUtils.TRANSFORMATION_FROM_WSG_84.transform(cord))));
         };
+        Set<String> modes = new HashSet<>(Collections.singletonList(String.join("", DADAR_ALL_MODES)));
 
         Network network = (new SupersonicOsmNetworkReader.Builder())
-                .setCoordinateTransformation(DadarUtils.transformationFromWSG84)
+                .setCoordinateTransformation(DadarUtils.TRANSFORMATION_FROM_WSG_84)
 //                .addOverridingLinkProperties(OsmTags.MOTORWAY, new LinkProperties(LinkProperties.LEVEL_MOTORWAY, 2, 120.0 / 3.6, 2000, true))
 //                .addOverridingLinkProperties(OsmTags.MOTORWAY_LINK, new LinkProperties(LinkProperties.LEVEL_MOTORWAY, 2, 120.0 / 3.6, 1800, true))
 //                .addOverridingLinkProperties(OsmTags.TRUNK, new LinkProperties(LinkProperties.LEVEL_TRUNK, 2, 120.0 / 3.6, 2000, false))
@@ -502,12 +523,12 @@ public class RunDadarEvacScenario {
 //                .addOverridingLinkProperties(OsmTags.TERTIARY_LINK, new LinkProperties(LinkProperties.LEVEL_TERTIARY, 2, 4, 600, false))
                 .setIncludeLinkAtCoordWithHierarchy(includeLinkAtCoordWithHierarchy)
                 .setAfterLinkCreated((link, osmTags, isReversed) -> {
-                    link.setAllowedModes(dadarModes);
+                    link.setAllowedModes(modes);
                 })
                 .build()
                 .read(inputOSMFile);
 
         new NetworkCleaner().run(network);
-        new NetworkWriter(network).write(outputMATSimNetworkFile);
+        new NetworkWriter(network).write(MATSIM_NETWORK);
     }
 }
