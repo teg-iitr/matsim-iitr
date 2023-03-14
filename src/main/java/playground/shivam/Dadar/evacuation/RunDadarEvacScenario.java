@@ -54,6 +54,7 @@ import playground.amit.analysis.tripTime.ModalTravelTimeAnalyzer;
 import playground.amit.jaipur.plans.ODMatrixGenerator;
 import playground.amit.mixedTraffic.MixedTrafficVehiclesUtils;
 import playground.amit.mixedTraffic.patnaIndia.covidWork.PatnaCovidPolicyControler;
+import playground.amit.mixedTraffic.patnaIndia.utils.OuterCordonUtils;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.amit.utils.LoadMyScenarios;
@@ -73,27 +74,27 @@ import java.util.stream.Collectors;
  * @author Shivam
  */
 public class RunDadarEvacScenario {
-    private  final String INPUT_FILES_PATH = "input/evacDadar/";
-    private  final String OUTPUT_FILES_PATH = "output/evacDadar/";
-    private  final Map<Id<Link>, Geometry> SAFE_POINTS = new HashMap<>();
+    private final String INPUT_FILES_PATH = "input/evacDadar/";
+    private final String OUTPUT_FILES_PATH = "output/evacDadar/";
+    private final Map<Id<Link>, Geometry> SAFE_POINTS = new HashMap<>();
     private Collection<Id<Node>> safeNodeAIds = new ArrayList<>();
-    private  final String BOUNDARY_SHAPEFILE = INPUT_FILES_PATH + "boundaryDadar.shp";
-    private  final String EVACUATION_ZONES_SHAPEFILE = INPUT_FILES_PATH + "evacuationZones.shp";
-    private  final String ZONES_SHAPEFILE = INPUT_FILES_PATH + "zonesDadar.shp";
+    private final String BOUNDARY_SHAPEFILE = INPUT_FILES_PATH + "boundaryDadar.shp";
+    private final String EVACUATION_ZONES_SHAPEFILE = INPUT_FILES_PATH + "evacuationZones.shp";
+    private final String ZONES_SHAPEFILE = INPUT_FILES_PATH + "zonesDadar.shp";
     //    private static final String boundaryShapeFile = "input/evacDadar/boundaryDadar.shp";
-    private  final String ORIGIN_ACTIVITY = "origin";
-    private  final String DESTINATION_ACTIVITY = "destination";
-    private  final String MATSIM_NETWORK = INPUT_FILES_PATH + "dadar-network_smaller.xml.gz";
+    private final String ORIGIN_ACTIVITY = "origin";
+    private final String DESTINATION_ACTIVITY = "destination";
+    private final String MATSIM_NETWORK = INPUT_FILES_PATH + "dadar-network_smaller.xml.gz";
     private final String EVACUATION_NETWORK = INPUT_FILES_PATH + "dadar_evac_network.xml.gz";
 
-    private  final String SAFE_POINT_SHAPEFILE = INPUT_FILES_PATH + "dadarSafePoints.shp";
-    private  final String OD_MATRIX = INPUT_FILES_PATH + "dadar_od_10_10_22.csv";
+    private final String SAFE_POINT_SHAPEFILE = INPUT_FILES_PATH + "dadarSafePoints.shp";
+    private final String OD_MATRIX = INPUT_FILES_PATH + "dadar_od_10_10_22.csv";
 
-    private  final String modeShareFilePath = INPUT_FILES_PATH + "dadar_mode_share/";
+    private final String modeShareFilePath = INPUT_FILES_PATH + "dadar_mode_share/";
 
-    private  final String MATSIM_PLANS = INPUT_FILES_PATH + "dadar-plans.xml.gz";
+    private final String MATSIM_PLANS = INPUT_FILES_PATH + "dadar-plans.xml.gz";
 
-    private  final String EVACUATION_PLANS = INPUT_FILES_PATH + "dadar_evac_plans.xml.gz";
+    private final String EVACUATION_PLANS = INPUT_FILES_PATH + "dadar_evac_plans.xml.gz";
     private final Collection<String> DADAR_ALL_MODES = DadarUtils.ALL_MAIN_MODES;
     private Scenario scenario;
     private Geometry evacuationArea;
@@ -145,7 +146,7 @@ public class RunDadarEvacScenario {
                 continue;
 
             evacPerson = popFact.createPerson(person.getId());
-            for (Id<Link> safeLinkIdFromSafePoint: SAFE_POINTS.keySet()) {
+            for (Id<Link> safeLinkIdFromSafePoint : SAFE_POINTS.keySet()) {
                 Plan planOut = popFact.createPlan();
 
                 planOut.addActivity(origin);
@@ -220,16 +221,20 @@ public class RunDadarEvacScenario {
 
     private void createDadarEvacConfig() {
         Config config = scenario.getConfig();
+
         config.network().setInputFile(EVACUATION_NETWORK);
+
         config.plans().setInputFile(EVACUATION_PLANS);
-        config.controler().setLastIteration(10);
+        config.plans().setRemovingUnneccessaryPlanAttributes(true);
+
+        config.controler().setLastIteration(0);
+        config.controler().setLastIteration(100);
         config.controler().setOutputDirectory(OUTPUT_FILES_PATH);
         config.controler().setDumpDataAtEnd(true);
         config.controler().setCreateGraphs(true);
         config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
-        config.vspExperimental().setWritingOutputEvents(true);
-
-        // config.global().setCoordinateSystem(DadarUtils.Dadar_EPSG);
+        config.controler().setWriteEventsInterval(10);
+        config.controler().setWritePlansInterval(10);
 
         config.qsim().setSnapshotPeriod(5 * 60);
         config.qsim().setEndTime(30 * 3600);
@@ -245,6 +250,10 @@ public class RunDadarEvacScenario {
         config.qsim().setStorageCapFactor(0.5);
 
         config.vspExperimental().setWritingOutputEvents(true);
+        config.vspExperimental().setWritingOutputEvents(true);
+
+        config.counts().setWriteCountsInterval(1);
+        config.counts().setOutputFormat("all");
 
         config.plansCalcRoute().setNetworkModes(DADAR_ALL_MODES);
 
@@ -254,51 +263,54 @@ public class RunDadarEvacScenario {
 
 
         PlanCalcScoreConfigGroup pcg = config.planCalcScore();
-        PlanCalcScoreConfigGroup.ActivityParams originAct = new PlanCalcScoreConfigGroup.ActivityParams(ORIGIN_ACTIVITY);
-        originAct.setScoringThisActivityAtAll(false);
-        pcg.addActivityParams(originAct);
+        {
+            PlanCalcScoreConfigGroup.ActivityParams originAct = new PlanCalcScoreConfigGroup.ActivityParams(ORIGIN_ACTIVITY);
+            originAct.setScoringThisActivityAtAll(false);
+            pcg.addActivityParams(originAct);
 
-        PlanCalcScoreConfigGroup.ActivityParams destinationAct = new PlanCalcScoreConfigGroup.ActivityParams(DESTINATION_ACTIVITY);
-        destinationAct.setScoringThisActivityAtAll(false);
-        pcg.addActivityParams(destinationAct);
+            PlanCalcScoreConfigGroup.ActivityParams destinationAct = new PlanCalcScoreConfigGroup.ActivityParams(DESTINATION_ACTIVITY);
+            destinationAct.setScoringThisActivityAtAll(false);
+            destinationAct.setTypicalDuration(8 * 3600);
+            pcg.addActivityParams(destinationAct);
 
-        PlanCalcScoreConfigGroup.ActivityParams evacAct = new PlanCalcScoreConfigGroup.ActivityParams("evac");
-        evacAct.setTypicalDuration(3600);
-        config.planCalcScore().addActivityParams(evacAct);
-
-        PlanCalcScoreConfigGroup.ActivityParams dummyAct = new PlanCalcScoreConfigGroup.ActivityParams("dummy");
-        dummyAct.setTypicalDuration(12 * 3600);
-        config.planCalcScore().addActivityParams(dummyAct);
-
-        StrategyConfigGroup scg = config.strategy();
-
-//        StrategyConfigGroup.StrategySettings reRoute = new StrategyConfigGroup.StrategySettings();
-//        reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
-//        reRoute.setWeight(0.2);
-//        scg.addStrategySettings(reRoute);
-
-        StrategyConfigGroup.StrategySettings tam = new StrategyConfigGroup.StrategySettings();
-        tam.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator);
-        tam.setWeight(0.1);
-        scg.addStrategySettings(tam);
-
-        config.timeAllocationMutator().setAffectingDuration(false);
-
-        for (String mode: DADAR_ALL_MODES) {
-            PlanCalcScoreConfigGroup.ModeParams modeParams = new PlanCalcScoreConfigGroup.ModeParams(mode);
-            modeParams.setConstant(DadarUtils.setConstant(mode));
-            config.planCalcScore().addModeParams(modeParams);
+            PlanCalcScoreConfigGroup.ActivityParams evacAct = new PlanCalcScoreConfigGroup.ActivityParams("evac");
+            evacAct.setTypicalDuration(3600);
+            pcg.addActivityParams(evacAct);
         }
 
+        for (String mode : DADAR_ALL_MODES) {
+            PlanCalcScoreConfigGroup.ModeParams modeParams = new PlanCalcScoreConfigGroup.ModeParams(mode);
+            modeParams.setConstant(DadarUtils.setConstant(mode));
+            modeParams.setMarginalUtilityOfTraveling(DadarUtils.setMarginalUtilityOfTraveling(mode));
+            pcg.addModeParams(modeParams);
+        }
 
-//        StrategyConfigGroup.StrategySettings ceb = new StrategyConfigGroup.StrategySettings();
-//        ceb.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta);
-//        scg.addStrategySettings(ceb);
+        StrategyConfigGroup scg = config.strategy();
+        {
+            StrategyConfigGroup.StrategySettings expChangeBeta = new StrategyConfigGroup.StrategySettings();
+            expChangeBeta.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta);
+            expChangeBeta.setWeight(0.7);
+            scg.addStrategySettings(expChangeBeta);
 
-//        StrategyConfigGroup.StrategySettings modeChoice = new StrategyConfigGroup.StrategySettings();
-//        tam.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeSingleTripMode);
-//        tam.setWeight(0.1);
-//        scg.addStrategySettings(tam);
+            StrategyConfigGroup.StrategySettings reRoute = new StrategyConfigGroup.StrategySettings();
+            reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
+            reRoute.setWeight(0.15);
+            scg.addStrategySettings(reRoute);
+
+            StrategyConfigGroup.StrategySettings timeAllocationMutator = new StrategyConfigGroup.StrategySettings();
+            timeAllocationMutator.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator);
+            timeAllocationMutator.setWeight(0.05);
+            scg.addStrategySettings(timeAllocationMutator);
+
+            config.timeAllocationMutator().setAffectingDuration(false);
+
+            StrategyConfigGroup.StrategySettings modeChoice = new StrategyConfigGroup.StrategySettings();
+            modeChoice.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode);
+            modeChoice.setWeight(0.1);
+            scg.addStrategySettings(modeChoice);
+
+            config.changeMode().setModes(DadarUtils.ALL_MAIN_MODES.toArray(new String[DadarUtils.ALL_MAIN_MODES.size()]));
+        }
 
         config.strategy().setFractionOfIterationsToDisableInnovation(0.75);
 
@@ -320,8 +332,8 @@ public class RunDadarEvacScenario {
 
         Controler controler = new Controler(scenario);
 
-        controler.getConfig().controler().setDumpDataAtEnd(true);
         controler.getConfig().strategy().setMaxAgentPlanMemorySize(5);
+
         /*controler.addOverridingModule(new AbstractModule() {
             @Override
             public void install() {
@@ -348,13 +360,12 @@ public class RunDadarEvacScenario {
             }
         });
 
-
         controler.run();
 
         String outputEventsFile = OUTPUT_FILES_PATH + "/output_events.xml.gz";
         String userGroup = DadarUtils.DadarUserGroup.urban.toString();
 
-        new ModalShareFromEvents(outputEventsFile, userGroup, new  DadarPersonFilter());
+        new ModalShareFromEvents(outputEventsFile, userGroup, new DadarPersonFilter());
 
     }
 
@@ -386,7 +397,7 @@ public class RunDadarEvacScenario {
         String toSafePointSystem = DadarUtils.Dadar_EPSG;
 
 
-        for (SimpleFeature safePoint: safePoints) {
+        for (SimpleFeature safePoint : safePoints) {
             Geometry safePointDefaultGeometry = (Geometry) safePoint.getDefaultGeometry();
 
             try {

@@ -18,6 +18,47 @@ public class DadarUtils {
             .getCoordinateTransformation(TransformationFactory.WGS84, Dadar_EPSG);
 
     public static final Collection<String> ALL_MAIN_MODES =  Arrays.asList("motorbike", "car", "auto",  "bus", "lcv", "truck", "bicycle", "cart");
+
+    public static double setMarginalUtilityOfTraveling(String mode) {
+        double marginalUtilityOfTraveling;
+        switch (mode) {
+            case TransportMode.car:
+                marginalUtilityOfTraveling = 0;
+                break;
+            case "bicycle":
+            case TransportMode.bike:
+                marginalUtilityOfTraveling = 0;
+                break;
+            case "motorbike":
+                marginalUtilityOfTraveling = 0;
+                break;
+            case TransportMode.walk:
+                marginalUtilityOfTraveling = 0;
+                break;
+            case "lcv":
+                marginalUtilityOfTraveling = 0;
+                break;
+            case "bus":
+                marginalUtilityOfTraveling = 0;
+                break;
+            case "cart":
+                marginalUtilityOfTraveling = 0;
+                break;
+            case "truck":
+                marginalUtilityOfTraveling = 0;
+                break;
+            case "auto":
+                marginalUtilityOfTraveling = 0;
+                break;
+            case "cycle":
+                marginalUtilityOfTraveling = 0;
+                break;
+            default:
+                throw new RuntimeException("No marginal utility of traveling is set for travel mode " + mode + ".");
+        }
+        return marginalUtilityOfTraveling;
+    }
+
     public enum DadarTrafficCountMode2023 {
         motorbike, car, auto,  bus, lcv, truck, bicycle, cart;
     }
@@ -28,35 +69,35 @@ public class DadarUtils {
         double constant;
         switch (travelMode) {
             case TransportMode.car:
-                constant = 1;
+                constant = 0;
                 break;
             case "bicycle":
             case TransportMode.bike:
-                constant = 1;
+                constant = 0;
                 break;
             case "motorbike":
-                constant = 1;
+                constant = 0;
                 break;
             case TransportMode.walk:
-                constant = 1;
+                constant = 0;
                 break;
             case "lcv":
-                constant = 1;
+                constant = 0;
                 break;
             case "bus":
-                constant = 1;
+                constant = 0;
                 break;
             case "cart":
-                constant = 1;
+                constant = 0;
                 break;
             case "truck":
-                constant = 1;
+                constant = 0;
                 break;
             case "auto":
-                constant = 1;
+                constant = 0;
                 break;
             case "cycle":
-                constant = 1;
+                constant = 0;
                 break;
             default:
                 throw new RuntimeException("No constant is set for travel mode " + travelMode + ".");
