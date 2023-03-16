@@ -1,7 +1,6 @@
 package playground.shivam.Dadar.evacuation;
 
 
-import com.google.inject.Provides;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.locationtech.jts.geom.Geometry;
@@ -11,14 +10,10 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.*;
 import org.matsim.api.core.v01.population.*;
-import org.matsim.contrib.cadyts.general.CadytsScoring;
-import org.matsim.contrib.multimodal.config.MultiModalConfigGroup;
 import org.matsim.contrib.osm.networkReader.SupersonicOsmNetworkReader;
-import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
-import org.matsim.core.config.groups.CountsConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.StrategyConfigGroup;
@@ -34,13 +29,8 @@ import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.costcalculators.OnlyTimeDependentTravelDisutility;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.scoring.ScoringFunction;
-import org.matsim.core.scoring.ScoringFunctionFactory;
-import org.matsim.core.scoring.SumScoringFunction;
-import org.matsim.core.scoring.functions.*;
 import org.matsim.core.trafficmonitoring.FreeSpeedTravelTime;
 import org.matsim.core.utils.collections.Tuple;
-import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
@@ -56,7 +46,6 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.operation.TransformException;
 import playground.amit.Dehradun.OD;
-import playground.amit.analysis.modalShare.ModalShareFromEvents;
 import playground.amit.jaipur.plans.ODMatrixGenerator;
 import playground.amit.mixedTraffic.MixedTrafficVehiclesUtils;
 import playground.amit.utils.LoadMyScenarios;
@@ -65,12 +54,8 @@ import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareContro
 import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
-import playground.vsp.cadyts.multiModeCadyts.ModalCountsCadytsContext;
-import playground.vsp.cadyts.multiModeCadyts.ModalCountsLinkIdentifier;
 import playground.vsp.cadyts.multiModeCadyts.MultiModeCountsControlerListener;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.*;
@@ -81,7 +66,8 @@ import java.util.function.BiPredicate;
  */
 public class RunDadarEvacScenario {
     private final String INPUT_FILES_PATH = "input/evacDadar/";
-    private final String OUTPUT_FILES_PATH = "output/evacDadar/";
+    private final String OUTPUT_EVAC_SIM_FILES_PATH = "output/evacDadar/";
+    private final String OUTPUT_MODE_SHARE_CALIBRATION_FILES_PATH = "output/dadarModeShareCalibration";
     private final Map<Id<Link>, Geometry> SAFE_POINTS = new HashMap<>();
     private Collection<Id<Node>> safeNodeAIds = new ArrayList<>();
     private final String BOUNDARY_SHAPEFILE = INPUT_FILES_PATH + "boundaryDadar.shp";
@@ -106,11 +92,10 @@ public class RunDadarEvacScenario {
     private Scenario scenario;
     private Geometry evacuationArea;
     private final Id<Link> safeLinkId = Id.createLinkId("safeLink_Dadar");
-    private final Map<Tuple<Id<Link>,String>, Map<Integer, Double>> countStation2time2countInfo = new HashMap<>();
+    private final Map<Tuple<Id<Link>, String>, Map<Integer, Double>> countStation2time2countInfo = new HashMap<>();
 
 
     public void run() {
-        createDadarNetworkFromOSM();
 
         scenario = LoadMyScenarios.loadScenarioFromNetwork(MATSIM_NETWORK);
 
@@ -118,39 +103,44 @@ public class RunDadarEvacScenario {
 
         createDadarEvacNetwork(scenario);
 
-        createPlansFromDadarOD();
-
         createDadarEvacPlans(LoadMyScenarios.loadScenarioFromPlans(MATSIM_PLANS));
-//
-        createDadarPseudoCounts();
-//
+
         createDadarEvacConfig();
 
     }
+    private void runModeShareCalibration() {
+        createDadarNetworkFromOSM();
 
-    public void readCountStationData(final String file){
+        createPlansFromDadarOD();
+
+        createDadarPseudoCounts();
+
+        createModeShareCalibrationConfig();
+    }
+    public void readCountStationData(final String file) {
         try (BufferedReader reader = IOUtils.getBufferedReader(file)) {
             String line = reader.readLine();
 
-            while(line != null ) {
-                if( line.startsWith("countStation") ){
+            while (line != null) {
+                if (line.startsWith("countStation")) {
                     line = reader.readLine();
                     continue;
                 }
-                String parts [] = line.split("\t");
+                String parts[] = line.split("\t");
                 String surveyLocation = parts[0];
-                Id<Link> linkId = Id.createLinkId( parts[1] );
+                Id<Link> linkId = Id.createLinkId(parts[1]);
                 Integer time = Integer.valueOf(parts[2]);
                 double sum = 0.;
-                for (int index = 3; index<parts.length-1;index++){
-                    sum += Double.valueOf( parts[index] );
+                for (int index = 3; index < parts.length - 1; index++) {
+                    sum += Double.valueOf(parts[index]);
                 }
 
-                double count = Double.valueOf(parts[parts.length-1]);
-                if(sum!=count) throw new RuntimeException("sum of individual modal counts does not match total count.");
+                double count = Double.valueOf(parts[parts.length - 1]);
+                if (sum != count)
+                    throw new RuntimeException("sum of individual modal counts does not match total count.");
 
-                Tuple<Id<Link>,String> myCountStationInfo = new Tuple<>( linkId, surveyLocation);
-                if(countStation2time2countInfo.containsKey(myCountStationInfo)){
+                Tuple<Id<Link>, String> myCountStationInfo = new Tuple<>(linkId, surveyLocation);
+                if (countStation2time2countInfo.containsKey(myCountStationInfo)) {
                     Map<Integer, Double> time2count = countStation2time2countInfo.get(myCountStationInfo);
                     time2count.put(time, count);
                 } else {
@@ -161,7 +151,7 @@ public class RunDadarEvacScenario {
                 line = reader.readLine();
             }
         } catch (IOException e) {
-            throw new RuntimeException("Data is not Read. Reason :"+e);
+            throw new RuntimeException("Data is not Read. Reason :" + e);
         }
     }
 
@@ -173,9 +163,9 @@ public class RunDadarEvacScenario {
         counts.setYear(2014);
         counts.setDescription("DadarAllModesCountBasedOnCMP_Mumbai_2016");
 
-        for (Tuple<Id<Link>, String> mcs: countStation2time2countInfo.keySet()){
+        for (Tuple<Id<Link>, String> mcs : countStation2time2countInfo.keySet()) {
             Count<Link> c = counts.createAndAddCount(mcs.getFirst(), mcs.getSecond());
-            for(Integer i: countStation2time2countInfo.get(mcs).keySet()){
+            for (Integer i : countStation2time2countInfo.get(mcs).keySet()) {
                 c.createVolume(i, countStation2time2countInfo.get(mcs).get(i));
             }
         }
@@ -285,6 +275,136 @@ public class RunDadarEvacScenario {
         new NetworkWriter(scenario.getNetwork()).write(EVACUATION_NETWORK);
     }
 
+    private void createModeShareCalibrationConfig() {
+        Config config = ConfigUtils.createConfig();
+
+        config.network().setInputFile(MATSIM_NETWORK);
+
+        config.plans().setInputFile(MATSIM_PLANS);
+        config.plans().setRemovingUnneccessaryPlanAttributes(false);
+
+        config.controler().setLastIteration(0);
+        config.controler().setLastIteration(100);
+        config.controler().setOutputDirectory(OUTPUT_MODE_SHARE_CALIBRATION_FILES_PATH);
+        config.controler().setDumpDataAtEnd(false);
+        config.controler().setCreateGraphs(false);
+        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+        config.controler().setWriteEventsInterval(10);
+        config.controler().setWritePlansInterval(10);
+
+        config.qsim().setSnapshotPeriod(5 * 60);
+        config.qsim().setEndTime(30 * 3600);
+        config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
+        config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
+        config.qsim().setMainModes(DADAR_ALL_MODES);
+        config.qsim().setUsingFastCapacityUpdate(false);
+        config.qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.withHoles);
+        config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
+
+        //TODO we are using 0.5 just to see some congestion.
+        config.qsim().setFlowCapFactor(0.5);
+        config.qsim().setStorageCapFactor(0.5);
+
+        config.vspExperimental().setWritingOutputEvents(true);
+        config.plansCalcRoute().setNetworkModes(DADAR_ALL_MODES);
+
+        config.counts().setWriteCountsInterval(5);
+        config.counts().setInputFile(MATSIM_COUNTS);
+        config.counts().setFilterModes(true);
+        config.counts().setOutputFormat("txt");
+        config.counts().setAverageCountsOverIterations(5);
+
+        config.travelTimeCalculator().setFilterModes(true);
+        config.travelTimeCalculator().setSeparateModes(true);
+        config.travelTimeCalculator().setAnalyzedModes((new HashSet<>(DadarUtils.ALL_MAIN_MODES)));
+
+
+        PlanCalcScoreConfigGroup pcg = config.planCalcScore();
+        {
+            PlanCalcScoreConfigGroup.ActivityParams originAct = new PlanCalcScoreConfigGroup.ActivityParams(ORIGIN_ACTIVITY);
+            originAct.setScoringThisActivityAtAll(false);
+            pcg.addActivityParams(originAct);
+
+            PlanCalcScoreConfigGroup.ActivityParams destinationAct = new PlanCalcScoreConfigGroup.ActivityParams(DESTINATION_ACTIVITY);
+            destinationAct.setScoringThisActivityAtAll(false);
+            destinationAct.setTypicalDuration(8 * 3600);
+            pcg.addActivityParams(destinationAct);
+
+        }
+
+        for (String mode : DADAR_ALL_MODES) {
+            PlanCalcScoreConfigGroup.ModeParams modeParams = new PlanCalcScoreConfigGroup.ModeParams(mode);
+            modeParams.setConstant(DadarUtils.setConstant(mode));
+            modeParams.setMarginalUtilityOfTraveling(DadarUtils.setMarginalUtilityOfTraveling(mode));
+            pcg.addModeParams(modeParams);
+        }
+
+        StrategyConfigGroup scg = config.strategy();
+        {
+            StrategyConfigGroup.StrategySettings expChangeBeta = new StrategyConfigGroup.StrategySettings();
+            expChangeBeta.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta);
+            expChangeBeta.setWeight(0.7);
+            scg.addStrategySettings(expChangeBeta);
+
+            StrategyConfigGroup.StrategySettings reRoute = new StrategyConfigGroup.StrategySettings();
+            reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
+            reRoute.setWeight(0.15);
+            scg.addStrategySettings(reRoute);
+
+            StrategyConfigGroup.StrategySettings timeAllocationMutator = new StrategyConfigGroup.StrategySettings();
+            timeAllocationMutator.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator);
+            timeAllocationMutator.setWeight(0.05);
+            scg.addStrategySettings(timeAllocationMutator);
+
+            config.timeAllocationMutator().setAffectingDuration(false);
+
+            StrategyConfigGroup.StrategySettings modeChoice = new StrategyConfigGroup.StrategySettings();
+            modeChoice.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode);
+            modeChoice.setWeight(0.8);
+            scg.addStrategySettings(modeChoice);
+
+            config.changeMode().setModes(DadarUtils.ALL_MAIN_MODES.toArray(new String[DadarUtils.ALL_MAIN_MODES.size()]));
+        }
+
+        config.strategy().setFractionOfIterationsToDisableInnovation(0.75);
+
+        Scenario scenario = ScenarioUtils.loadScenario(config);
+
+        Vehicles vehicles = scenario.getVehicles();
+
+        for (String mode : DADAR_ALL_MODES) {
+            VehicleType veh = VehicleUtils.createVehicleType(Id.create(mode, VehicleType.class));
+            veh.setPcuEquivalents(MixedTrafficVehiclesUtils.getPCU(mode));
+            veh.setMaximumVelocity(MixedTrafficVehiclesUtils.getSpeed(mode));
+            veh.setLength(MixedTrafficVehiclesUtils.getLength(mode));
+            veh.setLength(MixedTrafficVehiclesUtils.getStuckTime(mode));
+            veh.setNetworkMode(mode);
+            vehicles.addVehicleType(veh);
+        }
+
+        new ConfigWriter(config).write(INPUT_FILES_PATH + "config.xml");
+
+        Controler controler = new Controler(scenario);
+
+        controler.getConfig().strategy().setMaxAgentPlanMemorySize(5);
+
+        controler.addOverridingModule(new AbstractModule() { // ploting modal share over iterations
+
+            @Override
+            public void install() {
+                this.bind(ModalShareEventHandler.class);
+                this.addControlerListenerBinding().to(ModalShareControlerListener.class);
+
+                this.bind(ModalTripTravelTimeHandler.class);
+                this.addControlerListenerBinding().to(ModalTravelTimeControlerListener.class);
+
+                this.addControlerListenerBinding().to(MultiModeCountsControlerListener.class);
+            }
+        });
+
+        controler.run();
+    }
+
     private void createDadarEvacConfig() {
         Config config = scenario.getConfig();
 
@@ -295,7 +415,7 @@ public class RunDadarEvacScenario {
 
         config.controler().setLastIteration(0);
         config.controler().setLastIteration(100);
-        config.controler().setOutputDirectory(OUTPUT_FILES_PATH);
+        config.controler().setOutputDirectory(OUTPUT_EVAC_SIM_FILES_PATH);
         config.controler().setDumpDataAtEnd(false);
         config.controler().setCreateGraphs(false);
         config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
@@ -317,12 +437,6 @@ public class RunDadarEvacScenario {
 
         config.vspExperimental().setWritingOutputEvents(true);
 
-        config.counts().setWriteCountsInterval(5);
-        config.counts().setInputFile(MATSIM_COUNTS);
-        config.counts().setFilterModes(true);
-        config.counts().setOutputFormat("txt");
-        config.counts().setAverageCountsOverIterations(5);
-
         config.plansCalcRoute().setNetworkModes(DADAR_ALL_MODES);
 
         config.travelTimeCalculator().setFilterModes(true);
@@ -332,15 +446,6 @@ public class RunDadarEvacScenario {
 
         PlanCalcScoreConfigGroup pcg = config.planCalcScore();
         {
-            PlanCalcScoreConfigGroup.ActivityParams originAct = new PlanCalcScoreConfigGroup.ActivityParams(ORIGIN_ACTIVITY);
-            originAct.setScoringThisActivityAtAll(false);
-            pcg.addActivityParams(originAct);
-
-            PlanCalcScoreConfigGroup.ActivityParams destinationAct = new PlanCalcScoreConfigGroup.ActivityParams(DESTINATION_ACTIVITY);
-            destinationAct.setScoringThisActivityAtAll(false);
-            destinationAct.setTypicalDuration(8 * 3600);
-            pcg.addActivityParams(destinationAct);
-
             PlanCalcScoreConfigGroup.ActivityParams evacAct = new PlanCalcScoreConfigGroup.ActivityParams("evac");
             evacAct.setTypicalDuration(3600);
             pcg.addActivityParams(evacAct);
@@ -372,11 +477,6 @@ public class RunDadarEvacScenario {
 
             config.timeAllocationMutator().setAffectingDuration(false);
 
-            StrategyConfigGroup.StrategySettings modeChoice = new StrategyConfigGroup.StrategySettings();
-            modeChoice.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode);
-            modeChoice.setWeight(0.1);
-            scg.addStrategySettings(modeChoice);
-
             config.changeMode().setModes(DadarUtils.ALL_MAIN_MODES.toArray(new String[DadarUtils.ALL_MAIN_MODES.size()]));
         }
 
@@ -402,18 +502,6 @@ public class RunDadarEvacScenario {
 
         controler.getConfig().strategy().setMaxAgentPlanMemorySize(5);
 
-        /*controler.addOverridingModule(new AbstractModule() {
-            @Override
-            public void install() {
-
-                addTravelTimeBinding("bike").to(networkTravelTime());
-                addTravelDisutilityFactoryBinding("bike").to(carTravelDisutilityFactoryKey());
-
-                addTravelTimeBinding("motorbike").to(networkTravelTime());
-                addTravelDisutilityFactoryBinding("motorbike").to(carTravelDisutilityFactoryKey());
-
-            }
-        });*/
 
         controler.addOverridingModule(new AbstractModule() { // ploting modal share over iterations
 
@@ -424,23 +512,18 @@ public class RunDadarEvacScenario {
 
                 this.bind(ModalTripTravelTimeHandler.class);
                 this.addControlerListenerBinding().to(ModalTravelTimeControlerListener.class);
-
-                this.addControlerListenerBinding().to(MultiModeCountsControlerListener.class);
             }
         });
 
         controler.run();
-
-        String outputEventsFile = OUTPUT_FILES_PATH + "/output_events.xml.gz";
-        String userGroup = DadarUtils.DadarUserGroup.urban.toString();
-
-        new ModalShareFromEvents(outputEventsFile, userGroup, new DadarPersonFilter());
-
     }
 
     public static void main(String[] args) {
-        new RunDadarEvacScenario().run();
+        new RunDadarEvacScenario().runModeShareCalibration();
+        //new RunDadarEvacScenario().run();
     }
+
+
 
     private void safePoints() {
         int numberOfSafePointsNeeded = 2;
@@ -534,17 +617,6 @@ public class RunDadarEvacScenario {
 
                 Activity destinAct = factory.createActivityFromCoord(DESTINATION_ACTIVITY, destination);
                 plan.addActivity(destinAct);
-
-//                            plan.addLeg(leg);
-//
-//                            Activity dummyAct1 = factory.createActivityFromCoord("dummy", dummy1);
-//                            dummyAct1.setEndTime( MatsimRandom.getRandom().nextInt(3600));
-//                            plan.addActivity(dummyAct1);
-//
-//                            plan.addLeg(leg);
-//
-//                            Activity dummyAct2 = factory.createActivityFromCoord("dummy", dummy2);
-//                            plan.addActivity(dummyAct2);
 
                 person.addPlan(plan);
                 population.addPerson(person);
