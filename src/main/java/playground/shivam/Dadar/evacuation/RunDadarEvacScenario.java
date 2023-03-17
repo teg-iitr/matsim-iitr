@@ -1,6 +1,8 @@
 package playground.shivam.Dadar.evacuation;
 
 
+import com.google.inject.Key;
+import com.google.inject.name.Names;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.locationtech.jts.geom.Geometry;
@@ -8,15 +10,17 @@ import org.locationtech.jts.geom.Point;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.network.*;
+import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.network.NetworkWriter;
+import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.*;
 import org.matsim.contrib.osm.networkReader.SupersonicOsmNetworkReader;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
-import org.matsim.core.config.groups.QSimConfigGroup;
-import org.matsim.core.config.groups.StrategyConfigGroup;
+import org.matsim.core.config.groups.*;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
@@ -26,6 +30,7 @@ import org.matsim.core.network.algorithms.NetworkCleaner;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.router.DefaultRoutingModules;
 import org.matsim.core.router.DijkstraFactory;
+import org.matsim.core.router.RoutingModule;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.costcalculators.OnlyTimeDependentTravelDisutility;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -35,7 +40,9 @@ import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.IOUtils;
-import org.matsim.counts.*;
+import org.matsim.counts.Count;
+import org.matsim.counts.Counts;
+import org.matsim.counts.CountsWriter;
 import org.matsim.evacuationgui.scenariogenerator.EvacuationNetworkGenerator;
 import org.matsim.facilities.FacilitiesUtils;
 import org.matsim.utils.objectattributes.attributable.Attributes;
@@ -88,7 +95,8 @@ public class RunDadarEvacScenario {
 
     private final String MATSIM_PLANS = INPUT_FILES_PATH + "dadar-plans.xml.gz";
     private final String EVACUATION_PLANS = INPUT_FILES_PATH + "dadar_evac_plans.xml.gz";
-    private final Collection<String> DADAR_ALL_MODES = DadarUtils.ALL_MAIN_MODES;
+    private final Collection<String> DADAR_MAIN_MODES = DadarUtils.MAIN_MODES;
+    private final Collection<String> DADAR_TELEPORTED_MODES = DadarUtils.TELEPORTED_MODES;
     private Scenario scenario;
     private Geometry evacuationArea;
     private final Id<Link> safeLinkId = Id.createLinkId("safeLink_Dadar");
@@ -113,7 +121,7 @@ public class RunDadarEvacScenario {
 
         createPlansFromDadarOD();
 
-        createDadarPseudoCounts();
+        //createDadarPseudoCounts();
 
         createModeShareCalibrationConfig();
     }
@@ -217,7 +225,7 @@ public class RunDadarEvacScenario {
                 planOut.addActivity(evacAct);
 
                 evacPerson.addPlan(planOut);
-                if (DADAR_ALL_MODES.contains(leg.getMode())) {
+                if (DADAR_MAIN_MODES.contains(leg.getMode()) || DADAR_TELEPORTED_MODES.contains(leg.getMode())) {
                     TripRouter.Builder builder = new TripRouter.Builder(scenario.getConfig());
                     builder.setRoutingModule(
                             leg.getMode(),
@@ -268,7 +276,7 @@ public class RunDadarEvacScenario {
         this.safeNodeAIds = net.getSafeNodeAIds();
 
         for (Link l : scenario.getNetwork().getLinks().values()) {
-            Set<String> allowedModes = new HashSet<>(DADAR_ALL_MODES);
+            Set<String> allowedModes = new HashSet<>(DADAR_MAIN_MODES);
             l.setAllowedModes(allowedModes);
         }
 
@@ -286,9 +294,9 @@ public class RunDadarEvacScenario {
         config.controler().setLastIteration(0);
         config.controler().setLastIteration(100);
         config.controler().setOutputDirectory(OUTPUT_MODE_SHARE_CALIBRATION_FILES_PATH);
-        config.controler().setDumpDataAtEnd(false);
+        config.controler().setDumpDataAtEnd(true);
         config.controler().setCreateGraphs(false);
-        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
         config.controler().setWriteEventsInterval(10);
         config.controler().setWritePlansInterval(10);
 
@@ -296,7 +304,7 @@ public class RunDadarEvacScenario {
         config.qsim().setEndTime(30 * 3600);
         config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
         config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
-        config.qsim().setMainModes(DADAR_ALL_MODES);
+        config.qsim().setMainModes(DADAR_MAIN_MODES);
         config.qsim().setUsingFastCapacityUpdate(false);
         config.qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.withHoles);
         config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
@@ -306,37 +314,54 @@ public class RunDadarEvacScenario {
         config.qsim().setStorageCapFactor(0.5);
 
         config.vspExperimental().setWritingOutputEvents(true);
-        config.plansCalcRoute().setNetworkModes(DADAR_ALL_MODES);
+        config.vspExperimental().setVspDefaultsCheckingLevel(VspExperimentalConfigGroup.VspDefaultsCheckingLevel.ignore);
+
+        config.plansCalcRoute().setNetworkModes(DADAR_MAIN_MODES);
 
         config.counts().setWriteCountsInterval(5);
-        config.counts().setInputFile(MATSIM_COUNTS);
+        //config.counts().setInputFile(MATSIM_COUNTS);
         config.counts().setFilterModes(true);
         config.counts().setOutputFormat("txt");
         config.counts().setAverageCountsOverIterations(5);
 
         config.travelTimeCalculator().setFilterModes(true);
         config.travelTimeCalculator().setSeparateModes(true);
-        config.travelTimeCalculator().setAnalyzedModes((new HashSet<>(DadarUtils.ALL_MAIN_MODES)));
-
+        config.travelTimeCalculator().setAnalyzedModes((new HashSet<>(DadarUtils.MAIN_MODES)));
 
         PlanCalcScoreConfigGroup pcg = config.planCalcScore();
+        PlansCalcRouteConfigGroup ptg = config.plansCalcRoute();
+
+        ptg.setClearingDefaultModeRoutingParams(true);
         {
             PlanCalcScoreConfigGroup.ActivityParams originAct = new PlanCalcScoreConfigGroup.ActivityParams(ORIGIN_ACTIVITY);
             originAct.setScoringThisActivityAtAll(false);
+            originAct.setTypicalDuration(16 * 3600);
             pcg.addActivityParams(originAct);
 
             PlanCalcScoreConfigGroup.ActivityParams destinationAct = new PlanCalcScoreConfigGroup.ActivityParams(DESTINATION_ACTIVITY);
             destinationAct.setScoringThisActivityAtAll(false);
             destinationAct.setTypicalDuration(8 * 3600);
             pcg.addActivityParams(destinationAct);
-
         }
 
-        for (String mode : DADAR_ALL_MODES) {
-            PlanCalcScoreConfigGroup.ModeParams modeParams = new PlanCalcScoreConfigGroup.ModeParams(mode);
-            modeParams.setConstant(DadarUtils.setConstant(mode));
-            modeParams.setMarginalUtilityOfTraveling(DadarUtils.setMarginalUtilityOfTraveling(mode));
-            pcg.addModeParams(modeParams);
+        for (String teleportedMode: DADAR_TELEPORTED_MODES) {
+//            PlansCalcRouteConfigGroup.TeleportedModeParams teleportedModeParams= new PlansCalcRouteConfigGroup.TeleportedModeParams(teleportedMode);
+//            teleportedModeParams.setTeleportedModeSpeed(MixedTrafficVehiclesUtils.getSpeed(teleportedMode) / 3.6);
+//            teleportedModeParams.setMode(teleportedMode);
+//            teleportedModeParams.setBeelineDistanceFactor(1.5);
+//            ptg.addTeleportedModeParams(teleportedModeParams);
+            PlansCalcRouteConfigGroup.ModeRoutingParams modeRoutingParams = new PlansCalcRouteConfigGroup.ModeRoutingParams(teleportedMode);
+            modeRoutingParams.setTeleportedModeSpeed(MixedTrafficVehiclesUtils.getSpeed(teleportedMode) / 3.6);
+            modeRoutingParams.setMode(teleportedMode);
+            modeRoutingParams.setBeelineDistanceFactor(1.5);
+            ptg.addModeRoutingParams(modeRoutingParams);
+        }
+        for (String mode : DADAR_MAIN_MODES) {
+                PlanCalcScoreConfigGroup.ModeParams modeParams = new PlanCalcScoreConfigGroup.ModeParams(mode);
+                modeParams.setConstant(DadarUtils.setConstant(mode));
+                modeParams.setMarginalUtilityOfTraveling(-1 * DadarUtils.setMarginalUtilityOfTraveling(mode));
+                modeParams.setMarginalUtilityOfDistance(DadarUtils.setMarginalUtilityOfDistance(mode));
+                pcg.addModeParams(modeParams);
         }
 
         StrategyConfigGroup scg = config.strategy();
@@ -363,7 +388,7 @@ public class RunDadarEvacScenario {
             modeChoice.setWeight(0.8);
             scg.addStrategySettings(modeChoice);
 
-            config.changeMode().setModes(DadarUtils.ALL_MAIN_MODES.toArray(new String[DadarUtils.ALL_MAIN_MODES.size()]));
+            config.changeMode().setModes(DadarUtils.MAIN_MODES.toArray(new String[DadarUtils.MAIN_MODES.size()]));
         }
 
         config.strategy().setFractionOfIterationsToDisableInnovation(0.75);
@@ -372,12 +397,11 @@ public class RunDadarEvacScenario {
 
         Vehicles vehicles = scenario.getVehicles();
 
-        for (String mode : DADAR_ALL_MODES) {
+        for (String mode : DADAR_MAIN_MODES) {
             VehicleType veh = VehicleUtils.createVehicleType(Id.create(mode, VehicleType.class));
             veh.setPcuEquivalents(MixedTrafficVehiclesUtils.getPCU(mode));
             veh.setMaximumVelocity(MixedTrafficVehiclesUtils.getSpeed(mode));
             veh.setLength(MixedTrafficVehiclesUtils.getLength(mode));
-            veh.setLength(MixedTrafficVehiclesUtils.getStuckTime(mode));
             veh.setNetworkMode(mode);
             vehicles.addVehicleType(veh);
         }
@@ -387,6 +411,20 @@ public class RunDadarEvacScenario {
         Controler controler = new Controler(scenario);
 
         controler.getConfig().strategy().setMaxAgentPlanMemorySize(5);
+
+        controler.addOverridingModule(new AbstractModule() {
+            @Override
+            public void install() {
+
+                addRoutingModuleBinding( "walk").to(Key.get(RoutingModule.class, Names.named(TransportMode.pt)));
+
+//                addTravelTimeBinding("bicycle").to(networkTravelTime());
+//                addTravelDisutilityFactoryBinding("bicycle").to(carTravelDisutilityFactoryKey());
+//
+//                addTravelTimeBinding("motorbike").to(networkTravelTime());
+//                addTravelDisutilityFactoryBinding("motorbike").to(carTravelDisutilityFactoryKey());
+            }
+        });
 
         controler.addOverridingModule(new AbstractModule() { // ploting modal share over iterations
 
@@ -418,7 +456,7 @@ public class RunDadarEvacScenario {
         config.controler().setOutputDirectory(OUTPUT_EVAC_SIM_FILES_PATH);
         config.controler().setDumpDataAtEnd(false);
         config.controler().setCreateGraphs(false);
-        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
         config.controler().setWriteEventsInterval(10);
         config.controler().setWritePlansInterval(10);
 
@@ -426,7 +464,7 @@ public class RunDadarEvacScenario {
         config.qsim().setEndTime(30 * 3600);
         config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
         config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
-        config.qsim().setMainModes(DADAR_ALL_MODES);
+        config.qsim().setMainModes(DADAR_MAIN_MODES);
         config.qsim().setUsingFastCapacityUpdate(false);
         config.qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.withHoles);
         config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
@@ -436,25 +474,33 @@ public class RunDadarEvacScenario {
         config.qsim().setStorageCapFactor(0.5);
 
         config.vspExperimental().setWritingOutputEvents(true);
+        config.vspExperimental().setVspDefaultsCheckingLevel(VspExperimentalConfigGroup.VspDefaultsCheckingLevel.ignore);
 
-        config.plansCalcRoute().setNetworkModes(DADAR_ALL_MODES);
+        config.plansCalcRoute().setNetworkModes(DADAR_MAIN_MODES);
 
-        config.travelTimeCalculator().setFilterModes(true);
-        config.travelTimeCalculator().setSeparateModes(true);
-        config.travelTimeCalculator().setAnalyzedModes((new HashSet<>(DadarUtils.ALL_MAIN_MODES)));
+        config.travelTimeCalculator().setAnalyzedModes((new HashSet<>(DadarUtils.MAIN_MODES)));
 
 
         PlanCalcScoreConfigGroup pcg = config.planCalcScore();
+        PlansCalcRouteConfigGroup ptg = config.plansCalcRoute();
         {
             PlanCalcScoreConfigGroup.ActivityParams evacAct = new PlanCalcScoreConfigGroup.ActivityParams("evac");
             evacAct.setTypicalDuration(3600);
             pcg.addActivityParams(evacAct);
         }
 
-        for (String mode : DADAR_ALL_MODES) {
+        for (String teleportedMode: DADAR_TELEPORTED_MODES) {
+            PlansCalcRouteConfigGroup.TeleportedModeParams teleportedModeParams= new PlansCalcRouteConfigGroup.TeleportedModeParams(teleportedMode);
+            teleportedModeParams.setTeleportedModeSpeed(MixedTrafficVehiclesUtils.getSpeed(teleportedMode) / 3.6);
+            teleportedModeParams.setMode(teleportedMode);
+            teleportedModeParams.setBeelineDistanceFactor(1.5);
+            ptg.addTeleportedModeParams(teleportedModeParams);
+        }
+        for (String mode : DADAR_MAIN_MODES) {
             PlanCalcScoreConfigGroup.ModeParams modeParams = new PlanCalcScoreConfigGroup.ModeParams(mode);
             modeParams.setConstant(DadarUtils.setConstant(mode));
-            modeParams.setMarginalUtilityOfTraveling(DadarUtils.setMarginalUtilityOfTraveling(mode));
+            modeParams.setMarginalUtilityOfTraveling(-1 * DadarUtils.setMarginalUtilityOfTraveling(mode));
+            modeParams.setMarginalUtilityOfDistance(DadarUtils.setMarginalUtilityOfDistance(mode));
             pcg.addModeParams(modeParams);
         }
 
@@ -477,7 +523,7 @@ public class RunDadarEvacScenario {
 
             config.timeAllocationMutator().setAffectingDuration(false);
 
-            config.changeMode().setModes(DadarUtils.ALL_MAIN_MODES.toArray(new String[DadarUtils.ALL_MAIN_MODES.size()]));
+            config.changeMode().setModes(DadarUtils.MAIN_MODES.toArray(new String[DadarUtils.MAIN_MODES.size()]));
         }
 
         config.strategy().setFractionOfIterationsToDisableInnovation(0.75);
@@ -486,12 +532,11 @@ public class RunDadarEvacScenario {
 
         Vehicles vehicles = scenario.getVehicles();
 
-        for (String mode : DADAR_ALL_MODES) {
+        for (String mode : DADAR_MAIN_MODES) {
             VehicleType veh = VehicleUtils.createVehicleType(Id.create(mode, VehicleType.class));
             veh.setPcuEquivalents(MixedTrafficVehiclesUtils.getPCU(mode));
             veh.setMaximumVelocity(MixedTrafficVehiclesUtils.getSpeed(mode));
             veh.setLength(MixedTrafficVehiclesUtils.getLength(mode));
-            veh.setLength(MixedTrafficVehiclesUtils.getStuckTime(mode));
             veh.setNetworkMode(mode);
             vehicles.addVehicleType(veh);
         }
@@ -612,7 +657,7 @@ public class RunDadarEvacScenario {
                 origAct.setEndTime(6 * 3600 + MatsimRandom.getRandom().nextInt(3600));
                 plan.addActivity(origAct);
 
-                Leg leg = factory.createLeg(getTravelMode(MatsimRandom.getLocalInstance().nextInt(100)));
+                Leg leg = factory.createLeg(getTravelModeFromModalSplit(MatsimRandom.getLocalInstance().nextDouble() * 100));
                 plan.addLeg(leg);
 
                 Activity destinAct = factory.createActivityFromCoord(DESTINATION_ACTIVITY, destination);
@@ -626,21 +671,36 @@ public class RunDadarEvacScenario {
         new PopulationWriter(population).write(MATSIM_PLANS);
     }
 
-    private static String getTravelMode(int number) {
-        if (number <= 45) return DadarUtils.DadarTrafficCountMode2023.motorbike.toString();
-        else if (number <= 85) {
-            return DadarUtils.DadarTrafficCountMode2023.car.toString();
-        } else if (number <= 89) {
-            return DadarUtils.DadarTrafficCountMode2023.bus.toString();
-        } else if (number <= 91) {
-            return DadarUtils.DadarTrafficCountMode2023.lcv.toString();
-        } else if (number <= 95) {
-            return DadarUtils.DadarTrafficCountMode2023.truck.toString();
-        } else if (number <= 97) {
-            return DadarUtils.DadarTrafficCountMode2023.bicycle.toString();
-        } else if (number <= 99) {
-            return DadarUtils.DadarTrafficCountMode2023.auto.toString();
-        } else return DadarUtils.DadarTrafficCountMode2023.cart.toString();
+    // traffic composition based on cmp mumbai 2016 pg 2-4 (figure 2-8)
+    private static String getTravelModeFromTrafficComposition(double number) {
+        if (number <= 29.1) return DadarUtils.MumbaiModeShareSplit2014.car.toString();
+        else if (number > 29.1 && number <= 73.8) {
+            return DadarUtils.MumbaiModeShareSplit2014.motorbike.toString();
+        } else if (number > 73.8 && number <= 78.2) {
+            return DadarUtils.MumbaiModeShareSplit2014.bus.toString();
+        } else if (number > 78.2 && number <= 83.6) {
+            return DadarUtils.MumbaiModeShareSplit2014.lcv.toString();
+        } else if (number > 83.6 && number <= 89.7) {
+            return DadarUtils.MumbaiModeShareSplit2014.truck.toString();
+        } else if (number > 89.7 && number <= 99.4) {
+            return DadarUtils.MumbaiModeShareSplit2014.auto.toString();
+        } else if (number > 99.4 && number <= 99.6) {
+            return DadarUtils.MumbaiModeShareSplit2014.bicycle.toString();
+        } else return DadarUtils.MumbaiModeShareSplit2014.cart.toString();
+    }
+
+    // traffic composition based on cmp mumbai 2016 pg 2-4 (figure 2-8)
+    private static String getTravelModeFromModalSplit(double number) {
+        if (number <= 18.2)
+            return DadarUtils.MumbaiModeShareSplit2014.car.toString();
+        else if (number > 18.2 && number <= 33) {
+            return DadarUtils.MumbaiModeShareSplit2014.motorbike.toString();
+        } else if (number > 33 && number <= 94.2) {
+            return DadarUtils.MumbaiModeShareSplit2014.pt.toString();
+        } else if (number > 94.2 && number <= 99.4) {
+            return DadarUtils.MumbaiModeShareSplit2014.auto.toString();
+        } else
+            return DadarUtils.MumbaiModeShareSplit2014.bicycle.toString();
     }
 
     /**
@@ -659,7 +719,7 @@ public class RunDadarEvacScenario {
             else
                 return (hierarchyLevel <= 5 && wholeGeometry.contains(MGC.coord2Point(DadarUtils.TRANSFORMATION_FROM_WSG_84.transform(cord))));
         };
-        Set<String> modes = new HashSet<>(Collections.singletonList(String.join("", DADAR_ALL_MODES)));
+        Set<String> modes = new HashSet<>(Collections.singletonList(String.join(",", DADAR_MAIN_MODES)));
 
         Network network = (new SupersonicOsmNetworkReader.Builder())
                 .setCoordinateTransformation(DadarUtils.TRANSFORMATION_FROM_WSG_84)

@@ -53,7 +53,9 @@ public class MixedTrafficVehiclesUtils {
             case "cart":
                 pcu = 0.15;
                 break;
-//		case PT :
+            case TransportMode.pt:
+                pcu = 20./3.6;
+                break;
             case "truck":
                 pcu = 3.0;
                 break;
@@ -94,7 +96,9 @@ public class MixedTrafficVehiclesUtils {
             case "cart":
                 speed = 2;
                 break;
-//		case PT :
+            case TransportMode.pt:
+                speed = 20;
+                break;
             case "truck":
                 speed = 8.33;
                 break;
@@ -138,6 +142,8 @@ public class MixedTrafficVehiclesUtils {
                 return 7.5;
             case "auto":
                 return 2.5;
+            case TransportMode.pt:
+                return 10;
 
         }
         throw new RuntimeException("Length fot " + travelMode + " is not found.");
@@ -163,7 +169,9 @@ public class MixedTrafficVehiclesUtils {
             case "cart":
                 stuckTime = 10;
                 break;
-//		case PT :
+            case TransportMode.pt:
+                stuckTime = 360;
+                break;
             case "truck":
                 stuckTime = 180.;
                 break;
@@ -174,7 +182,7 @@ public class MixedTrafficVehiclesUtils {
                 stuckTime = 40;
                 break;
             default:
-                throw new RuntimeException("No speed is set for travel mode " + travelMode + ".");
+                throw new RuntimeException("No stuckTime is set for travel mode " + travelMode + ".");
         }
         return stuckTime;
     }

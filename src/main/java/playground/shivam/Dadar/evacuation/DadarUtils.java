@@ -18,19 +18,22 @@ public class DadarUtils {
             .getCoordinateTransformation(TransformationFactory.WGS84, Dadar_EPSG);
 
     public static final Collection<String> ALL_MAIN_MODES =  Arrays.asList("motorbike", "car", "auto",  "bus", "lcv", "truck", "bicycle", "cart");
+    public static final Collection<String> MAIN_MODES = Arrays.asList("motorbike", "car", "bicycle");
+    public static final Collection<String> TELEPORTED_MODES = Arrays.asList("pt", "auto");
 
     public static double setMarginalUtilityOfTraveling(String mode) {
         double marginalUtilityOfTraveling;
         switch (mode) {
             case TransportMode.car:
-                marginalUtilityOfTraveling = 0;
+                marginalUtilityOfTraveling = 95.18;
                 break;
             case "bicycle":
+            case "cycle":
             case TransportMode.bike:
-                marginalUtilityOfTraveling = 0;
+                marginalUtilityOfTraveling = 20;
                 break;
             case "motorbike":
-                marginalUtilityOfTraveling = 0;
+                marginalUtilityOfTraveling = 53.17;
                 break;
             case TransportMode.walk:
                 marginalUtilityOfTraveling = 0;
@@ -39,7 +42,7 @@ public class DadarUtils {
                 marginalUtilityOfTraveling = 0;
                 break;
             case "bus":
-                marginalUtilityOfTraveling = 0;
+                marginalUtilityOfTraveling = 44.14;
                 break;
             case "cart":
                 marginalUtilityOfTraveling = 0;
@@ -48,10 +51,10 @@ public class DadarUtils {
                 marginalUtilityOfTraveling = 0;
                 break;
             case "auto":
-                marginalUtilityOfTraveling = 0;
+                marginalUtilityOfTraveling = 38.5;
                 break;
-            case "cycle":
-                marginalUtilityOfTraveling = 0;
+            case TransportMode.pt:
+                marginalUtilityOfTraveling = 45.27;
                 break;
             default:
                 throw new RuntimeException("No marginal utility of traveling is set for travel mode " + mode + ".");
@@ -59,8 +62,49 @@ public class DadarUtils {
         return marginalUtilityOfTraveling;
     }
 
-    public enum DadarTrafficCountMode2023 {
-        motorbike, car, auto,  bus, lcv, truck, bicycle, cart;
+    public static double setMarginalUtilityOfDistance(String mode) {
+        double marginalUtilityOfDistance;
+        switch (mode) {
+            case TransportMode.car:
+                marginalUtilityOfDistance = 9.09;
+                break;
+            case "bicycle":
+            case "cycle":
+            case TransportMode.bike:
+                marginalUtilityOfDistance = 5;
+                break;
+            case "motorbike":
+                marginalUtilityOfDistance = 12.38;
+                break;
+            case TransportMode.walk:
+                marginalUtilityOfDistance = 0;
+                break;
+            case "lcv":
+                marginalUtilityOfDistance = 0;
+                break;
+            case "bus":
+                marginalUtilityOfDistance = 18.37;
+                break;
+            case "cart":
+                marginalUtilityOfDistance = 0;
+                break;
+            case "truck":
+                marginalUtilityOfDistance = 0;
+                break;
+            case "auto":
+                marginalUtilityOfDistance = 16.3;
+                break;
+            case TransportMode.pt:
+                marginalUtilityOfDistance = 5.12;
+                break;
+            default:
+                throw new RuntimeException("No marginal utility of traveling is set for travel mode " + mode + ".");
+        }
+        return marginalUtilityOfDistance;
+    }
+
+    public enum MumbaiModeShareSplit2014 {
+        motorbike, car, auto,  bus, pt, bicycle, truck, lcv, cart;
     }
     public enum DadarUserGroup {
         urban, commuter, through
@@ -72,6 +116,7 @@ public class DadarUtils {
                 constant = 0;
                 break;
             case "bicycle":
+            case "cycle":
             case TransportMode.bike:
                 constant = 0;
                 break;
@@ -96,7 +141,7 @@ public class DadarUtils {
             case "auto":
                 constant = 0;
                 break;
-            case "cycle":
+            case TransportMode.pt:
                 constant = 0;
                 break;
             default:
