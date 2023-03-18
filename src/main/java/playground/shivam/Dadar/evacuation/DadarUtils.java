@@ -17,7 +17,7 @@ public class DadarUtils {
     public static final CoordinateTransformation TRANSFORMATION_FROM_WSG_84 = TransformationFactory
             .getCoordinateTransformation(TransformationFactory.WGS84, Dadar_EPSG);
 
-    public static final Collection<String> ALL_MAIN_MODES =  Arrays.asList("motorbike", "car", "auto",  "bus", "lcv", "truck", "bicycle", "cart");
+    public static final Collection<String> ALL_MAIN_MODES =  Arrays.asList("motorbike", "car", "auto", "pt", "bicycle", "walk");
     public static final Collection<String> MAIN_MODES = Arrays.asList("motorbike", "car", "bicycle");
     public static final Collection<String> TELEPORTED_MODES = Arrays.asList("pt", "auto", "walk");
 
@@ -77,7 +77,7 @@ public class DadarUtils {
                 marginalUtilityOfDistance = 12.38;
                 break;
             case TransportMode.walk:
-                marginalUtilityOfDistance = 0;
+                marginalUtilityOfDistance = 0.002;
                 break;
             case "lcv":
                 marginalUtilityOfDistance = 0;

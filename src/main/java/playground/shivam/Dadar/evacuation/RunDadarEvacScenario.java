@@ -221,7 +221,7 @@ public class RunDadarEvacScenario {
                 planOut.addActivity(evacAct);
 
                 evacPerson.addPlan(planOut);
-                if (DADAR_MAIN_MODES.contains(leg.getMode()) || DADAR_TELEPORTED_MODES.contains(leg.getMode())) {
+                if (DADAR_MAIN_MODES.contains(leg.getMode())) {
                     TripRouter.Builder builder = new TripRouter.Builder(scenario.getConfig());
                     builder.setRoutingModule(
                             leg.getMode(),
@@ -320,14 +320,16 @@ public class RunDadarEvacScenario {
         config.counts().setOutputFormat("txt");
         config.counts().setAverageCountsOverIterations(5);
 
-        config.travelTimeCalculator().setFilterModes(true);
-        config.travelTimeCalculator().setSeparateModes(true);
-        config.travelTimeCalculator().setAnalyzedModes((new HashSet<>(DadarUtils.MAIN_MODES)));
+//        config.travelTimeCalculator().setFilterModes(true);
+//        config.travelTimeCalculator().setSeparateModes(true);
+//        config.travelTimeCalculator().setAnalyzedModes((new HashSet<>(DadarUtils.MAIN_MODES)));
+
+        config.parallelEventHandling().setNumberOfThreads(4);
 
         PlanCalcScoreConfigGroup pcg = config.planCalcScore();
         PlansCalcRouteConfigGroup ptg = config.plansCalcRoute();
 
-        ptg.setClearingDefaultModeRoutingParams(false);
+        ptg.setClearingDefaultModeRoutingParams(true);
         {
             PlanCalcScoreConfigGroup.ActivityParams originAct = new PlanCalcScoreConfigGroup.ActivityParams(ORIGIN_ACTIVITY);
             originAct.setScoringThisActivityAtAll(false);
@@ -352,7 +354,7 @@ public class RunDadarEvacScenario {
             modeRoutingParams.setBeelineDistanceFactor(1.5);
             ptg.addModeRoutingParams(modeRoutingParams);
         }
-        for (String mode : DADAR_MAIN_MODES) {
+        for (String mode : DadarUtils.ALL_MAIN_MODES) {
                 PlanCalcScoreConfigGroup.ModeParams modeParams = new PlanCalcScoreConfigGroup.ModeParams(mode);
                 modeParams.setConstant(DadarUtils.setConstant(mode));
                 modeParams.setMarginalUtilityOfTraveling(-1 * DadarUtils.setMarginalUtilityOfTraveling(mode));
@@ -381,7 +383,7 @@ public class RunDadarEvacScenario {
 
             StrategyConfigGroup.StrategySettings modeChoice = new StrategyConfigGroup.StrategySettings();
             modeChoice.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode);
-            modeChoice.setWeight(0.8);
+            modeChoice.setWeight(0.1);
             scg.addStrategySettings(modeChoice);
 
             config.changeMode().setModes(DadarUtils.MAIN_MODES.toArray(new String[DadarUtils.MAIN_MODES.size()]));
@@ -411,8 +413,6 @@ public class RunDadarEvacScenario {
         controler.addOverridingModule(new AbstractModule() {
             @Override
             public void install() {
-                    // not needed if walk is added as a teleported mode
-                // addRoutingModuleBinding( "walk").to(Key.get(RoutingModule.class, Names.named(TransportMode.pt)));
 
 //                addTravelTimeBinding("bicycle").to(networkTravelTime());
 //                addTravelDisutilityFactoryBinding("bicycle").to(carTravelDisutilityFactoryKey());
