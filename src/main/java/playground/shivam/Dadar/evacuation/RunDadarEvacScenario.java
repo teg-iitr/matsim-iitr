@@ -1,8 +1,6 @@
 package playground.shivam.Dadar.evacuation;
 
 
-import com.google.inject.Key;
-import com.google.inject.name.Names;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.locationtech.jts.geom.Geometry;
@@ -10,7 +8,6 @@ import org.locationtech.jts.geom.Point;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkWriter;
@@ -30,7 +27,6 @@ import org.matsim.core.network.algorithms.NetworkCleaner;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.router.DefaultRoutingModules;
 import org.matsim.core.router.DijkstraFactory;
-import org.matsim.core.router.RoutingModule;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.costcalculators.OnlyTimeDependentTravelDisutility;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -331,7 +327,7 @@ public class RunDadarEvacScenario {
         PlanCalcScoreConfigGroup pcg = config.planCalcScore();
         PlansCalcRouteConfigGroup ptg = config.plansCalcRoute();
 
-        ptg.setClearingDefaultModeRoutingParams(true);
+        ptg.setClearingDefaultModeRoutingParams(false);
         {
             PlanCalcScoreConfigGroup.ActivityParams originAct = new PlanCalcScoreConfigGroup.ActivityParams(ORIGIN_ACTIVITY);
             originAct.setScoringThisActivityAtAll(false);
@@ -415,8 +411,8 @@ public class RunDadarEvacScenario {
         controler.addOverridingModule(new AbstractModule() {
             @Override
             public void install() {
-
-                addRoutingModuleBinding( "walk").to(Key.get(RoutingModule.class, Names.named(TransportMode.pt)));
+                    // not needed if walk is added as a teleported mode
+                // addRoutingModuleBinding( "walk").to(Key.get(RoutingModule.class, Names.named(TransportMode.pt)));
 
 //                addTravelTimeBinding("bicycle").to(networkTravelTime());
 //                addTravelDisutilityFactoryBinding("bicycle").to(carTravelDisutilityFactoryKey());

@@ -19,7 +19,7 @@ public class DadarUtils {
 
     public static final Collection<String> ALL_MAIN_MODES =  Arrays.asList("motorbike", "car", "auto",  "bus", "lcv", "truck", "bicycle", "cart");
     public static final Collection<String> MAIN_MODES = Arrays.asList("motorbike", "car", "bicycle");
-    public static final Collection<String> TELEPORTED_MODES = Arrays.asList("pt", "auto");
+    public static final Collection<String> TELEPORTED_MODES = Arrays.asList("pt", "auto", "walk");
 
     public static double setMarginalUtilityOfTraveling(String mode) {
         double marginalUtilityOfTraveling;
