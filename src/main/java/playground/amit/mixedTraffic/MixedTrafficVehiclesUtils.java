@@ -170,7 +170,7 @@ public class MixedTrafficVehiclesUtils {
                 stuckTime = 10;
                 break;
             case TransportMode.pt:
-                stuckTime = 360;
+                stuckTime = 180;
                 break;
             case "truck":
                 stuckTime = 180.;
