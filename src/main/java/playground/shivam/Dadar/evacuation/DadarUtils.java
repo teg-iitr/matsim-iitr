@@ -108,10 +108,10 @@ public class DadarUtils {
         double constant;
         switch (travelMode) {
             case TransportMode.car:
-                constant = -10230;
+                constant = -10245;
                 break;
             case "motorbike":
-                constant = 6330;
+                constant = 6348;
                 break;
             case "auto":
                 constant = 0;
