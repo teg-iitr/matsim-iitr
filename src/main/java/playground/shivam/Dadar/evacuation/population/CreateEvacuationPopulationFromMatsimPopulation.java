@@ -30,7 +30,6 @@ public class CreateEvacuationPopulationFromMatsimPopulation {
         Geometry evacuationArea = CreateEvacuationNetworkFromMatsimNetwork.getEvacuationArea();
         Collection<Id<Node>> safeNodeAIds = CreateEvacuationNetworkFromMatsimNetwork.getSafeNodeAIds();
 
-
         Population dadarPop = scenarioPlans.getPopulation();
 
         Population evacPop = scenarioNetwork.getPopulation();

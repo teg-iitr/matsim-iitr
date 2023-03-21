@@ -39,7 +39,7 @@ public class MixedTrafficVehiclesUtils {
                 pcu = 0.25;
                 break;
             case "motorbike":
-                pcu = 0.25;
+                pcu = 0.3;
                 break;
             case TransportMode.walk:
                 pcu = 0.10;
@@ -60,7 +60,7 @@ public class MixedTrafficVehiclesUtils {
                 pcu = 3.0;
                 break;
             case "auto":
-                pcu = 3.0;
+                pcu = 1.2;
                 break;
             case "cycle":
                 pcu = 0.5;

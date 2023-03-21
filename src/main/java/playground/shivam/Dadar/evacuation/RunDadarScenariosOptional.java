@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Scanner;
 
 import static playground.shivam.Dadar.evacuation.DadarUtils.MATSIM_NETWORK;
+import static playground.shivam.Dadar.evacuation.DadarUtils.MATSIM_PLANS;
 import static playground.shivam.Dadar.evacuation.SafePoints.SafePoints.safePoints;
 import static playground.shivam.Dadar.evacuation.network.CreateEvacuationNetworkFromMatsimNetwork.createDadarEvacNetwork;
 import static playground.shivam.Dadar.evacuation.network.CreateNetworkFromOSM.createDadarNetworkFromOSM;
@@ -44,7 +45,7 @@ public class RunDadarScenariosOptional {
 
         createPlansFromDadarOD(a);
 
-        Scenario scenarioFromPlans = LoadMyScenarios.loadScenarioFromNetwork(MATSIM_NETWORK);
+        Scenario scenarioFromPlans = LoadMyScenarios.loadScenarioFromPlans(MATSIM_PLANS);
 
         createDadarEvacPlans(scenarioFromPlans, scenarioFromNetwork);
 
@@ -77,7 +78,7 @@ public class RunDadarScenariosOptional {
         System.out.println("3. Dadar traffic simulation with all modes, even teleported");
         System.out.println("4. Dadar evacuation traffic simulation");
         System.out.print("Enter your choice: ");
-        a = 3;
+        a = sc.nextInt();
         System.out.println();
         switch (a){
             case 1:

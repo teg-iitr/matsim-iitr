@@ -52,8 +52,8 @@ public class DadarUtils {
             .getCoordinateTransformation(TransformationFactory.WGS84, Dadar_EPSG);
 
     public static final Collection<String> ALL_MODES =  Arrays.asList("motorbike", "car", "auto", "pt");
-    public static final Collection<String> MAIN_MODES = Arrays.asList("motorbike", "car");
-    public static final Collection<String> TELEPORTED_MODES = Arrays.asList("pt", "auto", "walk");
+    public static final Collection<String> MAIN_MODES = Arrays.asList("motorbike", "car","auto");
+    public static final Collection<String> TELEPORTED_MODES = Arrays.asList("pt",  "walk");
     public static final String SINGLE_MODE = TransportMode.car;
 
     public static double setMarginalUtilityOfTraveling(String mode) {
@@ -61,6 +61,7 @@ public class DadarUtils {
         switch (mode) {
             case TransportMode.car:
                 marginalUtilityOfTraveling = 95.18;
+                marginalUtilityOfTraveling = 0;
                 break;
             case "motorbike":
                 marginalUtilityOfTraveling = 53.17;
@@ -81,6 +82,7 @@ public class DadarUtils {
         double marginalUtilityOfDistance;
         switch (mode) {
             case TransportMode.car:
+                marginalUtilityOfDistance = 9.09;
                 marginalUtilityOfDistance = 9.09;
                 break;
             case "motorbike":
@@ -108,10 +110,10 @@ public class DadarUtils {
         double constant;
         switch (travelMode) {
             case TransportMode.car:
-                constant = -10245;
+                constant = -10250;
                 break;
             case "motorbike":
-                constant = 6348;
+                constant = 6335;
                 break;
             case "auto":
                 constant = 0;

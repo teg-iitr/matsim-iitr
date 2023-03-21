@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.matsim.evacuationgui.model.Constants.safeLinkId;
 import static playground.shivam.Dadar.evacuation.DadarUtils.*;
 
 public class CreateEvacuationNetworkFromMatsimNetwork {

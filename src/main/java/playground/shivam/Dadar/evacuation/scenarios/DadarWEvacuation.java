@@ -19,6 +19,7 @@ import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareContro
 import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
+import playground.vsp.cadyts.multiModeCadyts.MultiModeCountsControlerListener;
 
 import java.util.HashSet;
 
@@ -35,10 +36,10 @@ public class DadarWEvacuation {
         config.plans().setRemovingUnneccessaryPlanAttributes(true);
 
         config.controler().setLastIteration(0);
-        config.controler().setLastIteration(100);
+        config.controler().setLastIteration(ITERATIONS);
         config.controler().setOutputDirectory(OUTPUT_EVACUATION);
-        config.controler().setDumpDataAtEnd(false);
-        config.controler().setCreateGraphs(false);
+        config.controler().setDumpDataAtEnd(true);
+        config.controler().setCreateGraphs(true);
         config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
         config.controler().setWriteEventsInterval(10);
         config.controler().setWritePlansInterval(10);
@@ -67,6 +68,10 @@ public class DadarWEvacuation {
         PlanCalcScoreConfigGroup pcg = config.planCalcScore();
         PlansCalcRouteConfigGroup ptg = config.plansCalcRoute();
         {
+            PlanCalcScoreConfigGroup.ActivityParams originAct = new PlanCalcScoreConfigGroup.ActivityParams(ORIGIN_ACTIVITY);
+            originAct.setScoringThisActivityAtAll(false);
+            pcg.addActivityParams(originAct);
+
             PlanCalcScoreConfigGroup.ActivityParams evacAct = new PlanCalcScoreConfigGroup.ActivityParams("evac");
             evacAct.setTypicalDuration(3600);
             pcg.addActivityParams(evacAct);
@@ -106,6 +111,13 @@ public class DadarWEvacuation {
 
             config.timeAllocationMutator().setAffectingDuration(false);
 
+            StrategyConfigGroup.StrategySettings modeChoice = new StrategyConfigGroup.StrategySettings();
+            modeChoice.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeSingleTripMode);
+            modeChoice.setWeight(0.1);
+            scg.addStrategySettings(modeChoice);
+
+            config.changeMode().setModes(DadarUtils.MAIN_MODES.toArray(new String[DadarUtils.MAIN_MODES.size()]));
+
         }
 
         config.strategy().setFractionOfIterationsToDisableInnovation(0.75);
@@ -137,6 +149,8 @@ public class DadarWEvacuation {
 
                 this.bind(ModalTripTravelTimeHandler.class);
                 this.addControlerListenerBinding().to(ModalTravelTimeControlerListener.class);
+
+                this.addControlerListenerBinding().to(MultiModeCountsControlerListener.class);
             }
         });
 

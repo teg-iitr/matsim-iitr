@@ -74,7 +74,9 @@ public class DadarAllModes {
 
         PlanCalcScoreConfigGroup pcg = config.planCalcScore();
         PlansCalcRouteConfigGroup ptg = config.plansCalcRoute();
-
+        pcg.setPerforming_utils_hr(0.1);
+        pcg.setWriteExperiencedPlans(true);
+        pcg.setFractionOfIterationsToStartScoreMSA(0.8);
         {
             PlanCalcScoreConfigGroup.ActivityParams originAct = new PlanCalcScoreConfigGroup.ActivityParams(ORIGIN_ACTIVITY);
             originAct.setScoringThisActivityAtAll(false);
@@ -97,7 +99,7 @@ public class DadarAllModes {
 
         for (String mode : DadarUtils.ALL_MODES) {
             PlanCalcScoreConfigGroup.ModeParams modeParams = new PlanCalcScoreConfigGroup.ModeParams(mode);
-            modeParams.setConstant(DadarUtils.setConstant(mode));
+            modeParams.setConstant(-1 * DadarUtils.setConstant(mode));
             modeParams.setMarginalUtilityOfTraveling(-1 * DadarUtils.setMarginalUtilityOfTraveling(mode));
             modeParams.setMarginalUtilityOfDistance(-1 * DadarUtils.setMarginalUtilityOfDistance(mode));
             pcg.addModeParams(modeParams);
