@@ -12,6 +12,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.matsim.api.core.v01.TransportMode.walk;
+
 public class DadarUtils {
     public static final String INPUT_FILES_PATH = "input/evacDadar/";
     public static final String OUTPUT_EVACUATION = "output/evacDadar/";
@@ -61,16 +63,23 @@ public class DadarUtils {
         switch (mode) {
             case TransportMode.car:
                 marginalUtilityOfTraveling = 95.18;
+                marginalUtilityOfTraveling = 0.94;
                 marginalUtilityOfTraveling = 0;
                 break;
             case "motorbike":
                 marginalUtilityOfTraveling = 53.17;
+                marginalUtilityOfTraveling = 0.48;
+                marginalUtilityOfTraveling = 0;
                 break;
             case "auto":
                 marginalUtilityOfTraveling = 38.5;
+                marginalUtilityOfTraveling = 0.765;
+                marginalUtilityOfTraveling = 0;
                 break;
             case TransportMode.pt:
                 marginalUtilityOfTraveling = 45.27;
+                marginalUtilityOfTraveling = 0.59;
+                marginalUtilityOfTraveling = 0;
                 break;
             default:
                 throw new RuntimeException("No marginal utility of traveling is set for travel mode " + mode + ".");
@@ -83,16 +92,19 @@ public class DadarUtils {
         switch (mode) {
             case TransportMode.car:
                 marginalUtilityOfDistance = 9.09;
-                marginalUtilityOfDistance = 9.09;
+                marginalUtilityOfDistance = 0;
                 break;
             case "motorbike":
                 marginalUtilityOfDistance = 12.38;
+                marginalUtilityOfDistance = 0;
                 break;
             case "auto":
                 marginalUtilityOfDistance = 16.3;
+                marginalUtilityOfDistance = 0;
                 break;
             case TransportMode.pt:
                 marginalUtilityOfDistance = 5.12;
+                marginalUtilityOfDistance = 0;
                 break;
             default:
                 throw new RuntimeException("No marginal utility of traveling is set for travel mode " + mode + ".");
@@ -110,10 +122,10 @@ public class DadarUtils {
         double constant;
         switch (travelMode) {
             case TransportMode.car:
-                constant = -10250;
+                constant = 0;
                 break;
             case "motorbike":
-                constant = 6335;
+                constant = 0;
                 break;
             case "auto":
                 constant = 0;
@@ -125,5 +137,46 @@ public class DadarUtils {
                 throw new RuntimeException("No constant is set for travel mode " + travelMode + ".");
         }
         return constant;
+    }
+
+    public static double getSpeed(final String travelMode) {
+        double speed;
+        switch (travelMode) {
+            case TransportMode.car:
+                speed = 16.67;
+                break;
+            case "motorbike":
+                speed = 16.67;
+                break;
+            case "auto":
+                speed = 40;
+                break;
+            case TransportMode.pt:
+                speed = 20;
+                break;
+            case walk:
+                speed = 0.1;
+                break;
+            default:
+                throw new RuntimeException("No constant is set for travel mode " + travelMode + ".");
+        }
+        return speed;
+    }
+    public static double getPCU(final String travelMode) {
+        double pcu;
+        switch (travelMode) {
+            case TransportMode.car:
+                pcu = 1;
+                break;
+            case "motorbike":
+                pcu = 0.3;
+                break;
+            case "auto":
+                pcu = 1.2;
+                break;
+            default:
+                throw new RuntimeException("No constant is set for travel mode " + travelMode + ".");
+        }
+        return pcu;
     }
 }

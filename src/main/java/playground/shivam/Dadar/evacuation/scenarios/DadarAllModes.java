@@ -91,9 +91,9 @@ public class DadarAllModes {
 
         for (String teleportedMode: TELEPORTED_MODES) {
             PlansCalcRouteConfigGroup.TeleportedModeParams teleportedModeParams= new PlansCalcRouteConfigGroup.TeleportedModeParams(teleportedMode);
-            teleportedModeParams.setTeleportedModeSpeed(MixedTrafficVehiclesUtils.getSpeed(teleportedMode) / 3.6);
+            teleportedModeParams.setTeleportedModeSpeed(DadarUtils.getSpeed(teleportedMode) / 3.6);
             teleportedModeParams.setMode(teleportedMode);
-            teleportedModeParams.setBeelineDistanceFactor(1.5);
+            teleportedModeParams.setBeelineDistanceFactor(1.3);
             ptg.addTeleportedModeParams(teleportedModeParams);
         }
 
@@ -127,10 +127,10 @@ public class DadarAllModes {
 
             StrategyConfigGroup.StrategySettings modeChoice = new StrategyConfigGroup.StrategySettings();
             modeChoice.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeSingleTripMode);
-            modeChoice.setWeight(0.1);
+            modeChoice.setWeight(0.5);
             scg.addStrategySettings(modeChoice);
 
-            config.changeMode().setModes(DadarUtils.MAIN_MODES.toArray(new String[DadarUtils.MAIN_MODES.size()]));
+            config.changeMode().setModes(ALL_MODES.toArray(new String[0]));
         }
 
         config.strategy().setFractionOfIterationsToDisableInnovation(0.75);
@@ -142,8 +142,8 @@ public class DadarAllModes {
 
         for (String mode : MAIN_MODES) {
             VehicleType veh = VehicleUtils.createVehicleType(Id.create(mode, VehicleType.class));
-            veh.setPcuEquivalents(MixedTrafficVehiclesUtils.getPCU(mode));
-            veh.setMaximumVelocity(MixedTrafficVehiclesUtils.getSpeed(mode));
+            veh.setPcuEquivalents(DadarUtils.getPCU(mode));
+            veh.setMaximumVelocity(DadarUtils.getSpeed(mode));
             veh.setLength(MixedTrafficVehiclesUtils.getLength(mode));
             veh.setNetworkMode(mode);
             vehicles.addVehicleType(veh);
