@@ -78,7 +78,8 @@ public class RunDadarScenariosOptional {
         System.out.println("3. Dadar traffic simulation with all modes, even teleported");
         System.out.println("4. Dadar evacuation traffic simulation");
         System.out.print("Enter your choice: ");
-        a = sc.nextInt();
+        //a = sc.nextInt();
+        a = 3;
         System.out.println();
         switch (a){
             case 1:

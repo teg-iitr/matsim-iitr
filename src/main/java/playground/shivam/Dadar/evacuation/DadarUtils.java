@@ -64,22 +64,18 @@ public class DadarUtils {
             case TransportMode.car:
                 marginalUtilityOfTraveling = 95.18;
                 marginalUtilityOfTraveling = 0.94;
-                marginalUtilityOfTraveling = 0;
                 break;
             case "motorbike":
                 marginalUtilityOfTraveling = 53.17;
                 marginalUtilityOfTraveling = 0.48;
-                marginalUtilityOfTraveling = 0;
                 break;
             case "auto":
                 marginalUtilityOfTraveling = 38.5;
                 marginalUtilityOfTraveling = 0.765;
-                marginalUtilityOfTraveling = 0;
                 break;
             case TransportMode.pt:
                 marginalUtilityOfTraveling = 45.27;
                 marginalUtilityOfTraveling = 0.59;
-                marginalUtilityOfTraveling = 0;
                 break;
             default:
                 throw new RuntimeException("No marginal utility of traveling is set for travel mode " + mode + ".");
@@ -122,16 +118,16 @@ public class DadarUtils {
         double constant;
         switch (travelMode) {
             case TransportMode.car:
-                constant = 0;
+                constant = 0.028;
                 break;
             case "motorbike":
-                constant = 0;
+                constant = 0.1;
                 break;
             case "auto":
-                constant = 0;
+                constant = 0.091;
                 break;
             case TransportMode.pt:
-                constant = 0;
+                constant = 0.069;
                 break;
             default:
                 throw new RuntimeException("No constant is set for travel mode " + travelMode + ".");
