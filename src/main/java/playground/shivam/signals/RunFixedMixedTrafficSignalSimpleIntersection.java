@@ -12,21 +12,24 @@ import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.api.core.v01.population.*;
 import org.matsim.contrib.otfvis.OTFVis;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
+import org.matsim.contrib.signals.analysis.MixedTrafficDelayAnalysisTool;
+import org.matsim.contrib.signals.analysis.MixedTrafficSignalAnalysisTool;
+import org.matsim.contrib.signals.builder.MixedTrafficSignals;
 import org.matsim.contrib.signals.builder.Signals;
 import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
+import org.matsim.contrib.signals.controller.laemmerFix.MixedTrafficLaemmerSignalController;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsScenarioWriter;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlData;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlDataFactory;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalPlanData;
+import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupData;
 import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupsData;
-import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemControllerData;
-import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
-import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsData;
-import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemsDataFactory;
+import org.matsim.contrib.signals.data.signalsystems.v20.*;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalSystem;
+import org.matsim.contrib.signals.model.SignalSystemsManager;
 import org.matsim.contrib.signals.otfvis.OTFVisWithSignalsLiveModule;
 import org.matsim.contrib.signals.utils.SignalUtils;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -37,6 +40,7 @@ import org.matsim.core.config.groups.ChangeModeConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.StrategyConfigGroup;
+import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.controler.PrepareForSimUtils;
@@ -55,6 +59,8 @@ import org.matsim.vis.otfvis.OTFVisConfigGroup;
 import org.matsim.vis.otfvis.OnTheFlyServer;
 import playground.amit.mixedTraffic.MixedTrafficVehiclesUtils;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -65,7 +71,7 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
     static String outputDirectory = "output/RunFixedMixedTrafficSignalSimpleIntersection/";
 
     private static final double LANE_LENGTH = 500;
-    private static final int LANE_CAPACITY = 1000;
+    private static final int LANE_CAPACITY = 7200;
     private static final int NO_LANES = 1;
     private static final double LINK_LENGTH = 1000;
 
@@ -92,10 +98,132 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
         final Config config = defineConfig();
         final Scenario scenario = defineScenario(config);
 
+
         controler = new Controler(scenario);
 
         Signals.configure(controler);
 
+        // create the path to the output directory if it does not exist yet
+        Files.createDirectories(Paths.get(outputDirectory));
+
+        config.controler().setOutputDirectory(outputDirectory);
+        config.controler().setLastIteration(10);
+
+        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+        config.controler().setWriteEventsInterval(config.controler().getLastIteration());
+        config.controler().setWritePlansInterval(config.controler().getLastIteration());
+
+        config.vspExperimental().setWritingOutputEvents(true);
+        config.planCalcScore().setWriteExperiencedPlans(true);
+        //write config to file
+        String configFile = outputDirectory + "config.xml";
+        ConfigWriter configWriter = new ConfigWriter(config);
+        configWriter.write(configFile);
+
+//        SignalSystemsConfigGroup signalSystemsConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
+//        signalSystemsConfigGroup.setUseSignalSystems(true);
+//        ----
+        SignalsData signalsData = (SignalsData) controler.getScenario().getScenarioElement(SignalsData.ELEMENT_NAME);
+        List<Id<SignalSystem>> signalSystemIds = new ArrayList<>(signalsData.getSignalGroupsData().getSignalGroupDataBySignalSystemId().keySet());
+        List<Id<Signal>> signalIds = new ArrayList<>();
+        List<SignalData> signalData = new ArrayList<>();
+
+        List<Id<SignalGroup>> signalGroupIds = new ArrayList<>();
+        Map<Id<Link>, Id<Signal>> linkId2signalId = new HashMap<>();
+        Map<Id<Signal>, Id<SignalGroup>> signalId2signalGroupId = new HashMap<>();
+        Map<Id<Link>, Id<SignalGroup>> linkId2signalGroupId = new HashMap<>();
+
+        (new MixedTrafficSignals.Configurator(this.controler)).addSignalControllerFactory(MixedTrafficLaemmerSignalController.IDENTIFIER,
+                MixedTrafficLaemmerSignalController.LaemmerFactory.class);
+
+        MixedTrafficSignalAnalysisTool signalAnalyzer = new MixedTrafficSignalAnalysisTool();
+        controler.addOverridingModule(new AbstractModule() {
+            @Override
+            public void install() {
+                this.addEventHandlerBinding().toInstance(signalAnalyzer);
+                this.addControlerListenerBinding().toInstance(signalAnalyzer);
+            }
+        });
+        // add general analysis tools
+        MixedTrafficDelayAnalysisTool delayAnalysis = new MixedTrafficDelayAnalysisTool(controler.getScenario().getNetwork(), controler.getScenario().getVehicles());
+        controler.addOverridingModule(new AbstractModule() {
+            @Override
+            public void install() {
+                this.addEventHandlerBinding().toInstance(delayAnalysis);
+            }
+        });
+
+        for (var signalSystemId : signalSystemIds) {
+            Map<Id<SignalGroup>, SignalGroupData> signalGroupDataBySystemId = signalsData.getSignalGroupsData().getSignalGroupDataBySystemId(signalSystemId);
+            signalGroupDataBySystemId.values().forEach(signalGroupData -> signalIds.addAll(new ArrayList<>(signalGroupData.getSignalIds())));
+            signalGroupIds.addAll(signalsData.getSignalGroupsData().getSignalGroupDataBySignalSystemId().get(signalSystemId).keySet());
+            signalsData.getSignalSystemsData().getSignalSystemData().values().forEach(signalSystemData -> signalData.addAll(signalSystemData.getSignalData().values()));
+            signalGroupDataBySystemId.values().forEach(signalGroupData -> signalGroupData.getSignalIds().forEach(signalId -> signalId2signalGroupId.put(signalId, signalGroupData.getId())));
+        }
+        signalData.forEach(signalD -> linkId2signalId.put(signalD.getLinkId(), signalD.getId()));
+        linkId2signalId.forEach((linkId, signalId) -> linkId2signalGroupId.put(linkId, signalId2signalGroupId.get(signalId)));
+
+
+        Map<Double, Map<Id<SignalGroup>, Double>> greenTimePerCycle = signalAnalyzer.getSummedBygoneSignalGreenTimesPerCycle();
+        Map<Double, Map<Id<Link>, Double>> delayPerCycle = delayAnalysis.getSummedBygoneDelayPerCycle();
+        Map<Double, Map<Id<Link>, Map<Id<VehicleType>, Double>>> flowPerCycle = delayAnalysis.getSummedBygoneFlowPerLinkPerVehicleTypePerCycle();
+
+        writeResult(outputDirectory + "greenTimesPerCycle.csv", List.of(new String[]{"cycle_time", "signal_group", "link_ids", "green_time"}), false);
+        controler.run();
+        for (var outerEntry : greenTimePerCycle.entrySet()) {
+            for (var innerEntry : outerEntry.getValue().entrySet()) {
+                List<Id<Link>> linkIds = new ArrayList<>();
+                StringBuilder stringBuilder = new StringBuilder();
+                for (var linkSignalGroupId : linkId2signalGroupId.entrySet()) {
+                    if (linkSignalGroupId.getValue().equals(innerEntry.getKey()))
+                        linkIds.add(linkSignalGroupId.getKey());
+                }
+                for (var linkId: linkIds)
+                    stringBuilder.append(linkId).append("|");
+                writeResult(outputDirectory + "greenTimesPerCycle.csv", List.of(new String[]{outerEntry.getKey().toString(), innerEntry.getKey().toString(), stringBuilder.substring(0, stringBuilder.length() - 1), String.valueOf(innerEntry.getValue())}), true);
+            }
+        }
+
+        writeResult(outputDirectory + "delayPerCycle.csv", List.of(new String[]{"cycle_time", "link_id", "delay"}), false);
+
+        for (var outerEntry : delayPerCycle.entrySet()) {
+            for (var innerEntry : outerEntry.getValue().entrySet()) {
+                writeResult(outputDirectory + "delayPerCycle.csv", List.of(new String[]{outerEntry.getKey().toString(), innerEntry.getKey().toString(), String.valueOf(innerEntry.getValue())}), true);
+            }
+        }
+
+        List<String> flowColumns = new ArrayList();
+        flowColumns.add("cycle_time");
+        List<Id<Link>> linkIdList = new ArrayList<>(controler.getScenario().getNetwork().getLinks().keySet());
+        Collections.sort(linkIdList);
+        for (var linkId: linkIdList) {
+            for (var vehicleType: controler.getScenario().getVehicles().getVehicleTypes().keySet()) {
+                String linkIdWithVehicleType = linkId.toString() + "_" + vehicleType.toString();
+                flowColumns.add(linkIdWithVehicleType);
+            }
+        }
+        writeResult(outputDirectory + "flowPerCycle.csv", flowColumns, false);
+        Map<Id<VehicleType>, Double> emptyFlow = new HashMap<>();
+        // filling non-present linkIds
+        for (var vehicleType: controler.getScenario().getVehicles().getVehicleTypes().keySet()) {
+            emptyFlow.putIfAbsent(vehicleType, 0.0);
+        }
+
+        for (var linkId: controler.getScenario().getNetwork().getLinks().keySet()) {
+            for (var outerEntry : flowPerCycle.entrySet()) {
+                flowPerCycle.get(outerEntry.getKey()).putIfAbsent(linkId, emptyFlow);
+            }
+        }
+        for (var outerEntry : flowPerCycle.entrySet()) {
+            List<String> linkIdWithFlowValues = new ArrayList<>();
+            linkIdWithFlowValues.add(outerEntry.getKey().toString());
+            for (var innerEntry : outerEntry.getValue().entrySet()) {
+                for (var innerInnerEntry: innerEntry.getValue().entrySet()) {
+                    linkIdWithFlowValues.add(innerInnerEntry.getValue().toString());
+                }
+            }
+            writeResult(outputDirectory + "flowPerCycle.csv", linkIdWithFlowValues, true);
+        }
     }
 
     public static void main(String[] args) throws IOException {
@@ -123,8 +251,35 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
             // add the module that start the otfvis visualization with signals
             controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
         }
-        //qSim.run();
         controler.run();
+    }
+    public static void writeResult(String filename, List<String> values, boolean append) {
+        FileWriter csvwriter;
+        BufferedWriter bufferedWriter = null;
+        try {
+            csvwriter = new FileWriter(filename, append);
+            bufferedWriter = new BufferedWriter(csvwriter);
+            StringJoiner stringJoiner = new StringJoiner(",");
+            for (var value: values) {
+                stringJoiner.add(value);
+            }
+            bufferedWriter.write(stringJoiner.toString());
+            bufferedWriter.newLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                assert bufferedWriter != null;
+                bufferedWriter.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                bufferedWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private Scenario defineScenario(Config config) {
@@ -133,6 +288,7 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
         SignalSystemsConfigGroup signalSystemsConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
         signalSystemsConfigGroup.setUseSignalSystems(true);
         SignalsData signalsData = SignalUtils.createSignalsData(signalSystemsConfigGroup);
+
         scenario.addScenarioElement(SignalsData.ELEMENT_NAME, signalsData);
 //        scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(config).loadSignalsData());
 
@@ -162,7 +318,7 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
                 ONSET, DROPPING);
 
         // set output files
-        scenario.getConfig().network().setLaneDefinitionsFile(outputDirectory + "lane_definitions_v2.0.xml");
+        scenario.getConfig().network().setLaneDefinitionsFile("lane_definitions_v2.0.xml");
         signalSystemsConfigGroup.setSignalSystemFile(outputDirectory + "signal_systems.xml");
         signalSystemsConfigGroup.setSignalGroupsFile(outputDirectory + "signal_groups.xml");
         signalSystemsConfigGroup.setSignalControlFile(outputDirectory + "signal_control.xml");
@@ -289,12 +445,6 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
     private Config defineConfig() throws IOException {
         Config config = ConfigUtils.createConfig();
 
-        // create the path to the output directory if it does not exist yet
-        Files.createDirectories(Paths.get(outputDirectory));
-
-        config.controler().setOutputDirectory(outputDirectory);
-        config.controler().setLastIteration(50);
-
         config.travelTimeCalculator().setMaxTime(5 * 60 * 60);
 
         config.qsim().setStartTime(0);
@@ -336,19 +486,6 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
         ChangeModeConfigGroup changeTripMode = config.changeMode();
         changeTripMode.setModes(new String[]{"car", "truck"});
         config.plansCalcRoute().setNetworkModes(mainModes);
-
-
-        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
-        config.controler().setWriteEventsInterval(config.controler().getLastIteration());
-        config.controler().setWritePlansInterval(config.controler().getLastIteration());
-
-        config.vspExperimental().setWritingOutputEvents(true);
-        config.planCalcScore().setWriteExperiencedPlans(true);
-
-        //write config to file
-        String configFile = outputDirectory + "config.xml";
-        ConfigWriter configWriter = new ConfigWriter(config);
-        configWriter.write(configFile);
 
 
         return config;
