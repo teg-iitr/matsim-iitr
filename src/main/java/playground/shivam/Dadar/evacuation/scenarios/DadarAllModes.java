@@ -38,7 +38,7 @@ public class DadarAllModes {
         config.controler().setLastIteration(ITERATIONS);
         config.controler().setOutputDirectory(OUTPUT_All_MODES);
         config.controler().setDumpDataAtEnd(true);
-        config.controler().setCreateGraphs(false);
+        config.controler().setCreateGraphs(true);
         config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
         config.controler().setWriteEventsInterval(10);
         config.controler().setWritePlansInterval(10);

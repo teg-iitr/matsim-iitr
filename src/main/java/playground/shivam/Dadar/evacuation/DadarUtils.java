@@ -44,7 +44,8 @@ public class DadarUtils {
 
     public static final String Dadar_EPSG = "EPSG:7767"; // same is used for Mumbai.
     public static  int numberOfSafePointsNeeded = 2;
-    public static int ITERATIONS = 50;
+    // TODO: can be run for iteration as mode hasn't converged
+    public static int ITERATIONS = 160;
     public static final Id<Link> safeLinkId = Id.createLinkId("safeLink_Dadar");
 
     public static final CoordinateTransformation REVERSE_TRANSFORMATION_WGS_84 = TransformationFactory
