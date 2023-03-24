@@ -118,16 +118,16 @@ public class DadarUtils {
         double constant;
         switch (travelMode) {
             case TransportMode.car:
-                constant = 0.055;
+                constant = 0;
                 break;
             case "motorbike":
-                constant = 0.13;
+                constant = 0.075;
                 break;
             case "auto":
-                constant = 0.118;
+                constant = 0.063;
                 break;
             case TransportMode.pt:
-                constant = 0.0975;
+                constant = 0.0425;
                 break;
             default:
                 throw new RuntimeException("No constant is set for travel mode " + travelMode + ".");
