@@ -92,7 +92,7 @@ public class RunAdaptiveSignalSimpleNetwork {
                     net.getNodes().get(Id.createNodeId(fromNodeId)),
                     net.getNodes().get(Id.createNodeId(toNodeId)));
             link.setAllowedModes(Set.of("car", "truck"));
-            link.setCapacity(7200);
+            link.setCapacity(1000);
             link.setLength(1000);
             link.setFreespeed(10);
             net.addLink(link);
@@ -102,13 +102,14 @@ public class RunAdaptiveSignalSimpleNetwork {
     private static void createPopulation(Scenario scenario) {
         Population population = scenario.getPopulation();
 
-        String[] odRelations = {"1_2-4_5", "4_5-2_1", "6_7-8_9", "9_8-7_6"};
+        String[] odRelations = {"1_2-7_6", "1_2-4_5", "1_2-8_9", "6_7-4_5", "6_7-8_9", "6_7-2_1",
+                "5_4-8_9", "5_4-2_1", "5_4-7_6", "9_8-2_1", "9_8-7_6", "9_8-4_5",};
 
         for (String od : odRelations) {
             String fromLinkId = od.split("-")[0];
             String toLinkId = od.split("-")[1];
 
-            for (int i = 0; i < 1800; i++) {
+            for (int i = 0; i < 600; i++) {
                 // create a person
                 Person person = population.getFactory().createPerson(Id.createPersonId(od + "-" + i));
                 population.addPerson(person);
@@ -272,10 +273,13 @@ public class RunAdaptiveSignalSimpleNetwork {
 
         config.controler().setOutputDirectory(outputDirectory);
 
-        config.controler().setLastIteration(10);
-        config.travelTimeCalculator().setMaxTime(18000);
-        config.qsim().setStartTime(0.0D);
-        config.qsim().setEndTime(18000.0D);
+        config.controler().setLastIteration(100);
+
+        config.travelTimeCalculator().setMaxTime(5 * 60 * 60);
+
+        config.qsim().setStartTime(0);
+        config.qsim().setEndTime(5 * 60 * 60);
+        config.qsim().setNodeOffset(20.0);
         config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
         config.qsim().setUsingFastCapacityUpdate(false);
         config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
@@ -315,7 +319,8 @@ public class RunAdaptiveSignalSimpleNetwork {
         otfvisConfig.setDrawTime(true);
 
         LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config, LaemmerConfigGroup.GROUP_NAME, LaemmerConfigGroup.class);
-        laemmerConfigGroup.setDesiredCycleTime(90);
+        laemmerConfigGroup.setMaxCycleTime(120);
+        laemmerConfigGroup.setDesiredCycleTime(120);
         laemmerConfigGroup.setMinGreenTime(5);
         laemmerConfigGroup.setActiveRegime(LaemmerConfigGroup.Regime.COMBINED);
         config.getModules().put(LaemmerConfigGroup.GROUP_NAME, laemmerConfigGroup);

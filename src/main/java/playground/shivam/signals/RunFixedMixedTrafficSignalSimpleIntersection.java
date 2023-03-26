@@ -3,21 +3,17 @@ package playground.shivam.signals;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.events.PersonStuckEvent;
-import org.matsim.api.core.v01.events.handler.PersonStuckEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkFactory;
 import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.api.core.v01.population.*;
-import org.matsim.contrib.otfvis.OTFVis;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.analysis.MixedTrafficDelayAnalysisTool;
 import org.matsim.contrib.signals.analysis.MixedTrafficSignalAnalysisTool;
 import org.matsim.contrib.signals.builder.MixedTrafficSignals;
 import org.matsim.contrib.signals.builder.Signals;
 import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
-import org.matsim.contrib.signals.controller.laemmerFix.MixedTrafficLaemmerSignalController;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsScenarioWriter;
 import org.matsim.contrib.signals.data.signalcontrol.v20.SignalControlData;
@@ -29,7 +25,6 @@ import org.matsim.contrib.signals.data.signalsystems.v20.*;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalSystem;
-import org.matsim.contrib.signals.model.SignalSystemsManager;
 import org.matsim.contrib.signals.otfvis.OTFVisWithSignalsLiveModule;
 import org.matsim.contrib.signals.utils.SignalUtils;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -54,17 +49,14 @@ import org.matsim.lanes.*;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
-import org.matsim.vis.otfvis.OTFClientLive;
-import org.matsim.vis.otfvis.OTFVisConfigGroup;
-import org.matsim.vis.otfvis.OnTheFlyServer;
 import playground.amit.mixedTraffic.MixedTrafficVehiclesUtils;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+
+import static playground.shivam.signals.RunAdaptiveSignalSimpleNetwork.writeResult;
 
 public class RunFixedMixedTrafficSignalSimpleIntersection {
     private Controler controler;
@@ -107,9 +99,9 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
         Files.createDirectories(Paths.get(outputDirectory));
 
         config.controler().setOutputDirectory(outputDirectory);
-        config.controler().setLastIteration(10);
+        config.controler().setLastIteration(100);
 
-        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
         config.controler().setWriteEventsInterval(config.controler().getLastIteration());
         config.controler().setWritePlansInterval(config.controler().getLastIteration());
 
@@ -120,9 +112,34 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
         ConfigWriter configWriter = new ConfigWriter(config);
         configWriter.write(configFile);
 
-//        SignalSystemsConfigGroup signalSystemsConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
-//        signalSystemsConfigGroup.setUseSignalSystems(true);
-//        ----
+
+    }
+
+    public static void main(String[] args) throws IOException {
+        RunFixedMixedTrafficSignalSimpleIntersection fixedMixedTrafficSignalSimpleIntersection = new RunFixedMixedTrafficSignalSimpleIntersection();
+        fixedMixedTrafficSignalSimpleIntersection.run(false);
+    }
+
+    private void run(boolean startOtfvis) {
+
+        EventsManager manager = EventsUtils.createEventsManager();
+
+        PrepareForSimUtils.createDefaultPrepareForSim(controler.getScenario()).run();
+        QSim qSim = new QSimBuilder(controler.getScenario().getConfig()).useDefaults().build(controler.getScenario(), manager);
+
+        if (startOtfvis) {
+
+            // otfvis configuration.  There is more you can do here than via file!
+//                final OTFVisConfigGroup otfVisConfig = ConfigUtils.addOrGetModule(qSim.getScenario().getConfig(), OTFVisConfigGroup.GROUP_NAME, OTFVisConfigGroup.class);
+//                otfVisConfig.setDrawTransitFacilities(false) ; // this DOES work
+//                otfVisConfig.setColoringScheme(OTFVisConfigGroup.ColoringScheme.byId);
+//
+//                OnTheFlyServer server = OTFVis.startServerAndRegisterWithQSim(controler.getScenario().getConfig(), controler.getScenario(), manager, qSim);
+//                OTFClientLive.run(controler.getScenario().getConfig(), server);
+
+            // add the module that start the otfvis visualization with signals
+            controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
+        }
         SignalsData signalsData = (SignalsData) controler.getScenario().getScenarioElement(SignalsData.ELEMENT_NAME);
         List<Id<SignalSystem>> signalSystemIds = new ArrayList<>(signalsData.getSignalGroupsData().getSignalGroupDataBySignalSystemId().keySet());
         List<Id<Signal>> signalIds = new ArrayList<>();
@@ -133,8 +150,8 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
         Map<Id<Signal>, Id<SignalGroup>> signalId2signalGroupId = new HashMap<>();
         Map<Id<Link>, Id<SignalGroup>> linkId2signalGroupId = new HashMap<>();
 
-        (new MixedTrafficSignals.Configurator(this.controler)).addSignalControllerFactory(MixedTrafficLaemmerSignalController.IDENTIFIER,
-                MixedTrafficLaemmerSignalController.LaemmerFactory.class);
+        (new MixedTrafficSignals.Configurator(this.controler)).addSignalControllerFactory(DefaultPlanbasedSignalSystemController.IDENTIFIER,
+                DefaultPlanbasedSignalSystemController.FixedTimeFactory.class);
 
         MixedTrafficSignalAnalysisTool signalAnalyzer = new MixedTrafficSignalAnalysisTool();
         controler.addOverridingModule(new AbstractModule() {
@@ -153,6 +170,8 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
             }
         });
 
+        controler.run();
+
         for (var signalSystemId : signalSystemIds) {
             Map<Id<SignalGroup>, SignalGroupData> signalGroupDataBySystemId = signalsData.getSignalGroupsData().getSignalGroupDataBySystemId(signalSystemId);
             signalGroupDataBySystemId.values().forEach(signalGroupData -> signalIds.addAll(new ArrayList<>(signalGroupData.getSignalIds())));
@@ -169,7 +188,7 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
         Map<Double, Map<Id<Link>, Map<Id<VehicleType>, Double>>> flowPerCycle = delayAnalysis.getSummedBygoneFlowPerLinkPerVehicleTypePerCycle();
 
         writeResult(outputDirectory + "greenTimesPerCycle.csv", List.of(new String[]{"cycle_time", "signal_group", "link_ids", "green_time"}), false);
-        controler.run();
+
         for (var outerEntry : greenTimePerCycle.entrySet()) {
             for (var innerEntry : outerEntry.getValue().entrySet()) {
                 List<Id<Link>> linkIds = new ArrayList<>();
@@ -180,7 +199,9 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
                 }
                 for (var linkId: linkIds)
                     stringBuilder.append(linkId).append("|");
-                writeResult(outputDirectory + "greenTimesPerCycle.csv", List.of(new String[]{outerEntry.getKey().toString(), innerEntry.getKey().toString(), stringBuilder.substring(0, stringBuilder.length() - 1), String.valueOf(innerEntry.getValue())}), true);
+                if (stringBuilder.length() > 1)
+                    writeResult(outputDirectory + "greenTimesPerCycle.csv", List.of(new String[]{outerEntry.getKey().toString(), innerEntry.getKey().toString(), stringBuilder.substring(0, stringBuilder.length() - 1), String.valueOf(innerEntry.getValue())}), true);
+                writeResult(outputDirectory + "greenTimesPerCycle.csv", List.of(new String[]{outerEntry.getKey().toString(), innerEntry.getKey().toString(), stringBuilder.toString(), String.valueOf(innerEntry.getValue())}), true);
             }
         }
 
@@ -223,62 +244,6 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
                 }
             }
             writeResult(outputDirectory + "flowPerCycle.csv", linkIdWithFlowValues, true);
-        }
-    }
-
-    public static void main(String[] args) throws IOException {
-        RunFixedMixedTrafficSignalSimpleIntersection fixedMixedTrafficSignalSimpleIntersection = new RunFixedMixedTrafficSignalSimpleIntersection();
-        fixedMixedTrafficSignalSimpleIntersection.run(false);
-    }
-
-    private void run(boolean startOtfvis) {
-
-        EventsManager manager = EventsUtils.createEventsManager();
-
-        PrepareForSimUtils.createDefaultPrepareForSim(controler.getScenario()).run();
-        QSim qSim = new QSimBuilder(controler.getScenario().getConfig()).useDefaults().build(controler.getScenario(), manager);
-
-        if (startOtfvis) {
-
-            // otfvis configuration.  There is more you can do here than via file!
-//                final OTFVisConfigGroup otfVisConfig = ConfigUtils.addOrGetModule(qSim.getScenario().getConfig(), OTFVisConfigGroup.GROUP_NAME, OTFVisConfigGroup.class);
-//                otfVisConfig.setDrawTransitFacilities(false) ; // this DOES work
-//                otfVisConfig.setColoringScheme(OTFVisConfigGroup.ColoringScheme.byId);
-//
-//                OnTheFlyServer server = OTFVis.startServerAndRegisterWithQSim(controler.getScenario().getConfig(), controler.getScenario(), manager, qSim);
-//                OTFClientLive.run(controler.getScenario().getConfig(), server);
-
-            // add the module that start the otfvis visualization with signals
-            controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
-        }
-        controler.run();
-    }
-    public static void writeResult(String filename, List<String> values, boolean append) {
-        FileWriter csvwriter;
-        BufferedWriter bufferedWriter = null;
-        try {
-            csvwriter = new FileWriter(filename, append);
-            bufferedWriter = new BufferedWriter(csvwriter);
-            StringJoiner stringJoiner = new StringJoiner(",");
-            for (var value: values) {
-                stringJoiner.add(value);
-            }
-            bufferedWriter.write(stringJoiner.toString());
-            bufferedWriter.newLine();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                assert bufferedWriter != null;
-                bufferedWriter.flush();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            try {
-                bufferedWriter.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
     }
 

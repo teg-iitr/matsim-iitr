@@ -1,28 +1,21 @@
 package org.matsim.contrib.signals.analysis;
 
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
-import java.util.*;
-
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.ActivityEndEvent;
 import org.matsim.api.core.v01.events.ActivityStartEvent;
 import org.matsim.api.core.v01.events.handler.ActivityEndEventHandler;
 import org.matsim.api.core.v01.events.handler.ActivityStartEventHandler;
-import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.events.SignalGroupStateChangedEvent;
 import org.matsim.contrib.signals.events.SignalGroupStateChangedEventHandler;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalSystem;
-import org.matsim.core.api.experimental.events.EventsManager;
-import org.matsim.core.controler.ControlerListenerManager;
 import org.matsim.core.controler.events.AfterMobsimEvent;
-import org.matsim.core.controler.events.IterationEndsEvent;
 import org.matsim.core.controler.listener.AfterMobsimListener;
-import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.mobsim.qsim.interfaces.SignalGroupState;
+
+import java.util.*;
 
 @Singleton
 public class MixedTrafficSignalAnalysisTool implements SignalGroupStateChangedEventHandler, AfterMobsimListener, ActivityStartEventHandler, ActivityEndEventHandler {
@@ -175,6 +168,9 @@ public class MixedTrafficSignalAnalysisTool implements SignalGroupStateChangedEv
 
         double greenTime = redSwitch - lastGreenSwitch;
         this.totalSignalGreenTime.put(signalGroupId, (Double)this.totalSignalGreenTime.get(signalGroupId) + greenTime);
+        this.summedBygoneSignalGreenTimesPerCycle.computeIfAbsent(this.currentCycleTime, k -> new HashMap<>());
+        if (this.summedBygoneSignalGreenTimesPerCycle.get(this.currentCycleTime).get(signalGroupId) == null)
+            this.summedBygoneSignalGreenTimesPerCycle.get(this.currentCycleTime).putIfAbsent(signalGroupId, 0.0);
         this.summedBygoneSignalGreenTimesPerCycle.get(this.currentCycleTime).put(signalGroupId, this.summedBygoneSignalGreenTimesPerCycle.get(this.currentCycleTime).get(signalGroupId) + greenTime);
     }
 
