@@ -168,7 +168,10 @@ public class MixedTrafficSignalAnalysisTool implements SignalGroupStateChangedEv
 
         double greenTime = redSwitch - lastGreenSwitch;
         this.totalSignalGreenTime.put(signalGroupId, (Double)this.totalSignalGreenTime.get(signalGroupId) + greenTime);
-        this.summedBygoneSignalGreenTimesPerCycle.computeIfAbsent(this.currentCycleTime, k -> new HashMap<>());
+        if (this.summedBygoneSignalGreenTimesPerCycle.get(this.currentCycleTime) == null) {
+            this.summedBygoneSignalGreenTimesPerCycle.putIfAbsent(this.currentCycleTime, new HashMap<>());
+            this.summedBygoneSignalGreenTimesPerCycle.get(this.currentCycleTime).putIfAbsent(signalGroupId, 0.0D);
+        }
         if (this.summedBygoneSignalGreenTimesPerCycle.get(this.currentCycleTime).get(signalGroupId) == null)
             this.summedBygoneSignalGreenTimesPerCycle.get(this.currentCycleTime).putIfAbsent(signalGroupId, 0.0);
         this.summedBygoneSignalGreenTimesPerCycle.get(this.currentCycleTime).put(signalGroupId, this.summedBygoneSignalGreenTimesPerCycle.get(this.currentCycleTime).get(signalGroupId) + greenTime);

@@ -11,7 +11,6 @@ import org.matsim.api.core.v01.population.*;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.analysis.MixedTrafficDelayAnalysisTool;
 import org.matsim.contrib.signals.analysis.MixedTrafficSignalAnalysisTool;
-import org.matsim.contrib.signals.builder.MixedTrafficSignals;
 import org.matsim.contrib.signals.builder.Signals;
 import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
 import org.matsim.contrib.signals.data.SignalsData;
@@ -51,12 +50,12 @@ import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
 import playground.amit.mixedTraffic.MixedTrafficVehiclesUtils;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-
-import static playground.shivam.signals.RunAdaptiveSignalSimpleNetwork.writeResult;
 
 public class RunFixedMixedTrafficSignalSimpleIntersection {
     private Controler controler;
@@ -68,23 +67,23 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
     private static final double LINK_LENGTH = 1000;
 
     private static final int LINK_CAPACITY = 1000;
-    private int CYCLE = 120;
-    private final int ONSET = 0;
-    private final int DROPPING = 60;
+    public int CYCLE = 120;
+    public final int ONSET = 0;
+    public final int DROPPING = 60;
 
-    private final int AGENTS_PER_LEFT_APPROACH = 200;
+    public final int AGENTS_PER_LEFT_APPROACH = 200;
     // seconds
-    private final int OFFSET_LEFT_APPROACH = 60;
-    private final int DROPPING_LEFT_APPROACH = 80;
-    private final int AGENTS_PER_TOP_APPROACH = 800;
-    private final int OFFSET_TOP_APPROACH = 20;
-    private final int DROPPING_TOP_APPROACH = 100;
-    private final int AGENTS_PER_RIGHT_APPROACH = 400;
-    private final int OFFSET_RIGHT_APPROACH = 60;
-    private final int DROPPING_RIGHT_APPROACH = 100;
-    private final int AGENTS_PER_BOTTOM_APPROACH = 600;
-    private final int OFFSET_BOTTOM_APPROACH = 10;
-    private final int DROPPING_BOTTOM_APPROACH = 70;
+    public final int OFFSET_LEFT_APPROACH = 60;
+    public final int DROPPING_LEFT_APPROACH = 80;
+    public final int AGENTS_PER_TOP_APPROACH = 800;
+    public final int OFFSET_TOP_APPROACH = 20;
+    public final int DROPPING_TOP_APPROACH = 100;
+    public final int AGENTS_PER_RIGHT_APPROACH = 400;
+    public final int OFFSET_RIGHT_APPROACH = 60;
+    public final int DROPPING_RIGHT_APPROACH = 100;
+    public final int AGENTS_PER_BOTTOM_APPROACH = 600;
+    public final int OFFSET_BOTTOM_APPROACH = 10;
+    public final int DROPPING_BOTTOM_APPROACH = 70;
 
     public RunFixedMixedTrafficSignalSimpleIntersection() throws IOException {
         final Config config = defineConfig();
@@ -150,7 +149,7 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
         Map<Id<Signal>, Id<SignalGroup>> signalId2signalGroupId = new HashMap<>();
         Map<Id<Link>, Id<SignalGroup>> linkId2signalGroupId = new HashMap<>();
 
-        (new MixedTrafficSignals.Configurator(this.controler)).addSignalControllerFactory(DefaultPlanbasedSignalSystemController.IDENTIFIER,
+        (new Signals.Configurator(this.controler)).addSignalControllerFactory(DefaultPlanbasedSignalSystemController.IDENTIFIER,
                 DefaultPlanbasedSignalSystemController.FixedTimeFactory.class);
 
         MixedTrafficSignalAnalysisTool signalAnalyzer = new MixedTrafficSignalAnalysisTool();
@@ -283,7 +282,7 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
                 ONSET, DROPPING);
 
         // set output files
-        scenario.getConfig().network().setLaneDefinitionsFile("lane_definitions_v2.0.xml");
+        scenario.getConfig().network().setLaneDefinitionsFile(outputDirectory + "lane_definitions_v2.0.xml");
         signalSystemsConfigGroup.setSignalSystemFile(outputDirectory + "signal_systems.xml");
         signalSystemsConfigGroup.setSignalGroupsFile(outputDirectory + "signal_groups.xml");
         signalSystemsConfigGroup.setSignalControlFile(outputDirectory + "signal_control.xml");
@@ -456,7 +455,7 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
         return config;
     }
 
-    private void createGroupsAndSystem(SignalSystemsData signalSystemsData, SignalGroupsData signalGroupsData) {
+    public void createGroupsAndSystem(SignalSystemsData signalSystemsData, SignalGroupsData signalGroupsData) {
         SignalSystemData sys = signalSystemsData.getFactory().createSignalSystemData(Id.create("3", SignalSystem.class));
         signalSystemsData.addSignalSystemData(sys);
         SignalSystemsDataFactory factory = signalSystemsData.getFactory();
@@ -493,7 +492,7 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
         SignalUtils.createAndAddSignalGroups4Signals(signalGroupsData, sys);
     }
 
-    private void createLanes(Scenario scenario) {
+    public void createLanes(Scenario scenario) {
         Lanes lanes = scenario.getLanes();
         LanesFactory factory = lanes.getFactory();
 
@@ -632,5 +631,33 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
             net.addLink(link);
         }
         new NetworkWriter(net).write(outputDirectory + "network.xml.gz");
+    }
+    public static void writeResult(String filename, List<String> values, boolean append) {
+        FileWriter csvwriter;
+        BufferedWriter bufferedWriter = null;
+        try {
+            csvwriter = new FileWriter(filename, append);
+            bufferedWriter = new BufferedWriter(csvwriter);
+            StringJoiner stringJoiner = new StringJoiner(",");
+            for (var value: values) {
+                stringJoiner.add(value);
+            }
+            bufferedWriter.write(stringJoiner.toString());
+            bufferedWriter.newLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                assert bufferedWriter != null;
+                bufferedWriter.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                bufferedWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
