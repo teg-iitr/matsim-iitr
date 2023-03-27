@@ -15,7 +15,6 @@ import org.matsim.contrib.signals.controller.laemmerFix.MixedTrafficLaemmerSigna
 import org.matsim.contrib.signals.controller.sylvia.SylviaSignalController.SylviaFactory;
 import org.matsim.contrib.signals.model.SignalSystemsManager;
 import org.matsim.contrib.signals.sensor.DownstreamSensor;
-import org.matsim.contrib.signals.sensor.LinkSensorManager;
 import org.matsim.contrib.signals.sensor.MixedTrafficLinkSensorManager;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
@@ -47,7 +46,7 @@ class MixedTrafficSignalsModule extends AbstractModule {
             this.bind(SignalModelFactory.class).to(SignalModelFactoryImpl.class);
             this.addControlerListenerBinding().to(SensorBasedSignalControlerListener.class);
             this.bind(MixedTrafficLinkSensorManager.class).in(Singleton.class);
-            this.bind(LinkSensorManager.class).in(Singleton.class);
+            //this.bind(LinkSensorManager.class).in(Singleton.class);
             this.bind(DownstreamSensor.class).in(Singleton.class);
             Iterator var1 = this.signalControllerFactoryClassNames.keySet().iterator();
 
