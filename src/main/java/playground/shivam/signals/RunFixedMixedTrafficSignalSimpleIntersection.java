@@ -20,7 +20,7 @@ import org.matsim.core.mobsim.qsim.QSimBuilder;
 
 import java.io.IOException;
 
-import static playground.shivam.signals.config.CreateAdaptiveConfig.defineFixedConfig;
+import static playground.shivam.signals.config.CreateFixedConfig.defineFixedConfig;
 import static playground.shivam.signals.scenarios.CreateScenarioFromConfig.defineScenario;
 
 public class RunFixedMixedTrafficSignalSimpleIntersection {

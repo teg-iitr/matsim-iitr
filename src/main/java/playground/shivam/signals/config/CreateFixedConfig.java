@@ -1,6 +1,5 @@
 package playground.shivam.signals.config;
 
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
@@ -17,11 +16,9 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
-public class CreateAdaptiveConfig {
-
-    public static Config defineAdaptiveConfig(String outputDirectory) throws IOException {
+public class CreateFixedConfig {
+    public static Config defineFixedConfig(String outputDirectory) throws IOException {
         Config config = ConfigUtils.createConfig();
-
         // create the path to the output directory if it does not exist yet
         Files.createDirectories(Paths.get(outputDirectory));
 
@@ -74,12 +71,6 @@ public class CreateAdaptiveConfig {
         List<String> mainModes = Arrays.asList("car", "truck");
         qsim.setMainModes(mainModes);
 
-        LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config, LaemmerConfigGroup.GROUP_NAME, LaemmerConfigGroup.class);
-        laemmerConfigGroup.setDesiredCycleTime(120);
-        laemmerConfigGroup.setMinGreenTime(10);
-        laemmerConfigGroup.setActiveRegime(LaemmerConfigGroup.Regime.COMBINED);
-        config.getModules().put(LaemmerConfigGroup.GROUP_NAME, laemmerConfigGroup);
-
         ChangeModeConfigGroup changeTripMode = config.changeMode();
         changeTripMode.setModes(new String[]{"car", "truck"});
         config.plansCalcRoute().setNetworkModes(mainModes);
@@ -88,10 +79,6 @@ public class CreateAdaptiveConfig {
         String configFile = outputDirectory + "config.xml";
         ConfigWriter configWriter = new ConfigWriter(config);
         configWriter.write(configFile);
-
         return config;
     }
-
-
-
 }

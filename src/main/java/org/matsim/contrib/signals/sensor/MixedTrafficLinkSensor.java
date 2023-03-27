@@ -1,28 +1,19 @@
 package org.matsim.contrib.signals.sensor;
 
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.LinkLeaveEvent;
 import org.matsim.api.core.v01.events.PersonEntersVehicleEvent;
 import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.vehicles.Vehicle;
-import org.matsim.vehicles.VehicleType;
-import playground.amit.mixedTraffic.MixedTrafficVehiclesUtils;
 
-import javax.inject.Inject;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 final class MixedTrafficLinkSensor {
     private static final Logger log = LogManager.getLogger(LinkSensor.class);
@@ -64,10 +55,6 @@ final class MixedTrafficLinkSensor {
         }
 
         this.distanceMeterCarLocatorMap.put(distanceMeter, new HashMap());
-    }
-
-    public void registerAverageVehiclesPerSecondToMonitor() {
-        this.registerAverageVehiclesPerSecondToMonitor(1.0D / 0.0, 1.0D / 0.0);
     }
 
     public void registerAverageVehiclesPerSecondToMonitor(double lookBackTime, double timeBucketCollectionDuration) {

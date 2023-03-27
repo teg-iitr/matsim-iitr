@@ -46,18 +46,6 @@ public final class MixedTrafficLinkSensorManager implements LinkEnterEventHandle
         events.addHandler(this);
     }
 
-    public void registerNumberOfCarsMonitoring(Id<Link> linkId) {
-        if (!this.linkIdSensorMap.containsKey(linkId)) {
-            Link link = (Link)this.network.getLinks().get(linkId);
-            if (link == null) {
-                throw new IllegalStateException("Link with Id " + linkId + " is not in the network, can't register sensor");
-            }
-
-            this.linkIdSensorMap.put(linkId, new MixedTrafficLinkSensor(link, vehicles.getVehicles()));
-        }
-
-    }
-
     public void registerNumberOfCarsInDistanceMonitoring(Id<Link> linkId, Double distanceMeter) {
         if (!this.linkIdSensorMap.containsKey(linkId)) {
             Link link = this.network.getLinks().get(linkId);
@@ -91,29 +79,6 @@ public final class MixedTrafficLinkSensorManager implements LinkEnterEventHandle
         }
     }
 
-    public void registerNumberOfCarsMonitoringOnLane(Id<Link> linkId, Id<Lane> laneId) {
-        Link link = (Link)this.network.getLinks().get(linkId);
-        if (link == null) {
-            throw new IllegalStateException("Link with Id " + linkId + " is not in the network, can't register sensor");
-        } else if (this.laneDefinitions != null && this.laneDefinitions.getLanesToLinkAssignments().get(linkId) != null && ((LanesToLinkAssignment)this.laneDefinitions.getLanesToLinkAssignments().get(linkId)).getLanes().get(laneId) != null) {
-            if (!this.linkIdLaneIdSensorMap.containsKey(linkId)) {
-                this.linkIdLaneIdSensorMap.put(linkId, new HashMap());
-            }
-
-            if (!((Map)this.linkIdLaneIdSensorMap.get(linkId)).containsKey(laneId)) {
-                Lane lane = (Lane)((LanesToLinkAssignment)this.laneDefinitions.getLanesToLinkAssignments().get(linkId)).getLanes().get(laneId);
-                ((Map)this.linkIdLaneIdSensorMap.get(linkId)).put(laneId, new MixedTrafficLaneSensor(link, lane, vehicles.getVehicles()));
-            }
-
-        } else {
-            throw new IllegalStateException("No data found for lane  " + laneId + " on link  " + linkId + " is not in the network, can't register sensor");
-        }
-    }
-
-    public void registerAverageNumberOfCarsPerSecondMonitoringOnLane(Id<Link> linkId, Id<Lane> laneId) {
-        this.registerAverageNumberOfCarsPerSecondMonitoringOnLane(linkId, laneId, 1.0D / 0.0, 1.0D / 0.0);
-    }
-
     public void registerAverageNumberOfCarsPerSecondMonitoringOnLane(Id<Link> linkId, Id<Lane> laneId, double lookBackTime, double timeBucketCollectionDuration) {
         Link link = (Link)this.network.getLinks().get(linkId);
         if (link == null) {
@@ -134,10 +99,6 @@ public final class MixedTrafficLinkSensorManager implements LinkEnterEventHandle
         }
     }
 
-    public void registerAverageNumberOfCarsPerSecondMonitoring(Id<Link> linkId) {
-        this.registerAverageNumberOfCarsPerSecondMonitoring(linkId, 1.0D / 0.0, 1.0D / 0.0);
-    }
-
     public void registerAverageNumberOfCarsPerSecondMonitoring(Id<Link> linkId, double lookBackTime, double timeBucketCollectionDuration) {
         if (!this.linkIdSensorMap.containsKey(linkId)) {
             Link link = (Link)this.network.getLinks().get(linkId);
@@ -149,27 +110,6 @@ public final class MixedTrafficLinkSensorManager implements LinkEnterEventHandle
         }
 
         ((MixedTrafficLinkSensor)this.linkIdSensorMap.get(linkId)).registerAverageVehiclesPerSecondToMonitor(lookBackTime, timeBucketCollectionDuration);
-    }
-
-    public int getNumberOfCarsOnLink(Id<Link> linkId) {
-        if (!this.linkIdSensorMap.containsKey(linkId)) {
-            throw new IllegalStateException("No sensor on link " + linkId + "! Register measurement for this link by calling one of the 'register...' methods of this class first.");
-        } else {
-            return ((MixedTrafficLinkSensor)this.linkIdSensorMap.get(linkId)).getNumberOfCarsOnLink();
-        }
-    }
-
-    public int getNumberOfCarsOnLane(Id<Link> linkId, Id<Lane> laneId) {
-        if (!this.linkIdLaneIdSensorMap.containsKey(linkId)) {
-            throw new IllegalStateException("No sensor on link " + linkId + "! Register measurement for this link by calling one of the 'register...' methods of this class first.");
-        } else {
-            Map<Id<Lane>, MixedTrafficLaneSensor> map = (Map)this.linkIdLaneIdSensorMap.get(linkId);
-            if (map != null && map.containsKey(laneId)) {
-                return ((MixedTrafficLaneSensor)map.get(laneId)).getNumberOfCarsOnLane();
-            } else {
-                throw new IllegalStateException("No sensor on lane " + laneId + " of link " + linkId + "! Register measurement for this link lane pair!");
-            }
-        }
     }
 
     public double getNumberOfCarsInDistance(Id<Link> linkId, Double distanceMeter, double timeSeconds) {
