@@ -27,28 +27,31 @@ public class CreateSignalControl {
 
         // create and add control settings for signal groups
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
-                Id.create("1", SignalGroup.class), OFFSET_LEFT_APPROACH, DROPPING_LEFT_APPROACH));
+                Id.create("23_1", SignalGroup.class), OFFSET_LEFT_APPROACH, DROPPING_LEFT_APPROACH));
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
-                Id.create("2", SignalGroup.class), OFFSET_LEFT_APPROACH, DROPPING_LEFT_APPROACH));
+                Id.create("23_2", SignalGroup.class), OFFSET_LEFT_APPROACH, DROPPING_LEFT_APPROACH));
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
-                Id.create("3", SignalGroup.class), OFFSET_LEFT_APPROACH, DROPPING_LEFT_APPROACH));
+                Id.create("23_3", SignalGroup.class), OFFSET_LEFT_APPROACH, DROPPING_LEFT_APPROACH));
+
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
-                Id.create("4", SignalGroup.class), OFFSET_TOP_APPROACH, DROPPING_TOP_APPROACH));
+                Id.create("73_1", SignalGroup.class), OFFSET_TOP_APPROACH, DROPPING_TOP_APPROACH));
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
-                Id.create("5", SignalGroup.class), OFFSET_TOP_APPROACH, DROPPING_TOP_APPROACH));
+                Id.create("73_2", SignalGroup.class), OFFSET_TOP_APPROACH, DROPPING_TOP_APPROACH));
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
-                Id.create("6", SignalGroup.class), OFFSET_TOP_APPROACH, DROPPING_TOP_APPROACH));
+                Id.create("73_3", SignalGroup.class), OFFSET_TOP_APPROACH, DROPPING_TOP_APPROACH));
+
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
-                Id.create("7", SignalGroup.class), OFFSET_RIGHT_APPROACH, DROPPING_RIGHT_APPROACH));
+                Id.create("43_1", SignalGroup.class), OFFSET_RIGHT_APPROACH, DROPPING_RIGHT_APPROACH));
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
-                Id.create("8", SignalGroup.class), OFFSET_RIGHT_APPROACH, DROPPING_RIGHT_APPROACH));
+                Id.create("43_2", SignalGroup.class), OFFSET_RIGHT_APPROACH, DROPPING_RIGHT_APPROACH));
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
-                Id.create("9", SignalGroup.class), OFFSET_RIGHT_APPROACH, DROPPING_RIGHT_APPROACH));
+                Id.create("43_3", SignalGroup.class), OFFSET_RIGHT_APPROACH, DROPPING_RIGHT_APPROACH));
+
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
-                Id.create("10", SignalGroup.class), OFFSET_BOTTOM_APPROACH, DROPPING_BOTTOM_APPROACH));
+                Id.create("83_1", SignalGroup.class), OFFSET_BOTTOM_APPROACH, DROPPING_BOTTOM_APPROACH));
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
-                Id.create("11", SignalGroup.class), OFFSET_BOTTOM_APPROACH, DROPPING_BOTTOM_APPROACH));
+                Id.create("83_2", SignalGroup.class), OFFSET_BOTTOM_APPROACH, DROPPING_BOTTOM_APPROACH));
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
-                Id.create("12", SignalGroup.class), OFFSET_BOTTOM_APPROACH, DROPPING_BOTTOM_APPROACH));
+                Id.create("83_3", SignalGroup.class), OFFSET_BOTTOM_APPROACH, DROPPING_BOTTOM_APPROACH));
     }
 }

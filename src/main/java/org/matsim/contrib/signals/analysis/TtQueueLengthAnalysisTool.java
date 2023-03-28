@@ -244,6 +244,6 @@ public class TtQueueLengthAnalysisTool implements MobsimBeforeSimStepListener, M
 //		log.info("execute command: cd " + pathToSpecificAnalysisDir);
 //		log.info("and afterwards: gnuplot " + relativePathToGnuplotScript);
 
-        GnuplotUtils.runGnuplotScript(pathToInputDir, relativePathToGnuplotScript);
+        //GnuplotUtils.runGnuplotScript(pathToInputDir, relativePathToGnuplotScript);
     }
 }
