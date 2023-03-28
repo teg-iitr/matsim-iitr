@@ -43,7 +43,7 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
 
     public static void main(String[] args) throws IOException {
         RunFixedMixedTrafficSignalSimpleIntersection fixedMixedTrafficSignalSimpleIntersection = new RunFixedMixedTrafficSignalSimpleIntersection();
-        fixedMixedTrafficSignalSimpleIntersection.run(false);
+        fixedMixedTrafficSignalSimpleIntersection.run(true);
     }
 
     private void run(boolean startOtfvis) {

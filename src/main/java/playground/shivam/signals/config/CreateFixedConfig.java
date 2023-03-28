@@ -25,7 +25,7 @@ public class CreateFixedConfig {
         Files.createDirectories(Paths.get(outputDirectory));
 
         config.controler().setOutputDirectory(outputDirectory);
-        config.controler().setLastIteration(100);
+        config.controler().setLastIteration(20);
 
         config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
         config.controler().setWriteEventsInterval(config.controler().getLastIteration());
@@ -39,7 +39,7 @@ public class CreateFixedConfig {
 
         config.qsim().setStartTime(0);
         config.qsim().setEndTime(5 * 60 * 60);
-        config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
+//        config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
         config.qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.withHoles);
         config.qsim().setNodeOffset(20.0);
         config.qsim().setMainModes(SignalUtils.MAIN_MODES);
@@ -71,19 +71,19 @@ public class CreateFixedConfig {
             reRoute.setWeight(0.15);
             scg.addStrategySettings(reRoute);
 
-            StrategyConfigGroup.StrategySettings timeAllocationMutator = new StrategyConfigGroup.StrategySettings();
-            timeAllocationMutator.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator);
-            timeAllocationMutator.setWeight(0.05);
-            scg.addStrategySettings(timeAllocationMutator);
+//            StrategyConfigGroup.StrategySettings timeAllocationMutator = new StrategyConfigGroup.StrategySettings();
+//            timeAllocationMutator.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator);
+//            timeAllocationMutator.setWeight(0.05);
+//            scg.addStrategySettings(timeAllocationMutator);
 
-            config.timeAllocationMutator().setAffectingDuration(false);
+//            config.timeAllocationMutator().setAffectingDuration(false);
 
-            StrategyConfigGroup.StrategySettings modeChoice = new StrategyConfigGroup.StrategySettings();
-            modeChoice.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeSingleTripMode);
-            modeChoice.setWeight(0.5);
-            scg.addStrategySettings(modeChoice);
+//            StrategyConfigGroup.StrategySettings modeChoice = new StrategyConfigGroup.StrategySettings();
+//            modeChoice.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeSingleTripMode);
+//            modeChoice.setWeight(0.5);
+//            scg.addStrategySettings(modeChoice);
 
-            config.changeMode().setModes(SignalUtils.MAIN_MODES.toArray(new String[0]));
+//            config.changeMode().setModes(SignalUtils.MAIN_MODES.toArray(new String[0]));
         }
 
         config.strategy().setFractionOfIterationsToDisableInnovation(0.75);
