@@ -9,13 +9,11 @@ import org.matsim.contrib.signals.builder.SignalModelFactory;
 import org.matsim.contrib.signals.controller.AbstractSignalController;
 import org.matsim.contrib.signals.controller.SignalController;
 import org.matsim.contrib.signals.controller.SignalControllerFactory;
-import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
 import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup.Regime;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalGroup;
-import org.matsim.contrib.signals.model.SignalPlan;
 import org.matsim.contrib.signals.model.SignalSystem;
-import org.matsim.contrib.signals.sensor.DownstreamSensor;
+import org.matsim.contrib.signals.sensor.MixedTrafficDownstreamSensor;
 import org.matsim.contrib.signals.sensor.MixedTrafficLinkSensorManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -34,7 +32,7 @@ public final class MixedTrafficLaemmerSignalController extends AbstractSignalCon
     private Queue<MixedTrafficLaemmerSignalController.LaemmerSignal> regulationQueue = new LinkedList();
     private final List<MixedTrafficLaemmerSignalController.LaemmerSignal> laemmerSignals = new ArrayList();
     private MixedTrafficLinkSensorManager sensorManager;
-    private DownstreamSensor downstreamSensor;
+    private MixedTrafficDownstreamSensor downstreamSensor;
     private Scenario scenario;
     private final Network network;
     private final Lanes lanes;
@@ -45,7 +43,7 @@ public final class MixedTrafficLaemmerSignalController extends AbstractSignalCon
     private double systemOutflowCapacity;
 
 
-    private MixedTrafficLaemmerSignalController(Scenario scenario, MixedTrafficLinkSensorManager sensorManager, DownstreamSensor downstreamSensor) {
+    private MixedTrafficLaemmerSignalController(Scenario scenario, MixedTrafficLinkSensorManager sensorManager, MixedTrafficDownstreamSensor downstreamSensor) {
         this.sensorManager = sensorManager;
         this.network = scenario.getNetwork();
         this.lanes = scenario.getLanes();
@@ -551,7 +549,7 @@ public final class MixedTrafficLaemmerSignalController extends AbstractSignalCon
         @Inject
         private MixedTrafficLinkSensorManager sensorManager;
         @Inject
-        private DownstreamSensor downstreamSensor;
+        private MixedTrafficDownstreamSensor downstreamSensor;
         @Inject
         private Scenario scenario;
 

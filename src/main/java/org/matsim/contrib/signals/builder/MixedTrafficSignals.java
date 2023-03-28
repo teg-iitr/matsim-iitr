@@ -2,7 +2,6 @@ package org.matsim.contrib.signals.builder;
 
 import org.matsim.contrib.signals.controller.SignalControllerFactory;
 import org.matsim.core.controler.AllowsConfiguration;
-import playground.amit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.estimation.ChandraSikdarPCUUpdator;
 
 public final class MixedTrafficSignals {
     public MixedTrafficSignals() {
@@ -10,7 +9,7 @@ public final class MixedTrafficSignals {
 
     public static void configure(AllowsConfiguration ao) {
         ao.addOverridingModule(new MixedTrafficSignalsModule());
-        ao.addOverridingModule(new SignalsModule());
+        //ao.addOverridingModule(new SignalsModule());
         ao.addOverridingQSimModule(new SignalsQSimModule());
     }
 

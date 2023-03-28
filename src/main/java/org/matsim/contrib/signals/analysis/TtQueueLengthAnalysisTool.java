@@ -10,7 +10,7 @@ import org.matsim.contrib.signals.data.signalsystems.v20.SignalData;
 import org.matsim.contrib.signals.data.signalsystems.v20.SignalSystemData;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalSystem;
-import org.matsim.contrib.signals.sensor.LinkSensorManager;
+import org.matsim.contrib.signals.sensor.MixedTrafficLinkSensorManager;
 import org.matsim.core.controler.events.IterationEndsEvent;
 import org.matsim.core.controler.events.IterationStartsEvent;
 import org.matsim.core.controler.listener.IterationEndsListener;
@@ -37,7 +37,7 @@ public class TtQueueLengthAnalysisTool implements MobsimBeforeSimStepListener, M
     private static final Logger LOG = Logger.getLogger(TtQueueLengthAnalysisTool.class);
 
     private final SignalsData signals;
-    private final LinkSensorManager sensorManager;
+    private final MixedTrafficLinkSensorManager sensorManager;
     private final int noSystems;
     private final Lanes lanes;
 
@@ -54,7 +54,7 @@ public class TtQueueLengthAnalysisTool implements MobsimBeforeSimStepListener, M
 
 
     @Inject
-    public TtQueueLengthAnalysisTool(Scenario scenario, LinkSensorManager sensorManager) {
+    public TtQueueLengthAnalysisTool(Scenario scenario, MixedTrafficLinkSensorManager sensorManager) {
         this.sensorManager = sensorManager;
         this.signals = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
         this.noSystems = signals.getSignalSystemsData().getSignalSystemData().keySet().size();

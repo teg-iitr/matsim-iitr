@@ -1,12 +1,15 @@
 package playground.shivam.signals;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 public class SignalUtils {
     public static final double LANE_LENGTH = 500;
-    public static final int LANE_CAPACITY = 500;
+    public static final int LANE_CAPACITY = 1000;
     public static final int NO_LANES = 1;
     public static final double LINK_LENGTH = 1000;
 
-    public static final int LINK_CAPACITY = 500;
+    public static final int LINK_CAPACITY = 1000;
     public static int CYCLE = 120;
 
     public static final int AGENTS_PER_LEFT_APPROACH = 100;
@@ -22,4 +25,5 @@ public class SignalUtils {
     public static final int AGENTS_PER_BOTTOM_APPROACH = 160;
     public static final int OFFSET_BOTTOM_APPROACH = 10;
     public static final int DROPPING_BOTTOM_APPROACH = 70;
+    public static final Collection<String> MAIN_MODES = Arrays.asList("car","truck");
 }

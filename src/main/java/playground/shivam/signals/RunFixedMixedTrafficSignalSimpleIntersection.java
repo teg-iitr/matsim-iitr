@@ -5,7 +5,6 @@ import org.matsim.contrib.signals.analysis.MixedTrafficDelayAnalysisTool;
 import org.matsim.contrib.signals.analysis.MixedTrafficSignalAnalysisTool;
 import org.matsim.contrib.signals.analysis.TtQueueLengthAnalysisTool;
 import org.matsim.contrib.signals.builder.MixedTrafficSignals;
-import org.matsim.contrib.signals.builder.Signals;
 import org.matsim.contrib.signals.controller.SignalControllerFactory;
 import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
 import org.matsim.contrib.signals.otfvis.OTFVisWithSignalsLiveModule;
@@ -17,6 +16,8 @@ import org.matsim.core.controler.PrepareForSimUtils;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.QSimBuilder;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
 
 import java.io.IOException;
 
@@ -35,7 +36,7 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
 
         controler = new Controler(scenario);
 
-        Signals.configure(controler);
+        MixedTrafficSignals.configure(controler);
 
     }
 
@@ -81,6 +82,9 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
                 bind(TtQueueLengthAnalysisTool.class).asEagerSingleton();
                 addControlerListenerBinding().to(TtQueueLengthAnalysisTool.class);
                 addMobsimListenerBinding().to(TtQueueLengthAnalysisTool.class);
+
+                this.bind(ModalTripTravelTimeHandler.class);
+                this.addControlerListenerBinding().to(ModalTravelTimeControlerListener.class);
             }
         });
 

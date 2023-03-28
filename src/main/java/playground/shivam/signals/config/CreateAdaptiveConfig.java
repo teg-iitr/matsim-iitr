@@ -4,18 +4,17 @@ import org.matsim.contrib.signals.controller.laemmerFix.LaemmerConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
-import org.matsim.core.config.groups.ChangeModeConfigGroup;
 import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.StrategyConfigGroup;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
+import playground.shivam.signals.SignalUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
 
 public class CreateAdaptiveConfig {
 
@@ -43,22 +42,51 @@ public class CreateAdaptiveConfig {
         config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
         config.qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.withHoles);
         config.qsim().setNodeOffset(20.0);
+        config.qsim().setMainModes(SignalUtils.MAIN_MODES);
         config.qsim().setUsingFastCapacityUpdate(false);
         config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
         config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
 
+        config.plansCalcRoute().setNetworkModes(SignalUtils.MAIN_MODES);
+
+        config.travelTimeCalculator().setSeparateModes(true);
+        config.travelTimeCalculator().setAnalyzedModes((new HashSet<>(SignalUtils.MAIN_MODES)));
+
         config.qsim().setUseLanes(true);
 
         PlanCalcScoreConfigGroup.ActivityParams dummyAct = new PlanCalcScoreConfigGroup.ActivityParams("dummy");
-        dummyAct.setTypicalDuration(12 * 3600);
+        dummyAct.setTypicalDuration(3600);
+        dummyAct.setScoringThisActivityAtAll(false);
         config.planCalcScore().addActivityParams(dummyAct);
+
+        StrategyConfigGroup scg = config.strategy();
         {
-            StrategyConfigGroup.StrategySettings strat = new StrategyConfigGroup.StrategySettings();
-            strat.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta);
-            strat.setWeight(0.0);
-            strat.setDisableAfter(config.controler().getLastIteration());
-            config.strategy().addStrategySettings(strat);
+            StrategyConfigGroup.StrategySettings expChangeBeta = new StrategyConfigGroup.StrategySettings();
+            expChangeBeta.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta);
+            expChangeBeta.setWeight(0.7);
+            scg.addStrategySettings(expChangeBeta);
+
+            StrategyConfigGroup.StrategySettings reRoute = new StrategyConfigGroup.StrategySettings();
+            reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
+            reRoute.setWeight(0.15);
+            scg.addStrategySettings(reRoute);
+
+            StrategyConfigGroup.StrategySettings timeAllocationMutator = new StrategyConfigGroup.StrategySettings();
+            timeAllocationMutator.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator);
+            timeAllocationMutator.setWeight(0.05);
+            scg.addStrategySettings(timeAllocationMutator);
+
+            config.timeAllocationMutator().setAffectingDuration(false);
+
+            StrategyConfigGroup.StrategySettings modeChoice = new StrategyConfigGroup.StrategySettings();
+            modeChoice.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeSingleTripMode);
+            modeChoice.setWeight(0.5);
+            scg.addStrategySettings(modeChoice);
+
+            config.changeMode().setModes(SignalUtils.MAIN_MODES.toArray(new String[0]));
         }
+
+        config.strategy().setFractionOfIterationsToDisableInnovation(0.75);
         // from Jaipur controller
         PlanCalcScoreConfigGroup.ModeParams car = new PlanCalcScoreConfigGroup.ModeParams("car");
         car.setMarginalUtilityOfTraveling(-6.0);
@@ -70,9 +98,6 @@ public class CreateAdaptiveConfig {
         truck.setMarginalUtilityOfTraveling(-7.0);
         config.planCalcScore().addModeParams(truck);
 
-        QSimConfigGroup qsim = config.qsim();
-        List<String> mainModes = Arrays.asList("car", "truck");
-        qsim.setMainModes(mainModes);
 
         LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config, LaemmerConfigGroup.GROUP_NAME, LaemmerConfigGroup.class);
         laemmerConfigGroup.setDesiredCycleTime(120);
@@ -80,9 +105,6 @@ public class CreateAdaptiveConfig {
         laemmerConfigGroup.setActiveRegime(LaemmerConfigGroup.Regime.COMBINED);
         config.getModules().put(LaemmerConfigGroup.GROUP_NAME, laemmerConfigGroup);
 
-        ChangeModeConfigGroup changeTripMode = config.changeMode();
-        changeTripMode.setModes(new String[]{"car", "truck"});
-        config.plansCalcRoute().setNetworkModes(mainModes);
 
         //write config to file
         String configFile = outputDirectory + "config.xml";

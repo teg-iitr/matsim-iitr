@@ -9,12 +9,9 @@ import org.apache.logging.log4j.Logger;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.analysis.SignalEvents2ViaCSVWriter;
 import org.matsim.contrib.signals.controller.SignalControllerFactory;
-import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController.FixedTimeFactory;
-import org.matsim.contrib.signals.controller.laemmerFix.LaemmerSignalController.LaemmerFactory;
 import org.matsim.contrib.signals.controller.laemmerFix.MixedTrafficLaemmerSignalController;
-import org.matsim.contrib.signals.controller.sylvia.SylviaSignalController.SylviaFactory;
 import org.matsim.contrib.signals.model.SignalSystemsManager;
-import org.matsim.contrib.signals.sensor.DownstreamSensor;
+import org.matsim.contrib.signals.sensor.MixedTrafficDownstreamSensor;
 import org.matsim.contrib.signals.sensor.MixedTrafficLinkSensorManager;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
@@ -30,9 +27,9 @@ class MixedTrafficSignalsModule extends AbstractModule {
     private Map<String, Class<? extends SignalControllerFactory>> signalControllerFactoryClassNames = new HashMap();
 
     MixedTrafficSignalsModule() {
-        this.signalControllerFactoryClassNames.put("DefaultPlanbasedSignalSystemController", FixedTimeFactory.class);
-        this.signalControllerFactoryClassNames.put("SylviaSignalControl", SylviaFactory.class);
-        this.signalControllerFactoryClassNames.put("LaemmerSignalController", LaemmerFactory.class);
+//        this.signalControllerFactoryClassNames.put("DefaultPlanbasedSignalSystemController", FixedTimeFactory.class);
+//        this.signalControllerFactoryClassNames.put("SylviaSignalControl", SylviaFactory.class);
+//        this.signalControllerFactoryClassNames.put("LaemmerSignalController", LaemmerFactory.class);
         this.signalControllerFactoryClassNames.put("MixedTrafficLaemmerSignalController", MixedTrafficLaemmerSignalController.LaemmerFactory.class);
     }
 
@@ -47,7 +44,7 @@ class MixedTrafficSignalsModule extends AbstractModule {
             this.addControlerListenerBinding().to(SensorBasedSignalControlerListener.class);
             this.bind(MixedTrafficLinkSensorManager.class).in(Singleton.class);
             //this.bind(LinkSensorManager.class).in(Singleton.class);
-            this.bind(DownstreamSensor.class).in(Singleton.class);
+            this.bind(MixedTrafficDownstreamSensor.class).in(Singleton.class);
             Iterator var1 = this.signalControllerFactoryClassNames.keySet().iterator();
 
             while(var1.hasNext()) {

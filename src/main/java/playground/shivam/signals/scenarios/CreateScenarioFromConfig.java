@@ -5,6 +5,9 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.signals.SignalSystemsConfigGroup;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.data.SignalsScenarioWriter;
+import org.matsim.contrib.signals.data.ambertimes.v10.AmberTimesData;
+import org.matsim.contrib.signals.data.ambertimes.v10.AmberTimesDataFactory;
+import org.matsim.contrib.signals.data.ambertimes.v10.AmberTimesWriter10;
 import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.contrib.signals.utils.SignalUtils;
 import org.matsim.core.config.Config;
@@ -31,10 +34,22 @@ public class CreateScenarioFromConfig {
         // add missing scenario elements
         SignalSystemsConfigGroup signalSystemsConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
         signalSystemsConfigGroup.setUseSignalSystems(true);
+        signalSystemsConfigGroup.setUseAmbertimes(true);
+        //signalSystemsConfigGroup.setUseIntergreenTimes(true);
+        signalSystemsConfigGroup.setActionOnIntergreenViolation(SignalSystemsConfigGroup.ActionOnSignalSpecsViolation.WARN);
+
         SignalsData signalsData = SignalUtils.createSignalsData(signalSystemsConfigGroup);
 
+        AmberTimesData amberTimesData = signalsData.getAmberTimesData();
+        amberTimesData.setDefaultAmber(5);
+        amberTimesData.setDefaultAmberTimeGreen(2.0);
+        AmberTimesDataFactory amberTimesDataFactory = amberTimesData.getFactory();
+        AmberTimesWriter10 amberTimesWriter10 = new AmberTimesWriter10(amberTimesData);
+        amberTimesWriter10.write(outputDirectory + "amber_time.xml.gz");
+        signalSystemsConfigGroup.setAmberTimesFile(outputDirectory + "amber_time.xml.gz");
+
         scenario.addScenarioElement(SignalsData.ELEMENT_NAME, signalsData);
-//        scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(config).loadSignalsData());
+        //scenario.addScenarioElement(SignalsData.ELEMENT_NAME, new SignalsDataLoader(config).loadSignalsData());
 
         createNetwork(scenario, outputDirectory);
         createPopulation(scenario, outputDirectory);
@@ -75,7 +90,7 @@ public class CreateScenarioFromConfig {
         signalsWriter.setSignalSystemsOutputFilename(signalSystemsConfigGroup.getSignalSystemFile());
         signalsWriter.setSignalGroupsOutputFilename(signalSystemsConfigGroup.getSignalGroupsFile());
         signalsWriter.setSignalControlOutputFilename(signalSystemsConfigGroup.getSignalControlFile());
-        signalsWriter.writeSignalsData(scenario);
+       signalsWriter.writeSignalsData(scenario);
 
         return scenario;
     }
