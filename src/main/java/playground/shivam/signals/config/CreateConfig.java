@@ -16,16 +16,19 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashSet;
 
-public class CreateAdaptiveConfig {
+import static playground.shivam.signals.SignalUtils.ITERATION;
 
-    public static Config defineAdaptiveConfig(String outputDirectory) throws IOException {
+public class CreateConfig {
+
+    public static Config defineConfig(String outputDirectory, boolean adaptive) throws IOException {
         Config config = ConfigUtils.createConfig();
 
         // create the path to the output directory if it does not exist yet
         Files.createDirectories(Paths.get(outputDirectory));
 
         config.controler().setOutputDirectory(outputDirectory);
-        config.controler().setLastIteration(100);
+
+        config.controler().setLastIteration(ITERATION);
 
         config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
         config.controler().setWriteEventsInterval(config.controler().getLastIteration());
@@ -39,9 +42,8 @@ public class CreateAdaptiveConfig {
 
         config.qsim().setStartTime(0);
         config.qsim().setEndTime(5 * 60 * 60);
-        config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
+        //config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
         config.qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.withHoles);
-        config.qsim().setNodeOffset(20.0);
         config.qsim().setMainModes(SignalUtils.MAIN_MODES);
         config.qsim().setUsingFastCapacityUpdate(false);
         config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
@@ -51,6 +53,7 @@ public class CreateAdaptiveConfig {
 
         config.travelTimeCalculator().setSeparateModes(true);
         config.travelTimeCalculator().setAnalyzedModes((new HashSet<>(SignalUtils.MAIN_MODES)));
+        config.travelTimeCalculator().setCalculateLinkTravelTimes(true);
 
         config.qsim().setUseLanes(true);
 
@@ -71,19 +74,19 @@ public class CreateAdaptiveConfig {
             reRoute.setWeight(0.15);
             scg.addStrategySettings(reRoute);
 
-            StrategyConfigGroup.StrategySettings timeAllocationMutator = new StrategyConfigGroup.StrategySettings();
-            timeAllocationMutator.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator);
-            timeAllocationMutator.setWeight(0.05);
-            scg.addStrategySettings(timeAllocationMutator);
+//            StrategyConfigGroup.StrategySettings timeAllocationMutator = new StrategyConfigGroup.StrategySettings();
+//            timeAllocationMutator.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator);
+//            timeAllocationMutator.setWeight(0.05);
+//            scg.addStrategySettings(timeAllocationMutator);
 
-            config.timeAllocationMutator().setAffectingDuration(false);
+//            config.timeAllocationMutator().setAffectingDuration(false);
 
-            StrategyConfigGroup.StrategySettings modeChoice = new StrategyConfigGroup.StrategySettings();
-            modeChoice.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeSingleTripMode);
-            modeChoice.setWeight(0.5);
-            scg.addStrategySettings(modeChoice);
+//            StrategyConfigGroup.StrategySettings modeChoice = new StrategyConfigGroup.StrategySettings();
+//            modeChoice.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeSingleTripMode);
+//            modeChoice.setWeight(0.5);
+//            scg.addStrategySettings(modeChoice);
 
-            config.changeMode().setModes(SignalUtils.MAIN_MODES.toArray(new String[0]));
+//            config.changeMode().setModes(SignalUtils.MAIN_MODES.toArray(new String[0]));
         }
 
         config.strategy().setFractionOfIterationsToDisableInnovation(0.75);
@@ -98,13 +101,14 @@ public class CreateAdaptiveConfig {
         truck.setMarginalUtilityOfTraveling(-7.0);
         config.planCalcScore().addModeParams(truck);
 
-
-        LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config, LaemmerConfigGroup.GROUP_NAME, LaemmerConfigGroup.class);
-        laemmerConfigGroup.setDesiredCycleTime(120);
-        laemmerConfigGroup.setMinGreenTime(10);
-        laemmerConfigGroup.setActiveRegime(LaemmerConfigGroup.Regime.COMBINED);
-        config.getModules().put(LaemmerConfigGroup.GROUP_NAME, laemmerConfigGroup);
-
+        if (adaptive) {
+            LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config, LaemmerConfigGroup.GROUP_NAME, LaemmerConfigGroup.class);
+            laemmerConfigGroup.setDesiredCycleTime(120);
+            laemmerConfigGroup.setMinGreenTime(5);
+//            laemmerConfigGroup.setCheckDownstream(true);
+            laemmerConfigGroup.setActiveRegime(LaemmerConfigGroup.Regime.COMBINED);
+            config.getModules().put(LaemmerConfigGroup.GROUP_NAME, laemmerConfigGroup);
+        }
 
         //write config to file
         String configFile = outputDirectory + "config.xml";

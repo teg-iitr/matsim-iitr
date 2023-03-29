@@ -1,52 +1,28 @@
-package playground.shivam.signals;
+package playground.shivam.signals.runner;
 
-import org.matsim.api.core.v01.Scenario;
-import org.matsim.contrib.signals.analysis.SignalAnalysisTool;
-import org.matsim.contrib.signals.analysis.SignalAnalysisWriter;
-import org.matsim.contrib.signals.analysis.TtQueueLengthAnalysisTool;
-import org.matsim.contrib.signals.analysis.TtSignalAnalysisListener;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.contrib.signals.analysis.*;
 import org.matsim.contrib.signals.builder.MixedTrafficSignals;
 import org.matsim.contrib.signals.controller.SignalControllerFactory;
-import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
 import org.matsim.contrib.signals.otfvis.OTFVisWithSignalsLiveModule;
 import org.matsim.core.api.experimental.events.EventsManager;
-import org.matsim.core.config.Config;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.PrepareForSimUtils;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.QSimBuilder;
+import org.matsim.vehicles.VehicleType;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
 
-import java.io.IOException;
+import java.util.*;
 
-import static playground.shivam.signals.config.CreateFixedConfig.defineFixedConfig;
-import static playground.shivam.signals.scenarios.CreateScenarioFromConfig.defineScenario;
+import static playground.shivam.signals.writer.CSVWriter.writeResult;
 
-public class RunFixedMixedTrafficSignalSimpleIntersection {
-    private Controler controler;
-    private static String outputDirectory = "output/RunFixedMixedTrafficSignalSimpleIntersection/";
-    private static String signalController = DefaultPlanbasedSignalSystemController.IDENTIFIER;
-    private static Class<? extends SignalControllerFactory> signalControllerFactoryClassName = DefaultPlanbasedSignalSystemController.FixedTimeFactory.class;
-
-    public RunFixedMixedTrafficSignalSimpleIntersection() throws IOException {
-        final Config config = defineFixedConfig(outputDirectory);
-        final Scenario scenario = defineScenario(config, outputDirectory, signalController);
-
-        controler = new Controler(scenario);
-
-        MixedTrafficSignals.configure(controler);
-
-    }
-
-    public static void main(String[] args) throws IOException {
-        RunFixedMixedTrafficSignalSimpleIntersection fixedMixedTrafficSignalSimpleIntersection = new RunFixedMixedTrafficSignalSimpleIntersection();
-        fixedMixedTrafficSignalSimpleIntersection.run(true);
-    }
-
-    private void run(boolean startOtfvis) {
+public class RunMatsim {
+    public static void run(boolean startOtfvis, Controler controler, String signalController, Class<? extends SignalControllerFactory> signalControllerFactoryClassName, String outputDirectory) {
 
         EventsManager manager = EventsUtils.createEventsManager();
 
@@ -57,7 +33,7 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
             controler.addOverridingModule(new OTFVisWithSignalsLiveModule());
         }
 
-        (new MixedTrafficSignals.Configurator(this.controler)).addSignalControllerFactory(signalController,
+        (new MixedTrafficSignals.Configurator(controler)).addSignalControllerFactory(signalController,
                 signalControllerFactoryClassName);
 
         controler.addOverridingModule(new AbstractModule() {
@@ -75,9 +51,8 @@ public class RunFixedMixedTrafficSignalSimpleIntersection {
                 this.addControlerListenerBinding().to(ModalTravelTimeControlerListener.class);
             }
         });
-
         controler.run();
 
-    }
 
+    }
 }

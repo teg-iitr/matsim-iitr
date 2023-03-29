@@ -13,7 +13,7 @@ import static playground.shivam.signals.SignalUtils.*;
 
 public class CreateSignalControl {
 
-    public static void createSystemControl(SignalControlData control, Id<SignalSystem> signalSystemId, String SignalController) {
+    public static void createFixedSystemControl(SignalControlData control, Id<SignalSystem> signalSystemId, String SignalController) {
         SignalControlDataFactory fac = control.getFactory();
 
         // create and add signal control for the given system id
@@ -25,8 +25,8 @@ public class CreateSignalControl {
         SignalPlanData plan = SignalUtils.createSignalPlan(fac, CYCLE, 0);
         controller.addSignalPlanData(plan);
 
-        // create and add control settings for signal groups
-        plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
+        // create and add control settings for signal groups - only needed for fixed time signal
+        /*plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
                 Id.create("23_1", SignalGroup.class), OFFSET_LEFT_APPROACH, DROPPING_LEFT_APPROACH));
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
                 Id.create("23_2", SignalGroup.class), OFFSET_LEFT_APPROACH, DROPPING_LEFT_APPROACH));
@@ -53,5 +53,34 @@ public class CreateSignalControl {
                 Id.create("83_2", SignalGroup.class), OFFSET_BOTTOM_APPROACH, DROPPING_BOTTOM_APPROACH));
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
                 Id.create("83_3", SignalGroup.class), OFFSET_BOTTOM_APPROACH, DROPPING_BOTTOM_APPROACH));
+        */
+        plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
+                Id.create("23_sl", SignalGroup.class), OFFSET_LEFT_APPROACH, DROPPING_LEFT_APPROACH));
+        plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
+                Id.create("23_r", SignalGroup.class), OFFSET_LEFT_APPROACH, DROPPING_LEFT_APPROACH));
+
+        plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
+                Id.create("73_sl", SignalGroup.class), OFFSET_TOP_APPROACH, DROPPING_TOP_APPROACH));
+        plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
+                Id.create("73_r", SignalGroup.class), OFFSET_TOP_APPROACH, DROPPING_TOP_APPROACH));
+
+        plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
+                Id.create("43_sl", SignalGroup.class), OFFSET_RIGHT_APPROACH, DROPPING_RIGHT_APPROACH));
+        plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
+                Id.create("43_r", SignalGroup.class), OFFSET_RIGHT_APPROACH, DROPPING_RIGHT_APPROACH));
+
+        plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
+                Id.create("83_sl", SignalGroup.class), OFFSET_BOTTOM_APPROACH, DROPPING_BOTTOM_APPROACH));
+        plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
+                Id.create("83_r", SignalGroup.class), OFFSET_BOTTOM_APPROACH, DROPPING_BOTTOM_APPROACH));
+    }
+
+    public static void createAdaptiveSystemControl(SignalControlData control, Id<SignalSystem> signalSystemId, String SignalController) {
+        SignalControlDataFactory fac = control.getFactory();
+
+        // create and add signal control for the given system id
+        SignalSystemControllerData controller = fac.createSignalSystemControllerData(signalSystemId);
+        control.addSignalSystemControllerData(controller);
+        controller.setControllerIdentifier(SignalController);
     }
 }
