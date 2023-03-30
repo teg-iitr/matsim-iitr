@@ -16,9 +16,30 @@ public class RunEventHandlerLanes{
     private static Network network;
     private static EventHandlerLanes eventHandler;
 
-    public static void run(){
-        // Give the path of events file. for this you first need to run a simulation
-
+//    public static double travelTimeLanes(String linkId){
+//        double travelTime = 0.0;
+//        for (LanesToLinkAssignment l2l : scenario.getLanes().getLanesToLinkAssignments().values()) {
+//            for (Lane lane : l2l.getLanes().values()) {
+//                travelTime += eventHandler.getTravelTimeLanes(lane.getId().toString());
+//                System.out.println("Travel Time for lane Id : "+ lane.getId().toString()+"=="+eventHandler.getTravelTimeLanes(lane.getId().toString()));
+//            }
+//        }
+//        return travelTime;
+//    }
+//
+//    public static double sumOfLanesTravelTime(String linkId){
+//        //link ke sare lanes ka travelTime ka sum dena hai. // 2_3 -> 2_3l
+//        double travelTime = 0.0;
+//        for (LanesToLinkAssignment l2l : scenario.getLanes().getLanesToLinkAssignments().values()) {
+//            Link link = network.getLinks().get(l2l.getLinkId());
+//            if(l2l.getLinkId().toString().equals(linkId)){
+//                travelTime = travelTimeLanes(l2l.getLinkId().toString());
+//            }
+//        }
+//        System.out.println("travelTimeLanesPerLink for Link ID: " +linkId + " = " + travelTime);
+//        return travelTime;
+//    }
+    public static void main(String[] args){
         String inputFile = "output/RunFixedMixedTrafficSignalSimpleIntersection/output_events.xml.gz"; // events file
 
         EventsManager events = EventsUtils.createEventsManager();
@@ -39,38 +60,17 @@ public class RunEventHandlerLanes{
         config.network().getLaneDefinitionsFile();
         network = scenario.getNetwork();
 
-        for (LanesToLinkAssignment l2l : scenario.getLanes().getLanesToLinkAssignments().values()) {
-            double travelTime = travelTimeLanes(l2l.getLinkId().toString());
-            System.out.println(travelTimeLanesPerLink(l2l.getLinkId().toString()));
-        }
-
-
-    }
-
-    public static double travelTimeLanes(String linkId){
-        double travelTime = 0.0;
+//        for (LanesToLinkAssignment l2l : scenario.getLanes().getLanesToLinkAssignments().values()) {
+//            double travelTime = travelTimeLanes(l2l.getLinkId().toString());
+////            System.out.println(travelTimeLanesPerLink(l2l.getLinkId().toString()));
+//            travelTimeLanesPerLink(l2l.getLinkId().toString());
+//        }
         for (LanesToLinkAssignment l2l : scenario.getLanes().getLanesToLinkAssignments().values()) {
             for (Lane lane : l2l.getLanes().values()) {
-                travelTime += eventHandler.getTravelTimeLanes(lane.getId().toString());
-                System.out.println("Travel Time for lane Id is: "+lane.getId().toString());
-                System.out.println("Travel Time for lane Id : "+ lane.getId().toString()+"=="+eventHandler.getTravelTimeLanes(lane.getId().toString()));
+                String laneId = lane.getId().toString();
+                System.out.println("Travel Time for lanes is = " + laneId + "= "+eventHandler.getTravelTimeLanes(laneId));
             }
         }
-        return travelTime;
-    }
-
-    public static double travelTimeLanesPerLink(String linkId){
-        double travelTime = 0.0;
-        for (LanesToLinkAssignment l2l : scenario.getLanes().getLanesToLinkAssignments().values()) {
-            Link link = network.getLinks().get(l2l.getLinkId());
-            System.out.println("travelTimeLanesPerLink for Link ID: " + l2l.getLinkId().toString());
-            if(l2l.getLinkId().toString().equals(linkId)){
-                travelTime = travelTimeLanes(l2l.getLinkId().toString());
-            }
-        }
-        return travelTime;
-    }
-    public static void main(String[] args){
-        run();
+        //System.out.println("Travel Time for lanes is =bjhgd "  + "= "+eventHandler.getTravelTimeLanes("2_3.r"));
     }
 }
