@@ -40,8 +40,9 @@ public class CreatePopulation {
                 offset = OFFSET_BOTTOM_APPROACH;
             }
             for (int i = 0; i < agentsPerApproach; i++) {
+                String mode = getTravelMode(MatsimRandom.getLocalInstance().nextInt(100));
                 // create a person
-                Person person = population.getFactory().createPerson(Id.createPersonId(od + "-" + i));
+                Person person = population.getFactory().createPerson(Id.createPersonId(od + "_" + mode + "-" + i));
 
                 // create a plan for the person that contains all this
                 // information
@@ -54,7 +55,7 @@ public class CreatePopulation {
                 plan.addActivity(homeAct);
 
                 // create a dummy leg
-                plan.addLeg(population.getFactory().createLeg(getTravelMode(MatsimRandom.getLocalInstance().nextInt(100))));
+                plan.addLeg(population.getFactory().createLeg(mode));
 
                 // create a work activity at the to link
                 Activity workAct = population.getFactory().createActivityFromLinkId("dummy", Id.createLinkId(toLinkId));

@@ -1,10 +1,16 @@
 package playground.shivam.signals.runner;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.signals.analysis.*;
 import org.matsim.contrib.signals.builder.MixedTrafficSignals;
 import org.matsim.contrib.signals.controller.SignalControllerFactory;
+import org.matsim.contrib.signals.data.SignalsData;
+import org.matsim.contrib.signals.data.signalgroups.v20.SignalGroupData;
+import org.matsim.contrib.signals.model.SignalGroup;
+import org.matsim.contrib.signals.model.SignalSystem;
 import org.matsim.contrib.signals.otfvis.OTFVisWithSignalsLiveModule;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.controler.AbstractModule;
@@ -22,6 +28,8 @@ import java.util.*;
 import static playground.shivam.signals.writer.CSVWriter.writeResult;
 
 public class RunMatsim {
+    private static final Logger log = LogManager.getLogger(RunMatsim.class);
+
     public static void run(boolean startOtfvis, Controler controler, String signalController, Class<? extends SignalControllerFactory> signalControllerFactoryClassName, String outputDirectory) {
 
         EventsManager manager = EventsUtils.createEventsManager();
@@ -45,14 +53,47 @@ public class RunMatsim {
 
                 this.bind(SignalAnalysisTool.class).asEagerSingleton();
                 this.bind(SignalAnalysisWriter.class).asEagerSingleton();
+                this.bind(DelayAnalysisTool.class).asEagerSingleton();
                 this.addControlerListenerBinding().to(TtSignalAnalysisListener.class);
 
                 this.bind(ModalTripTravelTimeHandler.class);
                 this.addControlerListenerBinding().to(ModalTravelTimeControlerListener.class);
             }
         });
+
+        DelayAnalysisTool delayAnalysis = new DelayAnalysisTool(controler.getScenario().getNetwork());
+        SignalAnalysisTool signalAnalyzer = new SignalAnalysisTool();
+
+        controler.addOverridingModule(new AbstractModule() {
+            @Override
+            public void install() {
+                this.addEventHandlerBinding().toInstance(delayAnalysis);
+
+                this.addEventHandlerBinding().toInstance(signalAnalyzer);
+                this.addControlerListenerBinding().toInstance(signalAnalyzer);
+            }
+        });
+
         controler.run();
 
+        Map<Id<SignalGroup>, Double> totalSignalGreenTimes = signalAnalyzer.getTotalSignalGreenTime();
+        Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycle = signalAnalyzer.calculateAvgSignalGreenTimePerFlexibleCycle();
+        Map<Id<SignalSystem>, Double> avgCycleTimePerSystem = signalAnalyzer.calculateAvgFlexibleCycleTimePerSignalSystem();
+        Map<Id<Link>, Double> avgDelayPerLink = delayAnalysis.getAvgDelayPerLink();
 
+        SignalsData signalsData = (SignalsData) controler.getScenario().getScenarioElement(SignalsData.ELEMENT_NAME);
+        for (Id<SignalSystem> signalSystemId : signalsData.getSignalSystemsData().getSignalSystemData().keySet()) {
+            log.info("avg cycle time per system " + signalSystemId + ": " + avgCycleTimePerSystem.get(signalSystemId));
+            Map<Id<SignalGroup>, SignalGroupData> signalGroupDataBySystemId = signalsData.getSignalGroupsData().getSignalGroupDataBySystemId(signalSystemId);
+            for (Id<SignalGroup> signalGroupId : signalGroupDataBySystemId.keySet()) {
+                log.info("total signal green times " + signalGroupId + ": " + totalSignalGreenTimes.get(signalGroupId));
+                log.info("avg signal green times per cycle " + signalGroupId + ": " + avgSignalGreenTimePerCycle.get(signalGroupId));
+            }
+        }
+
+        for (Link link: controler.getScenario().getNetwork().getLinks().values())
+            log.info("avg delay per link " + link.getId() + ": " + avgDelayPerLink.get(link.getId()));
+
+        log.info("total delay: " + delayAnalysis.getTotalDelay());
     }
 }

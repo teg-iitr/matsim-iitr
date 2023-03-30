@@ -102,7 +102,7 @@ final class MixedTrafficLinkSensor {
         if (now > this.monitoringStartTime) {
             if (this.lookBackTime == 1.0D / 0.0) {
                 avgVehPerSecond = this.volume / (now - this.monitoringStartTime + 1.0D);
-//                avgVehPerSecond = this.totalVehicles / (now - this.monitoringStartTime + 1.0D);
+                avgVehPerSecond = this.totalVehicles / (now - this.monitoringStartTime + 1.0D);
             } else {
                 this.updateBucketsUntil(now);
                 if (this.timeBuckets.size() > 0) {
@@ -140,15 +140,15 @@ final class MixedTrafficLinkSensor {
     }
 
     public void handleEvent(LinkEnterEvent event) {
-        ++this.vehiclesOnLink;
+        this.vehiclesOnLink += this.vehicles.get(event.getVehicleId()).getType().getPcuEquivalents();;
         if (this.doAverageVehiclesPerSecondMonitoring) {
             if (this.lookBackTime != 1.0D / 0.0) {
                 this.updateBucketsUntil(event.getTime());
                 this.currentBucket.incrementAndGet();
             }
             this.volume += this.vehicles.get(event.getVehicleId()).getType().getPcuEquivalents();
-            ++this.totalVehicles;
-            if (this.volume == 1.0D) {
+            this.totalVehicles += this.vehicles.get(event.getVehicleId()).getType().getPcuEquivalents();;
+            if (this.volume == 1.0D || totalVehicles == 1) {
                 this.monitoringStartTime = event.getTime();
             }
         }
@@ -165,15 +165,15 @@ final class MixedTrafficLinkSensor {
     }
 
     public void handleEvent(PersonEntersVehicleEvent event) {
-        ++this.vehiclesOnLink;
+        this.vehiclesOnLink += this.vehicles.get(event.getVehicleId()).getType().getPcuEquivalents();
         if (this.doAverageVehiclesPerSecondMonitoring) {
             if (this.lookBackTime != 1.0D / 0.0) {
                 this.updateBucketsUntil(event.getTime());
                 this.currentBucket.incrementAndGet();
             }
             this.volume += this.vehicles.get(event.getVehicleId()).getType().getPcuEquivalents();
-            ++this.totalVehicles;
-            if (this.volume == 1.0D) {
+            this.totalVehicles += this.vehicles.get(event.getVehicleId()).getType().getPcuEquivalents();
+            if (this.volume == 1.0D || totalVehicles == 1) {
                 this.monitoringStartTime = event.getTime();
             }
         }
@@ -199,14 +199,14 @@ final class MixedTrafficLinkSensor {
     public void handleEvent(VehicleLeavesTrafficEvent event) {
         this.vehicleLeftLink(event.getVehicleId());
         if (this.doAverageVehiclesPerSecondMonitoring) {
-            --this.totalVehicles;
+            this.totalVehicles -= this.vehicles.get(event.getVehicleId()).getType().getPcuEquivalents();;
             this.volume -= this.vehicles.get(event.getVehicleId()).getType().getPcuEquivalents();
         }
 
     }
 
     private void vehicleLeftLink(Id<Vehicle> vehId) {
-        --this.vehiclesOnLink;
+        this.vehiclesOnLink -= this.vehicles.get(vehId).getType().getPcuEquivalents();
         if (this.doDistanceMonitoring) {
             Iterator var2 = this.distanceMeterCarLocatorMap.keySet().iterator();
 

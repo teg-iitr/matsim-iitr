@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.signals.data.SignalsData;
 import org.matsim.contrib.signals.model.SignalGroup;
 import org.matsim.contrib.signals.model.SignalSystem;
@@ -22,20 +23,25 @@ public class SignalAnalysisWriter {
 
     private static final Logger log = Logger.getLogger(SignalAnalysisWriter.class);
 
-    private SignalAnalysisTool handler;
+    private SignalAnalysisTool signalAnalysisTool;
+    private DelayAnalysisTool delayAnalysisTool;
     private String outputDirBase;
     private PrintStream totalGreenOverItWritingStream;
     private PrintStream avgGreenPerCycOverItWritingStream;
+    private PrintStream avgDelayOverItWritingStream;
+    private PrintStream totalDelayOverItWriterStream;
     private int lastIteration;
     private SignalsData signalsData;
+    private Scenario scenario;
 
     @Inject
-    public SignalAnalysisWriter(Scenario scenario, SignalAnalysisTool handler) {
-        this.handler = handler;
+    public SignalAnalysisWriter(Scenario scenario, SignalAnalysisTool signalAnalysisTool, DelayAnalysisTool delayAnalysisTool) {
+        this.delayAnalysisTool = delayAnalysisTool;
+        this.signalAnalysisTool = signalAnalysisTool;
         this.outputDirBase = scenario.getConfig().controler().getOutputDirectory();
         this.lastIteration = scenario.getConfig().controler().getLastIteration();
         this.signalsData = (SignalsData) scenario.getScenarioElement(SignalsData.ELEMENT_NAME);
-
+        this.scenario = scenario;
         // prepare files for the results of all iterations
         prepareOverallItWriting();
     }
@@ -52,10 +58,15 @@ public class SignalAnalysisWriter {
             this.totalGreenOverItWritingStream = new PrintStream(new File(lastItOutputDir + "totalGreenOverIt.txt"));
             this.avgGreenPerCycOverItWritingStream = new PrintStream(
                     new File(lastItOutputDir + "avgGreenPerCycOverIt.txt"));
+            this.avgDelayOverItWritingStream = new PrintStream(new File(lastItOutputDir + "avgDelayPerLinkOverIt.txt"));
+            this.totalDelayOverItWriterStream = new PrintStream((lastItOutputDir + "totalDelayPerLinkOverIt.txt"));
 
             // write header of both streams
             String headerTotalGreen = "it";
             String headerAvgGreen = "it";
+            String headerAvgDelay = "it";
+            String headerTotalDelay = "it";
+
             for (Id<SignalSystem> signalSystemId : signalsData.getSignalSystemsData().getSignalSystemData().keySet()) {
                 for (Id<SignalGroup> signalGroupId : signalsData.getSignalGroupsData()
                         .getSignalGroupDataBySystemId(signalSystemId).keySet()) {
@@ -63,8 +74,15 @@ public class SignalAnalysisWriter {
                     headerAvgGreen += "\t" + signalGroupId;
                 }
             }
+            for (Id<Link> linkId: scenario.getNetwork().getLinks().keySet()) {
+                headerAvgDelay += "\t" + linkId;
+                headerTotalDelay += "\t" + linkId;
+            }
+
             this.totalGreenOverItWritingStream.println(headerTotalGreen);
             this.avgGreenPerCycOverItWritingStream.println(headerAvgGreen);
+            this.avgDelayOverItWritingStream.println(headerAvgDelay);
+            this.totalDelayOverItWriterStream.println(headerTotalDelay);
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -76,32 +94,46 @@ public class SignalAnalysisWriter {
         log.info("Starting to write analysis of iteration " + iteration + "...");
 
         // collect results of this iteration
-        Map<Id<SignalGroup>, Double> totalSignalGreenTimes = handler.getTotalSignalGreenTime();
-        Map<Id<SignalGroup>, Double> avgSignalGreenTimes = handler.calculateAvgSignalGreenTimePerFlexibleCycle();
+        Map<Id<SignalGroup>, Double> totalSignalGreenTimes = signalAnalysisTool.getTotalSignalGreenTime();
+        Map<Id<SignalGroup>, Double> avgSignalGreenTimes = signalAnalysisTool.calculateAvgSignalGreenTimePerFlexibleCycle();
+        Map<Id<Link>, Double> avgDelayPerLink = delayAnalysisTool.getAvgDelayPerLink();
+        Map<Id<Link>, Double> totalDelayPerLink = delayAnalysisTool.getTotalDelayPerLink();
 
         // add line with results to overallItWritingStreams
         StringBuffer lineTotalTime = new StringBuffer();
         StringBuffer lineAvgTime = new StringBuffer();
+        StringBuffer lineAvgDelay = new StringBuffer();
+        StringBuffer lineTotalDelay = new StringBuffer();
+
         lineTotalTime.append(iteration);
         lineAvgTime.append(iteration);
+        lineAvgDelay.append(iteration);
+        lineTotalDelay.append(iteration);
         for (Id<SignalSystem> signalSystemId : signalsData.getSignalSystemsData().getSignalSystemData().keySet()){
             for (Id<SignalGroup> signalGroupId : signalsData.getSignalGroupsData().getSignalGroupDataBySystemId(signalSystemId).keySet()){
                 lineTotalTime.append("\t" + totalSignalGreenTimes.get(signalGroupId));
                 lineAvgTime.append("\t" + avgSignalGreenTimes.get(signalGroupId));
             }
         }
+        for (Id<Link> linkId: scenario.getNetwork().getLinks().keySet()) {
+            lineAvgDelay.append("\t" + avgDelayPerLink.get(linkId));
+            lineTotalDelay.append("\t" + totalDelayPerLink.get(linkId));
+        }
         if (this.totalGreenOverItWritingStream != null)
             this.totalGreenOverItWritingStream.println(lineTotalTime.toString());
         if (this.avgGreenPerCycOverItWritingStream != null)
             this.avgGreenPerCycOverItWritingStream.println(lineAvgTime.toString());
-
+        if (this.avgDelayOverItWritingStream != null)
+            this.avgDelayOverItWritingStream.println(lineAvgDelay.toString());
+        if (this.totalDelayOverItWriterStream != null)
+            this.totalDelayOverItWriterStream.println(lineTotalDelay.toString());
         // create output dir for this iteration analysis
         String outputDir = this.outputDirBase + "/ITERS/it." + iteration + "/analysis/";
         new File(outputDir).mkdir();
 
         // write iteration specific analysis
         log.info("Results of iteration " + iteration + ":");
-        writeSumOfBygoneSignalTimes(outputDir, handler.getSumOfBygoneSignalGreenTime());
+        writeSumOfBygoneSignalTimes(outputDir, signalAnalysisTool.getSumOfBygoneSignalGreenTime());
     }
 
     private void writeSumOfBygoneSignalTimes(String outputDir, Map<Double, Map<Id<SignalGroup>, Double>> sumOfBygoneSignalGreenTime) {
@@ -142,6 +174,10 @@ public class SignalAnalysisWriter {
             this.totalGreenOverItWritingStream.close();
         if (this.avgGreenPerCycOverItWritingStream != null)
             this.avgGreenPerCycOverItWritingStream.close();
+        if (this.avgDelayOverItWritingStream != null)
+            this.avgDelayOverItWritingStream.close();
+        if (this.totalDelayOverItWriterStream != null)
+            this.totalDelayOverItWriterStream.close();
     }
 
 }

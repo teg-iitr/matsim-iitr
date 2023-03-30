@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashSet;
 
+import static playground.shivam.signals.SignalUtils.CYCLE;
 import static playground.shivam.signals.SignalUtils.ITERATION;
 
 public class CreateConfig {
@@ -48,6 +49,8 @@ public class CreateConfig {
         config.qsim().setUsingFastCapacityUpdate(false);
         config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
         config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
+        config.qsim().setStorageCapFactor(0.5);
+        config.qsim().setFlowCapFactor(0.5);
 
         config.plansCalcRoute().setNetworkModes(SignalUtils.MAIN_MODES);
 
@@ -68,17 +71,17 @@ public class CreateConfig {
             expChangeBeta.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta);
             expChangeBeta.setWeight(0.7);
             scg.addStrategySettings(expChangeBeta);
-
-            StrategyConfigGroup.StrategySettings reRoute = new StrategyConfigGroup.StrategySettings();
-            reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
-            reRoute.setWeight(0.15);
-            scg.addStrategySettings(reRoute);
-
+//
+//            StrategyConfigGroup.StrategySettings reRoute = new StrategyConfigGroup.StrategySettings();
+//            reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
+//            reRoute.setWeight(0.15);
+//            scg.addStrategySettings(reRoute);
+//
 //            StrategyConfigGroup.StrategySettings timeAllocationMutator = new StrategyConfigGroup.StrategySettings();
 //            timeAllocationMutator.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator);
-//            timeAllocationMutator.setWeight(0.05);
+//            timeAllocationMutator.setWeight(0.1);
 //            scg.addStrategySettings(timeAllocationMutator);
-
+//
 //            config.timeAllocationMutator().setAffectingDuration(false);
 
 //            StrategyConfigGroup.StrategySettings modeChoice = new StrategyConfigGroup.StrategySettings();
@@ -103,9 +106,12 @@ public class CreateConfig {
 
         if (adaptive) {
             LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config, LaemmerConfigGroup.GROUP_NAME, LaemmerConfigGroup.class);
-            laemmerConfigGroup.setDesiredCycleTime(120);
-            laemmerConfigGroup.setMinGreenTime(5);
-//            laemmerConfigGroup.setCheckDownstream(true);
+            laemmerConfigGroup.setDesiredCycleTime(CYCLE);
+            laemmerConfigGroup.setMinGreenTime(15);
+            laemmerConfigGroup.setShortenStabilizationAfterIntergreenTime(true);
+            //laemmerConfigGroup.setDetermineMaxLoadForTIdleGroupedBySignals(true);
+            laemmerConfigGroup.setMinGreenTimeForNonGrowingQueues(true);
+            //laemmerConfigGroup.setCheckDownstream(true);
             laemmerConfigGroup.setActiveRegime(LaemmerConfigGroup.Regime.COMBINED);
             config.getModules().put(LaemmerConfigGroup.GROUP_NAME, laemmerConfigGroup);
         }

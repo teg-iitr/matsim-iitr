@@ -34,8 +34,7 @@ public class CreateScenarioFromConfig {
         // add missing scenario elements
         SignalSystemsConfigGroup signalSystemsConfigGroup = ConfigUtils.addOrGetModule(config, SignalSystemsConfigGroup.GROUP_NAME, SignalSystemsConfigGroup.class);
         signalSystemsConfigGroup.setUseSignalSystems(true);
-        signalSystemsConfigGroup.setUseAmbertimes(!adaptive);
-        //signalSystemsConfigGroup.setUseIntergreenTimes(true);
+        //signalSystemsConfigGroup.setUseAmbertimes(!adaptive);
         signalSystemsConfigGroup.setActionOnConflictingDirectionViolation(SignalSystemsConfigGroup.ActionOnSignalSpecsViolation.EXCEPTION);
         signalSystemsConfigGroup.setIntersectionLogic(SignalSystemsConfigGroup.IntersectionLogic.CONFLICTING_DIRECTIONS_AND_TURN_RESTRICTIONS);
 

@@ -41,7 +41,7 @@ class MixedTrafficSignalsModule extends AbstractModule {
         });
         if (((SignalSystemsConfigGroup)ConfigUtils.addOrGetModule(this.getConfig(), "signalsystems", SignalSystemsConfigGroup.class)).isUseSignalSystems()) {
             this.bind(SignalModelFactory.class).to(SignalModelFactoryImpl.class);
-            this.addControlerListenerBinding().to(SensorBasedSignalControlerListener.class);
+            this.addControlerListenerBinding().to(MixedTrafficSensorBasedSignalControlerListener.class);
             this.bind(MixedTrafficLinkSensorManager.class).in(Singleton.class);
             //this.bind(LinkSensorManager.class).in(Singleton.class);
             this.bind(MixedTrafficDownstreamSensor.class).in(Singleton.class);

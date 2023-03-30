@@ -47,16 +47,16 @@ final class MixedTrafficLaneSensor {
     }
 
     public void handleEvent(LaneEnterEvent event) {
-        ++this.agentsOnLane;
+        this.agentsOnLane += this.vehicles.get(event.getVehicleId()).getType().getPcuEquivalents();
         if (this.doAverageVehiclesPerSecondMonitoring) {
             if (this.lookBackTime != 1.0D / 0.0) {
                 this.updateBucketsUntil(event.getTime());
                 this.currentBucket.incrementAndGet();
             }
 
-            ++this.totalVehicles;
+            this.totalVehicles += this.vehicles.get(event.getVehicleId()).getType().getPcuEquivalents();
             this.volume += this.vehicles.get(event.getVehicleId()).getType().getPcuEquivalents();
-            if (this.totalVehicles == 1.0D) {
+            if (this.volume == 1 || this.totalVehicles == 1.0D) {
                 this.monitoringStartTime = event.getTime();
             }
         }
@@ -72,7 +72,7 @@ final class MixedTrafficLaneSensor {
     }
 
     public void handleEvent(LaneLeaveEvent event) {
-        --this.agentsOnLane;
+        this.agentsOnLane -= this.vehicles.get(event.getVehicleId()).getType().getPcuEquivalents();
         if (this.doDistanceMonitoring) {
 
             for (Double distance : this.distanceMeterCarLocatorMap.keySet()) {
@@ -109,8 +109,8 @@ final class MixedTrafficLaneSensor {
         double avgVehPerSecond = 0.0D;
         if (now > this.monitoringStartTime) {
             if (this.lookBackTime == 1.0D / 0.0) {
-//                avgVehPerSecond = this.totalVehicles / (now - this.monitoringStartTime + 1.0D);
                 avgVehPerSecond = this.volume / (now - this.monitoringStartTime + 1.0D);
+                avgVehPerSecond = this.totalVehicles / (now - this.monitoringStartTime + 1.0D);
             } else {
                 this.updateBucketsUntil(now);
                 if (this.timeBuckets.size() > 0) {
