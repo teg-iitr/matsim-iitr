@@ -1,7 +1,10 @@
 package playground.shivam.signals;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
@@ -9,6 +12,7 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.lanes.Lane;
 import org.matsim.lanes.LanesToLinkAssignment;
 
 import static org.junit.Assert.assertEquals;
@@ -17,15 +21,18 @@ import static org.junit.Assert.assertNotEquals;
 public class JavaUnitTests {
 
     private EventHandlerLinks eventHandlerLinks;
-    private EventHandlerLanes eventHandlerLanes;
-
-    private final String inputFile = "output/RunFixedMixedTrafficSignalSimpleIntersection/output_events.xml.gz";
-
+//    private EventHandlerLanes eventHandlerLanes;
+    private static EventHandlerLanes eventHandlerLanes;
     private final EventsManager eventsLinks = EventsUtils.createEventsManager();
-    private final EventsManager eventsLanes = EventsUtils.createEventsManager();
+//    private final EventsManager eventsLanes = EventsUtils.createEventsManager();
 
-    // constructor for initializing the objects
     public JavaUnitTests() {
+
+    }
+
+    @Test
+    public void testTravelTimes1() { // Length diff: lane=500 & link=1000 capacityboth=1000
+        String inputFile = "output/LengthDiff/output_events.xml.gz";
         eventHandlerLinks = new EventHandlerLinks();
         eventsLinks.addHandler(eventHandlerLinks);
         eventsLinks.initProcessing();
@@ -35,40 +42,104 @@ public class JavaUnitTests {
         eventsLinks.finishProcessing();
 
         eventHandlerLanes = new EventHandlerLanes();
-        eventsLanes.addHandler(eventHandlerLanes);
-        eventsLanes.initProcessing();
+        EventsManager events = EventsUtils.createEventsManager();
+        events.addHandler(eventHandlerLanes);
 
-        reader = new MatsimEventsReader(eventsLanes);
-        reader.readFile(inputFile);
-        eventsLanes.finishProcessing();
+        //create the reader and read the file
+        events.initProcessing();
+        LanesEventReader reader2 = new LanesEventReader(events);
+
+        reader2.readFile(inputFile);
+        events.finishProcessing();
+
+        double tt1 = eventHandlerLinks.getTravelTimeLinks("2_3");
+        System.out.println(eventHandlerLanes.getTravelTimeLanes("2_3.l"));
+        assertEquals(eventHandlerLanes.getTravelTimeLanes("2_3.l"), tt1, 1e-6);
+        assertEquals(eventHandlerLanes.getTravelTimeLanes("2_3.s"), tt1, 1e-6);
+        assertEquals(eventHandlerLanes.getTravelTimeLanes("2_3.r"), tt1, 1e-6);
     }
-    // Test case 1 for comparing the travel time of links and lane per ID
     @Test
-    public void testTravelTimes() {
-        // Call the run method to initialize the scenario and event handler
-        RunEventHandlerLanes.run(); 
+    public void testTravelTimes2() { // When length same = 500 & capacityboth=1000
+        String inputFile = "output/LengthSame/output_events.xml.gz";
+        eventHandlerLinks = new EventHandlerLinks();
+        eventsLinks.addHandler(eventHandlerLinks);
+        eventsLinks.initProcessing();
 
-        Config config = ConfigUtils.loadConfig("output/RunFixedMixedTrafficSignalSimpleIntersection/config.xml");
-        Scenario scenario = ScenarioUtils.loadScenario(config);
-        config.network().getLaneDefinitionsFile();
-        Network network = scenario.getNetwork();
+        MatsimEventsReader reader = new MatsimEventsReader(eventsLinks);
+        reader.readFile(inputFile);
+        eventsLinks.finishProcessing();
 
-        // loop over all the link Ids present in the network we created 
-        for (LanesToLinkAssignment l2l : scenario.getLanes().getLanesToLinkAssignments().values()) {
-            String linkId = l2l.getLinkId().toString();
+        eventHandlerLanes = new EventHandlerLanes();
+        EventsManager events = EventsUtils.createEventsManager();
+        events.addHandler(eventHandlerLanes);
 
-            // get the travel time for each link through eventHandlers
-            double linkTravelTime = eventHandlerLinks.getTravelTimeLinks(linkId);
-            // get the travel time for each Lane per link by calling a method present in class RunEventHandlerLanes
-            double lanesTravelTime = RunEventHandlerLanes.travelTimeLanesPerLink(linkId);
-            
+        //create the reader and read the file
+        events.initProcessing();
+        LanesEventReader reader2 = new LanesEventReader(events);
 
-            System.out.println("Link Id in test"+ linkId);
-//          assertEquals(linkTravelTime, lanesTravelTime, 1e-6);
-                
-            // checks if the link travel time is equal to lane travel time
-            assertNotEquals(linkTravelTime, lanesTravelTime, 1e-6);
+        reader2.readFile(inputFile);
+        events.finishProcessing();
 
-        }
+        double tt1 = eventHandlerLinks.getTravelTimeLinks("4_3");
+
+        assertEquals(eventHandlerLanes.getTravelTimeLanes("4_3.l"), tt1, 1e-6);
+        assertEquals(eventHandlerLanes.getTravelTimeLanes("4_3.s"), tt1, 1e-6);
+        assertEquals(eventHandlerLanes.getTravelTimeLanes("4_3.r"), tt1, 1e-6);
+    }
+    @Test
+    public void testTravelTimes3(){ // capacity same = 1000 & length link=1000 lane = 500
+        String inputFile = "output/case3/output_events.xml.gz";
+        eventHandlerLinks = new EventHandlerLinks();
+        eventsLinks.addHandler(eventHandlerLinks);
+        eventsLinks.initProcessing();
+
+        MatsimEventsReader reader = new MatsimEventsReader(eventsLinks);
+        reader.readFile(inputFile);
+        eventsLinks.finishProcessing();
+
+        eventHandlerLanes = new EventHandlerLanes();
+        EventsManager events = EventsUtils.createEventsManager();
+        events.addHandler(eventHandlerLanes);
+
+        //create the reader and read the file
+        events.initProcessing();
+        LanesEventReader reader2 = new LanesEventReader(events);
+
+        reader2.readFile(inputFile);
+        events.finishProcessing();
+
+        double tt1 = eventHandlerLinks.getTravelTimeLinks("8_3");
+
+        assertEquals(eventHandlerLanes.getTravelTimeLanes("8_3.l"), tt1, 1e-6);
+        assertEquals(eventHandlerLanes.getTravelTimeLanes("8_3.s"), tt1, 1e-6);
+        assertEquals(eventHandlerLanes.getTravelTimeLanes("8_3.r"), tt1, 1e-6);
+    }
+    @Test
+    public void testTravelTimes4(){ // capacity diff = 1000lane, 500link & length=500
+        String inputFile = "output/CapacityDiff/output_events.xml.gz";
+        eventHandlerLinks = new EventHandlerLinks();
+        eventsLinks.addHandler(eventHandlerLinks);
+        eventsLinks.initProcessing();
+
+        MatsimEventsReader reader = new MatsimEventsReader(eventsLinks);
+        reader.readFile(inputFile);
+        eventsLinks.finishProcessing();
+
+        eventHandlerLanes = new EventHandlerLanes();
+        EventsManager events = EventsUtils.createEventsManager();
+        events.addHandler(eventHandlerLanes);
+
+        //create the reader and read the file
+        events.initProcessing();
+        LanesEventReader reader2 = new LanesEventReader(events);
+
+        reader2.readFile(inputFile);
+        events.finishProcessing();
+
+        double tt1 = eventHandlerLinks.getTravelTimeLinks("7_3");
+
+        assertEquals(eventHandlerLanes.getTravelTimeLanes("7_3.l"), tt1, 1e-6);
+        assertEquals(eventHandlerLanes.getTravelTimeLanes("7_3.s"), tt1, 1e-6);
+        assertEquals(eventHandlerLanes.getTravelTimeLanes("7_3.r"), tt1, 1e-6);
     }
 }
