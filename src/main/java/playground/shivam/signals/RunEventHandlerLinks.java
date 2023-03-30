@@ -33,7 +33,7 @@ public class RunEventHandlerLinks {
         HashSet<String>linkId = new HashSet<>();
         linkId.add("2_3"); linkId.add("8_3"); linkId.add("4_3"); linkId.add("7_3");
 
-        HashMap<String, Double> travelTimeLinks = new HashMap<>();
+//        HashMap<String, Double> travelTimeLinks = new HashMap<>();
         for (String linkIds: linkId) {
             System.out.println("Travel Time in link : " + linkIds + " " + eventHandler.getTravelTimeLinks(linkIds));
         }
