@@ -49,8 +49,8 @@ public class CreateConfig {
         config.qsim().setUsingFastCapacityUpdate(false);
         config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
         config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
-        config.qsim().setStorageCapFactor(0.5);
-        config.qsim().setFlowCapFactor(0.5);
+        config.qsim().setStorageCapFactor(0.75);
+        config.qsim().setFlowCapFactor(0.75);
 
         config.plansCalcRoute().setNetworkModes(SignalUtils.MAIN_MODES);
 
@@ -107,11 +107,12 @@ public class CreateConfig {
         if (adaptive) {
             LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config, LaemmerConfigGroup.GROUP_NAME, LaemmerConfigGroup.class);
             laemmerConfigGroup.setDesiredCycleTime(CYCLE);
-            laemmerConfigGroup.setMinGreenTime(15);
-            laemmerConfigGroup.setShortenStabilizationAfterIntergreenTime(true);
-            //laemmerConfigGroup.setDetermineMaxLoadForTIdleGroupedBySignals(true);
-            laemmerConfigGroup.setMinGreenTimeForNonGrowingQueues(true);
-            //laemmerConfigGroup.setCheckDownstream(true);
+            laemmerConfigGroup.setMinGreenTime(10);
+            //laemmerConfigGroup.setShortenStabilizationAfterIntergreenTime(true);
+            laemmerConfigGroup.setDetermineMaxLoadForTIdleGroupedBySignals(true);
+            //laemmerConfigGroup.setMinGreenTimeForNonGrowingQueues(true);
+            laemmerConfigGroup.setCheckDownstream(true);
+            laemmerConfigGroup.setActiveStabilizationStrategy(LaemmerConfigGroup.StabilizationStrategy.HEURISTIC);
             laemmerConfigGroup.setActiveRegime(LaemmerConfigGroup.Regime.COMBINED);
             config.getModules().put(LaemmerConfigGroup.GROUP_NAME, laemmerConfigGroup);
         }

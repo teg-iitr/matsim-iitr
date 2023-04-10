@@ -5,14 +5,14 @@ import java.util.Collection;
 
 public class SignalUtils {
 
-    public static final double LANE_LENGTH = 500;
-    public static final int LANE_CAPACITY = 1000;
+    public static final double LANE_LENGTH = 1000;
+    public static final int LANE_CAPACITY = 500;
     public static final int NO_LANES = 1;
 
-    public static int ITERATION = 100;
+    public static int ITERATION = 50;
 
     public static final double LINK_LENGTH = 1000;
-    public static final int LINK_CAPACITY = 2000;
+    public static final int LINK_CAPACITY = 1000;
 
     public static int CYCLE = 120;
 
