@@ -41,8 +41,8 @@ public class TtQueueLengthAnalysisTool implements MobsimBeforeSimStepListener, M
     private final int noSystems;
     private final Lanes lanes;
 
-    private Map<Id<Signal>, Double> totalWaitingTimePerSignal = new HashMap<>();
-    private Map<Id<SignalSystem>, Double> totalWaitingTimePerSystem = new HashMap<>();
+    public static Map<Id<Signal>, Double> totalWaitingTimePerSignal = new HashMap<>();
+    public static  Map<Id<SignalSystem>, Double> totalWaitingTimePerSystem = new HashMap<>();
 
     private final int lastIteration;
     private boolean analyzeThisIt = true;
