@@ -28,8 +28,12 @@ import java.util.*;
 import static playground.shivam.signals.writer.CSVWriter.writeResult;
 
 public class RunMatsim {
-    private static final Logger log = LogManager.getLogger(RunMatsim.class);
-
+     public static final Logger log = LogManager.getLogger(RunMatsim.class);
+     public static Map<Id<SignalGroup>, Double> totalSignalGreenTimes;
+     public static Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycle;
+     public static Map<Id<SignalSystem>, Double> avgCycleTimePerSystem;
+     public static Map<Id<Link>, Double> avgDelayPerLink;
+     public static double totalDelay;
     public static void run(boolean startOtfvis, Controler controler, String signalController, Class<? extends SignalControllerFactory> signalControllerFactoryClassName, String outputDirectory) {
 
         EventsManager manager = EventsUtils.createEventsManager();
@@ -76,10 +80,10 @@ public class RunMatsim {
 
         controler.run();
 
-        Map<Id<SignalGroup>, Double> totalSignalGreenTimes = signalAnalyzer.getTotalSignalGreenTime();
-        Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycle = signalAnalyzer.calculateAvgSignalGreenTimePerFlexibleCycle();
-        Map<Id<SignalSystem>, Double> avgCycleTimePerSystem = signalAnalyzer.calculateAvgFlexibleCycleTimePerSignalSystem();
-        Map<Id<Link>, Double> avgDelayPerLink = delayAnalysis.getAvgDelayPerLink();
+        totalSignalGreenTimes = signalAnalyzer.getTotalSignalGreenTime();
+        avgSignalGreenTimePerCycle = signalAnalyzer.calculateAvgSignalGreenTimePerFlexibleCycle();
+        avgCycleTimePerSystem = signalAnalyzer.calculateAvgFlexibleCycleTimePerSignalSystem();
+        avgDelayPerLink = delayAnalysis.getAvgDelayPerLink();
 
         SignalsData signalsData = (SignalsData) controler.getScenario().getScenarioElement(SignalsData.ELEMENT_NAME);
         for (Id<SignalSystem> signalSystemId : signalsData.getSignalSystemsData().getSignalSystemData().keySet()) {
@@ -94,6 +98,8 @@ public class RunMatsim {
         for (Link link: controler.getScenario().getNetwork().getLinks().values())
             log.info("avg delay per link " + link.getId() + ": " + avgDelayPerLink.get(link.getId()));
 
-        log.info("total delay: " + delayAnalysis.getTotalDelay());
+        totalDelay = delayAnalysis.getTotalDelay();
+
+        log.info("total delay: " + totalDelay);
     }
 }

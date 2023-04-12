@@ -16,8 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashSet;
 
-import static playground.shivam.signals.SignalUtils.CYCLE;
-import static playground.shivam.signals.SignalUtils.ITERATION;
+import static playground.shivam.signals.SignalUtils.*;
 
 public class CreateConfig {
 
@@ -49,8 +48,8 @@ public class CreateConfig {
         config.qsim().setUsingFastCapacityUpdate(false);
         config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
         config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
-        config.qsim().setStorageCapFactor(0.75);
-        config.qsim().setFlowCapFactor(0.75);
+        config.qsim().setStorageCapFactor(STORAGE_CAPFACTOR);
+        config.qsim().setFlowCapFactor(FLOW_CAPFACTOR);
 
         config.plansCalcRoute().setNetworkModes(SignalUtils.MAIN_MODES);
 
