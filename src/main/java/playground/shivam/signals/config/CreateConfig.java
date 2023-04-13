@@ -48,8 +48,8 @@ public class CreateConfig {
         config.qsim().setUsingFastCapacityUpdate(false);
         config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
         config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
-        config.qsim().setStorageCapFactor(STORAGE_CAPFACTOR);
-        config.qsim().setFlowCapFactor(FLOW_CAPFACTOR);
+        config.qsim().setStorageCapFactor(STORAGE_CAPACITY_FACTOR);
+        config.qsim().setFlowCapFactor(FLOW_CAPACITY_FACTOR);
 
         config.plansCalcRoute().setNetworkModes(SignalUtils.MAIN_MODES);
 

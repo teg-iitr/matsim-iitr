@@ -29,9 +29,7 @@ import static playground.shivam.signals.writer.CSVWriter.writeResult;
 
 public class RunMatsim {
      public static final Logger log = LogManager.getLogger(RunMatsim.class);
-     public static Map<Id<SignalGroup>, Double> totalSignalGreenTimes;
-     public static Map<Id<SignalGroup>, Double> avgSignalGreenTimePerCycle;
-     public static Map<Id<SignalSystem>, Double> avgCycleTimePerSystem;
+     public static  Map<Id<SignalSystem>, Double> avgCycleTimePerSystem;
      public static Map<Id<Link>, Double> avgDelayPerLink;
      public static double totalDelay;
     public static void run(boolean startOtfvis, Controler controler, String signalController, Class<? extends SignalControllerFactory> signalControllerFactoryClassName, String outputDirectory) {
@@ -80,24 +78,17 @@ public class RunMatsim {
 
         controler.run();
 
-        totalSignalGreenTimes = signalAnalyzer.getTotalSignalGreenTime();
-        avgSignalGreenTimePerCycle = signalAnalyzer.calculateAvgSignalGreenTimePerFlexibleCycle();
         avgCycleTimePerSystem = signalAnalyzer.calculateAvgFlexibleCycleTimePerSignalSystem();
         avgDelayPerLink = delayAnalysis.getAvgDelayPerLink();
 
-        SignalsData signalsData = (SignalsData) controler.getScenario().getScenarioElement(SignalsData.ELEMENT_NAME);
+        /*SignalsData signalsData = (SignalsData) controler.getScenario().getScenarioElement(SignalsData.ELEMENT_NAME);
         for (Id<SignalSystem> signalSystemId : signalsData.getSignalSystemsData().getSignalSystemData().keySet()) {
             log.info("avg cycle time per system " + signalSystemId + ": " + avgCycleTimePerSystem.get(signalSystemId));
-            Map<Id<SignalGroup>, SignalGroupData> signalGroupDataBySystemId = signalsData.getSignalGroupsData().getSignalGroupDataBySystemId(signalSystemId);
-            for (Id<SignalGroup> signalGroupId : signalGroupDataBySystemId.keySet()) {
-                log.info("total signal green times " + signalGroupId + ": " + totalSignalGreenTimes.get(signalGroupId));
-                log.info("avg signal green times per cycle " + signalGroupId + ": " + avgSignalGreenTimePerCycle.get(signalGroupId));
-            }
         }
 
         for (Link link: controler.getScenario().getNetwork().getLinks().values())
             log.info("avg delay per link " + link.getId() + ": " + avgDelayPerLink.get(link.getId()));
-
+*/
         totalDelay = delayAnalysis.getTotalDelay();
 
         log.info("total delay: " + totalDelay);
