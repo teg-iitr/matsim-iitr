@@ -5,8 +5,10 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.signals.builder.MixedTrafficSignals;
+import org.matsim.contrib.signals.builder.Signals;
 import org.matsim.contrib.signals.controller.SignalControllerFactory;
 import org.matsim.contrib.signals.controller.fixedTime.DefaultPlanbasedSignalSystemController;
+import org.matsim.contrib.signals.controller.laemmerFix.LaemmerSignalController;
 import org.matsim.contrib.signals.controller.laemmerFix.MixedTrafficLaemmerSignalController;
 import org.matsim.contrib.signals.model.Signal;
 import org.matsim.contrib.signals.model.SignalSystem;
@@ -46,9 +48,12 @@ public class RunSignals {
         int a;
         do {
             System.out.println("0. Exit");
-            System.out.println("1. Fixed Time Signal");
-            System.out.println("2. Adaptive Signal ");
-            System.out.println("3. Read and Write signal results");
+            System.out.println("1. Fixed Time Mixed-Signal");
+            System.out.println("2. Adaptive Mixed-Signal ");
+            System.out.println("3. Compare Mixed-Traffic signal results");
+            System.out.println("4. Fixed Time Homogenous Signal");
+            System.out.println("5. Adaptive Homogenous Signal ");
+            System.out.println("6. Compare Homogenous signal results");
 
             System.out.print("Enter your choice: ");
 
@@ -57,21 +62,29 @@ public class RunSignals {
             System.out.println();
             switch (a) {
                 case 1:
-                    fixedTimeSignal();
+                    fixedTimeSignal(false);
                     break;
                 case 2:
-                    adaptiveTimeSignal();
+                    adaptiveTimeSignal(false);
                     break;
                 case 3:
-                    readAndWriteSignalsResults();
+                    compareMixedTrafficSignals(false);
                     break;
+                case 4:
+                    fixedTimeSignal(true);
+                    break;
+                case 5:
+                    adaptiveTimeSignal(true);
+                    break;
+                case 6:
+                    compareMixedTrafficSignals(true);
                 default:
                     System.out.println("You have exited");
             }
         } while (a != 0);
     }
 
-    static void fixedTimeSignal() throws IOException {
+    static void fixedTimeSignal(boolean homogenous) throws IOException {
         outputDirectory = "output/fixedTimeSignal/";
         signalController = DefaultPlanbasedSignalSystemController.IDENTIFIER;
         signalControllerFactoryClassName = DefaultPlanbasedSignalSystemController.FixedTimeFactory.class;
@@ -81,7 +94,10 @@ public class RunSignals {
 
         controler = new Controler(scenario);
 
-        MixedTrafficSignals.configure(controler);
+        if (homogenous)
+            Signals.configure(controler);
+        else
+            MixedTrafficSignals.configure(controler);
 
         RunMatsim.run(false, controler, signalController, signalControllerFactoryClassName, outputDirectory);
 
@@ -107,17 +123,25 @@ public class RunSignals {
 
     }
 
-    static void adaptiveTimeSignal() throws IOException {
+    static void adaptiveTimeSignal(boolean homogenous) throws IOException {
         outputDirectory = "output/adaptiveTimeSignal/";
-        signalController = MixedTrafficLaemmerSignalController.IDENTIFIER;
-        signalControllerFactoryClassName = MixedTrafficLaemmerSignalController.LaemmerFactory.class;
-
+        if (homogenous) {
+            signalController = LaemmerSignalController.IDENTIFIER;
+            signalControllerFactoryClassName = LaemmerSignalController.LaemmerFactory.class;
+        }
+        else {
+            signalController = MixedTrafficLaemmerSignalController.IDENTIFIER;
+            signalControllerFactoryClassName = MixedTrafficLaemmerSignalController.LaemmerFactory.class;
+        }
         final Config config = defineConfig(outputDirectory, true);
         final Scenario scenario = defineScenario(config, outputDirectory, signalController, true);
 
         controler = new Controler(scenario);
 
-        MixedTrafficSignals.configure(controler);
+        if (homogenous)
+            Signals.configure(controler);
+        else
+            MixedTrafficSignals.configure(controler);
 
         RunMatsim.run(false, controler, signalController, signalControllerFactoryClassName, outputDirectory);
 
@@ -144,7 +168,7 @@ public class RunSignals {
 
     }
 
-    public static void readAndWriteSignalsResults() throws IOException {
+    public static void compareMixedTrafficSignals(boolean homogenous) throws IOException {
 
 
         // specify the path to your CSV file
@@ -192,8 +216,14 @@ public class RunSignals {
                 addToBothLists(fixedList, adaptiveList, Double.toString(STORAGE_CAPACITY_FACTOR));
                 addToBothLists(fixedList, adaptiveList, Double.toString(FLOW_CAPACITY_FACTOR));
 
-                fixedTimeSignal();
-                adaptiveTimeSignal();
+                if (homogenous) {
+                    fixedTimeSignal(true);
+                    adaptiveTimeSignal(true);
+                }
+                else {
+                    fixedTimeSignal(false);
+                    adaptiveTimeSignal(false);
+                }
 
                 if (isFirstRowWrite) {
                     ArrayList<String> columnNameList = new ArrayList<>();
@@ -223,10 +253,10 @@ public class RunSignals {
                         columnNameList.add("total_waiting_" + entry.getKey());
                     }
 
-                    fixedWriter = new CSVWriter(new FileWriter("output/readAndWriteSignals/" + "fixedResult_60_cycle.csv"));
+                    fixedWriter = new CSVWriter(new FileWriter("output/readAndWriteSignals/" + "fixedResult_150_cycle.csv"));
                     fixedWriter.writeNext(columnNameList.toArray(new String[0]));
 
-                    adaptiveWriter = new CSVWriter(new FileWriter ("output/readAndWriteSignals/" + "adaptiveResult_60_cycle.csv"));
+                    adaptiveWriter = new CSVWriter(new FileWriter ("output/readAndWriteSignals/" + "adaptiveResult_150_cycle.csv"));
                     adaptiveWriter.writeNext(columnNameList.toArray(new String[0]));
 
                     isFirstRowWrite = false;

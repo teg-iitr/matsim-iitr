@@ -69,7 +69,7 @@ public class CreatePopulation {
     }
 
     private static String getTravelMode(int number) {
-        if (number <= 60) return "car";
+        if (number <= 100) return "car";
         else return "truck";
     }
 

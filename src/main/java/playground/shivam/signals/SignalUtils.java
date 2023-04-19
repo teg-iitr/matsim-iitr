@@ -16,7 +16,7 @@ public class SignalUtils {
 
     public static int CYCLE;
 
-    // 150 cycle
+    /*// 150 cycle
     public static int AGENTS_PER_LEFT_APPROACH;
     public static final int OFFSET_LEFT_APPROACH = 5;
     public static final int DROPPING_LEFT_APPROACH = 40;
@@ -31,10 +31,10 @@ public class SignalUtils {
 
     public static int AGENTS_PER_BOTTOM_APPROACH;
     public static final int OFFSET_BOTTOM_APPROACH = 120;
-    public static final int DROPPING_BOTTOM_APPROACH = 150;
+    public static final int DROPPING_BOTTOM_APPROACH = 150;*/
 
     // 120 cycle
-    /*public static int AGENTS_PER_LEFT_APPROACH;
+    public static int AGENTS_PER_LEFT_APPROACH;
     public static final int OFFSET_LEFT_APPROACH = 5;
     public static final int DROPPING_LEFT_APPROACH = 30;
 
@@ -48,7 +48,7 @@ public class SignalUtils {
 
     public static int AGENTS_PER_BOTTOM_APPROACH;
     public static final int OFFSET_BOTTOM_APPROACH = 90;
-    public static final int DROPPING_BOTTOM_APPROACH = 120;*/
+    public static final int DROPPING_BOTTOM_APPROACH = 120;
 
     /*// 90 cycle
     public static int AGENTS_PER_LEFT_APPROACH;
