@@ -20,9 +20,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 import static org.matsim.contrib.signals.analysis.TtQueueLengthAnalysisTool.totalWaitingTimePerSignal;
 import static org.matsim.contrib.signals.analysis.TtQueueLengthAnalysisTool.totalWaitingTimePerSystem;
@@ -172,106 +170,114 @@ public class RunSignals {
 
 
         // specify the path to your CSV file
-        String csvPath = "input/signal_parameter_input.csv";
+        List<String> csvPaths = Arrays.asList("input/low_demand/signal_input.csv", "input/high_demand/signal_input.csv");
         int index = 0;
         // create a CSVReader instance
         String line = "";
         String delimiter = ",";
         boolean isFirstRowRead = true;
         boolean isFirstRowWrite = true;
+        for (String csvPath: csvPaths) {
+            try (BufferedReader br = new BufferedReader(new FileReader(csvPath))) {
+                while ((line = br.readLine()) != null) {
 
-        try (BufferedReader br = new BufferedReader(new FileReader(csvPath))) {
-            while ((line = br.readLine()) != null) {
+                    String[] values = line.split(delimiter);
 
-                String[] values = line.split(delimiter);
+                    if (isFirstRowRead) { // skip first row
+                        isFirstRowRead = false;
+                        continue;
+                    }
+                    // access the values in each column
+                    LANE_LENGTH = Double.parseDouble(values[0]);
+                    LANE_CAPACITY = Integer.parseInt(values[1]);
+                    LINK_LENGTH = Double.parseDouble(values[2]);
+                    LINK_CAPACITY = Integer.parseInt(values[3]);
+                    CYCLE = Integer.parseInt(values[4]);
+                    AGENTS_PER_LEFT_APPROACH = Integer.parseInt(values[5]);
+                    AGENTS_PER_TOP_APPROACH = Integer.parseInt(values[6]);
+                    AGENTS_PER_RIGHT_APPROACH = Integer.parseInt(values[7]);
+                    AGENTS_PER_BOTTOM_APPROACH = Integer.parseInt(values[8]);
+                    ITERATION = Integer.parseInt(values[9]);
+                    STORAGE_CAPACITY_FACTOR = Double.parseDouble(values[10]);
+                    FLOW_CAPACITY_FACTOR = Double.parseDouble(values[11]);
 
-                if (isFirstRowRead) { // skip first row
-                    isFirstRowRead = false;
-                    continue;
-                }
-                // access the values in each column
-                LANE_LENGTH = Double.parseDouble(values[0]);
-                LANE_CAPACITY = Integer.parseInt(values[1]);
-                LINK_LENGTH = Double.parseDouble(values[2]);
-                LINK_CAPACITY = Integer.parseInt(values[3]);
-                CYCLE = Integer.parseInt(values[4]);
-                AGENTS_PER_LEFT_APPROACH = Integer.parseInt(values[5]);
-                AGENTS_PER_TOP_APPROACH = Integer.parseInt(values[6]);
-                AGENTS_PER_RIGHT_APPROACH = Integer.parseInt(values[7]);
-                AGENTS_PER_BOTTOM_APPROACH = Integer.parseInt(values[8]);
-                ITERATION = Integer.parseInt(values[9]);
-                STORAGE_CAPACITY_FACTOR = Double.parseDouble(values[10]);
-                FLOW_CAPACITY_FACTOR = Double.parseDouble(values[11]);
+                    addToBothLists(fixedList, adaptiveList, String.valueOf(LANE_LENGTH));
+                    addToBothLists(fixedList, adaptiveList, String.valueOf(LANE_CAPACITY));
+                    addToBothLists(fixedList, adaptiveList, String.valueOf(LINK_LENGTH));
+                    addToBothLists(fixedList, adaptiveList, String.valueOf(LINK_CAPACITY));
+                    addToBothLists(fixedList, adaptiveList, String.valueOf(CYCLE));
+                    addToBothLists(fixedList, adaptiveList, String.valueOf(AGENTS_PER_LEFT_APPROACH));
+                    addToBothLists(fixedList, adaptiveList, String.valueOf(AGENTS_PER_TOP_APPROACH));
+                    addToBothLists(fixedList, adaptiveList, String.valueOf(AGENTS_PER_RIGHT_APPROACH));
+                    addToBothLists(fixedList, adaptiveList, String.valueOf(AGENTS_PER_BOTTOM_APPROACH));
+                    addToBothLists(fixedList, adaptiveList, String.valueOf(ITERATION));
+                    addToBothLists(fixedList, adaptiveList, Double.toString(STORAGE_CAPACITY_FACTOR));
+                    addToBothLists(fixedList, adaptiveList, Double.toString(FLOW_CAPACITY_FACTOR));
 
-                addToBothLists(fixedList, adaptiveList, String.valueOf(LANE_LENGTH));
-                addToBothLists(fixedList, adaptiveList, String.valueOf(LANE_CAPACITY));
-                addToBothLists(fixedList, adaptiveList, String.valueOf(LINK_LENGTH));
-                addToBothLists(fixedList, adaptiveList, String.valueOf(LINK_CAPACITY));
-                addToBothLists(fixedList, adaptiveList, String.valueOf(CYCLE));
-                addToBothLists(fixedList, adaptiveList, String.valueOf(AGENTS_PER_LEFT_APPROACH));
-                addToBothLists(fixedList, adaptiveList, String.valueOf(AGENTS_PER_TOP_APPROACH));
-                addToBothLists(fixedList, adaptiveList, String.valueOf(AGENTS_PER_RIGHT_APPROACH));
-                addToBothLists(fixedList, adaptiveList, String.valueOf(AGENTS_PER_BOTTOM_APPROACH));
-                addToBothLists(fixedList, adaptiveList, String.valueOf(ITERATION));
-                addToBothLists(fixedList, adaptiveList, Double.toString(STORAGE_CAPACITY_FACTOR));
-                addToBothLists(fixedList, adaptiveList, Double.toString(FLOW_CAPACITY_FACTOR));
-
-                if (homogenous) {
-                    fixedTimeSignal(true);
-                    adaptiveTimeSignal(true);
-                }
-                else {
-                    fixedTimeSignal(false);
-                    adaptiveTimeSignal(false);
-                }
-
-                if (isFirstRowWrite) {
-                    ArrayList<String> columnNameList = new ArrayList<>();
-
-                    columnNameList.add("lane_len");
-                    columnNameList.add("lane_cap");
-                    columnNameList.add("link_len");
-                    columnNameList.add("link_cap");
-                    columnNameList.add("cycle");
-                    columnNameList.add("west_agents");
-                    columnNameList.add("north_agents");
-                    columnNameList.add("east_agents");
-                    columnNameList.add("south_agents");
-                    columnNameList.add("iter");
-                    columnNameList.add("storage_cap");
-                    columnNameList.add("flow_cap");
-
-                    columnNameList.add("total_delay");
-
-                    for (Link link : controler.getScenario().getNetwork().getLinks().values()) {
-                        columnNameList.add("avg_delay_" + link.getId());
+                    if (homogenous) {
+                        fixedTimeSignal(true);
+                        adaptiveTimeSignal(true);
+                    } else {
+                        fixedTimeSignal(false);
+                        adaptiveTimeSignal(false);
                     }
 
-                    columnNameList.add("total_waiting");
+                    if (isFirstRowWrite) {
+                        ArrayList<String> columnNameList = new ArrayList<>();
 
-                    for (Map.Entry<Id<Signal>, Double> entry : totalWaitingTimePerSignal.entrySet()) {
-                        columnNameList.add("total_waiting_" + entry.getKey());
+                        columnNameList.add("lane_len");
+                        columnNameList.add("lane_cap");
+                        columnNameList.add("link_len");
+                        columnNameList.add("link_cap");
+                        columnNameList.add("cycle");
+                        columnNameList.add("west_agents");
+                        columnNameList.add("north_agents");
+                        columnNameList.add("east_agents");
+                        columnNameList.add("south_agents");
+                        columnNameList.add("iter");
+                        columnNameList.add("storage_cap");
+                        columnNameList.add("flow_cap");
+
+                        columnNameList.add("total_delay");
+
+                        for (Link link : controler.getScenario().getNetwork().getLinks().values()) {
+                            columnNameList.add("avg_delay_" + link.getId());
+                        }
+
+                        columnNameList.add("total_waiting");
+
+                        for (Map.Entry<Id<Signal>, Double> entry : totalWaitingTimePerSignal.entrySet()) {
+                            columnNameList.add("total_waiting_" + entry.getKey());
+                        }
+
+                        if (homogenous) {
+                            fixedWriter = new CSVWriter(new FileWriter("output/homogenousSignals/" + csvPath.split("/")[1] + "/fixedResult_cycle.csv"));
+
+                            adaptiveWriter = new CSVWriter(new FileWriter("output/homogenousSignals/" + csvPath.split("/")[1] +  "/adaptiveResult_cycle.csv"));
+                        }
+                        else {
+                            fixedWriter = new CSVWriter(new FileWriter("output/mixedTrafficSignals/" + csvPath.split("/")[1] + "/fixedResult_cycle.csv"));
+
+                            adaptiveWriter = new CSVWriter(new FileWriter("output/mixedTrafficSignals/" + csvPath.split("/")[1]+ "/adaptiveResult_cycle.csv"));
+
+                        }
+                        fixedWriter.writeNext(columnNameList.toArray(new String[0]));
+                        adaptiveWriter.writeNext(columnNameList.toArray(new String[0]));
+
+                        isFirstRowWrite = false;
                     }
 
-                    fixedWriter = new CSVWriter(new FileWriter("output/readAndWriteSignals/" + "fixedResult_150_cycle.csv"));
-                    fixedWriter.writeNext(columnNameList.toArray(new String[0]));
+                    fixedWriter.writeNext(fixedList.toArray(new String[0]));
+                    fixedWriter.flush();
+                    fixedList.clear();
 
-                    adaptiveWriter = new CSVWriter(new FileWriter ("output/readAndWriteSignals/" + "adaptiveResult_150_cycle.csv"));
-                    adaptiveWriter.writeNext(columnNameList.toArray(new String[0]));
-
-                    isFirstRowWrite = false;
+                    adaptiveWriter.writeNext(adaptiveList.toArray(new String[0]));
+                    adaptiveWriter.flush();
+                    adaptiveList.clear();
                 }
-
-                fixedWriter.writeNext(fixedList.toArray(new String[0]));
-                fixedWriter.flush();
-                fixedList.clear();
-
-                adaptiveWriter.writeNext(adaptiveList.toArray(new String[0]));
-                adaptiveWriter.flush();
-                adaptiveList.clear();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 
         fixedWriter.close();

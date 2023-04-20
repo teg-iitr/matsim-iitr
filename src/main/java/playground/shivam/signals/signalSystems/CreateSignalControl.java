@@ -53,7 +53,43 @@ public class CreateSignalControl {
 //                Id.create("83_2", SignalGroup.class), OFFSET_BOTTOM_APPROACH, DROPPING_BOTTOM_APPROACH));
 //        plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
 //                Id.create("83_3", SignalGroup.class), OFFSET_BOTTOM_APPROACH, DROPPING_BOTTOM_APPROACH));
-
+        if (CYCLE == 150) {
+            OFFSET_LEFT_APPROACH = 5;
+            DROPPING_LEFT_APPROACH = 40;
+            OFFSET_TOP_APPROACH = 45;
+            DROPPING_TOP_APPROACH = 70;
+            OFFSET_RIGHT_APPROACH = 80;
+            DROPPING_RIGHT_APPROACH = 115;
+            OFFSET_BOTTOM_APPROACH = 120;
+            DROPPING_BOTTOM_APPROACH = 150;
+        } else if (CYCLE == 120) {
+            OFFSET_LEFT_APPROACH = 5;
+            DROPPING_LEFT_APPROACH = 30;
+            OFFSET_TOP_APPROACH = 35;
+            DROPPING_TOP_APPROACH = 55;
+            OFFSET_RIGHT_APPROACH = 60;
+            DROPPING_RIGHT_APPROACH = 85;
+            OFFSET_BOTTOM_APPROACH = 90;
+            DROPPING_BOTTOM_APPROACH = 120;
+        } else if (CYCLE == 90) {
+            OFFSET_LEFT_APPROACH = 5;
+            DROPPING_LEFT_APPROACH = 25;
+            OFFSET_TOP_APPROACH = 30;
+            DROPPING_TOP_APPROACH = 40;
+            OFFSET_RIGHT_APPROACH = 45;
+            DROPPING_RIGHT_APPROACH = 65;
+            OFFSET_BOTTOM_APPROACH = 70;
+            DROPPING_BOTTOM_APPROACH = 85;
+        } else {
+            OFFSET_LEFT_APPROACH = 5;
+            DROPPING_LEFT_APPROACH = 15;
+            OFFSET_TOP_APPROACH = 20;
+            DROPPING_TOP_APPROACH = 30;
+            OFFSET_RIGHT_APPROACH = 35;
+            DROPPING_RIGHT_APPROACH = 45;
+            OFFSET_BOTTOM_APPROACH = 50;
+            DROPPING_BOTTOM_APPROACH = 60;
+        }
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
                 Id.create("23_sl", SignalGroup.class), OFFSET_LEFT_APPROACH, DROPPING_LEFT_APPROACH));
         plan.addSignalGroupSettings(SignalUtils.createSetting4SignalGroup(fac,
