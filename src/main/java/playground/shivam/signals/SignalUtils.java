@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 public class SignalUtils {
+    public static String RUN;
     public static double LANE_LENGTH;
     public static int LANE_CAPACITY;
     public static int NO_LANES = 1;
@@ -33,5 +34,5 @@ public class SignalUtils {
     public static int CYCLE;
 
 
-    public static Collection<String> MAIN_MODES = Arrays.asList("car","truck");
+    public static Collection<String> MAIN_MODES = Arrays.asList("car");
 }

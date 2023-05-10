@@ -66,7 +66,7 @@ public class RunSignals {
                     adaptiveTimeSignal(false);
                     break;
                 case 3:
-                    compareMixedTrafficSignals(false);
+                    compareTrafficSignals(false);
                     break;
                 case 4:
                     fixedTimeSignal(true);
@@ -75,7 +75,7 @@ public class RunSignals {
                     adaptiveTimeSignal(true);
                     break;
                 case 6:
-                    compareMixedTrafficSignals(true);
+                    compareTrafficSignals(true);
                 default:
                     System.out.println("You have exited");
             }
@@ -83,7 +83,7 @@ public class RunSignals {
     }
 
     static void fixedTimeSignal(boolean homogenous) throws IOException {
-        outputDirectory = "output/fixedTimeSignal/";
+        outputDirectory = "output/fixedTimeSignal_" + RUN + "/" ;
         signalController = DefaultPlanbasedSignalSystemController.IDENTIFIER;
         signalControllerFactoryClassName = DefaultPlanbasedSignalSystemController.FixedTimeFactory.class;
 
@@ -122,7 +122,7 @@ public class RunSignals {
     }
 
     static void adaptiveTimeSignal(boolean homogenous) throws IOException {
-        outputDirectory = "output/adaptiveTimeSignal/";
+        outputDirectory = "output/adaptiveTimeSignal_" + RUN + "/";
         if (homogenous) {
             signalController = LaemmerSignalController.IDENTIFIER;
             signalControllerFactoryClassName = LaemmerSignalController.LaemmerFactory.class;
@@ -166,18 +166,19 @@ public class RunSignals {
 
     }
 
-    public static void compareMixedTrafficSignals(boolean homogenous) throws IOException {
+    public static void compareTrafficSignals(boolean homogenous) throws IOException {
 
 
         // specify the path to your CSV file
-        List<String> csvPaths = Arrays.asList("input/low_demand/signal_input.csv", "input/high_demand/signal_input.csv");
+        List<String> csvPaths = Arrays.asList("input/low_demand/signal_input.csv");
         int index = 0;
         // create a CSVReader instance
         String line = "";
         String delimiter = ",";
         boolean isFirstRowRead = true;
         boolean isFirstRowWrite = true;
-        for (String csvPath: csvPaths) {
+//        for (String csvPath: csvPaths) {
+        String csvPath = csvPaths.get(1);
             try (BufferedReader br = new BufferedReader(new FileReader(csvPath))) {
                 while ((line = br.readLine()) != null) {
 
@@ -188,18 +189,19 @@ public class RunSignals {
                         continue;
                     }
                     // access the values in each column
-                    LANE_LENGTH = Double.parseDouble(values[0]);
-                    LANE_CAPACITY = Integer.parseInt(values[1]);
-                    LINK_LENGTH = Double.parseDouble(values[2]);
-                    LINK_CAPACITY = Integer.parseInt(values[3]);
-                    CYCLE = Integer.parseInt(values[4]);
-                    AGENTS_PER_LEFT_APPROACH = Integer.parseInt(values[5]);
-                    AGENTS_PER_TOP_APPROACH = Integer.parseInt(values[6]);
-                    AGENTS_PER_RIGHT_APPROACH = Integer.parseInt(values[7]);
-                    AGENTS_PER_BOTTOM_APPROACH = Integer.parseInt(values[8]);
-                    ITERATION = Integer.parseInt(values[9]);
-                    STORAGE_CAPACITY_FACTOR = Double.parseDouble(values[10]);
-                    FLOW_CAPACITY_FACTOR = Double.parseDouble(values[11]);
+                    RUN = String.valueOf(values[0]);
+                    LANE_LENGTH = Double.parseDouble(values[1]);
+                    LANE_CAPACITY = Integer.parseInt(values[2]);
+                    LINK_LENGTH = Double.parseDouble(values[3]);
+                    LINK_CAPACITY = Integer.parseInt(values[4]);
+                    CYCLE = Integer.parseInt(values[5]);
+                    AGENTS_PER_LEFT_APPROACH = Integer.parseInt(values[6]);
+                    AGENTS_PER_TOP_APPROACH = Integer.parseInt(values[7]);
+                    AGENTS_PER_RIGHT_APPROACH = Integer.parseInt(values[8]);
+                    AGENTS_PER_BOTTOM_APPROACH = Integer.parseInt(values[9]);
+                    ITERATION = Integer.parseInt(values[10]);
+                    STORAGE_CAPACITY_FACTOR = Double.parseDouble(values[11]);
+                    FLOW_CAPACITY_FACTOR = Double.parseDouble(values[12]);
 
                     addToBothLists(fixedList, adaptiveList, String.valueOf(LANE_LENGTH));
                     addToBothLists(fixedList, adaptiveList, String.valueOf(LANE_CAPACITY));
@@ -278,7 +280,6 @@ public class RunSignals {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
 
         fixedWriter.close();
         adaptiveWriter.close();

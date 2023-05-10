@@ -38,10 +38,10 @@ public class CreateConfig {
         config.planCalcScore().setWriteExperiencedPlans(true);
 
 
-        config.travelTimeCalculator().setMaxTime(5 * 60 * 60);
+        config.travelTimeCalculator().setMaxTime(24 * 60 * 60);
 
         config.qsim().setStartTime(0);
-        config.qsim().setEndTime(5 * 60 * 60);
+        config.qsim().setEndTime(24 * 60 * 60);
         //config.qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
         config.qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.withHoles);
         config.qsim().setMainModes(SignalUtils.MAIN_MODES);
@@ -98,10 +98,10 @@ public class CreateConfig {
         car.setConstant(-0.5);
         config.planCalcScore().addModeParams(car);
 
-        PlanCalcScoreConfigGroup.ModeParams truck = new PlanCalcScoreConfigGroup.ModeParams("truck"); // using default for them.
-        truck.setConstant(-1.0);
-        truck.setMarginalUtilityOfTraveling(-7.0);
-        config.planCalcScore().addModeParams(truck);
+//        PlanCalcScoreConfigGroup.ModeParams truck = new PlanCalcScoreConfigGroup.ModeParams("truck"); // using default for them.
+//        truck.setConstant(-1.0);
+//        truck.setMarginalUtilityOfTraveling(-7.0);
+//        config.planCalcScore().addModeParams(truck);
 
         if (adaptive) {
             LaemmerConfigGroup laemmerConfigGroup = ConfigUtils.addOrGetModule(config, LaemmerConfigGroup.GROUP_NAME, LaemmerConfigGroup.class);
