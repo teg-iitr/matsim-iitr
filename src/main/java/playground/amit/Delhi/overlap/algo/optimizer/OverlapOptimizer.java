@@ -1,6 +1,7 @@
 package playground.amit.Delhi.overlap.algo.optimizer;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.core.controler.OutputDirectoryLogging;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.pt2matsim.gtfs.GtfsFeed;
@@ -20,7 +21,8 @@ import java.util.*;
  */
 public class OverlapOptimizer {
 
-    public static final Logger LOG = Logger.getLogger(OverlapOptimizer.class);
+    public static final Logger LOG = LogManager.getLogger(OverlapOptimizer.class);
+    public static int MIN_DEVICES;
 
 //    public enum OptimizingElements{vehicle, GTFS}
 
@@ -33,8 +35,9 @@ public class OverlapOptimizer {
     private final SigmoidFunction sigmoidFunction;
     private double totalNetworkRouteLength= Double.NaN;
 
-    public OverlapOptimizer(int timebinSize, String outputPath, SigmoidFunction sigmoidFunction){
+    public OverlapOptimizer(int timebinSize, String outputPath, SigmoidFunction sigmoidFunction, int minDevicesPerTimeBin){
       this.spatialOverlap = new SpatialOverlap(timebinSize);
+      MIN_DEVICES = minDevicesPerTimeBin;
       this.outputPath = outputPath;
       this.sigmoidFunction = sigmoidFunction;
       String date = new SimpleDateFormat("dd-MM-yy").format(Calendar.getInstance().getTime());

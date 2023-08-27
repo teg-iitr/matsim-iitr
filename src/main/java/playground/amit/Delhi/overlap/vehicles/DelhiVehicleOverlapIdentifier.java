@@ -9,13 +9,22 @@ import playground.amit.utils.FileUtils;
  */
 
 public class DelhiVehicleOverlapIdentifier {
+
+
+
     public static void main(String[] args) {
         String GTFS_PATH = FileUtils.SVN_PROJECT_DATA_DRIVE+"\\delhi\\gtfs_files\\\\12052021\\GTFS_DIMTS_12052021.zip";
         String vehicles_file = FileUtils.SVN_PROJECT_DATA_DRIVE+"\\delhi\\dimts\\Mar2021\\VehicleSampleData.txt";
+
         int timebinSize = 24*60*60;
+        int freqDataPointsDevice = 1;
+        int minDataPointsPerTimeBin = 40; // configurable
+        int minDevicesPerTimeBin = (int) Math.ceil( (freqDataPointsDevice* timebinSize) / minDataPointsPerTimeBin );
+
+
         String outFilePath = FileUtils.SVN_PROJECT_DATA_DRIVE+"\\delhi\\gtfs_files\\02122021\\vehicles_overlap_prob_24hTimebin_excludingSelfTrips\\";
 
-        OverlapOptimizer optimizer = new OverlapOptimizer(timebinSize, outFilePath, SigmoidFunction.BipolarSigmoid);
+        OverlapOptimizer optimizer = new OverlapOptimizer(timebinSize, outFilePath, SigmoidFunction.BipolarSigmoid, minDevicesPerTimeBin);
         optimizer.initializeWithGTFSAndVehicles(GTFS_PATH, vehicles_file);
 //		optimizer.run(10);
         optimizer.optimizeTillProb(0.0);
