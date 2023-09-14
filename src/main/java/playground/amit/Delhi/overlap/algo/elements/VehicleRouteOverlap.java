@@ -11,6 +11,7 @@ import java.util.*;
 public class VehicleRouteOverlap {
     private final String vehicleNumber;
     private final Map<String, List<Id<Trip>>> routeName2Trips = new HashMap<>(); // a vehicle may be serving multiple routes (eg., up and down)
+    private final Set<TripOverlap> tripOverlapSet = new HashSet<>();
     private final Map<Id<Trip>, Map<SigmoidFunction, Double>> tripId2Probs = new HashMap<>();
     private final Map<SigmoidFunction, Double> routeProb = new HashMap<>();
 
@@ -31,11 +32,19 @@ public class VehicleRouteOverlap {
         return  routeProb;
     }
 
-    public void addProbsToTrip(String routeName, Id<Trip> tripId, Map<SigmoidFunction, Double> probs ){
+    public void addProbsToTrip(String routeName, TripOverlap tripOverlap, Map<SigmoidFunction, Double> probs ){
         this.routeName2Trips.computeIfAbsent(routeName, k -> new ArrayList<>());
+        this.tripOverlapSet.add(tripOverlap);
+        this.routeName2Trips.get(routeName).add(tripOverlap.getTripId());
+        this.tripId2Probs.put(tripOverlap.getTripId(), probs);
+    }
 
-        this.routeName2Trips.get(routeName).add(tripId);
-        this.tripId2Probs.put(tripId, probs);
+    public boolean isAllTripsHavingDataPointsMoreThanThreshold(int threshold){
+        for(TripOverlap to : this.tripOverlapSet){
+            int count = to.getSeg2overlaps().values().stream().mapToInt(SegmentalOverlap::getCount).sum();
+            if (count<threshold) return false;
+        }
+        return true;
     }
 
     public int getNumberOfTrips(){

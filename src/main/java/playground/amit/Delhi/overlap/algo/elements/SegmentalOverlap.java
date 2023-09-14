@@ -56,7 +56,8 @@ public class SegmentalOverlap {
     }
 
     public int getCount() {
-        return Math.min(counter - OverlapOptimizer.MIN_DEVICES, 1);
+//        return Math.min(counter - OverlapOptimizer.MIN_DEVICES, 1);
+        return counter;
     }
 
     public Tuple<String, String> getSelfTripVehicleRoute() {

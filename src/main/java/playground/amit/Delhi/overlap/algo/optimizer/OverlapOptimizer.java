@@ -22,7 +22,7 @@ import java.util.*;
 public class OverlapOptimizer {
 
     public static final Logger LOG = LogManager.getLogger(OverlapOptimizer.class);
-    public static int MIN_DEVICES;
+    private int minDataPointsPerTimeBin;
 
 //    public enum OptimizingElements{vehicle, GTFS}
 
@@ -37,7 +37,7 @@ public class OverlapOptimizer {
 
     public OverlapOptimizer(int timebinSize, String outputPath, SigmoidFunction sigmoidFunction, int minDevicesPerTimeBin){
       this.spatialOverlap = new SpatialOverlap(timebinSize);
-      MIN_DEVICES = minDevicesPerTimeBin;
+      minDataPointsPerTimeBin = minDevicesPerTimeBin;
       this.outputPath = outputPath;
       this.sigmoidFunction = sigmoidFunction;
       String date = new SimpleDateFormat("dd-MM-yy").format(Calendar.getInstance().getTime());
@@ -145,7 +145,10 @@ public class OverlapOptimizer {
         int highestTrips = highestProbRoutes.get(0).getNumberOfTrips();
         Map<String, Double> removedVehicles = new LinkedHashMap<>();
         for (VehicleRouteOverlap vro : highestProbRoutes) {
-            if (vro.getNumberOfTrips() == highestTrips) removedVehicles.put(vro.getVehicleNumber(), vro.getVRProb().get(sigmoidFunction));
+            if (vro.isAllTripsHavingDataPointsMoreThanThreshold(this.minDataPointsPerTimeBin) &&
+                    vro.getNumberOfTrips() == highestTrips) {
+                removedVehicles.put(vro.getVehicleNumber(), vro.getVRProb().get(sigmoidFunction));
+            }
             else break;
         }
         return removedVehicles;
@@ -155,7 +158,7 @@ public class OverlapOptimizer {
         for (TripOverlap to : spatialOverlap.getTrip2tripOverlap().values()) {
             String vehicleNumber = to.getVehicleNumber();
             VehicleRouteOverlap vrOverlap = vehicleRoute2VROverlpas.getOrDefault(vehicleNumber, new VehicleRouteOverlap(vehicleNumber));
-            vrOverlap.addProbsToTrip(to.getRouteLongName(), to.getTripId(), to.getSigmoidFunction2Probs());
+            vrOverlap.addProbsToTrip(to.getRouteLongName(), to, to.getSigmoidFunction2Probs());
             vehicleRoute2VROverlpas.put(vehicleNumber, vrOverlap);
         }
     }
