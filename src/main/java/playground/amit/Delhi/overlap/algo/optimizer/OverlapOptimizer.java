@@ -81,16 +81,18 @@ public class OverlapOptimizer {
 
         OverlapOptimizer.LOG.info("Evaluating overlaps and overlaps probabilities to a file ...");
         spatialOverlap.collectOverlaps();
+        getAllSegmentsLength();
         writeStatsToSummaryFile("-", 0);
         writeIterationFiles();
     }
 
     public void optimizeTillVehicles(int requiredVehicleRoutes){
         int vehiclesRemaining = 0;
+        OverlapOptimizer.LOG.info("\t\t Optimizing till the required number of vehicle routes are reached.");
         do {
             OverlapOptimizer.LOG.info("\t\tRunning iteration\t"+this.iteration);
             Map<String, Double> vehicles2Remove = getLeastProbVehicle();
-            if (vehicles2Remove==null) break;
+            if (vehicles2Remove==null || vehicles2Remove.isEmpty() ) break;
             for (String s : vehicles2Remove.keySet()) {
                 OverlapOptimizer.LOG.info("Removing vehicle route "+s);
                 remove(s, vehicles2Remove.get(s));
@@ -103,6 +105,7 @@ public class OverlapOptimizer {
 
     public void optimizeTillProb(double prob){
         double removedVehicleProb = 1.0;
+        OverlapOptimizer.LOG.info("\t\t Optimizing till the probability of removal reaches to the desired threshold.");
         do {
             OverlapOptimizer.LOG.info("\t\tRunning iteration\t"+this.iteration);
             Map<String, Double> vehicles2Remove = getLeastProbVehicle();
@@ -114,6 +117,24 @@ public class OverlapOptimizer {
                 removedVehicleProb = vehicles2Remove.get(s);
             }
         } while (removedVehicleProb>=prob);
+        done();
+    }
+
+    public void optimizeTillCoverage(double thresholdCoveragePct){
+        double coverageNow = getOverlappingNetworkLength()/(1000*this.totalNetworkRouteLength);
+        OverlapOptimizer.LOG.info("\t\t Optimizing till the coverage reaches to the desired threshold, i.e., "+thresholdCoveragePct);
+        while (coverageNow < thresholdCoveragePct) {
+            OverlapOptimizer.LOG.info("Current coverage ratio is "+coverageNow);
+            OverlapOptimizer.LOG.info("\t\tRunning iteration\t"+this.iteration);
+            Map<String, Double> vehicles2Remove = getLeastProbVehicle();
+            if (vehicles2Remove==null || vehicles2Remove.isEmpty()) break;
+            for (String s : vehicles2Remove.keySet()) {
+                OverlapOptimizer.LOG.info("Removing vehicle route "+s);
+                remove(s, vehicles2Remove.get(s));
+                writeIterationFiles();
+                coverageNow = getOverlappingNetworkLength()/(1000*this.totalNetworkRouteLength);
+            }
+        }
         done();
     }
 
@@ -177,12 +198,12 @@ public class OverlapOptimizer {
     /**
      * This represents the network route length (not total route length).
      */
-    public double getAllSegmentsLength(){
+    private void getAllSegmentsLength(){
         if (Double.isNaN(this.totalNetworkRouteLength)){
             this.totalNetworkRouteLength= spatialOverlap.getCollectedSegments().keySet().stream()
                     .mapToDouble(Segment::getLength).sum();
         }
-        return this.totalNetworkRouteLength;
+//        return this.totalNetworkRouteLength;
     }
 
     private String getItrDir(){
@@ -204,15 +225,14 @@ public class OverlapOptimizer {
 
     private void writeStatsToSummaryFile(String removedVehicle, double removalProb){
         double overlapLen = getOverlappingNetworkLength()/1000.;
-        double totalTripLength = getAllSegmentsLength()/1000.;
         String out = this.iteration+"\t"+
                 removedVehicle+"\t"+
                 removalProb+"\t"+
                 this.spatialOverlap.getVehicleRoute2TripsIds().size()+"\t"+
                 this.spatialOverlap.getTrip2tripOverlap().size()+"\t"+
                 overlapLen+"\t"+
-                totalTripLength + "\t" +
-                overlapLen/totalTripLength +
+                this.totalNetworkRouteLength + "\t" +
+                overlapLen/this.totalNetworkRouteLength +
                 "\n";
         writeToSummaryFile(out);
     }
@@ -261,7 +281,7 @@ public class OverlapOptimizer {
     }
 
     public void writeVehicleRouteProbs(String outputFolder){
-        Map<String, TripOverlap> trip2tripOverlap = spatialOverlap.getTrip2tripOverlap();
+//        Map<String, TripOverlap> trip2tripOverlap = spatialOverlap.getTrip2tripOverlap();
         Map<String, VehicleRouteOverlap> vehicleRoute2VROverlpas = new HashMap<>();
 
         processTripOverlaps(vehicleRoute2VROverlpas);
