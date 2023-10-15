@@ -17,15 +17,14 @@ public class DelhiVehicleOverlapIdentifier {
         String vehicles_file = FileUtils.SVN_PROJECT_DATA_DRIVE+"\\delhi\\dimts\\Mar2021\\VehicleSampleData.txt";
 
         int timebinSize = 24*60*60;
-        int freqDataPointsDevice = 1;
-        int minDataPointsPerTimeBin = 40; // configurable
-        int minDevicesPerTimeBin = (int) Math.ceil( (freqDataPointsDevice* timebinSize) / minDataPointsPerTimeBin );
+        int minDevicesPerTimeBin = 40;
 
 
         String outFilePath = FileUtils.SVN_PROJECT_DATA_DRIVE+"\\delhi\\gtfs_files\\02122021\\vehicles_overlap_prob_24hTimebin_excludingSelfTrips\\";
 
         OverlapOptimizer optimizer = new OverlapOptimizer(timebinSize, outFilePath, SigmoidFunction.BipolarSigmoid, minDevicesPerTimeBin);
         optimizer.initializeWithGTFSAndVehicles(GTFS_PATH, vehicles_file);
+//      optimizer.initializeWithGTFSAndVehicles(GTFS_PATH, vehicles_file, excluded_vehicles_file);
 //		optimizer.run(10);
         optimizer.optimizeTillProb(0.0);
 //		optimizer.optimizeTillRoutes(50);

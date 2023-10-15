@@ -17,11 +17,48 @@ public class GTFSVehicleIntegrator {
 
     private final Map<String, VehicleDetails> vehicleNumberToVehicleDetails = new HashMap<>();
     private final Map<String, List<VehicleDetails>> routeId2VehicleDetails = new HashMap<>();
+    private final Set<String> excludedVehicles = new HashSet<>(); // cant install device due to design/ warranty issues, Oct'23
 
     public static final double tripStartThreshold = 600.;
 
+    /**
+     *
+     * @param vehicle_file tab separated fields: Depot Name	Vehicle No.	Route Name	Origin	Sch. Trip Start	Destination	Sch. Trip End
+     * @param excluded_vehicles_file the first column should have the vehicle no which are to be excluded.
+     */
+    public GTFSVehicleIntegrator(String vehicle_file, String excluded_vehicles_file){
+        if (excluded_vehicles_file!=null) {
+            excludeVehicles(excluded_vehicles_file);
+        }
+        readVehicleFile(vehicle_file); // the file should have vehicle number, route number, start time
+    }
+
+    /**
+     *
+     * @param vehicle_file tab separated fields: Depot Name	Vehicle No.	Route Name	Origin	Sch. Trip Start	Destination	Sch. Trip End
+     */
     public GTFSVehicleIntegrator(String vehicle_file){
         readVehicleFile(vehicle_file); // the file should have vehicle number, route number, start time
+    }
+
+    private void excludeVehicles(String excluded_vehicles_file){
+        try(BufferedReader reader = IOUtils.getBufferedReader(excluded_vehicles_file)){
+            String line = reader.readLine();
+            boolean header = true;
+            while(line!=null){
+                if(header){
+                    header = false;
+                } else{
+                    // Vehicle No.
+                    String [] parts = line.split("\t");
+                    String vehicleNumber = parts[0]; //TODO assuming that the first column is having vehicle numbers
+                    this.excludedVehicles.add(vehicleNumber);
+                }
+                line = reader.readLine();
+            }
+        } catch (IOException e){
+            throw new RuntimeException("The file is not read. Reason "+e);
+        }
     }
 
     public String keepTheTrip(double tripStartTime, String routeName){
@@ -60,26 +97,29 @@ public class GTFSVehicleIntegrator {
                     // Depot Name	Vehicle No.	Route Name	Origin	Sch. Trip Start	Destination	Sch. Trip End
                     String [] parts = line.split("\t");
                     String vehicleNumber = parts[1];
-                    VehicleDetails vehicleDetails = this.vehicleNumberToVehicleDetails.get(vehicleNumber);
-                    if (vehicleDetails==null){
-                        vehicleDetails = new VehicleDetails(parts[0], vehicleNumber);
+                    if (this.excludedVehicles.contains(vehicleNumber)) continue;
+                    else{
+                        VehicleDetails vehicleDetails = this.vehicleNumberToVehicleDetails.get(vehicleNumber);
+                        if (vehicleDetails==null){
+                            vehicleDetails = new VehicleDetails(parts[0], vehicleNumber);
+                        }
+                        List<Double> startTimes = vehicleDetails.getRouteNamesToStartTimes().getOrDefault(parts[2], new ArrayList<>());
+                        startTimes.add(toSeconds(parts[4]));
+                        vehicleDetails.getRouteNamesToStartTimes().put(parts[2], startTimes);
+
+                        List<Double> endTimes = vehicleDetails.getRouteNamesToEndTimes().getOrDefault(parts[2], new ArrayList<>());
+                        endTimes.add(toSeconds(parts[6]));
+                        vehicleDetails.getRouteNamesToEndTimes().put(parts[2], endTimes);
+
+                        this.vehicleNumberToVehicleDetails.put(vehicleNumber, vehicleDetails);
+
+                        List<VehicleDetails> vds = this.routeId2VehicleDetails.get(parts[2]);
+                        if(vds==null){
+                            vds = new ArrayList<>();
+                        }
+                        vds.add(vehicleDetails);
+                        this.routeId2VehicleDetails.put(parts[2], vds);
                     }
-                    List<Double> startTimes = vehicleDetails.getRouteNamesToStartTimes().getOrDefault(parts[2], new ArrayList<>());
-                    startTimes.add(toSeconds(parts[4]));
-                    vehicleDetails.getRouteNamesToStartTimes().put(parts[2], startTimes);
-
-                    List<Double> endTimes = vehicleDetails.getRouteNamesToEndTimes().getOrDefault(parts[2], new ArrayList<>());
-                    endTimes.add(toSeconds(parts[6]));
-                    vehicleDetails.getRouteNamesToEndTimes().put(parts[2], endTimes);
-
-                    this.vehicleNumberToVehicleDetails.put(vehicleNumber, vehicleDetails);
-
-                    List<VehicleDetails> vds = this.routeId2VehicleDetails.get(parts[2]);
-                    if(vds==null){
-                        vds = new ArrayList<>();
-                    }
-                    vds.add(vehicleDetails);
-                    this.routeId2VehicleDetails.put(parts[2], vds);
                 }
                 line = reader.readLine();
             }

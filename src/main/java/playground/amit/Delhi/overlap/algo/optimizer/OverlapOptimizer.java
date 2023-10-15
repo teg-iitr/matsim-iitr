@@ -55,11 +55,15 @@ public class OverlapOptimizer {
     }
 
     public void initializeWithGTFSAndVehicles(String gtfs_path, String vehicle_file){
+        initializeWithGTFSAndVehicles(gtfs_path, vehicle_file, null);
+    }
+
+    public void initializeWithGTFSAndVehicles(String gtfs_path, String vehicle_file, String excluded_vehicles_file){
         writeToSummaryFile("iterationNr\tremovedVehicle\tremovedVehicleProb\tnoOfRoutes\tnoOfTrips\toverlappingSegmentsLength_km\tallsegmentsLength_km\toverlappingLengthRatio\n");
         GtfsFeed gtfsFeed = new GtfsFeedImpl(gtfs_path);
 
         if(vehicle_file!=null){
-            GTFSVehicleIntegrator gtfsVehicleIntegrator = new GTFSVehicleIntegrator(vehicle_file);
+            GTFSVehicleIntegrator gtfsVehicleIntegrator = new GTFSVehicleIntegrator(vehicle_file,excluded_vehicles_file);
             // exclude the trips if they are not served by the required vehicle fleet.
             // exclude trips which have no departure time details.
             gtfsFeed.getTrips().values().stream().filter(e -> e.getStopTimes().size() > 0).forEach(e -> {
@@ -102,7 +106,7 @@ public class OverlapOptimizer {
         do {
             OverlapOptimizer.LOG.info("\t\tRunning iteration\t"+this.iteration);
             Map<String, Double> vehicles2Remove = getLeastProbVehicle();
-            if (vehicles2Remove==null) break;
+            if (vehicles2Remove==null || vehicles2Remove.isEmpty()) break;
             for (String s : vehicles2Remove.keySet()) {
                 OverlapOptimizer.LOG.info("Removing vehicle route "+s);
                 remove(s, vehicles2Remove.get(s));
