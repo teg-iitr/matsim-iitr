@@ -118,9 +118,9 @@ public class OverlapOptimizer {
     }
 
     public void optimizeTillCoverage(double thresholdCoverage){
-        double coverageNow = getOverlappingNetworkLength()/(1000*this.totalNetworkRouteLength);
+        double coverageNow = getOverlappingNetworkLength()/(this.totalNetworkRouteLength);
         OverlapOptimizer.LOG.info("\t\t Optimizing till the coverage reaches to the desired threshold, i.e., "+thresholdCoverage);
-        while (coverageNow < thresholdCoverage) {
+        while (coverageNow > thresholdCoverage) {
             OverlapOptimizer.LOG.info("Current coverage ratio is "+coverageNow);
             OverlapOptimizer.LOG.info("\t\tRunning iteration\t"+this.iteration);
             Map<String, Double> vehicles2Remove = getLeastProbVehicle();
@@ -129,7 +129,7 @@ public class OverlapOptimizer {
                 OverlapOptimizer.LOG.info("Removing vehicle route "+s);
                 remove(s, vehicles2Remove.get(s));
                 writeIterationFiles();
-                coverageNow = getOverlappingNetworkLength()/(1000*this.totalNetworkRouteLength);
+                coverageNow = getOverlappingNetworkLength()/(this.totalNetworkRouteLength);
             }
         }
         done();
@@ -200,7 +200,6 @@ public class OverlapOptimizer {
             this.totalNetworkRouteLength= spatialOverlap.getCollectedSegments().keySet().stream()
                     .mapToDouble(Segment::getLength).sum();
         }
-//        return this.totalNetworkRouteLength;
     }
 
     private String getItrDir(){
@@ -221,14 +220,14 @@ public class OverlapOptimizer {
     }
 
     private void writeStatsToSummaryFile(String removedVehicle, double removalProb){
-        double overlapLen = getOverlappingNetworkLength()/1000.;
+        double overlapLen = getOverlappingNetworkLength();
         String out = this.iteration+"\t"+
                 removedVehicle+"\t"+
                 removalProb+"\t"+
                 this.spatialOverlap.getVehicleRoute2TripsIds().size()+"\t"+
                 this.spatialOverlap.getTrip2tripOverlap().size()+"\t"+
-                overlapLen+"\t"+
-                this.totalNetworkRouteLength + "\t" +
+                overlapLen/1000.+"\t"+
+                this.totalNetworkRouteLength/1000. + "\t" +
                 overlapLen/this.totalNetworkRouteLength +
                 "\n";
         writeToSummaryFile(out);
@@ -331,7 +330,7 @@ public class OverlapOptimizer {
 		writeVehicleRouteProbs(outputFolder);
     }
 
-    public void done() {
+    private void done() {
         OutputDirectoryLogging.closeOutputDirLogging();
         try {
             this.writer.close();

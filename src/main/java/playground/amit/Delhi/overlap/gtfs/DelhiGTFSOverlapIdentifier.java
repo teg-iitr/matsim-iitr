@@ -22,7 +22,6 @@ public class DelhiGTFSOverlapIdentifier {
 //		optimizer.run(10);
 		optimizer.optimizeTillProb(0.0);
 //		optimizer.optimizeTillRoutes(50);
-//		optimizer.done();
 		OverlapOptimizer.LOG.info("Completed.");
 	}
 }

@@ -46,8 +46,6 @@ public class RunVehicleOverlapIdentifier {
          */
         optimizer.optimizeTillVehicles(40);
 
-        optimizer.done();
-
         OverlapOptimizer.LOG.info("Completed.");
     }
 }
