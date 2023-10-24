@@ -22,10 +22,7 @@ import java.util.*;
 public class OverlapOptimizer {
 
     public static final Logger LOG = LogManager.getLogger(OverlapOptimizer.class);
-    private int minDataPointsPerTimeBin;
-
-//    public enum OptimizingElements{vehicle, GTFS}
-
+    private final int minDataPointsPerTimeBin;
     private final SpatialOverlap spatialOverlap;
     private final String outputPath;
     private final String suffix;
@@ -120,10 +117,10 @@ public class OverlapOptimizer {
         done();
     }
 
-    public void optimizeTillCoverage(double thresholdCoveragePct){
+    public void optimizeTillCoverage(double thresholdCoverage){
         double coverageNow = getOverlappingNetworkLength()/(1000*this.totalNetworkRouteLength);
-        OverlapOptimizer.LOG.info("\t\t Optimizing till the coverage reaches to the desired threshold, i.e., "+thresholdCoveragePct);
-        while (coverageNow < thresholdCoveragePct) {
+        OverlapOptimizer.LOG.info("\t\t Optimizing till the coverage reaches to the desired threshold, i.e., "+thresholdCoverage);
+        while (coverageNow < thresholdCoverage) {
             OverlapOptimizer.LOG.info("Current coverage ratio is "+coverageNow);
             OverlapOptimizer.LOG.info("\t\tRunning iteration\t"+this.iteration);
             Map<String, Double> vehicles2Remove = getLeastProbVehicle();
@@ -327,44 +324,6 @@ public class OverlapOptimizer {
         OverlapOptimizer.LOG.info("Writing overlaps to "+filename+" completed.");
     }
 
-//    private void writeSpecificRouteOverlapDetails(String outFilePath, String suffix){
-//        Map<String, TripOverlap> trip2tripOverlap = spatialOverlap.getTrip2tripOverlap();
-//        Map<String, VehicleRouteOverlap> route2VROverlpas = new HashMap<>();
-//
-//        for (TripOverlap to: trip2tripOverlap.values()) {
-//            String routeId = to.getRouteId();
-//            VehicleRouteOverlap vrOverlap = route2VROverlpas.getOrDefault(routeId, new VehicleRouteOverlap(routeId));
-//            vrOverlap.getTripId2Probs().put(to.getTripId(), to.getSigmoidFunction2Probs());
-//            route2VROverlpas.put(routeId, vrOverlap);
-//        }
-//
-//        System.out.println("Wrinting complete details for route IDs 362, 281 (prob =1, overlapping trips = 19)...");
-//        List<String> routeIds = Arrays.asList("362","281");
-//        for (String routeId : routeIds) {
-//            String file2 = outFilePath+"completeDetails_route_"+routeId+"_"+suffix+".txt";
-//            try (BufferedWriter writer  = IOUtils.getBufferedWriter(file2)) {
-//                writer.write("routeId\ttripIds\t" +
-//                        "seg_stopA_lat\tseg_stopA_lon\t" +
-//                        "seg_stopB_lat\tseg_stopB_lon\t" +
-//                        "overlap_count\toverlappingTrips\toverlappingRoutes\n");
-//                VehicleRouteOverlap vr = route2VROverlpas.get(routeId);
-//                for(Id<Trip> tripId : vr.getTripId2Probs().keySet()) {
-//                    TripOverlap tripOverlap = trip2tripOverlap.get(tripId.toString());
-//                    for (Segment seg: tripOverlap.getSegments()){
-//                        SegmentalOverlap so = tripOverlap.getSeg2overlaps().get(seg);
-//                        writer.write(routeId+"\t"+tripId+"\t"+seg.getStopA().getLat()+"\t"+seg.getStopA().getLon()+"\t");
-//                        writer.write(seg.getStopB().getLat()+"\t"+seg.getStopB().getLon()+"\t");
-//                        writer.write(so.getCount()+"\t");
-//                        writer.write(so.getOverlappingTripIds()+"\t");
-//                        writer.write(so.getOverlappingRouteIds()+"\n");
-//                    }
-//                }
-//            }catch (IOException e) {
-//                throw new RuntimeException("Data is not written. Reason "+e);
-//            }
-//        }
-//    }
-
     public void writeIterationFiles() {
         String outputFolder = getItrDir();
         writeSegmentalOverlapCountsProbs(outputFolder);
@@ -372,7 +331,7 @@ public class OverlapOptimizer {
 		writeVehicleRouteProbs(outputFolder);
     }
 
-    private void done() {
+    public void done() {
         OutputDirectoryLogging.closeOutputDirLogging();
         try {
             this.writer.close();
