@@ -30,7 +30,16 @@ public class OverlapOptimizer {
     private final BufferedWriter writer;
     // required for optimization
     private final SigmoidFunction sigmoidFunction;
+    /**
+     * this represents the total line/ route length, which includes the overlapping length
+     */
+    private double totalRouteLength = Double.NaN;
+
+    /**
+     * this represents the total network length, which excludes the overlapping length
+     */
     private double totalNetworkRouteLength= Double.NaN;
+    private double currentNetworkLengthCoverage = Double.NaN;
 
     public OverlapOptimizer(int timebinSize, String outputPath, SigmoidFunction sigmoidFunction, int minDevicesPerTimeBin){
       this.spatialOverlap = new SpatialOverlap(timebinSize);
@@ -56,7 +65,7 @@ public class OverlapOptimizer {
     }
 
     public void initializeWithGTFSAndVehicles(String gtfs_path, String vehicle_file, String excluded_vehicles_file){
-        writeToSummaryFile("iterationNr\tremovedVehicle\tremovedVehicleProb\tnoOfRoutes\tnoOfTrips\toverlappingSegmentsLength_km\tallsegmentsLength_km\toverlappingLengthRatio\n");
+        writeToSummaryFile("iterationNr\tremovedVehicle\tremovedVehicleProb\tnoOfRoutes\tnoOfTrips\toverlappingSegmentsLength_km\tallsegmentsLength_km\toverlappingLengthRatio\ttotalRouteLegnthExcludingOverlap\tlengthCoverageRatio\n");
         GtfsFeed gtfsFeed = new GtfsFeedImpl(gtfs_path);
 
         if(vehicle_file!=null){
@@ -78,7 +87,11 @@ public class OverlapOptimizer {
 
         OverlapOptimizer.LOG.info("Evaluating overlaps and overlaps probabilities to a file ...");
         spatialOverlap.collectOverlaps();
-        getAllSegmentsLength();
+
+
+        this.totalRouteLength = getSumOfCurrentSegmentsLength(); // at this instance, no segments are removed.
+        this.totalNetworkRouteLength = this.totalRouteLength - getSumOfOverlappingSegmentsLength();
+
         writeStatsToSummaryFile("-", 0);
         writeIterationFiles();
     }
@@ -118,9 +131,9 @@ public class OverlapOptimizer {
     }
 
     public void optimizeTillCoverage(double thresholdCoverage){
-        double coverageNow = getOverlappingNetworkLength()/(this.totalNetworkRouteLength);
+        this.currentNetworkLengthCoverage = getRetainedNetworkLengthCoverage();
         OverlapOptimizer.LOG.info("\t\t Optimizing till the coverage reaches to the desired threshold, i.e., "+thresholdCoverage);
-        while (coverageNow > thresholdCoverage) {
+        while (this.currentNetworkLengthCoverage > thresholdCoverage) {
             OverlapOptimizer.LOG.info("Current coverage ratio is "+coverageNow);
             OverlapOptimizer.LOG.info("\t\tRunning iteration\t"+this.iteration);
             Map<String, Double> vehicles2Remove = getLeastProbVehicle();
@@ -129,7 +142,7 @@ public class OverlapOptimizer {
                 OverlapOptimizer.LOG.info("Removing vehicle route "+s);
                 remove(s, vehicles2Remove.get(s));
                 writeIterationFiles();
-                coverageNow = getOverlappingNetworkLength()/(this.totalNetworkRouteLength);
+                this.currentNetworkLengthCoverage = getRetainedNetworkLengthCoverage();
             }
         }
         done();
@@ -185,21 +198,21 @@ public class OverlapOptimizer {
         }
     }
 
-    public double getOverlappingNetworkLength(){
+    public double getRetainedNetworkLengthCoverage(){
+        double currentRetainedRouteLength = getSumOfCurrentSegmentsLength() - getSumOfOverlappingSegmentsLength();
+        return currentRetainedRouteLength/ this.totalNetworkRouteLength;
+    }
+
+    private double getSumOfCurrentSegmentsLength() {
+        return spatialOverlap.getCollectedSegments().keySet().stream()
+                .mapToDouble(Segment::getLength).sum();
+    }
+
+    public double getSumOfOverlappingSegmentsLength(){
         return spatialOverlap.getCollectedSegments().values()
                 .stream()
                 .filter(so -> so.getCount() > 1.)
                 .mapToDouble(so -> so.getSegment().getLength()).sum();
-    }
-
-    /**
-     * This represents the network route length (not total route length).
-     */
-    private void getAllSegmentsLength(){
-        if (Double.isNaN(this.totalNetworkRouteLength)){
-            this.totalNetworkRouteLength= spatialOverlap.getCollectedSegments().keySet().stream()
-                    .mapToDouble(Segment::getLength).sum();
-        }
     }
 
     private String getItrDir(){
@@ -220,15 +233,17 @@ public class OverlapOptimizer {
     }
 
     private void writeStatsToSummaryFile(String removedVehicle, double removalProb){
-        double overlapLen = getOverlappingNetworkLength();
+        double overlapLen = getSumOfOverlappingSegmentsLength();
         String out = this.iteration+"\t"+
                 removedVehicle+"\t"+
                 removalProb+"\t"+
                 this.spatialOverlap.getVehicleRoute2TripsIds().size()+"\t"+
                 this.spatialOverlap.getTrip2tripOverlap().size()+"\t"+
                 overlapLen/1000.+"\t"+
-                this.totalNetworkRouteLength/1000. + "\t" +
-                overlapLen/this.totalNetworkRouteLength +
+                this.totalRouteLength /1000. + "\t" +
+                overlapLen/this.totalRouteLength + "\t" +
+                this.totalNetworkRouteLength + "\t" +
+                this.currentNetworkLengthCoverage +
                 "\n";
         writeToSummaryFile(out);
     }
