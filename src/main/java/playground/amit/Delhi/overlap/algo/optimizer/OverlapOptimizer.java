@@ -65,7 +65,7 @@ public class OverlapOptimizer {
     }
 
     public void initializeWithGTFSAndVehicles(String gtfs_path, String vehicle_file, String excluded_vehicles_file){
-        writeToSummaryFile("iterationNr\tremovedVehicle\tremovedVehicleProb\tnoOfRoutes\tnoOfTrips\toverlappingSegmentsLength_km\tallsegmentsLength_km\toverlappingLengthRatio\ttotalRouteLegnthExcludingOverlap\tlengthCoverageRatio\n");
+        writeToSummaryFile("iterationNr\tremovedVehicle\tremovedVehicleProb\tnoOfRoutes\tnoOfTrips\toverlappingSegmentsLength_km\tallsegmentsLength_km\toverlappingLengthRatio\ttotalRouteLengthExcludingOverlap_km\tlengthCoverageRatio\n");
         GtfsFeed gtfsFeed = new GtfsFeedImpl(gtfs_path);
 
         if(vehicle_file!=null){
@@ -134,7 +134,7 @@ public class OverlapOptimizer {
         this.currentNetworkLengthCoverage = getRetainedNetworkLengthCoverage();
         OverlapOptimizer.LOG.info("\t\t Optimizing till the coverage reaches to the desired threshold, i.e., "+thresholdCoverage);
         while (this.currentNetworkLengthCoverage > thresholdCoverage) {
-            OverlapOptimizer.LOG.info("Current coverage ratio is "+coverageNow);
+            OverlapOptimizer.LOG.info("Current coverage ratio is "+this.currentNetworkLengthCoverage);
             OverlapOptimizer.LOG.info("\t\tRunning iteration\t"+this.iteration);
             Map<String, Double> vehicles2Remove = getLeastProbVehicle();
             if (vehicles2Remove==null || vehicles2Remove.isEmpty()) break;
@@ -242,7 +242,7 @@ public class OverlapOptimizer {
                 overlapLen/1000.+"\t"+
                 this.totalRouteLength /1000. + "\t" +
                 overlapLen/this.totalRouteLength + "\t" +
-                this.totalNetworkRouteLength + "\t" +
+                this.totalNetworkRouteLength /1000. + "\t" +
                 this.currentNetworkLengthCoverage +
                 "\n";
         writeToSummaryFile(out);
