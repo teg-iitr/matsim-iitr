@@ -31,14 +31,11 @@ public class OverlapOptimizer {
     // required for optimization
     private final SigmoidFunction sigmoidFunction;
     /**
-     * this represents the total line/ route length, which includes the overlapping length
+     * this represents the total line/ route length, it is same ass the network length in this case becase
+     * it is estimated using the segments' length and not from the routes.
      */
     private double totalRouteLength = Double.NaN;
 
-    /**
-     * this represents the total network length, which excludes the overlapping length
-     */
-    private double totalNetworkRouteLength= Double.NaN;
     private double currentNetworkLengthCoverage = Double.NaN;
 
     public OverlapOptimizer(int timebinSize, String outputPath, SigmoidFunction sigmoidFunction, int minDevicesPerTimeBin){
@@ -65,7 +62,7 @@ public class OverlapOptimizer {
     }
 
     public void initializeWithGTFSAndVehicles(String gtfs_path, String vehicle_file, String excluded_vehicles_file){
-        writeToSummaryFile("iterationNr\tremovedVehicle\tremovedVehicleProb\tnoOfRoutes\tnoOfTrips\toverlappingSegmentsLength_km\tallsegmentsLength_km\toverlappingLengthRatio\ttotalRouteLengthExcludingOverlap_km\tlengthCoverageRatio\n");
+        writeToSummaryFile("iterationNr\tremovedVehicle\tremovedVehicleProb\tnoOfRoutes\tnoOfTrips\toverlappingSegmentsLength_km\tallsegmentsLength_km\toverlappingLengthRatio\tlengthCoverageRatio\n");
         GtfsFeed gtfsFeed = new GtfsFeedImpl(gtfs_path);
 
         if(vehicle_file!=null){
@@ -90,7 +87,6 @@ public class OverlapOptimizer {
 
 
         this.totalRouteLength = getSumOfCurrentSegmentsLength(); // at this instance, no segments are removed.
-        this.totalNetworkRouteLength = this.totalRouteLength - getSumOfOverlappingSegmentsLength();
 
         writeStatsToSummaryFile("-", 0);
         writeIterationFiles();
@@ -199,8 +195,8 @@ public class OverlapOptimizer {
     }
 
     public double getRetainedNetworkLengthCoverage(){
-        double currentRetainedRouteLength = getSumOfCurrentSegmentsLength() - getSumOfOverlappingSegmentsLength();
-        return currentRetainedRouteLength/ this.totalNetworkRouteLength;
+        double currentRetainedRouteLength = getSumOfCurrentSegmentsLength();
+        return currentRetainedRouteLength/ this.totalRouteLength;
     }
 
     private double getSumOfCurrentSegmentsLength() {
@@ -242,7 +238,6 @@ public class OverlapOptimizer {
                 overlapLen/1000.+"\t"+
                 this.totalRouteLength /1000. + "\t" +
                 overlapLen/this.totalRouteLength + "\t" +
-                this.totalNetworkRouteLength /1000. + "\t" +
                 this.currentNetworkLengthCoverage +
                 "\n";
         writeToSummaryFile(out);
