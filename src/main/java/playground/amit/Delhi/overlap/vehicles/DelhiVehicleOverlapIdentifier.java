@@ -13,11 +13,11 @@ public class DelhiVehicleOverlapIdentifier {
 
 
     public static void main(String[] args) {
-        String GTFS_PATH = "C:\\Users\\amit2\\Downloads\\bug-fix-JTRG\\input\\GTFS09072022Edit.zip";
-        String vehicles_file = "C:\\Users\\amit2\\Downloads\\bug-fix-JTRG\\input\\VehicleSampleData1.txt";
+        String GTFS_PATH = "C:\\Users\\amit2\\Downloads\\bug-fix-JTRG\\input\\GTFS09072022.zip";
+        String vehicles_file = "C:\\Users\\amit2\\Downloads\\bug-fix-JTRG\\input\\Sample.txt";
 
         int timebinSize = 24*60*60;
-        int minDevicesPerTimeBin = 100;
+        int minDevicesPerTimeBin = 10;
 
 
         String outFilePath = "C:\\Users\\amit2\\Downloads\\bug-fix-JTRG\\output\\";
@@ -28,7 +28,7 @@ public class DelhiVehicleOverlapIdentifier {
 //		optimizer.run(10);
 //        optimizer.optimizeTillProb(0.0);
 //		optimizer.optimizeTillRoutes(50);
-        optimizer.optimizeTillCoverage(0.95);
+        optimizer.optimizeTillCoverage(0.50);
 
         OverlapOptimizer.LOG.info("Completed.");
     }

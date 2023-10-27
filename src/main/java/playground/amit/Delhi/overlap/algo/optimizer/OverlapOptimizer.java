@@ -36,6 +36,11 @@ public class OverlapOptimizer {
      */
     private double totalRouteLength = Double.NaN;
 
+    /**
+     * this is estimated as the sum of all segments of a trip (i.e., includes overlap) - sum of overlap Count * length of overlapping segments
+     */
+    private double initialNetworkLength = Double.NaN;
+
     private double currentNetworkLengthCoverage = Double.NaN;
 
     public OverlapOptimizer(int timebinSize, String outputPath, SigmoidFunction sigmoidFunction, int minDevicesPerTimeBin){
@@ -62,7 +67,7 @@ public class OverlapOptimizer {
     }
 
     public void initializeWithGTFSAndVehicles(String gtfs_path, String vehicle_file, String excluded_vehicles_file){
-        writeToSummaryFile("iterationNr\tremovedVehicle\tremovedVehicleProb\tnoOfRoutes\tnoOfTrips\toverlappingSegmentsLength_km\tallsegmentsLength_km\toverlappingLengthRatio\tlengthCoverageRatio\n");
+        writeToSummaryFile("iterationNr\tremovedVehicle\tremovedVehicleProb\tnoOfRoutes\tnoOfTrips\toverlappingSegmentsLength_km\tallsegmentsLength_km\toverlappingLengthRatio\tinitialNetworkLength_km\tcurrentNetworklength_km\tlengthCoverageRatio\n");
         GtfsFeed gtfsFeed = new GtfsFeedImpl(gtfs_path);
 
         if(vehicle_file!=null){
@@ -86,7 +91,10 @@ public class OverlapOptimizer {
         spatialOverlap.collectOverlaps();
 
 
-        this.totalRouteLength = getSumOfCurrentSegmentsLength(); // at this instance, no segments are removed.
+        this.totalRouteLength = spatialOverlap.getCollectedSegments().keySet().stream()
+                .mapToDouble(Segment::getLength).sum();
+        this.initialNetworkLength = getCurrentNetworkLength();
+        this.currentNetworkLengthCoverage = this.getCurrentNetworkLength() / this.initialNetworkLength;
 
         writeStatsToSummaryFile("-", 0);
         writeIterationFiles();
@@ -127,7 +135,6 @@ public class OverlapOptimizer {
     }
 
     public void optimizeTillCoverage(double thresholdCoverage){
-        this.currentNetworkLengthCoverage = getRetainedNetworkLengthCoverage();
         OverlapOptimizer.LOG.info("\t\t Optimizing till the coverage reaches to the desired threshold, i.e., "+thresholdCoverage);
         while (this.currentNetworkLengthCoverage > thresholdCoverage) {
             OverlapOptimizer.LOG.info("Current coverage ratio is "+this.currentNetworkLengthCoverage);
@@ -138,7 +145,7 @@ public class OverlapOptimizer {
                 OverlapOptimizer.LOG.info("Removing vehicle route "+s);
                 remove(s, vehicles2Remove.get(s));
                 writeIterationFiles();
-                this.currentNetworkLengthCoverage = getRetainedNetworkLengthCoverage();
+                this.currentNetworkLengthCoverage = getCurrentNetworkLength()/ this.initialNetworkLength;
             }
         }
         done();
@@ -194,14 +201,14 @@ public class OverlapOptimizer {
         }
     }
 
-    public double getRetainedNetworkLengthCoverage(){
-        double currentRetainedRouteLength = getSumOfCurrentSegmentsLength();
-        return currentRetainedRouteLength/ this.totalRouteLength;
-    }
-
-    private double getSumOfCurrentSegmentsLength() {
-        return spatialOverlap.getCollectedSegments().keySet().stream()
-                .mapToDouble(Segment::getLength).sum();
+    public double getCurrentNetworkLength(){
+        return spatialOverlap.getTrip2tripOverlap().values().stream()
+                .flatMap(to->to.getSegments().stream()).mapToDouble(Segment::getLength).sum() -
+                spatialOverlap.getCollectedSegments().values()
+                        .stream()
+                        .filter(so -> so.getCount() > 1.)
+                        .mapToDouble(so -> so.getSegment().getLength()*(so.getCount()-1)).sum();
+//                getSumOfOverlappingSegmentsLength();
     }
 
     public double getSumOfOverlappingSegmentsLength(){
@@ -238,7 +245,9 @@ public class OverlapOptimizer {
                 overlapLen/1000.+"\t"+
                 this.totalRouteLength /1000. + "\t" +
                 overlapLen/this.totalRouteLength + "\t" +
-                this.currentNetworkLengthCoverage +
+                this.initialNetworkLength/1000.0 + "\t" +
+                this.getCurrentNetworkLength()/1000.0 +"\t" +
+                this.currentNetworkLengthCoverage + "\t" +
                 "\n";
         writeToSummaryFile(out);
     }
