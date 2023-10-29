@@ -10,11 +10,9 @@ import playground.amit.utils.FileUtils;
 
 public class DelhiVehicleOverlapIdentifier {
 
-
-
     public static void main(String[] args) {
         String GTFS_PATH = "C:\\Users\\amit2\\Downloads\\bug-fix-JTRG\\input\\GTFS09072022.zip";
-        String vehicles_file = "C:\\Users\\amit2\\Downloads\\bug-fix-JTRG\\input\\Sample.txt";
+        String vehicles_file = "C:\\Users\\amit2\\Downloads\\bug-fix-JTRG\\input\\Sample_5vehicles.txt";
 
         int timebinSize = 24*60*60;
         int minDevicesPerTimeBin = 10;

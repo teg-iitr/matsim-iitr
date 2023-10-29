@@ -27,7 +27,7 @@ public class SegmentalOverlap {
     }
 
     void overlapWith(String tripId, String vehicleNumber){
-        if(! vehicleNumber.equals(self_trip_routeId.getSecond())) {
+        if(! (vehicleNumber.equals(self_trip_routeId.getSecond()) && tripId.equals(self_trip_routeId.getFirst()))) {
             this.counter++;
             this.overlappingTripIds.add(tripId);
             this.overlappingVehicleRouteIds.add(vehicleNumber);

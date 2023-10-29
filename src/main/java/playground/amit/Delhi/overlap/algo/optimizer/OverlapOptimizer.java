@@ -90,7 +90,6 @@ public class OverlapOptimizer {
         OverlapOptimizer.LOG.info("Evaluating overlaps and overlaps probabilities to a file ...");
         spatialOverlap.collectOverlaps();
 
-
         this.totalRouteLength = spatialOverlap.getCollectedSegments().keySet().stream()
                 .mapToDouble(Segment::getLength).sum();
         this.initialNetworkLength = getCurrentNetworkLength();
@@ -204,11 +203,9 @@ public class OverlapOptimizer {
     public double getCurrentNetworkLength(){
         return spatialOverlap.getTrip2tripOverlap().values().stream()
                 .flatMap(to->to.getSegments().stream()).mapToDouble(Segment::getLength).sum() -
-                spatialOverlap.getCollectedSegments().values()
-                        .stream()
+                spatialOverlap.getCollectedSegments().values().stream()
                         .filter(so -> so.getCount() > 1.)
                         .mapToDouble(so -> so.getSegment().getLength()*(so.getCount()-1)).sum();
-//                getSumOfOverlappingSegmentsLength();
     }
 
     public double getSumOfOverlappingSegmentsLength(){
