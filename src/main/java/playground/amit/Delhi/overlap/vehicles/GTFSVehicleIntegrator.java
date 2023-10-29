@@ -70,11 +70,13 @@ public class GTFSVehicleIntegrator {
         double minDiff = Double.POSITIVE_INFINITY;
         for(VehicleDetails vehicleDetails : vehicleDetailsList){
             List<Double> startTimes = vehicleDetails.getRouteNamesToStartTimes().get(routeName);
+            if(startTimes.size()==0) continue;
             double closestTime = closestNumberFromList(tripStartTime, startTimes);
             double diff = Math.abs(closestTime-tripStartTime);
             if ( diff <= tripStartThreshold && diff < minDiff ) {
                 minDiff = diff;
                 vehicleNumber = vehicleDetails.getVehicleNumber();
+                vehicleDetails.getRouteNamesToStartTimes().get(routeName).remove(closestTime);
             }
         }
         return vehicleNumber;
