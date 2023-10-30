@@ -254,6 +254,40 @@ public class OverlapOptimizer {
     }
 
     /**
+     * Writing removed vehicles, trips and segments at each iteration.
+     */
+    public void writeRemovedVehicleTripSegments(String outputFolder) {
+        OverlapOptimizer.LOG.info("Writing removed vehicles, trips and segments to a file ...");
+        String filename = outputFolder+"removedSegments_"+suffix+"_"+"it-"+iteration+".txt.gz";
+        BufferedWriter writer  = IOUtils.getBufferedWriter(filename);
+        try {
+            writer.write("vehicleNumber\ttripId\tstopA_lat\tstopA_lon\t_stopB_lat\tstopB_lon\tgeom\ttimebin" +
+                    "\tlegnthOfSegment_m\n");
+            for (String str : spatialOverlap.getRemovedVehicle2Trip().keySet()) {
+                for (TripOverlap to: spatialOverlap.getRemovedVehicle2Trip().get(str)) {
+                    for (java.util.Map.Entry<Segment, SegmentalOverlap> val : to.getSeg2overlaps().entrySet()) {
+                        writer.write(str + "\t");
+                        writer.write(to.getTripId() + "\t");
+                        Segment key = val.getKey();
+                        writer.write(key.getStopA().getLat() + "\t");
+                        writer.write(key.getStopA().getLon() + "\t");
+                        writer.write(key.getStopB().getLat() + "\t");
+                        writer.write(key.getStopB().getLon() + "\t");
+                        writer.write(getGeom(key.getStopA(), key.getStopB()) + "\t");
+                        writer.write(key.getTimebin() + "\t");
+                        writer.write(key.getLength() + "\t");
+                        writer.write("\n");
+                    }
+                }
+            }
+            writer.close();
+        } catch (IOException e) {
+            throw new RuntimeException("Data is not written. Reason "+e);
+        }
+        OverlapOptimizer.LOG.info("Writing overlaps to "+filename+" completed.");
+    }
+
+    /**
      * Writing segmental counts and prob for each segment in all trips.
      */
     public void writeSegmentalOverlapCountsProbs(String outputFolder) {
@@ -322,8 +356,7 @@ public class OverlapOptimizer {
 
         OverlapOptimizer.LOG.info("Writing overlaps to a file ...");
         String filename = outputFolder+"vehicleRouteTripProbs_"+suffix+"_"+"it-"+iteration+".txt.gz";
-        BufferedWriter writer  = IOUtils.getBufferedWriter(filename);
-        try {
+        try (BufferedWriter writer  = IOUtils.getBufferedWriter(filename)){
             writer.write("vehicleNumber\ttripId\tsigmoidFunction\tprob\n");
             for (String vehicleRouteId : vehicleRoute2TripsIds.keySet()){
                 for (String t : vehicleRoute2TripsIds.get(vehicleRouteId)){
@@ -344,6 +377,7 @@ public class OverlapOptimizer {
         writeSegmentalOverlapCountsProbs(outputFolder);
 		writeTripProbs(outputFolder);
 		writeVehicleRouteProbs(outputFolder);
+        writeRemovedVehicleTripSegments(outputFolder);
     }
 
     private void done() {

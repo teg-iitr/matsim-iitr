@@ -47,7 +47,7 @@ public class SegmentalOverlap {
         this.self_trip_routeId = new Tuple<>(tripId, vehicleNumber);
     }
     void remove(String vehicleNumber, String tripId){
-        if(! vehicleNumber.equals(self_trip_routeId.getSecond())) {
+        if(! (vehicleNumber.equals(self_trip_routeId.getSecond()) && tripId.equals(self_trip_routeId.getFirst()))) {
             // since overlap is not counted for self_routes, it should not be removed.
             this.counter--;
         }

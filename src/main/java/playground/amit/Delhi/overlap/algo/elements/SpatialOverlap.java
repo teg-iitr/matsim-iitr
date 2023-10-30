@@ -23,6 +23,7 @@ public class SpatialOverlap {
     private final Map<String, TripOverlap> trip2tripOverlap = new LinkedHashMap<>();
     private final Map<String, Set<String>> vehicleRoute2TripsIds = new HashMap<>();
     private final Map<Segment, SegmentalOverlap> collectedSegments = new HashMap<>();
+    private final Map<String, Set<TripOverlap>> removedVehicle2Trip = new HashMap<>();
 
     private int getTimeBin(double time_sec){
         // in matsim, pt works from 4 to 27, so need to be converted to 0 to 24.
@@ -94,8 +95,10 @@ public class SpatialOverlap {
 
     public void removeVehicle(String vehicleNumber){
         Set<String> trips2Remove = this.vehicleRoute2TripsIds.remove(vehicleNumber);
+        this.removedVehicle2Trip.putIfAbsent(vehicleNumber, new HashSet<>());
         for (String trip_id : trips2Remove) {
             TripOverlap removedTO = this.trip2tripOverlap.remove(trip_id);
+            this.removedVehicle2Trip.get(vehicleNumber).add(removedTO);
             for (Segment removedSeg : removedTO.getSegments()) {
                 this.collectedSegments.get(removedSeg).remove(vehicleNumber, removedTO.getTripId().toString());
             }
@@ -112,5 +115,9 @@ public class SpatialOverlap {
 
     public Map<String, Set<String>> getVehicleRoute2TripsIds() {
         return vehicleRoute2TripsIds;
+    }
+
+    public Map<String, Set<TripOverlap>> getRemovedVehicle2Trip() {
+        return removedVehicle2Trip;
     }
 }

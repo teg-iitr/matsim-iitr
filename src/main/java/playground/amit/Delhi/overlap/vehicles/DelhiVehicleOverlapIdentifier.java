@@ -11,11 +11,11 @@ import playground.amit.utils.FileUtils;
 public class DelhiVehicleOverlapIdentifier {
 
     public static void main(String[] args) {
-        String GTFS_PATH = "C:\\Users\\amit2\\Downloads\\bug-fix-JTRG\\input\\GTFS09072022.zip";
-        String vehicles_file = "C:\\Users\\amit2\\Downloads\\bug-fix-JTRG\\input\\Sample_5vehicles.txt";
+        String GTFS_PATH = "C:\\Users\\amit2\\Downloads\\bug-fix-JTRG\\input\\GTFS09072022Edit.zip";
+        String vehicles_file = "C:\\Users\\amit2\\Downloads\\bug-fix-JTRG\\input\\Sample.txt";
 
         int timebinSize = 24*60*60;
-        int minDevicesPerTimeBin = 10;
+        int minDevicesPerTimeBin = 5;
 
 
         String outFilePath = "C:\\Users\\amit2\\Downloads\\bug-fix-JTRG\\output\\";
