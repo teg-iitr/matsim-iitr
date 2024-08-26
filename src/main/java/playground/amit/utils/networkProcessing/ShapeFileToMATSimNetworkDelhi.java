@@ -42,7 +42,7 @@ import org.opengis.feature.simple.SimpleFeature;
 /**
  * @author amit
  */
-public class ShapeFileToNetworkDelhi {
+public class ShapeFileToMATSimNetworkDelhi {
 
 	private final static String NETWORK_SHAPE_FILE = "./input/sarojini/abc.shp";
 	private final static String MATSIM_NETWORK = "./input/sarojini/matsimNetwork.xml";
