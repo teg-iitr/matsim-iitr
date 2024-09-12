@@ -14,6 +14,7 @@ public class OD  implements Attributable {
     private final String destination;
     private final Id<OD> id;
     private double numberOfTrips = 0;
+    private double value;
     private final Attributes attributes = new Attributes();
     private Node origin_metro_stop ;
     private Node destination_metro_stop ;
@@ -45,6 +46,12 @@ public class OD  implements Attributable {
 
     public double getNumberOfTrips() {
         return numberOfTrips;
+    }
+    public double getValue() {
+        return value;
+    }
+    public void setValue(double value) {
+        this.value = value;
     }
 
     public Id<OD> getId() {
