@@ -19,13 +19,7 @@
  * *********************************************************************** */
 package playground.amit.emissions.exposure;
 
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -47,21 +41,25 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.contrib.emissions.EmissionModule;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.core.config.Config;
-import org.matsim.core.config.groups.ControlerConfigGroup;
-import org.matsim.core.config.groups.StrategyConfigGroup;
-import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.ControllerConfigGroup;
+import org.matsim.core.config.groups.ReplanningConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
-
 import playground.amit.analysis.emission.AirPollutionExposureAnalysisControlerListener;
 import playground.amit.analysis.emission.experienced.ExperiencedEmissionCostHandler;
 import playground.amit.munich.utils.MunichPersonFilter;
 import playground.amit.utils.PersonFilter;
 import playground.vsp.airPollution.exposure.*;
+
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 
 /**
@@ -70,7 +68,7 @@ import playground.vsp.airPollution.exposure.*;
  */
 @RunWith(Parameterized.class)
 public class ExposurePricingIT {
-	private Logger logger = Logger.getLogger(ExposurePricingIT.class);
+	private Logger logger = LogManager.getLogger(ExposurePricingIT.class);
 
 	private Double xMin = 0.0;
 
@@ -116,12 +114,12 @@ public class ExposurePricingIT {
 		logger.info("Number of time bins are "+ this.noOfTimeBins);
 		Scenario sc = minimalControlerSetting(isConsideringCO2Costs);
 		
-//		sc.getConfig().plansCalcRoute().setInsertingAccessEgressWalk(true);
+//		sc.getConfig().routing().setInsertingAccessEgressWalk(true);
 
 		String outputDirectory = helper.getOutputDirectory() + "/" + (isConsideringCO2Costs ? "considerCO2Costs" : "notConsiderCO2Costs") + "_"+this.noOfTimeBins+"_timeBins/";
-		sc.getConfig().controler().setOutputDirectory(outputDirectory);
+		sc.getConfig().controller().setOutputDirectory(outputDirectory);
 
-		sc.getConfig().controler().setRoutingAlgorithmType(ControlerConfigGroup.RoutingAlgorithmType.Dijkstra);
+		sc.getConfig().controller().setRoutingAlgorithmType(ControllerConfigGroup.RoutingAlgorithmType.Dijkstra);
 
 		Controler controler = new Controler(sc);
 
@@ -150,13 +148,13 @@ public class ExposurePricingIT {
 		Scenario sc = minimalControlerSetting(isConsideringCO2Costs);
 		ScenarioUtils.loadScenario(sc); // need to load vehicles. Amit Sep 2016
 
-//		sc.getConfig().plansCalcRoute().setInsertingAccessEgressWalk(true);
-		sc.getConfig().controler().setRoutingAlgorithmType(ControlerConfigGroup.RoutingAlgorithmType.Dijkstra);
+//		sc.getConfig().routing().setInsertingAccessEgressWalk(true);
+		sc.getConfig().controller().setRoutingAlgorithmType(ControllerConfigGroup.RoutingAlgorithmType.Dijkstra);
 
 		String outputDirectory = helper.getOutputDirectory() + "/" + (isConsideringCO2Costs ? "considerCO2Costs" : "notConsiderCO2Costs") + "_"+this.noOfTimeBins+"_timeBins/";
-		sc.getConfig().controler().setOutputDirectory(outputDirectory);
+		sc.getConfig().controller().setOutputDirectory(outputDirectory);
 
-		sc.getConfig().controler().setLastIteration(1);
+		sc.getConfig().controller().setLastIteration(1);
 		addReRoutingStrategy(sc);
 
 		Controler controler = new Controler(sc);
@@ -215,14 +213,14 @@ public class ExposurePricingIT {
 		Scenario sc = minimalControlerSetting(isConsideringCO2Costs);
 		ScenarioUtils.loadScenario(sc); // need to load vehicles. Amit Sep 2016
 		
-//		sc.getConfig().plansCalcRoute().setInsertingAccessEgressWalk(false);
+//		sc.getConfig().routing().setInsertingAccessEgressWalk(false);
 		// yy otherwise, the scenario consumes walk time from activity to link, somewhat modifying the results. kai, jun'16
 
 		String outputDirectory = helper.getOutputDirectory() + "/" + (isConsideringCO2Costs ? "considerCO2Costs" : "notConsiderCO2Costs") + "_"+this.noOfTimeBins+"_timeBins/";
-		sc.getConfig().controler().setOutputDirectory(outputDirectory);
+		sc.getConfig().controller().setOutputDirectory(outputDirectory);
 
-		sc.getConfig().controler().setLastIteration(1);
-		sc.getConfig().controler().setRoutingAlgorithmType(ControlerConfigGroup.RoutingAlgorithmType.Dijkstra);
+		sc.getConfig().controller().setLastIteration(1);
+		sc.getConfig().controller().setRoutingAlgorithmType(ControllerConfigGroup.RoutingAlgorithmType.Dijkstra);
 
 		Controler controler = new Controler(sc);
 		/* 
@@ -236,7 +234,7 @@ public class ExposurePricingIT {
 		Double timeBinSize = controler.getScenario().getConfig().qsim().getEndTime().seconds() / this.noOfTimeBins ;
 
 		ResponsibilityGridTools rgt = new ResponsibilityGridTools(timeBinSize, noOfTimeBins, gt);
-//		final EmissionResponsibilityTravelDisutilityCalculatorFactory emfac = new EmissionResponsibilityTravelDisutilityCalculatorFactory(emissionModule, emissionCostModule, sc.getConfig().planCalcScore());
+//		final EmissionResponsibilityTravelDisutilityCalculatorFactory emfac = new EmissionResponsibilityTravelDisutilityCalculatorFactory(emissionModule, emissionCostModule, sc.getConfig().scoring());
         final playground.vsp.airPollution.exposure.EmissionResponsibilityTravelDisutilityCalculatorFactory emfac = new playground.vsp.airPollution.exposure.EmissionResponsibilityTravelDisutilityCalculatorFactory(
                 new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig())
 		);
@@ -376,12 +374,12 @@ public class ExposurePricingIT {
 
 		config.addModule(ecg);
 
-		config.controler().setLastIteration(0);
+		config.controller().setLastIteration(0);
 		return sc;
 	}
 
 	private void addReRoutingStrategy(Scenario sc) {
-		StrategyConfigGroup scg = sc.getConfig().strategy();
+		StrategyConfigGroup scg = sc.getConfig().replanning();
 		StrategySettings strategySettingsR = new StrategySettings();
 		strategySettingsR.setStrategyName("ReRoute");
 		strategySettingsR.setWeight(1000);

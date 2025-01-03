@@ -18,15 +18,8 @@
  * *********************************************************************** */
 package playground.amit.analysis.toll;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.events.PersonArrivalEvent;
@@ -38,12 +31,14 @@ import org.matsim.api.core.v01.events.handler.PersonMoneyEventHandler;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.gbl.Gbl;
 
+import java.util.*;
+
 /**
  * @author amit
  */
 
 public class TripTollHandler implements PersonMoneyEventHandler, PersonDepartureEventHandler, PersonArrivalEventHandler {
-	private static final Logger LOG = Logger.getLogger(TripTollHandler.class);
+	private static final Logger LOG = LogManager.getLogger(TripTollHandler.class);
 	private final double timeBinSize;
 	private int nonCarWarning= 0;
 

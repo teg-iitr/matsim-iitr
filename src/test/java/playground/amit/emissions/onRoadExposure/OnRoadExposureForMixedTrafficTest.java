@@ -19,7 +19,7 @@
 
 package playground.amit.emissions.onRoadExposure;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -61,7 +61,7 @@ public class OnRoadExposureForMixedTrafficTest {
 
     @Rule
     public final MatsimTestUtils helper = new MatsimTestUtils();
-    private static final Logger logger = Logger.getLogger(OnRoadExposureForMixedTrafficTest.class);
+    private static final Logger logger = LogManager.getLogger(OnRoadExposureForMixedTrafficTest.class);
 
     private final boolean isConsideringCO2Costs = false; // no local exposure for co2
 
@@ -207,8 +207,8 @@ public class OnRoadExposureForMixedTrafficTest {
           .plansCalcRoute()
           .getOrCreateModeRoutingParams(TransportMode.pt)
           .setTeleportedModeFreespeedFactor(1.5);
-        sc.getConfig().plansCalcRoute().setNetworkModes(mainModes);
-        sc.getConfig().planCalcScore().getOrCreateModeParams("bicycle").setConstant(0.0);
+        sc.getConfig().routing().setNetworkModes(mainModes);
+        sc.getConfig().scoring().getOrCreateModeParams("bicycle").setConstant(0.0);
 
         sc.getConfig().travelTimeCalculator().setAnalyzedModesAsString("car,bicycle");
         sc.getConfig().travelTimeCalculator().setFilterModes(true);
@@ -219,7 +219,7 @@ public class OnRoadExposureForMixedTrafficTest {
         emissionSettings(sc);
 
         Controler controler = new Controler(sc);
-        sc.getConfig().controler().setOutputDirectory(helper.getOutputDirectory());
+        sc.getConfig().controller().setOutputDirectory(helper.getOutputDirectory());
 
         EmissionsConfigGroup emissionsConfigGroup = ((EmissionsConfigGroup) sc.getConfig()
                                                                               .getModules()

@@ -26,7 +26,6 @@ import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.vehicles.VehicleWriterV1;
 import org.matsim.vehicles.Vehicles;
-
 import playground.amit.mixedTraffic.patnaIndia.input.others.PatnaVehiclesGenerator;
 import playground.amit.mixedTraffic.patnaIndia.router.FreeSpeedTravelTimeForBike;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
@@ -64,11 +63,11 @@ public class UrbanControler {
 		config.counts().setInputFile(INPUT_FILE_DIR+"/countsCarMotorbikeBike.xml");
 		config.vehicles().setVehiclesFile(patnaVehicles);
 
-		config.controler().setOutputDirectory(OUTPUT_DIR);
-		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
+		config.controller().setOutputDirectory(OUTPUT_DIR);
+		config.controller().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
 		final Controler controler = new Controler(config);
-		controler.getConfig().controler().setDumpDataAtEnd(true);
+		controler.getConfig().controller().setDumpDataAtEnd(true);
 
 		final RandomizingTimeDistanceTravelDisutilityFactory builder =  new RandomizingTimeDistanceTravelDisutilityFactory("bike", config);
 		

@@ -5,11 +5,10 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
-import org.matsim.core.config.groups.PlansCalcRouteConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
-import org.matsim.core.config.groups.StrategyConfigGroup;
+import org.matsim.core.config.groups.ReplanningConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup.ActivityParams;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
@@ -17,9 +16,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.pt.config.TransitConfigGroup;
 import playground.amit.utils.FileUtils;
 
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class MNControler {
@@ -45,13 +42,13 @@ public class MNControler {
 
         config.transit().setBoardingAcceptance(TransitConfigGroup.BoardingAcceptance.checkStopOnly);
 
-        config.controler().setOutputDirectory("./output/");
+        config.controller().setOutputDirectory("./output/");
 
-        config.controler().setLastIteration(10);
-        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-        config.controler().setDumpDataAtEnd(true);
+        config.controller().setLastIteration(10);
+        config.controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+        config.controller().setDumpDataAtEnd(true);
 
-        PlanCalcScoreConfigGroup scoreConfigGroup= config.planCalcScore();
+        ScoringConfigGroup scoreConfigGroup= config.scoring();
 
         QSimConfigGroup qsim =config.qsim();
         qsim.setEndTime(12*3600.);
@@ -66,25 +63,25 @@ public class MNControler {
            scoreConfigGroup.addActivityParams(destAct);
 
            //for modes
-           PlanCalcScoreConfigGroup.ModeParams ptParams =  new PlanCalcScoreConfigGroup.ModeParams(TransportMode.pt);
+           ScoringConfigGroup.ModeParams ptParams =  new ScoringConfigGroup.ModeParams(TransportMode.pt);
            ptParams.setConstant(-3);
            ptParams.setMarginalUtilityOfTraveling(-6);
            scoreConfigGroup.addModeParams(ptParams);
-           config.plansCalcRoute().removeModeRoutingParams("pt");
+           config.routing().removeModeRoutingParams("pt");
 
 //
-//            PlanCalcScoreConfigGroup.ModeParams walkParams = new PlanCalcScoreConfigGroup.ModeParams(TransportMode.walk);
+//            ScoringConfigGroup.ModeParams walkParams = new ScoringConfigGroup.ModeParams(TransportMode.walk);
 //            walkParams.setConstant(-1);
 //            walkParams.setMarginalUtilityOfTraveling(-12);
 //            scoreConfigGroup.addModeParams(walkParams);
-//            config.plansCalcRoute().removeModeRoutingParams("walk");
+//            config.routing().removeModeRoutingParams("walk");
 
 
-        StrategyConfigGroup.StrategySettings reRoute = new StrategyConfigGroup.StrategySettings();
+        ReplanningConfigGroup.StrategySettings reRoute = new ReplanningConfigGroup.StrategySettings();
         reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
         reRoute.setWeight(0.3);
-        config.strategy().addStrategySettings(reRoute);
-        StrategyConfigGroup strategy= config.strategy();
+        config.replanning().addStrategySettings(reRoute);
+        ReplanningConfigGroup strategy= config.replanning();
 //        strategy.setFractionOfIterationsToDisableInnovation(0.8);
 
         Scenario scenario = ScenarioUtils.loadScenario(config);

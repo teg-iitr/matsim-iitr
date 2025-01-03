@@ -19,15 +19,8 @@
 
 package playground.amit.opdyts.patna.allModes;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -45,7 +38,6 @@ import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
-
 import playground.amit.analysis.spatial.GeneralGrid;
 import playground.amit.clustering.BoundingBox;
 import playground.amit.clustering.Cluster;
@@ -56,13 +48,16 @@ import playground.amit.opdyts.teleportationModes.Zone;
 import playground.amit.utils.FileUtils;
 import playground.amit.utils.LoadMyScenarios;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 /**
  * Created by amit on 15.06.17.
  */
 
 public final class PatnaZoneIdentifier {
 
-    private static final Logger LOGGER = Logger.getLogger(PatnaZoneIdentifier.class);
+    private static final Logger LOGGER = LogManager.getLogger(PatnaZoneIdentifier.class);
 
     //BEGIN_EXAMPLE
     public static void main(String[] args) {

@@ -18,11 +18,7 @@
  * *********************************************************************** */
 package playground.amit.mixedTraffic.patnaIndia.input.extDemand;
 
-import java.io.File;
-import java.util.HashSet;
-import java.util.Map;
-import javax.inject.Inject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
@@ -31,13 +27,13 @@ import org.matsim.contrib.cadyts.general.CadytsConfigGroup;
 import org.matsim.contrib.cadyts.general.CadytsScoring;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
-import org.matsim.core.config.groups.PlansCalcRouteConfigGroup.ModeRoutingParams;
 import org.matsim.core.config.groups.QSimConfigGroup.LinkDynamics;
 import org.matsim.core.config.groups.QSimConfigGroup.SnapshotStyle;
 import org.matsim.core.config.groups.QSimConfigGroup.VehiclesSource;
-import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.ReplanningConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.RoutingConfigGroup.ModeRoutingParams;
+import org.matsim.core.config.groups.ScoringConfigGroup.ActivityParams;
+import org.matsim.core.config.groups.ScoringConfigGroup.ModeParams;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
@@ -47,22 +43,13 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.ScoringFunctionFactory;
 import org.matsim.core.scoring.SumScoringFunction;
-import org.matsim.core.scoring.functions.CharyparNagelActivityScoring;
-import org.matsim.core.scoring.functions.CharyparNagelAgentStuckScoring;
-import org.matsim.core.scoring.functions.CharyparNagelLegScoring;
-import org.matsim.core.scoring.functions.ScoringParameters;
-import org.matsim.core.scoring.functions.ScoringParametersForPerson;
-import org.matsim.core.scoring.functions.SubpopulationScoringParameters;
+import org.matsim.core.scoring.functions.*;
 import org.matsim.core.utils.collections.CollectionUtils;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.counts.Counts;
 import org.matsim.vehicles.VehicleWriterV1;
 import org.matsim.vehicles.Vehicles;
-import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
-import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
 import playground.amit.analysis.modalShare.ModalShareFromEvents;
-import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
-import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
 import playground.amit.mixedTraffic.counts.CountsInserter;
 import playground.amit.mixedTraffic.patnaIndia.input.joint.JointCalibrationControler;
 import playground.amit.mixedTraffic.patnaIndia.input.others.PatnaVehiclesGenerator;
@@ -71,9 +58,18 @@ import playground.amit.mixedTraffic.patnaIndia.router.FreeSpeedTravelTimeForTruc
 import playground.amit.mixedTraffic.patnaIndia.utils.OuterCordonUtils;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.amit.utils.plans.SelectedPlansFilter;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
 import playground.vsp.cadyts.multiModeCadyts.ModalCountsCadytsContext;
 import playground.vsp.cadyts.multiModeCadyts.ModalCountsLinkIdentifier;
 import playground.vsp.cadyts.multiModeCadyts.MultiModalCountsCadytsModule;
+
+import javax.inject.Inject;
+import java.io.File;
+import java.util.HashSet;
+import java.util.Map;
 
 /**
  * @author amit
@@ -111,12 +107,12 @@ public class OuterCordonCadytsControler {
 		new VehicleWriterV1(vehs).writeFile(patnaVehicles);
 		config.vehicles().setVehiclesFile(patnaVehicles);
 
-		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
+		config.controller().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 
 		final Controler controler = new Controler(scenario);
-		controler.getConfig().controler().setDumpDataAtEnd(true);
+		controler.getConfig().controller().setDumpDataAtEnd(true);
 
 		final RandomizingTimeDistanceTravelDisutilityFactory builder_bike =  new RandomizingTimeDistanceTravelDisutilityFactory("bike",config);
 		final RandomizingTimeDistanceTravelDisutilityFactory builder_truck =  new RandomizingTimeDistanceTravelDisutilityFactory("truck",config);
@@ -153,11 +149,11 @@ public class OuterCordonCadytsControler {
 		controler.run();
 
 		// delete unnecessary iterations folder here.
-		int firstIt = controler.getConfig().controler().getFirstIteration();
-		int lastIt = controler.getConfig().controler().getLastIteration();
+		int firstIt = controler.getConfig().controller().getFirstIteration();
+		int lastIt = controler.getConfig().controller().getLastIteration();
 		for (int index =firstIt+1; index <lastIt; index ++){
 			String dirToDel = outputDir+"/ITERS/it."+index;
-			Logger.getLogger(JointCalibrationControler.class).info("Deleting the directory "+dirToDel);
+			LogManager.getLogger(JointCalibrationControler.class).info("Deleting the directory "+dirToDel);
 			IOUtils.deleteDirectoryRecursively(new File(dirToDel).toPath());
 		}
 		
@@ -184,7 +180,7 @@ public class OuterCordonCadytsControler {
 		String modes = CollectionUtils.setToString(new HashSet<>(PatnaUtils.EXT_MAIN_MODES));
 		config.counts().setAnalyzedModes(modes);
 		config.counts().setFilterModes(true);
-		config.strategy().setMaxAgentPlanMemorySize(10);
+		config.replanning().setMaxAgentPlanMemorySize(10);
 
 		controler.addOverridingModule(new MultiModalCountsCadytsModule(modalLinkCounts, modalLinkContainer));
 		
@@ -238,79 +234,79 @@ public class OuterCordonCadytsControler {
 		config.counts().setCountsScaleFactor(1/OuterCordonUtils.SAMPLE_SIZE);
 		config.counts().setOutputFormat("all");
 
-		config.controler().setFirstIteration(0);
-		config.controler().setLastIteration(100);
-		config.controler().setOutputDirectory(outputDir);
-		config.controler().setWritePlansInterval(100);
-		config.controler().setWriteEventsInterval(50);
+		config.controller().setFirstIteration(0);
+		config.controller().setLastIteration(100);
+		config.controller().setOutputDirectory(outputDir);
+		config.controller().setWritePlansInterval(100);
+		config.controller().setWriteEventsInterval(50);
 
 		StrategySettings reRoute = new StrategySettings();
 		reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
 		reRoute.setWeight(0.3);
-		config.strategy().addStrategySettings(reRoute);
+		config.replanning().addStrategySettings(reRoute);
 
 		StrategySettings expChangeBeta = new StrategySettings();
 		expChangeBeta.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta);
 		expChangeBeta.setWeight(0.7);
-		config.strategy().addStrategySettings(expChangeBeta);
+		config.replanning().addStrategySettings(expChangeBeta);
 
-		config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
-		config.strategy().setMaxAgentPlanMemorySize(6);
+		config.replanning().setFractionOfIterationsToDisableInnovation(0.8);
+		config.replanning().setMaxAgentPlanMemorySize(6);
 
 		ActivityParams ac1 = new ActivityParams("E2E_Start");
 		ac1.setTypicalDuration(10*60*60);
-		config.planCalcScore().addActivityParams(ac1);
+		config.scoring().addActivityParams(ac1);
 
 		ActivityParams act2 = new ActivityParams("E2E_End");
 		act2.setTypicalDuration(10*60*60);
-		config.planCalcScore().addActivityParams(act2);
+		config.scoring().addActivityParams(act2);
 
 		ActivityParams act3 = new ActivityParams("E2I_Start");
 		act3.setTypicalDuration(12*60*60);
-		config.planCalcScore().addActivityParams(act3);
+		config.scoring().addActivityParams(act3);
 
 		for(String area : OuterCordonUtils.getAreaType2ZoneIds().keySet()){
 			ActivityParams act4 = new ActivityParams("E2I_mid_"+area.substring(0,3));
 			act4.setTypicalDuration(8*60*60);
-			config.planCalcScore().addActivityParams(act4);			
+			config.scoring().addActivityParams(act4);			
 		}
 
 		config.plans().setRemovingUnneccessaryPlanAttributes(true);
 		config.vspExperimental().addParam("vspDefaultsCheckingLevel", "abort");
 		config.vspExperimental().setWritingOutputEvents(true);
 
-		config.planCalcScore().setMarginalUtlOfWaiting_utils_hr(0);
-		config.planCalcScore().setPerforming_utils_hr(6.0);
+		config.scoring().setMarginalUtlOfWaiting_utils_hr(0);
+		config.scoring().setPerforming_utils_hr(6.0);
 
 		ModeParams car = new ModeParams("car");
 		car.setConstant(0.0);
 		car.setMarginalUtilityOfTraveling(-0.64);
 		car.setMonetaryDistanceRate(-3.7*Math.pow(10, -5));
-		config.planCalcScore().addModeParams(car);
+		config.scoring().addModeParams(car);
 
 		ModeParams bike = new ModeParams("bike");
 		bike.setConstant(0.0);
 		bike.setMarginalUtilityOfTraveling(0.0);
-		config.planCalcScore().addModeParams(bike);
+		config.scoring().addModeParams(bike);
 
 		ModeParams motorbike = new ModeParams("motorbike");
 		motorbike.setConstant(0.0);
 		motorbike.setMarginalUtilityOfTraveling(-0.18);
 		motorbike.setMonetaryDistanceRate(-1.6*Math.pow(10, -5));
-		config.planCalcScore().addModeParams(motorbike);
+		config.scoring().addModeParams(motorbike);
 
 		ModeParams truck = new ModeParams("truck"); // using default for them.
 		truck.setConstant(0.0);
 		truck.setMarginalUtilityOfTraveling(0.0);
-		config.planCalcScore().addModeParams(truck);
+		config.scoring().addModeParams(truck);
 
-		config.plansCalcRoute().setNetworkModes(PatnaUtils.EXT_MAIN_MODES);
+		config.routing().setNetworkModes(PatnaUtils.EXT_MAIN_MODES);
 
 		//following is necessary to override all defaults for teleportation.
 		ModeRoutingParams mrp = new ModeRoutingParams("pt");
 		mrp.setTeleportedModeSpeed(20./3.6);
 		mrp.setBeelineDistanceFactor(1.5);
-		config.plansCalcRoute().addModeRoutingParams(mrp);
+		config.routing().addModeRoutingParams(mrp);
 		return config;
 	}
 }

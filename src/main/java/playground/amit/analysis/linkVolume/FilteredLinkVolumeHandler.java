@@ -19,9 +19,8 @@
 
 package playground.amit.analysis.linkVolume;
 
-import java.util.List;
-import java.util.Map;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.LinkLeaveEvent;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
@@ -35,6 +34,9 @@ import org.matsim.core.events.algorithms.Vehicle2DriverEventHandler;
 import org.matsim.vehicles.Vehicle;
 import playground.amit.utils.PersonFilter;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Created by amit on 02/01/2017.
  */
@@ -42,7 +44,7 @@ import playground.amit.utils.PersonFilter;
 
 public class FilteredLinkVolumeHandler implements LinkLeaveEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
 
-    private static final Logger LOGGER = Logger.getLogger(FilteredLinkVolumeHandler.class);
+    private static final Logger LOGGER = LogManager.getLogger(FilteredLinkVolumeHandler.class);
 
     private final LinkVolumeHandler delegate;
     private final Vehicle2DriverEventHandler veh2DriverDelegate = new Vehicle2DriverEventHandler();

@@ -1,9 +1,5 @@
 package playground.amit.gridNet;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -11,17 +7,21 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
 import org.matsim.core.config.groups.ChangeModeConfigGroup;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
 import org.matsim.core.config.groups.QSimConfigGroup.LinkDynamics;
 import org.matsim.core.config.groups.QSimConfigGroup.TrafficDynamics;
 import org.matsim.core.config.groups.QSimConfigGroup.VehiclesSource;
-import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.ReplanningConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.ScoringConfigGroup.ActivityParams;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vehicles.MatsimVehicleWriter;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.Vehicles;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 
 public class RunGridScenario {
 
@@ -72,9 +72,9 @@ public class RunGridScenario {
         config.plans().setInputFile(GridPlans.GRID_PLANS);
         config.network().setInputFile(GridNetwork.NETWORK_FILE);
 
-        config.controler().setOutputDirectory("output/GridScenarioTrafficChar");
-        config.controler().setLastIteration(40);
-        config.controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
+        config.controller().setOutputDirectory("output/GridScenarioTrafficChar");
+        config.controller().setLastIteration(40);
+        config.controller().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
 
         config.qsim().setFlowCapFactor(0.05);
         config.qsim().setStorageCapFactor(0.1);
@@ -87,68 +87,68 @@ public class RunGridScenario {
 
         config.travelTimeCalculator().setAnalyzedModes(new HashSet<>(mainModes));
 
-        config.plansCalcRoute().setNetworkModes(mainModes);
-//		config.plansCalcRoute().getOrCreateModeRoutingParams(TransportMode.pt).setBeelineDistanceFactor(1.5);
-        config.plansCalcRoute().getOrCreateModeRoutingParams(TransportMode.pt).setTeleportedModeFreespeedFactor(1.8);
+        config.routing().setNetworkModes(mainModes);
+//		config.routing().getOrCreateModeRoutingParams(TransportMode.pt).setBeelineDistanceFactor(1.5);
+        config.routing().getOrCreateModeRoutingParams(TransportMode.pt).setTeleportedModeFreespeedFactor(1.8);
 
-        config.plansCalcRoute().removeModeRoutingParams("walk");
-//		config.plansCalcRoute().getOrCreateModeRoutingParams(TransportMode.walk).setBeelineDistanceFactor(1.);
-        config.plansCalcRoute().getOrCreateModeRoutingParams(TransportMode.walk).setTeleportedModeFreespeedFactor(2.4);
+        config.routing().removeModeRoutingParams("walk");
+//		config.routing().getOrCreateModeRoutingParams(TransportMode.walk).setBeelineDistanceFactor(1.);
+        config.routing().getOrCreateModeRoutingParams(TransportMode.walk).setTeleportedModeFreespeedFactor(2.4);
 
-        config.planCalcScore().getOrCreateModeParams(TransportMode.car).setConstant(-1.3);
-        config.planCalcScore().getOrCreateModeParams(TransportMode.car).setMarginalUtilityOfTraveling(-6);
+        config.scoring().getOrCreateModeParams(TransportMode.car).setConstant(-1.3);
+        config.scoring().getOrCreateModeParams(TransportMode.car).setMarginalUtilityOfTraveling(-6);
 
-        config.planCalcScore().getOrCreateModeParams("bicycle").setConstant(1.6);
-        config.planCalcScore().getOrCreateModeParams("bicycle").setMarginalUtilityOfTraveling(-6);
+        config.scoring().getOrCreateModeParams("bicycle").setConstant(1.6);
+        config.scoring().getOrCreateModeParams("bicycle").setMarginalUtilityOfTraveling(-6);
 
-        config.planCalcScore().getOrCreateModeParams("motorcycle").setConstant(-1.3);
-        config.planCalcScore().getOrCreateModeParams("motorcycle").setMarginalUtilityOfTraveling(-6);
+        config.scoring().getOrCreateModeParams("motorcycle").setConstant(-1.3);
+        config.scoring().getOrCreateModeParams("motorcycle").setMarginalUtilityOfTraveling(-6);
 
-        config.planCalcScore().getOrCreateModeParams("pt").setConstant(-0.65);
+        config.scoring().getOrCreateModeParams("pt").setConstant(-0.65);
 
         StrategySettings reRoute = new StrategySettings();
         reRoute.setStrategyName(DefaultStrategy.ReRoute);
         reRoute.setWeight(0.2);
-        config.strategy().addStrategySettings(reRoute);
+        config.replanning().addStrategySettings(reRoute);
 
         StrategySettings modeChoice = new StrategySettings();
         modeChoice.setStrategyName(DefaultStrategy.ChangeTripMode);
         modeChoice.setWeight(0.15);
-        config.strategy().addStrategySettings(modeChoice);
+        config.replanning().addStrategySettings(modeChoice);
 
         ChangeModeConfigGroup changeTripMode = config.changeMode();
         changeTripMode.setModes(new String [] {TransportMode.car,"motorcycle","bicycle"});
 
-        config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
+        config.replanning().setFractionOfIterationsToDisableInnovation(0.8);
         {
             ActivityParams ap = new ActivityParams("home");
             ap.setTypicalDuration(12*3600.);
-            config.planCalcScore().addActivityParams(ap);
+            config.scoring().addActivityParams(ap);
         }
         {
             ActivityParams ap = new ActivityParams("work");
             ap.setTypicalDuration(8*3600.);
-            config.planCalcScore().addActivityParams(ap);
+            config.scoring().addActivityParams(ap);
         }
         {
             ActivityParams ap = new ActivityParams("education");
             ap.setTypicalDuration(6*3600.);
-            config.planCalcScore().addActivityParams(ap);
+            config.scoring().addActivityParams(ap);
         }
         {
             ActivityParams ap = new ActivityParams("leisure");
             ap.setTypicalDuration(3*3600.);
-            config.planCalcScore().addActivityParams(ap);
+            config.scoring().addActivityParams(ap);
         }
         {
             ActivityParams ap = new ActivityParams("social");
             ap.setTypicalDuration(3*3600.);
-            config.planCalcScore().addActivityParams(ap);
+            config.scoring().addActivityParams(ap);
         }
         {
             ActivityParams ap = new ActivityParams("shopping");
             ap.setTypicalDuration(1*3600.);
-            config.planCalcScore().addActivityParams(ap);
+            config.scoring().addActivityParams(ap);
         }
         return config;
     }

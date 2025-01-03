@@ -5,8 +5,6 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.Controler;
-import org.matsim.core.network.NetworkChangeEvent;
-import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import playground.shivam.trafficChar.TrafficCharQSimModule;
 import playground.shivam.trafficChar.core.TrafficCharConfigGroup;
@@ -23,7 +21,7 @@ public class RunNetChangeGridScenario {
     private void run(){
         RunGridScenario rgs = new RunGridScenario();
         Config config = rgs.prepareConfig();
-        config.controler().setOutputDirectory("output/GridScenarioTrafficChar");
+        config.controller().setOutputDirectory("output/GridScenarioTrafficChar");
 //        config.network().setTimeVariantNetwork(true);
 
         TrafficCharConfigGroup trafficCharConfigGroup = new TrafficCharConfigGroup();

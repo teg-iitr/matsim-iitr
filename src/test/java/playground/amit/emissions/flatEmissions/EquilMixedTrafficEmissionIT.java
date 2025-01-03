@@ -20,7 +20,7 @@
 package playground.amit.emissions.flatEmissions;
 
 import com.google.inject.name.Names;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -46,7 +46,7 @@ import org.matsim.contrib.emissions.events.WarmEmissionEvent;
 import org.matsim.contrib.emissions.events.WarmEmissionEventHandler;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.core.config.Config;
-import org.matsim.core.config.groups.ControlerConfigGroup;
+import org.matsim.core.config.groups.ControllerConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
@@ -76,7 +76,7 @@ public class EquilMixedTrafficEmissionIT {
 
 	@Rule
 	public final MatsimTestUtils helper = new MatsimTestUtils();
-	private static final Logger logger = Logger.getLogger(EquilMixedTrafficEmissionIT.class);
+	private static final Logger logger = LogManager.getLogger(EquilMixedTrafficEmissionIT.class);
 
 	private final String classOutputDir = "test/output/" + EquilMixedTrafficEmissionIT.class.getCanonicalName().replace('.', '/') + "/";
 
@@ -167,9 +167,9 @@ public class EquilMixedTrafficEmissionIT {
 		sc.getConfig().qsim().setVehiclesSource(this.vehiclesSource);
 		sc.getConfig().qsim().setUsePersonIdForMissingVehicleId(true);
 
-		sc.getConfig().plansCalcRoute().getOrCreateModeRoutingParams(TransportMode.pt).setTeleportedModeFreespeedFactor(1.5);
-		sc.getConfig().plansCalcRoute().setNetworkModes(mainModes);
-		sc.getConfig().planCalcScore().getOrCreateModeParams("bicycle").setConstant(0.0);
+		sc.getConfig().routing().getOrCreateModeRoutingParams(TransportMode.pt).setTeleportedModeFreespeedFactor(1.5);
+		sc.getConfig().routing().setNetworkModes(mainModes);
+		sc.getConfig().scoring().getOrCreateModeParams("bicycle").setConstant(0.0);
 
 		sc.getConfig().travelTimeCalculator().setAnalyzedModesAsString("car,bicycle");
 		sc.getConfig().travelTimeCalculator().setFilterModes(true);
@@ -181,9 +181,9 @@ public class EquilMixedTrafficEmissionIT {
 
 		Controler controler = new Controler(sc);
 		String outputDirectory = classOutputDir + helper.getMethodName() + "/" + (isConsideringCO2Costs ? "considerCO2Costs/" : "notConsiderCO2Costs/");
-		sc.getConfig().controler().setOutputDirectory(outputDirectory);
+		sc.getConfig().controller().setOutputDirectory(outputDirectory);
 
-		sc.getConfig().controler().setRoutingAlgorithmType(ControlerConfigGroup.RoutingAlgorithmType.Dijkstra);
+		sc.getConfig().controller().setRoutingAlgorithmType(ControllerConfigGroup.RoutingAlgorithmType.Dijkstra);
 
 		EmissionsConfigGroup emissionsConfigGroup = ( (EmissionsConfigGroup) sc.getConfig().getModules().get(EmissionsConfigGroup.GROUP_NAME) );
 //		emissionsConfigGroup.setEmissionEfficiencyFactor(1.0);

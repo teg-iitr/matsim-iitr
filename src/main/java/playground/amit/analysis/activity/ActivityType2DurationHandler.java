@@ -18,14 +18,8 @@
  * *********************************************************************** */
 package playground.amit.analysis.activity;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.ActivityEndEvent;
 import org.matsim.api.core.v01.events.ActivityStartEvent;
@@ -35,6 +29,8 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.utils.collections.Tuple;
 
+import java.util.*;
+
 /**
  * This calculates activity durations for each activity type and each persons. 
  * Repetition of activities for same person will not be summed up instead will 
@@ -42,7 +38,7 @@ import org.matsim.core.utils.collections.Tuple;
  * @author amit
  */
 public class ActivityType2DurationHandler implements ActivityEndEventHandler, ActivityStartEventHandler {
-	public static final Logger LOG = Logger.getLogger(ActivityType2DurationHandler.class);
+	public static final Logger LOG = LogManager.getLogger(ActivityType2DurationHandler.class);
 	private final Map<Id<Person>, PersonActivityInfo> personId2ActInfo;
 	private final double midNightTime;
 	private final Set<String> actTyps;

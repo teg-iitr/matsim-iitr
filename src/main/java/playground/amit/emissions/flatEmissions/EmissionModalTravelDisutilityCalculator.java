@@ -19,26 +19,26 @@
 
 package playground.amit.emissions.flatEmissions;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.emissions.EmissionModule;
 import org.matsim.contrib.emissions.LinkEmissionsCalculator;
 import org.matsim.contrib.emissions.Pollutant;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
-
 import playground.vsp.airPollution.flatEmissions.EmissionCostModule;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author benjamin
@@ -46,7 +46,7 @@ import playground.vsp.airPollution.flatEmissions.EmissionCostModule;
  */
 class EmissionModalTravelDisutilityCalculator implements TravelDisutility {
 
-    public static final Logger LOGGER = Logger.getLogger(EmissionModalTravelDisutilityCalculator.class);
+    public static final Logger LOGGER = LogManager.getLogger(EmissionModalTravelDisutilityCalculator.class);
 
     private final TravelDisutility travelDisutility;
     private final TravelTime travelTime;
@@ -60,7 +60,7 @@ class EmissionModalTravelDisutilityCalculator implements TravelDisutility {
 
     public EmissionModalTravelDisutilityCalculator(TravelDisutility travelDisutility,
                                                    TravelTime travelTime,
-                                                   PlanCalcScoreConfigGroup cnScoringGroup,
+                                                   ScoringConfigGroup cnScoringGroup,
                                                    EmissionModule emissionModule,
                                                    EmissionCostModule emissionCostModule,
                                                    Set<Id<Link>> hotspotLinks,

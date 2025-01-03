@@ -18,23 +18,15 @@
  * *********************************************************************** */
 package playground.amit.analysis.activity;
 
-import java.io.BufferedWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigReader;
 import org.matsim.core.utils.io.IOUtils;
 import playground.amit.munich.utils.MunichPersonFilter;
+
+import java.io.BufferedWriter;
+import java.util.*;
 
 /**
  * A class to get the distribution of activity duration differences.
@@ -173,9 +165,9 @@ public class ActDurationDiffDistribution {
 		SortedMap<String, Double> act2TypDur = new TreeMap<>();
 		SortedMap<String, Double> act2MinDur = new TreeMap<>();
 
-		for (String actTyp :config.planCalcScore().getActivityTypes()){
-			act2TypDur.put(actTyp, config.planCalcScore().getActivityParams(actTyp).getTypicalDuration().seconds());
-			act2MinDur.put(actTyp, config.planCalcScore().getActivityParams(actTyp).getMinimalDuration().seconds());
+		for (String actTyp :config.scoring().getActivityTypes()){
+			act2TypDur.put(actTyp, config.scoring().getActivityParams(actTyp).getTypicalDuration().seconds());
+			act2MinDur.put(actTyp, config.scoring().getActivityParams(actTyp).getMinimalDuration().seconds());
 		}
 
 		String fileName = outputDir+"/analysis/actTyp2TypicalAndMinimumActDurations.txt";

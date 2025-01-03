@@ -19,8 +19,6 @@
 
 package playground.amit.emissions.exposure;
 
-import java.util.HashSet;
-import java.util.Set;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -31,13 +29,19 @@ import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.*;
-import org.matsim.core.config.groups.ControlerConfigGroup.EventsFileFormat;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
-import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.ControllerConfigGroup;
+import org.matsim.core.config.groups.ControllerConfigGroup.EventsFileFormat;
+import org.matsim.core.config.groups.QSimConfigGroup;
+import org.matsim.core.config.groups.ReplanningConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.ScoringConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup.ActivityParams;
+import org.matsim.core.config.groups.VspExperimentalConfigGroup;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.scenario.ScenarioUtils;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author julia, benjamin, amit
@@ -48,9 +52,9 @@ public class EquilTestSetUp {
 	public Scenario createConfigAndReturnScenario(){
 		Config config = ConfigUtils.createConfig();
 
-		config.strategy().setMaxAgentPlanMemorySize(2);
+		config.replanning().setMaxAgentPlanMemorySize(2);
 
-		ControlerConfigGroup ccg = config.controler();
+		ControllerConfigGroup ccg = config.controller();
 		ccg.setWriteEventsInterval(2);
 		ccg.setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
 		ccg.setCreateGraphs(false);		
@@ -69,7 +73,7 @@ public class EquilTestSetUp {
 		qcg.setFlowCapFactor(0.1);
 		qcg.setStorageCapFactor(0.3);
 
-		PlanCalcScoreConfigGroup pcs = config.planCalcScore();
+		ScoringConfigGroup pcs = config.scoring();
 
 		ActivityParams home = new ActivityParams("home");
 		home.setTypicalDuration( 6*3600 );
@@ -85,7 +89,7 @@ public class EquilTestSetUp {
 		pcs.setLateArrival_utils_hr(0.0);
 		pcs.setPerforming_utils_hr(0.96);
 		
-		StrategyConfigGroup scg  = config.strategy();
+		StrategyConfigGroup scg  = config.replanning();
 
 		StrategySettings strategySettings = new StrategySettings();
 		strategySettings.setStrategyName("ChangeExpBeta");

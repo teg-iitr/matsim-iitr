@@ -18,23 +18,22 @@
  * *********************************************************************** */
 package playground.amit.InternalizationEmissionAndCongestion;
 
-import java.util.Set;
-
 import com.google.inject.Inject;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.emissions.EmissionModule;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
 import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.vehicles.Vehicle;
-
 import org.matsim.vehicles.Vehicles;
 import playground.vsp.airPollution.flatEmissions.EmissionCostModule;
 import playground.vsp.congestion.handlers.TollHandler;
+
+import java.util.Set;
 
 /**
  * @author amit after Benjamin and Ihab
@@ -43,7 +42,7 @@ public class EmissionCongestionTravelDisutilityCalculatorFactory implements Trav
 
 	@Inject private EmissionModule emissionModule;
 	@Inject private EmissionCostModule emissionCostModule;
-	@Inject private PlanCalcScoreConfigGroup cnScoringGroup;
+	@Inject private ScoringConfigGroup cnScoringGroup;
 	@Inject private Vehicles vehicles;
 
 	private final RandomizingTimeDistanceTravelDisutilityFactory randomizedTimeDistanceTravelDisutilityFactory;

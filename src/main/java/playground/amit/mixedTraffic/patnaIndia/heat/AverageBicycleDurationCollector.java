@@ -1,6 +1,6 @@
 package playground.amit.mixedTraffic.patnaIndia.heat;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -95,7 +95,7 @@ public class AverageBicycleDurationCollector
 
     @Override
     public void handleEvent(PersonStuckEvent personStuckEvent) {
-        Logger.getLogger(AverageBicycleDurationCollector.class).error("Stuck and abort event :"+personStuckEvent.toString());
+        LogManager.getLogger(AverageBicycleDurationCollector.class).error("Stuck and abort event :"+personStuckEvent.toString());
     }
 
     private void processData(Scenario scenario){

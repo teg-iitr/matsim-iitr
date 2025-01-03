@@ -19,20 +19,13 @@
  * *********************************************************************** */
 package playground.amit.munich.analysis.userGroup;
 
-import java.io.BufferedWriter;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.contrib.emissions.EmissionUtils;
+import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.utils.io.IOUtils;
 import playground.amit.munich.utils.MunichPersonFilter;
@@ -40,6 +33,9 @@ import playground.amit.munich.utils.MunichPersonFilter.MunichUserGroup;
 import playground.amit.utils.LoadMyScenarios;
 import playground.vsp.airPollution.flatEmissions.EmissionCostFactors;
 import playground.vsp.analysis.modules.emissionsAnalyzer.EmissionsAnalyzer;
+
+import java.io.BufferedWriter;
+import java.util.*;
 
 import static org.matsim.contrib.emissions.Pollutant.*;
 
@@ -50,7 +46,7 @@ import static org.matsim.contrib.emissions.Pollutant.*;
  */
 public class EmissionsPerPersonPerUserGroup {
 
-	public static final Logger LOG = Logger.getLogger(EmissionsPerPersonPerUserGroup.class);
+	public static final Logger LOG = LogManager.getLogger(EmissionsPerPersonPerUserGroup.class);
 	private int lastIteration;
 	private final String outputDir;
 	private SortedMap<MunichUserGroup, SortedMap<String, Double>> userGroupToEmissions;
@@ -73,7 +69,7 @@ public class EmissionsPerPersonPerUserGroup {
 	private void init(final String runCase){
 		
 		this.scenario = LoadMyScenarios.loadScenarioFromOutputDir(this.outputDir+runCase);
-		this.lastIteration = this.scenario.getConfig().controler().getLastIteration();
+		this.lastIteration = this.scenario.getConfig().controller().getLastIteration();
 		
 		this.userGroupToEmissions = new TreeMap<>();
 		this.emissionsPerPerson = new HashMap<>();

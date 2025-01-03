@@ -4,21 +4,26 @@ import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.network.*;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.network.NetworkFactory;
+import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.routes.NetworkRoute;
-import org.matsim.core.router.*;
+import org.matsim.core.router.DefaultRoutingModules;
+import org.matsim.core.router.TripRouter;
 import org.matsim.core.router.costcalculators.RandomizingTimeDistanceTravelDisutilityFactory;
+import org.matsim.core.router.speedy.SpeedyALTFactory;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.facilities.FacilitiesUtils;
 import org.matsim.utils.objectattributes.attributable.Attributes;
-import org.matsim.utils.objectattributes.attributable.AttributesUtils;
+import org.matsim.utils.objectattributes.attributable.AttributesImpl;
 import playground.amit.utils.FileUtils;
 
 import java.io.BufferedReader;
@@ -42,7 +47,7 @@ public class GenerateRandomizedPTRoutes {
 
     public static void main(String[] args) {
         Config config = ConfigUtils.createConfig();
-        config.plansCalcRoute().setRoutingRandomness(3.0);
+        config.routing().setRoutingRandomness(3.0);
         Scenario scenario = ScenarioUtils.loadScenario(config);
         Network network = scenario.getNetwork();
 
@@ -79,7 +84,7 @@ public class GenerateRandomizedPTRoutes {
                         TransportMode.car,
                         scenario.getPopulation().getFactory(),
                         scenario.getNetwork(),
-                        new FastAStarLandmarksFactory(1).createPathCalculator(scenario.getNetwork(),
+                        new SpeedyALTFactory().createPathCalculator(scenario.getNetwork(),
                                 new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, scenario.getConfig())
                                         .createTravelDisutility(
                                                 new AccessibilityBasedTravelTime()),
@@ -92,7 +97,7 @@ public class GenerateRandomizedPTRoutes {
                 FacilitiesUtils.toFacility(destination, null),
                 origin.getEndTime().seconds(),
                 person,
-                new Attributes());
+                new AttributesImpl());
 
         System.out.println(((NetworkRoute) ((Leg) routeInfo.get(0)).getRoute()).getLinkIds());
     }

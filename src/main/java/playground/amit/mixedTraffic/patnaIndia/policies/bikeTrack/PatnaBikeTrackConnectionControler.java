@@ -26,12 +26,12 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ScoringParameterSet;
 import org.matsim.core.config.groups.QSimConfigGroup;
+import org.matsim.core.config.groups.ReplanningConfigGroup.StrategySettings;
 import org.matsim.core.config.groups.ScenarioConfigGroup;
-import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.ScoringConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup.ModeParams;
+import org.matsim.core.config.groups.ScoringConfigGroup.ScoringParameterSet;
 import org.matsim.core.config.groups.VspExperimentalConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
@@ -107,7 +107,7 @@ public class PatnaBikeTrackConnectionControler {
 
 		Scenario scenario = prepareScenario(outBikeTrackConnectorFile);
 
-		scenario.getConfig().controler().setOutputDirectory(dir+"bikeTrackConnectors_"+numberOfConnectors+"_"+updateConnectorsAfterIteration+"_"+
+		scenario.getConfig().controller().setOutputDirectory(dir+"bikeTrackConnectors_"+numberOfConnectors+"_"+updateConnectorsAfterIteration+"_"+
 				reduceLinkLengthBy+"_"+useBikeTravelTime+"_"+modeChoiceUntilLastIteration+"/");
 		BikeConnectorControlerListener bikeConnectorControlerListener = new BikeConnectorControlerListener(numberOfConnectors, updateConnectorsAfterIteration, initialStabilizationIterations);
 
@@ -138,7 +138,7 @@ public class PatnaBikeTrackConnectionControler {
 		});
 
 		// for PT fare system to work, make sure that util_dist and monetary dist rate for pt are zero.
-		ModeParams mp = controler.getConfig().planCalcScore().getModes().get("pt");
+		ModeParams mp = controler.getConfig().scoring().getModes().get("pt");
 		mp.setMarginalUtilityOfDistance(0.0);
 		mp.setMonetaryDistanceRate(0.0);
 
@@ -147,7 +147,7 @@ public class PatnaBikeTrackConnectionControler {
 
 		controler.run();
 
-		String outputDir = controler.getScenario().getConfig().controler().getOutputDirectory();
+		String outputDir = controler.getScenario().getConfig().controller().getOutputDirectory();
 
 		String outputEventsFile = outputDir+"/output_events.xml.gz";
 		if(new File(outputEventsFile).exists()) {
@@ -189,20 +189,20 @@ public class PatnaBikeTrackConnectionControler {
 
 		//==
 		// after calibration;  departure time is fixed for urban; check if time choice is not present
-		config.strategy().setFractionOfIterationsToDisableInnovation(1.0); // let all the innovations (except mode choice) go on until last iteration.
-		Collection<StrategySettings> strategySettings = config.strategy().getStrategySettings();
+		config.replanning().setFractionOfIterationsToDisableInnovation(1.0); // let all the innovations (except mode choice) go on until last iteration.
+		Collection<StrategySettings> strategySettings = config.replanning().getStrategySettings();
 		for(StrategySettings ss : strategySettings){ // departure time is fixed now.
 			ss.setDisableAfter(-1);
 			if ( ss.getStrategyName().equals(DefaultStrategy.TimeAllocationMutator.toString()) ) {
 				throw new RuntimeException("Time mutation should not be used; fixed departure time must be used after cadyts calibration.");
 			} else if ( ! modeChoiceUntilLastIteration && ss.getStrategyName().equals(DefaultStrategy.ChangeTripMode.toString())) {
-				ss.setDisableAfter(config.controler().getFirstIteration() + initialStabilizationIterations);
+				ss.setDisableAfter(config.controller().getFirstIteration() + initialStabilizationIterations);
 			}
 		}
 
 		//==
-		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
-		config.controler().setDumpDataAtEnd(true);
+		config.controller().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
+		config.controller().setDumpDataAtEnd(true);
 
 		config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
 
@@ -234,7 +234,7 @@ public class PatnaBikeTrackConnectionControler {
 			@Inject
 			Population population;
 			@Inject
-			PlanCalcScoreConfigGroup planCalcScoreConfigGroup; // to modify the util parameters
+			ScoringConfigGroup planCalcScoreConfigGroup; // to modify the util parameters
 			@Inject
 			ScenarioConfigGroup scenarioConfig;
 			@Override

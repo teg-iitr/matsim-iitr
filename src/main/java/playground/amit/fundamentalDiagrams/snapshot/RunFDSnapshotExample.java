@@ -19,14 +19,15 @@
 
 package playground.amit.fundamentalDiagrams.snapshot;
 
-import java.util.Collections;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.ControlerConfigGroup;
+import org.matsim.core.config.groups.ControllerConfigGroup;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 import playground.amit.fundamentalDiagrams.core.FDModule;
 import playground.amit.utils.FileUtils;
+
+import java.util.Collections;
 
 /**
  * Created by amit on 16/02/2017.
@@ -49,9 +50,9 @@ public class RunFDSnapshotExample {
 
         String myDir = FileUtils.RUNS_SVN+"/test/raceTrack/test";
         String outFolder ="/1lane/";
-        scenario.getConfig().controler().setOutputDirectory(myDir+outFolder);
-        scenario.getConfig().controler().setWriteEventsInterval(1);// write events for each combination
-        scenario.getConfig().controler().setSnapshotFormat(Collections.singletonList(ControlerConfigGroup.SnapshotFormat.transims));
+        scenario.getConfig().controller().setOutputDirectory(myDir+outFolder);
+        scenario.getConfig().controller().setWriteEventsInterval(1);// write events for each combination
+        scenario.getConfig().controller().setSnapshotFormat(Collections.singletonList(ControllerConfigGroup.SnapshotFormat.transims));
 
         Controler controler = new Controler(scenario);
         controler.addOverridingModule(new FDModule(scenario));

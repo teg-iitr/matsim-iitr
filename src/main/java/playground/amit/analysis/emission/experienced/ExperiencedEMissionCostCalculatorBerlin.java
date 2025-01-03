@@ -19,29 +19,25 @@
 
 package playground.amit.analysis.emission.experienced;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.PersonMoneyEvent;
 import org.matsim.api.core.v01.events.handler.PersonMoneyEventHandler;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.contrib.emissions.events.EmissionEventsReader;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.utils.io.IOUtils;
-
 import playground.amit.utils.LoadMyScenarios;
-import playground.amit.utils.MapUtils;
-import playground.vsp.airPollution.exposure.EmissionResponsibilityCostModule;
 import playground.vsp.airPollution.exposure.GridTools;
 import playground.vsp.airPollution.exposure.IntervalHandler;
 import playground.vsp.airPollution.exposure.ResponsibilityGridTools;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by amit on 15.05.17.
@@ -126,8 +122,8 @@ public class ExperiencedEMissionCostCalculatorBerlin {
                     rgt.resetAndcaluculateRelativeDurationFactors(intervalHandler.getDuration());
 
                     EmissionsConfigGroup emissionsConfigGroup  = new EmissionsConfigGroup();
-                    emissionsConfigGroup.setConsideringCO2Costs(true);
-                    emissionsConfigGroup.setEmissionCostMultiplicationFactor(1.);
+//                    emissionsConfigGroup.setConsideringCO2Costs(true);
+//                    emissionsConfigGroup.setEmissionCostMultiplicationFactor(1.);
 
                     throw new RuntimeException("EmissionResponsbilityCostModule is injected. I am unsure, how to get this thing functional outside controller. AA, SA, Feb 2023");
 

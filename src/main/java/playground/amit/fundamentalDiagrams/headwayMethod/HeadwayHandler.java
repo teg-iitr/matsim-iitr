@@ -19,34 +19,26 @@
 
 package playground.amit.fundamentalDiagrams.headwayMethod;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
-import javax.inject.Inject;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.LinkLeaveEvent;
 import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
 import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
-import org.matsim.core.config.groups.ControlerConfigGroup;
+import org.matsim.core.config.groups.ControllerConfigGroup;
 import org.matsim.core.controler.events.IterationEndsEvent;
 import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.Vehicles;
-import playground.amit.fundamentalDiagrams.core.FDConfigGroup;
-import playground.amit.fundamentalDiagrams.core.FDDataContainer;
-import playground.amit.fundamentalDiagrams.core.FDModule;
-import playground.amit.fundamentalDiagrams.core.FDNetworkGenerator;
-import playground.amit.fundamentalDiagrams.core.FDStabilityTester;
+import playground.amit.fundamentalDiagrams.core.*;
 import playground.amit.utils.ListUtils;
+
+import javax.inject.Inject;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by amit on 14.05.18.
@@ -56,7 +48,7 @@ public class HeadwayHandler implements LinkEnterEventHandler, LinkLeaveEventHand
 
     @Inject
     public HeadwayHandler(Vehicles vehicles, FDNetworkGenerator fdNetworkGenerator, FDStabilityTester stabilityTester,
-                          FDDataContainer fdDataContainer, ControlerConfigGroup config, FDConfigGroup fdConfigGroup) {
+                          FDDataContainer fdDataContainer, ControllerConfigGroup config, FDConfigGroup fdConfigGroup) {
         this.vehicles = vehicles;
         this.fdNetworkGenerator = fdNetworkGenerator;
         this.stabilityTester = stabilityTester;
@@ -69,7 +61,7 @@ public class HeadwayHandler implements LinkEnterEventHandler, LinkLeaveEventHand
     private FDNetworkGenerator fdNetworkGenerator;
     private FDStabilityTester stabilityTester;
     private FDDataContainer fdDataContainer;
-    private ControlerConfigGroup config;
+    private ControllerConfigGroup config;
     private FDConfigGroup fdConfigGroup;
 
     private final Map<String, List<Double>> modeToHeadwayList = new TreeMap<>();

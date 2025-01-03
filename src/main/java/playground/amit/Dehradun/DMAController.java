@@ -5,7 +5,6 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.router.util.TravelTime;
@@ -40,8 +39,8 @@ public class DMAController {
         }
 
         Config config = ConfigUtils.loadConfig(config_file);
-        config.controler().setRunId(runId);
-        config.controler().setOutputDirectory(config.controler().getOutputDirectory()+runId);
+        config.controller().setRunId(runId);
+        config.controller().setOutputDirectory(config.controller().getOutputDirectory()+runId);
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
         DMAVehicleGenerator.generateVehicles(scenario);
@@ -66,11 +65,11 @@ public class DMAController {
 //            }
 //        });
         // for above make sure that util_dist and monetary dist rate for pt are zero.
-//        PlanCalcScoreConfigGroup.ModeParams mp = controler.getConfig().planCalcScore().getModes().get(DehradunUtils.TravelModesBaseCase2017.bus.name());
+//        ScoringConfigGroup.ModeParams mp = controler.getConfig().scoring().getModes().get(DehradunUtils.TravelModesBaseCase2017.bus.name());
 //        mp.setMarginalUtilityOfDistance(0.0);
 //        mp.setMonetaryDistanceRate(0.0);
 //
-//        PlanCalcScoreConfigGroup.ModeParams mp2 = controler.getConfig().planCalcScore().getModes().get(DehradunUtils.TravelModesBaseCase2017.IPT.name());
+//        ScoringConfigGroup.ModeParams mp2 = controler.getConfig().scoring().getModes().get(DehradunUtils.TravelModesBaseCase2017.IPT.name());
 //        mp2.setMarginalUtilityOfDistance(0.0);
 //        mp2.setMonetaryDistanceRate(0.0);
 
@@ -85,11 +84,11 @@ public class DMAController {
 
         controler.run();
 
-        String OUTPUT_DIR = config.controler().getOutputDirectory();
-        String run = config.controler().getRunId();
+        String OUTPUT_DIR = config.controller().getOutputDirectory();
+        String run = config.controller().getRunId();
         // delete unnecessary iterations folder here.
-        int firstIt = controler.getConfig().controler().getFirstIteration();
-        int lastIt = controler.getConfig().controler().getLastIteration();
+        int firstIt = controler.getConfig().controller().getFirstIteration();
+        int lastIt = controler.getConfig().controller().getLastIteration();
         FileUtils.deleteIntermediateIterations(OUTPUT_DIR, firstIt, lastIt);
 
         new File(OUTPUT_DIR+"/analysis/").mkdir();
@@ -104,7 +103,7 @@ public class DMAController {
         msc.run();
         msc.writeResults(OUTPUT_DIR+"/analysis/modalShareFromEvents.txt");
 
-        StatsWriter.run(OUTPUT_DIR,config.controler().getRunId());
+        StatsWriter.run(OUTPUT_DIR,config.controller().getRunId());
     }
 
     public static class FreeSpeedTravelTimeForMotorbike implements TravelTime {

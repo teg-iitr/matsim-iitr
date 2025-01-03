@@ -18,14 +18,15 @@
  * *********************************************************************** */
 package playground.amit.analysis.emission;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.emissions.EmissionUtils;
 import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.contrib.emissions.events.EmissionEventsReader;
-import org.matsim.contrib.emissions.EmissionUtils;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.handler.EventHandler;
@@ -34,7 +35,10 @@ import playground.amit.analysis.emission.filtering.FilteredColdEmissionHandler;
 import playground.amit.analysis.emission.filtering.FilteredWarmEmissionHandler;
 import playground.amit.munich.utils.MunichPersonFilter;
 import playground.amit.munich.utils.MunichPersonFilter.MunichUserGroup;
-import playground.amit.utils.*;
+import playground.amit.utils.AreaFilter;
+import playground.amit.utils.FileUtils;
+import playground.amit.utils.LoadMyScenarios;
+import playground.amit.utils.PersonFilter;
 import playground.vsp.airPollution.flatEmissions.EmissionCostFactors;
 import playground.vsp.analysis.modules.AbstractAnalysisModule;
 
@@ -49,7 +53,7 @@ import java.util.*;
 //TODO :clean it.
 
 public class EmissionLinkAnalyzer extends AbstractAnalysisModule {
-	private static final Logger LOG = Logger.getLogger(EmissionLinkAnalyzer.class);
+	private static final Logger LOG = LogManager.getLogger(EmissionLinkAnalyzer.class);
 	private final String emissionEventsFile;
     private final FilteredWarmEmissionHandler warmHandler;
 	private final FilteredColdEmissionHandler coldHandler;

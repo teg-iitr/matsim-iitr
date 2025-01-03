@@ -27,12 +27,12 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ScoringParameterSet;
 import org.matsim.core.config.groups.QSimConfigGroup;
+import org.matsim.core.config.groups.ReplanningConfigGroup.StrategySettings;
 import org.matsim.core.config.groups.ScenarioConfigGroup;
-import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.ScoringConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup.ModeParams;
+import org.matsim.core.config.groups.ScoringConfigGroup.ScoringParameterSet;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
@@ -100,11 +100,11 @@ public class PatnaPolicyControler {
 		String configFile = inputDir + "configBaseCaseCtd.xml";
 
 		ConfigUtils.loadConfig(config, configFile);
-		config.controler().setOutputDirectory(outputDir);
+		config.controller().setOutputDirectory(outputDir);
 
 		//==
 		// after calibration;  departure time is fixed for urban; check if time choice is not present
-		Collection<StrategySettings> strategySettings = config.strategy().getStrategySettings();
+		Collection<StrategySettings> strategySettings = config.replanning().getStrategySettings();
 		for(StrategySettings ss : strategySettings){ // departure time is fixed now.
 			if ( ss.getStrategyName().equals(DefaultStrategy.TimeAllocationMutator.toString()) ) {
 				throw new RuntimeException("Time mutation should not be used; fixed departure time must be used after cadyts calibration.");
@@ -122,8 +122,8 @@ public class PatnaPolicyControler {
 		config.vehicles().setVehiclesFile(null); // vehicle types are added from vehicle file later.
 		//==
 
-		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
-		config.controler().setWriteEventsInterval(50);
+		config.controller().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
+		config.controller().setWriteEventsInterval(50);
 
 		config.travelTimeCalculator().setFilterModes(true);
 		config.travelTimeCalculator().setAnalyzedModesAsString(String.join(",", PatnaUtils.ALL_MAIN_MODES));
@@ -172,8 +172,8 @@ public class PatnaPolicyControler {
 
 		final Controler controler = new Controler(scenario);
 
-		controler.getConfig().controler().setDumpDataAtEnd(true);
-		controler.getConfig().strategy().setMaxAgentPlanMemorySize(10);
+		controler.getConfig().controller().setDumpDataAtEnd(true);
+		controler.getConfig().replanning().setMaxAgentPlanMemorySize(10);
 
 		controler.addOverridingModule(new AbstractModule() { // plotting modal share over iterations
 			@Override
@@ -196,7 +196,7 @@ public class PatnaPolicyControler {
 			}
 		});
 		// for above make sure that util_dist and monetary dist rate for pt are zero.
-		ModeParams mp = controler.getConfig().planCalcScore().getModes().get("pt");
+		ModeParams mp = controler.getConfig().scoring().getModes().get("pt");
 		mp.setMarginalUtilityOfDistance(0.0);
 		mp.setMonetaryDistanceRate(0.0);
 
@@ -213,8 +213,8 @@ public class PatnaPolicyControler {
 		controler.run();
 
 		// delete unnecessary iterations folder here.
-		int firstIt = controler.getConfig().controler().getFirstIteration();
-		int lastIt = controler.getConfig().controler().getLastIteration();
+		int firstIt = controler.getConfig().controller().getFirstIteration();
+		int lastIt = controler.getConfig().controller().getLastIteration();
 		FileUtils.deleteIntermediateIterations(outputDir,firstIt,lastIt);
 
 		new File(outputDir+"/analysis/").mkdir();
@@ -241,7 +241,7 @@ public class PatnaPolicyControler {
 			@Inject
              Population population;
 			@Inject
-             PlanCalcScoreConfigGroup planCalcScoreConfigGroup; // to modify the util parameters
+             ScoringConfigGroup planCalcScoreConfigGroup; // to modify the util parameters
 			@Inject
              ScenarioConfigGroup scenarioConfig;
 			@Override

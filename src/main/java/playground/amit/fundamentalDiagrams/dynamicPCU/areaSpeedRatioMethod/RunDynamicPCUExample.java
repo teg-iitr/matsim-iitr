@@ -19,8 +19,6 @@
 
 package playground.amit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod;
 
-import java.util.Arrays;
-import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -42,6 +40,9 @@ import playground.amit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.estim
 import playground.amit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.projectedArea.VehicleProjectedAreaRatio;
 import playground.amit.mixedTraffic.MixedTrafficVehiclesUtils;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Created by amit on 29.06.17.
  */
@@ -61,7 +62,7 @@ public class RunDynamicPCUExample {
 
         Config config = ConfigUtils.createConfig();
 
-        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+        config.controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
 
         QSimConfigGroup qsim = config.qsim();
         List<String> mainModes = Arrays.asList("car", "truck");
@@ -74,7 +75,7 @@ public class RunDynamicPCUExample {
         fdConfigGroup.setModalShareInPCU("1.0,3.0");
         if (! mainModes.contains("truck")) fdConfigGroup.setReduceDataPointsByFactor(2);
 
-        config.controler().setOutputDirectory(parentDir+StringUtils.join(mainModes,'_')+"/"+fdConfigGroup.getModalShareInPCUAsString()+"/");
+        config.controller().setOutputDirectory(parentDir+StringUtils.join(mainModes,'_')+"/"+fdConfigGroup.getModalShareInPCUAsString()+"/");
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
 
@@ -105,6 +106,6 @@ public class RunDynamicPCUExample {
         });
         controler.run();
 
-        FDUtils.cleanOutputDir(scenario.getConfig().controler().getOutputDirectory());
+        FDUtils.cleanOutputDir(scenario.getConfig().controller().getOutputDirectory());
     }
 }

@@ -18,8 +18,6 @@
  * *********************************************************************** */
 package playground.amit.analysis.congestion;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
@@ -32,6 +30,9 @@ import playground.vsp.congestion.handlers.CongestionEventHandler;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV4;
 import playground.vsp.congestion.handlers.MarginalCongestionPricingHandler;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Basically the idea is to read the events file from implementation A and then write congestion events of implementation B.
@@ -47,8 +48,8 @@ public class CrossMarginalCongestionEventsWriter {
 	
 	public CrossMarginalCongestionEventsWriter(final Scenario sc) {
 		this.sc = sc;
-		this.lastIt = sc.getConfig().controler().getLastIteration();
-		this.inputEventsFile = this.sc.getConfig().controler().getOutputDirectory()+"/ITERS/it."+lastIt+"/"+lastIt+".events.xml.gz";
+		this.lastIt = sc.getConfig().controller().getLastIteration();
+		this.inputEventsFile = this.sc.getConfig().controller().getOutputDirectory()+"/ITERS/it."+lastIt+"/"+lastIt+".events.xml.gz";
 	}
 
 	/**
@@ -56,7 +57,7 @@ public class CrossMarginalCongestionEventsWriter {
 	 */
 	public void readAndWrite(final String congestionImpl){
 		
-		String outputEventsFile = sc.getConfig().controler().getOutputDirectory()+"/ITERS/it."+lastIt+"/"+lastIt+".events_"+congestionImpl+".xml.gz";
+		String outputEventsFile = sc.getConfig().controller().getOutputDirectory()+"/ITERS/it."+lastIt+"/"+lastIt+".events_"+congestionImpl+".xml.gz";
 
 		EventsManager manager = EventsUtils.createEventsManager();
 		MatsimEventsReader reader = new MatsimEventsReader(manager);

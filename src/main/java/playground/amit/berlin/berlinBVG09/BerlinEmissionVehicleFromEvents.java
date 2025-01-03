@@ -20,9 +20,8 @@
 
 package playground.amit.berlin.berlinBVG09;
 
-import java.util.HashMap;
-import java.util.Map;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.TransitDriverStartsEvent;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
@@ -36,12 +35,15 @@ import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.vehicles.*;
 import playground.amit.utils.FileUtils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author benjamin
  *
  */
 public class BerlinEmissionVehicleFromEvents implements VehicleEntersTrafficEventHandler, TransitDriverStartsEventHandler {
-	private static final Logger LOGGER = Logger.getLogger(BerlinEmissionVehicleFromEvents.class);
+	private static final Logger LOGGER = LogManager.getLogger(BerlinEmissionVehicleFromEvents.class);
 
 	private final BerlinTransitVehicleTypeIdentifier berlinTransitVehicleTypeIdentifier;
 	private final Map<Id<Person>,Id<Vehicle>> transitDriver2TransitVehicle = new HashMap<>();

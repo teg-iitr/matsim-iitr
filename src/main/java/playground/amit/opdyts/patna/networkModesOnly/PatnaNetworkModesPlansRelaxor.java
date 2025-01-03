@@ -19,8 +19,6 @@
 
 package playground.amit.opdyts.patna.networkModesOnly;
 
-import java.util.Arrays;
-import java.util.List;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -28,14 +26,17 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
-import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
-import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
-import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
-import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
 import playground.amit.opdyts.ObjectiveFunctionEvaluator.ObjectiveFunctionType;
 import playground.amit.opdyts.OpdytsScenario;
 import playground.amit.opdyts.analysis.OpdytsModalStatsControlerListener;
 import playground.amit.utils.FileUtils;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author amit
@@ -57,14 +58,14 @@ class PatnaNetworkModesPlansRelaxor {
 		}
 
 		Config config= ConfigUtils.loadConfig(configFile);
-		config.controler().setOutputDirectory(outDir);
+		config.controller().setOutputDirectory(outDir);
 
 		new PatnaNetworkModesPlansRelaxor().run(config);
 	}
 
 	public void run (Config config) {
 		Scenario scenario = ScenarioUtils.loadScenario(config);
-		scenario.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+		scenario.getConfig().controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 
 		List<String> modes2consider = Arrays.asList("car","bike","motorbike");
 
@@ -89,8 +90,8 @@ class PatnaNetworkModesPlansRelaxor {
 		controler.run();
 
 		// delete unnecessary iterations folder here.
-		int firstIt = controler.getConfig().controler().getFirstIteration();
-		int lastIt = controler.getConfig().controler().getLastIteration();
-		FileUtils.deleteIntermediateIterations(config.controler().getOutputDirectory(),firstIt,lastIt);
+		int firstIt = controler.getConfig().controller().getFirstIteration();
+		int lastIt = controler.getConfig().controller().getLastIteration();
+		FileUtils.deleteIntermediateIterations(config.controller().getOutputDirectory(),firstIt,lastIt);
 	}
 }

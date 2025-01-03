@@ -1,4 +1,5 @@
 package playground.amit.Chandigarh;
+
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
@@ -9,9 +10,9 @@ import org.matsim.contrib.cadyts.general.CadytsConfigGroup;
 import org.matsim.contrib.cadyts.general.CadytsScoring;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
-import org.matsim.core.config.groups.StrategyConfigGroup;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
+import org.matsim.core.config.groups.ReplanningConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup.ModeParams;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
@@ -19,12 +20,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.ScoringFunctionFactory;
 import org.matsim.core.scoring.SumScoringFunction;
-import org.matsim.core.scoring.functions.CharyparNagelActivityScoring;
-import org.matsim.core.scoring.functions.CharyparNagelAgentStuckScoring;
-import org.matsim.core.scoring.functions.CharyparNagelLegScoring;
-import org.matsim.core.scoring.functions.ScoringParametersForPerson;
-
-import org.matsim.core.scoring.functions.ScoringParameters;
+import org.matsim.core.scoring.functions.*;
 
 import javax.inject.Inject;
 public class CadytsInt{
@@ -41,41 +37,41 @@ public class CadytsInt{
 
         config.plans().setInputFile(plans);
 
-        config.controler().setOutputDirectory(output);
-        config.controler().setLastIteration(50);
-        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-        config.controler().setDumpDataAtEnd(true);
+        config.controller().setOutputDirectory(output);
+        config.controller().setLastIteration(50);
+        config.controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+        config.controller().setDumpDataAtEnd(true);
 
         config.counts().setInputFile(countsFile);
         config.counts().setWriteCountsInterval(5);
         config.counts().setOutputFormat("all");
 
-        PlanCalcScoreConfigGroup.ActivityParams startAct = new PlanCalcScoreConfigGroup.ActivityParams(ChandigarhConstants.start_act_type);
+        ScoringConfigGroup.ActivityParams startAct = new ScoringConfigGroup.ActivityParams(ChandigarhConstants.start_act_type);
         startAct.setTypicalDuration(6*3600.);
-        PlanCalcScoreConfigGroup.ActivityParams endAct = new PlanCalcScoreConfigGroup.ActivityParams(ChandigarhConstants.end_act_type);
+        ScoringConfigGroup.ActivityParams endAct = new ScoringConfigGroup.ActivityParams(ChandigarhConstants.end_act_type);
         endAct.setTypicalDuration(16*3600.);
-        config.planCalcScore().addActivityParams(startAct);
-        config.planCalcScore().addActivityParams(endAct);
-		config.planCalcScore().setFractionOfIterationsToStartScoreMSA(0.7);
+        config.scoring().addActivityParams(startAct);
+        config.scoring().addActivityParams(endAct);
+		config.scoring().setFractionOfIterationsToStartScoreMSA(0.7);
 
-        StrategyConfigGroup.StrategySettings reRoute = new StrategyConfigGroup.StrategySettings();
+        ReplanningConfigGroup.StrategySettings reRoute = new ReplanningConfigGroup.StrategySettings();
         reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute); // though, this must not have any effect.
         reRoute.setWeight(0.2);
-        config.strategy().addStrategySettings(reRoute);
+        config.replanning().addStrategySettings(reRoute);
 
-		StrategyConfigGroup.StrategySettings changeExpBeta = new StrategyConfigGroup.StrategySettings();
+		ReplanningConfigGroup.StrategySettings changeExpBeta = new ReplanningConfigGroup.StrategySettings();
 		changeExpBeta.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta);
 		changeExpBeta.setWeight(0.8);
-		config.strategy().addStrategySettings(changeExpBeta);
-		config.strategy().setFractionOfIterationsToDisableInnovation(0.7);
-		config.strategy().setMaxAgentPlanMemorySize(10);
+		config.replanning().addStrategySettings(changeExpBeta);
+		config.replanning().setFractionOfIterationsToDisableInnovation(0.7);
+		config.replanning().setMaxAgentPlanMemorySize(10);
 
 		ModeParams carParams = new ModeParams(TransportMode.car);
 		carParams.setMarginalUtilityOfTraveling(0.);
 		carParams.setConstant(0.);
 		carParams.setMonetaryDistanceRate(0.);
 		carParams.setMarginalUtilityOfDistance(0.);
-		config.planCalcScore().addModeParams(carParams);
+		config.scoring().addModeParams(carParams);
 
 		CadytsConfigGroup cadytsConfigGroup = ConfigUtils.addOrGetModule(config, CadytsConfigGroup.GROUP_NAME, CadytsConfigGroup.class);
 		cadytsConfigGroup.setStartTime(9*3600);
@@ -104,7 +100,7 @@ public class CadytsInt{
 				scoringFunctionAccumulator.addScoringFunction(new CharyparNagelAgentStuckScoring(params));
 
 				final CadytsScoring<Link> scoringFunction = new CadytsScoring<>(person.getSelectedPlan(), config, cadytsContext);
-				scoringFunction.setWeightOfCadytsCorrection(cadytsWeight * config.planCalcScore().getBrainExpBeta()) ;
+				scoringFunction.setWeightOfCadytsCorrection(cadytsWeight * config.scoring().getBrainExpBeta()) ;
 				scoringFunctionAccumulator.addScoringFunction(scoringFunction );
 
 				return scoringFunctionAccumulator;

@@ -18,13 +18,8 @@
  * *********************************************************************** */
 package playground.amit.munich.analysis.userGroup;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -34,6 +29,13 @@ import playground.amit.analysis.congestion.ExperiencedDelayAnalyzer;
 import playground.amit.munich.utils.MunichPersonFilter;
 import playground.amit.munich.utils.MunichPersonFilter.MunichUserGroup;
 import playground.amit.utils.LoadMyScenarios;
+
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * A class to get absolute experienced delays and delays costs per user group.
@@ -48,7 +50,7 @@ public class ExperiencedDelaysUserGroup {
 	}
 
 	private int lastIteration;
-	public static final Logger logger = Logger.getLogger(ExperiencedDelaysUserGroup.class);
+	public static final Logger logger = LogManager.getLogger(ExperiencedDelaysUserGroup.class);
 	private final String outputDir;
 
 	private SortedMap<MunichUserGroup, Double> userGroupToDelays;
@@ -72,12 +74,12 @@ public class ExperiencedDelaysUserGroup {
 		
 		this.scenario = LoadMyScenarios.loadScenarioFromOutputDir(outputDir+runCase);
 		
-		this.lastIteration = scenario.getConfig().controler().getLastIteration();
+		this.lastIteration = scenario.getConfig().controller().getLastIteration();
 
-		double marginalUtlMoney = scenario.getConfig().planCalcScore().getMarginalUtilityOfMoney();
-		double marginalUtlPerformingSec = scenario.getConfig().planCalcScore().getPerforming_utils_hr() / 3600;
+		double marginalUtlMoney = scenario.getConfig().scoring().getMarginalUtilityOfMoney();
+		double marginalUtlPerformingSec = scenario.getConfig().scoring().getPerforming_utils_hr() / 3600;
 		double marginalUtlTravelingCarSec = scenario.getConfig()
-				.planCalcScore()
+				.scoring()
 				.getModes()
 				.get(TransportMode.car)
 				.getMarginalUtilityOfTraveling() / 3600;

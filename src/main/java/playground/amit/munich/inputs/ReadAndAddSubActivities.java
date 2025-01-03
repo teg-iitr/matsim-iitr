@@ -18,15 +18,14 @@
  * *********************************************************************** */
 package playground.amit.munich.inputs;
 
-import java.util.SortedMap;
-
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
-
+import org.matsim.core.config.groups.ScoringConfigGroup.ActivityParams;
 import playground.amit.utils.LoadMyScenarios;
+
+import java.util.SortedMap;
 
 /**
  * @author amit
@@ -73,10 +72,10 @@ public class ReadAndAddSubActivities {
 			params.setEarliestEndTime(Double.NEGATIVE_INFINITY);
 			params.setLatestStartTime(Double.NEGATIVE_INFINITY);
 			params.setOpeningTime(Double.NEGATIVE_INFINITY);
-			config.planCalcScore().addActivityParams(params);
+			config.scoring().addActivityParams(params);
 		}
 		
-		config.controler().setOutputDirectory(null);
+		config.controller().setOutputDirectory(null);
 		config.plans().setInputFile(outPlans);
 		config.vspExperimental().setWritingOutputEvents(true);
 		

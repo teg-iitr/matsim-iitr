@@ -19,11 +19,8 @@
 
 package playground.amit.berlin.berlinBVG09;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.emissions.HbefaVehicleCategory;
@@ -33,6 +30,11 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.Vehicles;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by amit on 11.06.17.
@@ -44,7 +46,7 @@ public class BerlinTransitVehicleTypeIdentifier {
         BUS_AS_HGV, TRAINS_AS_ZERO_EMISSIONS
     }
 
-    private static final Logger LOGGER = Logger.getLogger(BerlinTransitVehicleTypeIdentifier.class);
+    private static final Logger LOGGER = LogManager.getLogger(BerlinTransitVehicleTypeIdentifier.class);
     private final Map<HbefaVehicleCategory,List<Id<VehicleType>>> vehicleCategoryToVehicleTypeList = new HashMap<>();
     private Vehicles transitVehicles;
     private final Map<Id<Vehicle>, BerlinTransitEmissionVehicleType> transitVehicleType2BerlinVehicleType = new HashMap<>();

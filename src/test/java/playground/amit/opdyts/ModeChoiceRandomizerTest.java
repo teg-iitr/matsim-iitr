@@ -36,7 +36,7 @@
 //import org.matsim.contrib.opdyts.utils.OpdytsConfigGroup;
 //import org.matsim.core.config.Config;
 //import org.matsim.core.config.ConfigUtils;
-//import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+//import org.matsim.core.config.groups.ScoringConfigGroup;
 //import org.matsim.core.scenario.ScenarioUtils;
 //import org.matsim.testcases.MatsimTestUtils;
 //import playground.amit.utils.NumberUtils;
@@ -83,7 +83,7 @@
 //        modeToASCs.put("pt", 1.0);
 //        modeToASCs.put("walk", -0.25);
 //
-//        PlanCalcScoreConfigGroup initialScoringConfigGroup = config.planCalcScore();
+//        ScoringConfigGroup initialScoringConfigGroup = config.scoring();
 //        for(String mode : this.consideredModes) {
 //            initialScoringConfigGroup.getOrCreateModeParams(mode).setConstant(modeToASCs.get(mode));
 //        }
@@ -127,7 +127,7 @@
 //        for (String mode : this.consideredModes) {
 //            Assert.assertEquals("wrong value of ASC ",
 //                    modeToASCs.get(mode),
-//                    scenario.getConfig().planCalcScore().getOrCreateModeParams(mode).getConstant(),
+//                    scenario.getConfig().scoring().getOrCreateModeParams(mode).getConstant(),
 //                    MatsimTestUtils.EPSILON);
 //        }
 //
@@ -140,10 +140,10 @@
 //            variationsFromMethod.add(getASCAsString(scenario));
 //            Assert.assertEquals("Wrong ASC for mode car in new decision variables",
 //                    0.0,
-//                    scenario.getConfig().planCalcScore().getOrCreateModeParams("car").getConstant(),
+//                    scenario.getConfig().scoring().getOrCreateModeParams("car").getConstant(),
 //                    MatsimTestUtils.EPSILON);
 //            for(String mode: this.consideredModes) {
-//                double value = Math.abs(modeToASCs.get(mode) - scenario.getConfig().planCalcScore().getOrCreateModeParams(mode).getConstant());
+//                double value = Math.abs(modeToASCs.get(mode) - scenario.getConfig().scoring().getOrCreateModeParams(mode).getConstant());
 //                randomVariation = Math.max(randomVariation, value); // 0 or random variation (same amount in all cases)
 //            }
 //        }
@@ -207,7 +207,7 @@
 //    private String getASCAsString(Scenario scenario){
 //        StringBuilder stringBuilder = new StringBuilder();
 //        for (String mode : this.consideredModes) {
-//            stringBuilder.append(mode+"\t"+ NumberUtils.round(scenario.getConfig().planCalcScore().getOrCreateModeParams(mode).getConstant(), 2));
+//            stringBuilder.append(mode+"\t"+ NumberUtils.round(scenario.getConfig().scoring().getOrCreateModeParams(mode).getConstant(), 2));
 //        }
 //        return stringBuilder.toString();
 //    }

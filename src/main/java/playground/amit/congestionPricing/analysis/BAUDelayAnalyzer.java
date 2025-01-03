@@ -18,11 +18,6 @@
  * *********************************************************************** */
 package playground.amit.congestionPricing.analysis;
 
-import java.io.BufferedWriter;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -30,12 +25,16 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.config.Config;
 import org.matsim.core.utils.io.IOUtils;
-
 import playground.amit.analysis.congestion.CausedDelayAnalyzer;
 import playground.amit.analysis.congestion.CrossMarginalCongestionEventsWriter;
 import playground.amit.analysis.congestion.ExperiencedDelayAnalyzer;
 import playground.amit.munich.utils.MunichPersonFilter;
 import playground.amit.utils.LoadMyScenarios;
+
+import java.io.BufferedWriter;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
 
 /**
  * (1) Read events file and write congestion events for desired implementation.
@@ -49,7 +48,7 @@ public class BAUDelayAnalyzer {
 	public BAUDelayAnalyzer(String congestionImpl) {
 		scenario = LoadMyScenarios.loadScenarioFromOutputDir(runDir);
 		simulationEndTime = scenario.getConfig().qsim().getEndTime().seconds();
-		int lastIt = scenario.getConfig().controler().getLastIteration();
+		int lastIt = scenario.getConfig().controller().getLastIteration();
 		eventsFile = runDir+"ITERS/it."+lastIt+"/"+lastIt+".events.xml.gz";
 		congestionEventsFile = runDir+"/ITERS/it."+lastIt+"/"+lastIt+".events_"+congestionImpl+".xml.gz";
 		this.congestionImpl = congestionImpl;
@@ -133,9 +132,9 @@ public class BAUDelayAnalyzer {
 		
 		Config config = scenario.getConfig();
 
-		double vttsCar = ((config.planCalcScore().getModes().get(TransportMode.car).getMarginalUtilityOfTraveling() /3600) +
-				(config.planCalcScore().getPerforming_utils_hr()/3600)) 
-				/ (config.planCalcScore().getMarginalUtilityOfMoney());
+		double vttsCar = ((config.scoring().getModes().get(TransportMode.car).getMarginalUtilityOfTraveling() /3600) +
+				(config.scoring().getPerforming_utils_hr()/3600)) 
+				/ (config.scoring().getMarginalUtilityOfMoney());
 
 		CausedDelayAnalyzer delayAnalyzer = new CausedDelayAnalyzer(congestionEventsFile, scenario, noOfTimeBins);
 		delayAnalyzer.run();

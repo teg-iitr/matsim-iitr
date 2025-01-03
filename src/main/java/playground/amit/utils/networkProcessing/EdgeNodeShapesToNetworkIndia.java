@@ -18,7 +18,8 @@
  * *********************************************************************** */
 package playground.amit.utils.networkProcessing;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.geotools.feature.simple.SimpleFeatureTypeImpl;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -27,7 +28,6 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.contrib.util.chart.CoordDataset;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.network.NetworkUtils;
@@ -40,7 +40,6 @@ import org.opengis.feature.simple.SimpleFeature;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -53,7 +52,7 @@ public class EdgeNodeShapesToNetworkIndia {
 	private final static String MATSIM_NETWORK = "C:/Users/amit2/Downloads/road_india/MATSim_net_clean.xml.gz";
 	private final static CoordinateTransformation CT =TransformationFactory.getCoordinateTransformation(TransformationFactory.WGS84,"EPSG:24378");
 	private static final Map<String, Id<Node>> osmId2NodeId = new HashMap<>();
-	private static final Logger log = Logger.getLogger(EdgeNodeShapesToNetworkIndia.class);
+	private static final Logger log = LogManager.getLogger(EdgeNodeShapesToNetworkIndia.class);
 
 	public static void main(String[] args) {
 		Config config = ConfigUtils.createConfig();

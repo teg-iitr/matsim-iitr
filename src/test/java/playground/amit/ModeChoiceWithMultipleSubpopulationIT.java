@@ -25,7 +25,7 @@ import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.StrategyConfigGroup;
+import org.matsim.core.config.groups.ReplanningConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.replanning.PlanStrategy;
@@ -69,7 +69,7 @@ public class ModeChoiceWithMultipleSubpopulationIT {
 	@Test
 	public void run() {
 		Config config = ConfigUtils.loadConfig(IOUtils.extendUrl(EQUIL_DIR,"config-with-mode-vehicles.xml"));
-		config.controler().setOutputDirectory(helper.getOutputDirectory());
+		config.controller().setOutputDirectory(helper.getOutputDirectory());
 		config.plans().setInputFile(PLANS_FILE.toString());
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
@@ -85,49 +85,49 @@ public class ModeChoiceWithMultipleSubpopulationIT {
 //		scenario.getConfig().plans().setSubpopulationAttributeName(SUBPOP_ATTRIB_NAME); /* This is the default anyway. */
 
 		// clear previous strategies
-		scenario.getConfig().strategy().clearStrategySettings();
+		scenario.getConfig().replanning().clearStrategySettings();
 
 		// add innovative modules for SUBPOP1_NAME
 		{
-			StrategyConfigGroup.StrategySettings modeChoiceStrategySettings = new StrategyConfigGroup.StrategySettings() ;
+			StrategyConfigGroup.StrategySettings modeChoiceStrategySettings = new ReplanningConfigGroup.StrategySettings() ;
 			modeChoiceStrategySettings.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode.toString());
 			modeChoiceStrategySettings.setSubpopulation(SUBPOP1_NAME);
 			modeChoiceStrategySettings.setWeight(0.3);
-			scenario.getConfig().strategy().addStrategySettings(modeChoiceStrategySettings);
+			scenario.getConfig().replanning().addStrategySettings(modeChoiceStrategySettings);
 
 			// a set of modes for first sub population
 			scenario.getConfig().changeMode().setModes(new String[] {"car", "bicycle"} );
 
-			StrategyConfigGroup.StrategySettings changeExpBetaStrategySettings = new StrategyConfigGroup.StrategySettings();
+			StrategyConfigGroup.StrategySettings changeExpBetaStrategySettings = new ReplanningConfigGroup.StrategySettings();
 			changeExpBetaStrategySettings.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta.toString());
 			changeExpBetaStrategySettings.setSubpopulation(SUBPOP1_NAME);
 			changeExpBetaStrategySettings.setWeight(0.7);
-			scenario.getConfig().strategy().addStrategySettings(changeExpBetaStrategySettings);
+			scenario.getConfig().replanning().addStrategySettings(changeExpBetaStrategySettings);
 		}
 
 		// add innovative modules for SUBPOP2_NAME
 		final String CHANGE_TRIP_MODE_FOR_SUBPOP_2 = DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode.toString().concat(SUBPOP2_NAME);
 		{
-			StrategyConfigGroup.StrategySettings modeChoiceStrategySettings = new StrategyConfigGroup.StrategySettings() ;
+			StrategyConfigGroup.StrategySettings modeChoiceStrategySettings = new ReplanningConfigGroup.StrategySettings() ;
 			modeChoiceStrategySettings.setStrategyName(CHANGE_TRIP_MODE_FOR_SUBPOP_2); // a different name is must. Amit June'17
 			modeChoiceStrategySettings.setSubpopulation(SUBPOP2_NAME);
 			modeChoiceStrategySettings.setWeight(0.3);
-			scenario.getConfig().strategy().addStrategySettings(modeChoiceStrategySettings);
+			scenario.getConfig().replanning().addStrategySettings(modeChoiceStrategySettings);
 
-			StrategyConfigGroup.StrategySettings changeExpBetaStrategySettings = new StrategyConfigGroup.StrategySettings();
+			StrategyConfigGroup.StrategySettings changeExpBetaStrategySettings = new ReplanningConfigGroup.StrategySettings();
 			changeExpBetaStrategySettings.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta.toString());
 			changeExpBetaStrategySettings.setSubpopulation(SUBPOP2_NAME);
 			changeExpBetaStrategySettings.setWeight(0.7);
-			scenario.getConfig().strategy().addStrategySettings(changeExpBetaStrategySettings);
+			scenario.getConfig().replanning().addStrategySettings(changeExpBetaStrategySettings);
 		}
 
 		// disable innovation
-		scenario.getConfig().strategy().setFractionOfIterationsToDisableInnovation(0.8);
+		scenario.getConfig().replanning().setFractionOfIterationsToDisableInnovation(0.8);
 
 		Controler controler = new Controler(scenario);
 
 		// this is required to set the different set of available modes for second sub population example.
-		// (The name of the innovative module should be same as set in config.strategy())
+		// (The name of the innovative module should be same as set in config.replanning())
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
@@ -176,11 +176,11 @@ public class ModeChoiceWithMultipleSubpopulationIT {
 		motorbike.setPcuEquivalents(0.25);
 		scenario.getVehicles().addVehicleType(motorbike);
 
-		scenario.getConfig().plansCalcRoute().setNetworkModes(allowedMode);
+		scenario.getConfig().routing().setNetworkModes(allowedMode);
 		scenario.getConfig().qsim().setMainModes(allowedMode);
 		scenario.getConfig().travelTimeCalculator().setAnalyzedModesAsString("car,motorbike,bicycle");
 
-		scenario.getConfig().planCalcScore().getOrCreateModeParams("motorbike"); // this will set default scoring params for motorbike
+		scenario.getConfig().scoring().getOrCreateModeParams("motorbike"); // this will set default scoring params for motorbike
 
 		for (Link l : scenario.getNetwork().getLinks().values()) {
 			l.setAllowedModes(allowedMode);

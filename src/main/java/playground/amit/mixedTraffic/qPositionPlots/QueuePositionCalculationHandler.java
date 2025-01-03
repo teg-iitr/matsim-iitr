@@ -18,39 +18,27 @@
  * *********************************************************************** */
 package playground.amit.mixedTraffic.qPositionPlots;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Queue;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.events.LinkEnterEvent;
-import org.matsim.api.core.v01.events.LinkLeaveEvent;
-import org.matsim.api.core.v01.events.PersonDepartureEvent;
-import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
-import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
-import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
-import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
-import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
-import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
-import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
+import org.matsim.api.core.v01.events.*;
+import org.matsim.api.core.v01.events.handler.*;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.events.algorithms.Vehicle2DriverEventHandler;
 import org.matsim.core.utils.collections.Tuple;
-
 import playground.amit.mixedTraffic.MixedTrafficVehiclesUtils;
 import playground.amit.mixedTraffic.qPositionPlots.LinkPersonInfoContainer.PersonPositionChecker;
+
+import java.util.*;
 
 /**
  * @author amit
  */
 public class QueuePositionCalculationHandler implements LinkLeaveEventHandler, LinkEnterEventHandler, PersonDepartureEventHandler, VehicleLeavesTrafficEventHandler, VehicleEntersTrafficEventHandler {
 
-	private static final Logger LOG = Logger.getLogger(QueuePositionCalculationHandler.class);
+	private final static Logger LOG = LogManager.getLogger(AgentPositionWriter.class);
 	private final Map<Id<Link>,LinkPersonInfoContainer> linkid2Container = new HashMap<>();
 	private final Vehicle2DriverEventHandler delegate = new Vehicle2DriverEventHandler();
 	private final Map<Id<Person>,SortedMap<Double,String>> person2startTime2PersonQPos = new HashMap<>();

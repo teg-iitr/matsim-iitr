@@ -27,7 +27,7 @@
 //import com.google.inject.Inject;
 //import floetteroed.opdyts.ObjectiveFunction;
 //import floetteroed.opdyts.SimulatorState;
-//import org.apache.log4j.Logger;
+//import org.apache.logging.log4j.Logger;
 //import org.matsim.analysis.TransportPlanningMainModeIdentifier;
 //import org.matsim.api.core.v01.Id;
 //import org.matsim.api.core.v01.network.Link;
@@ -40,7 +40,7 @@
 //import org.matsim.contrib.analysis.kai.DataMap;
 //import org.matsim.contrib.analysis.kai.Databins;
 //import org.matsim.contrib.opdyts.MATSimState;
-//import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+//import org.matsim.core.config.groups.ScoringConfigGroup;
 //import org.matsim.core.gbl.Gbl;
 //import org.matsim.core.router.MainModeIdentifier;
 //import org.matsim.core.router.TripRouter;
@@ -54,13 +54,13 @@
 // *
 // */
 //public class ModeChoiceObjectiveFunction implements ObjectiveFunction {
-//    private static final Logger log = Logger.getLogger( ModeChoiceObjectiveFunction.class );
+//    private static final Logger log = LogManager.getLogger( ModeChoiceObjectiveFunction.class );
 //
 //    private final MainModeIdentifier mainModeIdentifier ;
 //
 //    private DistanceDistribution distriInfo ;
 //
-//    @Inject private PlanCalcScoreConfigGroup planCalcScoreConfigGroup;
+//    @Inject private ScoringConfigGroup planCalcScoreConfigGroup;
 //    @Inject private TripRouter tripRouter ;
 //    @Inject private Network network ;
 //

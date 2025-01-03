@@ -18,10 +18,8 @@
  * *********************************************************************** */
 package playground.amit.mixedTraffic.qPositionPlots;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.util.*;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -30,7 +28,7 @@ import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
-import org.matsim.core.config.groups.ControlerConfigGroup;
+import org.matsim.core.config.groups.ControllerConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup.SnapshotStyle;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
@@ -45,6 +43,10 @@ import org.matsim.run.Events2Snapshot;
 import org.matsim.vis.snapshotwriters.TransimsSnapshotWriter.Labels;
 import playground.amit.utils.LoadMyScenarios;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.util.*;
+
 /**
  * 1) Create Transims snapshot file from events or use existing file. 
  * 2) read events 
@@ -56,7 +58,7 @@ import playground.amit.utils.LoadMyScenarios;
 
 public class AgentPositionWriter {
 
-	private final static Logger LOGGER = Logger.getLogger(AgentPositionWriter.class);
+	private final static Logger LOGGER = LogManager.getLogger(AgentPositionWriter.class);
 	private final static boolean IS_WRITING_TRANSIM_FILE = false;
 	private final double linkLength = 1000;
 	private final double trackLength = 3000;
@@ -84,7 +86,7 @@ public class AgentPositionWriter {
 			sc.getConfig().qsim().setLinkWidthForVis((float)0);
 			sc.getNetwork().setEffectiveLaneWidth(0.);
 
-			sc.getConfig().controler().setSnapshotFormat(Collections.singletonList(ControlerConfigGroup.SnapshotFormat.transims));
+			sc.getConfig().controller().setSnapshotFormat(Collections.singletonList(ControllerConfigGroup.SnapshotFormat.transims));
 			transimFile = apw.createAndReturnTransimSnapshotFile(sc, eventsFile);
 		} else {
 			transimFile = dir+"/TransVeh/T_["+prefix+"].veh.gz";

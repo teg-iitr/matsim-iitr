@@ -19,9 +19,6 @@
 
 package playground.amit.opdyts.equil;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
@@ -29,9 +26,9 @@ import org.matsim.api.core.v01.population.Plan;
 import org.matsim.contrib.analysis.kai.KaiAnalysisListener;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
-import org.matsim.core.config.groups.StrategyConfigGroup;
+import org.matsim.core.config.groups.ReplanningConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
@@ -41,6 +38,10 @@ import playground.amit.opdyts.DistanceDistribution;
 import playground.amit.opdyts.OpdytsScenario;
 import playground.amit.opdyts.analysis.OpdytsModalStatsControlerListener;
 import playground.amit.utils.FileUtils;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by amit on 22.05.17.
@@ -72,35 +73,35 @@ public class EquilASCTrials {
         config.plans().setInputFile("plans2000.xml.gz");
 
         //== default config has limited inputs
-        StrategyConfigGroup strategies = config.strategy();
+        ReplanningConfigGroup strategies = config.replanning();
         strategies.clearStrategySettings();
 
         config.changeMode().setModes( modes2consider.toArray(new String [modes2consider.size()]));
-        StrategyConfigGroup.StrategySettings modeChoice = new StrategyConfigGroup.StrategySettings();
+        ReplanningConfigGroup.StrategySettings modeChoice = new ReplanningConfigGroup.StrategySettings();
         modeChoice.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode);
         modeChoice.setWeight(0.1);
-        config.strategy().addStrategySettings(modeChoice);
+        config.replanning().addStrategySettings(modeChoice);
 
-        StrategyConfigGroup.StrategySettings expChangeBeta = new StrategyConfigGroup.StrategySettings();
+        ReplanningConfigGroup.StrategySettings expChangeBeta = new ReplanningConfigGroup.StrategySettings();
         expChangeBeta.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta);
         expChangeBeta.setWeight(0.9);
-        config.strategy().addStrategySettings(expChangeBeta);
+        config.replanning().addStrategySettings(expChangeBeta);
 
         //==
 
         //== planCalcScore params (initialize will all defaults).
-        for ( PlanCalcScoreConfigGroup.ActivityParams params : config.planCalcScore().getActivityParams() ) {
-            params.setTypicalDurationScoreComputation( PlanCalcScoreConfigGroup.TypicalDurationScoreComputation.relative );
+        for ( ScoringConfigGroup.ActivityParams params : config.scoring().getActivityParams() ) {
+            params.setTypicalDurationScoreComputation( ScoringConfigGroup.TypicalDurationScoreComputation.relative );
         }
 
         // remove other mode params
-        PlanCalcScoreConfigGroup planCalcScoreConfigGroup = config.planCalcScore();
-        for ( PlanCalcScoreConfigGroup.ModeParams params : planCalcScoreConfigGroup.getModes().values() ) {
+        ScoringConfigGroup planCalcScoreConfigGroup = config.scoring();
+        for ( ScoringConfigGroup.ModeParams params : planCalcScoreConfigGroup.getModes().values() ) {
             planCalcScoreConfigGroup.removeParameterSet(params);
         }
 
-        PlanCalcScoreConfigGroup.ModeParams mpCar = new PlanCalcScoreConfigGroup.ModeParams("car");
-        PlanCalcScoreConfigGroup.ModeParams mpBike = new PlanCalcScoreConfigGroup.ModeParams("bicycle");
+        ScoringConfigGroup.ModeParams mpCar = new ScoringConfigGroup.ModeParams("car");
+        ScoringConfigGroup.ModeParams mpBike = new ScoringConfigGroup.ModeParams("bicycle");
         mpBike.setMarginalUtilityOfTraveling(0.);
 
 
@@ -112,14 +113,14 @@ public class EquilASCTrials {
         config.qsim().setTrafficDynamics( QSimConfigGroup.TrafficDynamics.withHoles );
         config.qsim().setUsingFastCapacityUpdate(true);
 
-        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+        config.controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
         //==
 
         if(! isPlansRelaxed) {
 
-            config.controler().setOutputDirectory(OUT_DIR+"/relaxingPlans/");
-            config.controler().setLastIteration(50);
-            config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
+            config.controller().setOutputDirectory(OUT_DIR+"/relaxingPlans/");
+            config.controller().setLastIteration(50);
+            config.replanning().setFractionOfIterationsToDisableInnovation(0.8);
 
             Scenario scenarioPlansRelaxor = ScenarioUtils.loadScenario(config);
             // following is taken from KNBerlinControler.prepareScenario(...);
@@ -139,20 +140,20 @@ public class EquilASCTrials {
                     addControlerListenerBinding().toInstance(new OpdytsModalStatsControlerListener(modes2consider, new EquilDistanceDistribution(EQUIL_MIXEDTRAFFIC)));
                 }
             });
-            FileUtils.deleteIntermediateIterations(config.controler().getOutputDirectory(),controler.getConfig().controler().getFirstIteration(), controler.getConfig().controler().getLastIteration());
+            FileUtils.deleteIntermediateIterations(config.controller().getOutputDirectory(),controler.getConfig().controller().getFirstIteration(), controler.getConfig().controller().getLastIteration());
             controler.run();
         }
 
         // set back settings for opdyts
-        File file = new File(config.controler().getOutputDirectory()+"/output_plans.xml.gz");
+        File file = new File(config.controller().getOutputDirectory()+"/output_plans.xml.gz");
         config.plans().setInputFile(file.getAbsoluteFile().getAbsolutePath());
-        config.strategy().setFractionOfIterationsToDisableInnovation(Double.POSITIVE_INFINITY);
+        config.replanning().setFractionOfIterationsToDisableInnovation(Double.POSITIVE_INFINITY);
 
         for (double asc : ascTrials){
             OUT_DIR = OUT_DIR+"/ascRun"+asc+"/";
-            config.planCalcScore().getOrCreateModeParams("bicycle").setConstant(asc);
-            config.controler().setOutputDirectory(OUT_DIR);
-            config.controler().setLastIteration(500);
+            config.scoring().getOrCreateModeParams("bicycle").setConstant(asc);
+            config.controller().setOutputDirectory(OUT_DIR);
+            config.controller().setLastIteration(500);
 
             Scenario scenario = ScenarioUtils.loadScenario(config);
 

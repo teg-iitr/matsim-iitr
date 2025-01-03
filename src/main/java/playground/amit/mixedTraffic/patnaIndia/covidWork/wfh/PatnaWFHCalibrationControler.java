@@ -1,12 +1,18 @@
 package playground.amit.mixedTraffic.patnaIndia.covidWork.wfh;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.population.*;
+import org.matsim.api.core.v01.population.Activity;
+import org.matsim.api.core.v01.population.Leg;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.*;
+import org.matsim.core.config.groups.QSimConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
+import org.matsim.core.config.groups.VspExperimentalConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
@@ -25,15 +31,17 @@ import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.amit.utils.FileUtils;
 import playground.amit.utils.PersonFilter;
 import playground.amit.utils.VehicleUtils;
+
 import java.io.File;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
 /**
  * @author amit
  */
 
 public class PatnaWFHCalibrationControler {
 
-    public static final Logger logger = Logger.getLogger(PatnaWFHCalibrationControler.class);
+    public static final Logger logger = LogManager.getLogger(PatnaWFHCalibrationControler.class);
 //    private static final String wfh_walk = "WFHwalk";
 
     public static void main(String[] args) {
@@ -55,12 +63,12 @@ public class PatnaWFHCalibrationControler {
         outputDir = outputDir+runCase;
 
         Config config = ConfigUtils.loadConfig(inputConfig);
-        config.controler().setOutputDirectory(outputDir);
-        config.controler().setRunId(runCase);
+        config.controller().setOutputDirectory(outputDir);
+        config.controller().setRunId(runCase);
 
         config.vehicles().setVehiclesFile(null); // vehicle types are added from vehicle file later.
-        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-        config.controler().setWriteEventsInterval(50);
+        config.controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+        config.controller().setWriteEventsInterval(50);
 
         config.travelTimeCalculator().setFilterModes(true);
         config.travelTimeCalculator().setSeparateModes(true);
@@ -80,8 +88,8 @@ public class PatnaWFHCalibrationControler {
 
         final Controler controler = new Controler(scenario);
 
-        controler.getConfig().controler().setDumpDataAtEnd(true);
-        controler.getConfig().strategy().setMaxAgentPlanMemorySize(10);
+        controler.getConfig().controller().setDumpDataAtEnd(true);
+        controler.getConfig().replanning().setMaxAgentPlanMemorySize(10);
 
         controler.addOverridingModule(new AbstractModule() {
             @Override
@@ -91,7 +99,7 @@ public class PatnaWFHCalibrationControler {
             }
         });
         // for above make sure that util_dist and monetary dist rate for pt are zero.
-        PlanCalcScoreConfigGroup.ModeParams mp = controler.getConfig().planCalcScore().getModes().get("pt");
+        ScoringConfigGroup.ModeParams mp = controler.getConfig().scoring().getModes().get("pt");
         mp.setMarginalUtilityOfDistance(0.0);
         mp.setMonetaryDistanceRate(0.0);
 
@@ -164,8 +172,8 @@ public class PatnaWFHCalibrationControler {
         controler.run();
 
         // delete unnecessary iterations folder here.
-        int firstIt = controler.getConfig().controler().getFirstIteration();
-        int lastIt = controler.getConfig().controler().getLastIteration();
+        int firstIt = controler.getConfig().controller().getFirstIteration();
+        int lastIt = controler.getConfig().controller().getLastIteration();
         FileUtils.deleteIntermediateIterations(outputDir,firstIt,lastIt);
 
         new File(outputDir+"/analysis/").mkdir();
@@ -173,7 +181,7 @@ public class PatnaWFHCalibrationControler {
         // write some default analysis
         String userGroup = PatnaPersonFilter.PatnaUserGroup.urban.toString();
 
-        PatnaCovidPolicyControler.writeModalShareFromEvents(userGroup, scenario.getConfig().controler());
+        PatnaCovidPolicyControler.writeModalShareFromEvents(userGroup, scenario.getConfig().controller());
 
 //        ModalShareFromPlans modalShareFromPlans = new ModalShareFromPlans(outputDir+"/"+runCase+".output_experienced_plans.xml.gz", userGroup, patnaPersonFilter);
 //        modalShareFromPlans.run();

@@ -616,10 +616,10 @@
 
 2023-02-16T23:27:04,986  INFO ControlerUtils:84 Complete config dump done.
 2023-02-16T23:27:04,986  INFO ControlerUtils:85 Checking consistency of config...
-2023-02-16T23:27:04,986  WARN ControlerConfigGroup:403 setting overwriting behavior to overwriteExistingFiles
-2023-02-16T23:27:04,986  WARN ControlerConfigGroup:404 this is not recommended, as it might result in a directory containing output from several model runs
-2023-02-16T23:27:04,986  WARN ControlerConfigGroup:405 prefer the options deleteDirectoryIfExists or failIfDirectoryExists
-2023-02-16T23:27:04,986  INFO PlanCalcScoreConfigGroup$ScoringParameterSet:1554 NO OPENING OR CLOSING TIMES DEFINED!
+2023-02-16T23:27:04,986  WARN ControllerConfigGroup:403 setting overwriting behavior to overwriteExistingFiles
+2023-02-16T23:27:04,986  WARN ControllerConfigGroup:404 this is not recommended, as it might result in a directory containing output from several model runs
+2023-02-16T23:27:04,986  WARN ControllerConfigGroup:405 prefer the options deleteDirectoryIfExists or failIfDirectoryExists
+2023-02-16T23:27:04,986  INFO ScoringConfigGroup$ScoringParameterSet:1554 NO OPENING OR CLOSING TIMES DEFINED!
 
 There is no activity type that has an opening *and* closing time (or opening time and late penalty) defined.
 This usually means that the activity chains can be shifted by an arbitrary

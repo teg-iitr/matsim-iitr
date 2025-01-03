@@ -18,7 +18,7 @@
  * *********************************************************************** */
 package playground.amit.mixedTraffic.patnaIndia.input.joint;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
@@ -28,11 +28,11 @@ import org.matsim.contrib.cadyts.general.CadytsConfigGroup;
 import org.matsim.contrib.cadyts.general.CadytsScoring;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ScoringParameterSet;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.ScenarioConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup.ModeParams;
+import org.matsim.core.config.groups.ScoringConfigGroup.ScoringParameterSet;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
@@ -89,21 +89,21 @@ public class JointCalibrationControler {
 			ConfigUtils.loadConfig(config, args[0]);
 			OUTPUT_DIR = dir+args [1];
 			isUsingCadyts = Boolean.valueOf( args[2] );
-			config.controler().setOutputDirectory( OUTPUT_DIR );
+			config.controller().setOutputDirectory( OUTPUT_DIR );
 
-			config.planCalcScore().getModes().get("car").setConstant(Double.valueOf(args[3]));
-			config.planCalcScore().getModes().get("bike").setConstant(Double.valueOf(args[4]));
-			config.planCalcScore().getModes().get("motorbike").setConstant(Double.valueOf(args[5]));
-			config.planCalcScore().getModes().get("pt").setConstant(Double.valueOf(args[6]));
-			config.planCalcScore().getModes().get("walk").setConstant(Double.valueOf(args[7]));
+			config.scoring().getModes().get("car").setConstant(Double.valueOf(args[3]));
+			config.scoring().getModes().get("bike").setConstant(Double.valueOf(args[4]));
+			config.scoring().getModes().get("motorbike").setConstant(Double.valueOf(args[5]));
+			config.scoring().getModes().get("pt").setConstant(Double.valueOf(args[6]));
+			config.scoring().getModes().get("walk").setConstant(Double.valueOf(args[7]));
 
 		} else {
 			// all utility parameters must be set in  input config file 
 			ConfigUtils.loadConfig(config, CONFIG_FILE);
 		}
 
-		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
-		config.controler().setOutputDirectory(OUTPUT_DIR);
+		config.controller().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
+		config.controller().setOutputDirectory(OUTPUT_DIR);
 
 		Scenario sc = ScenarioUtils.loadScenario(config);
 
@@ -113,7 +113,7 @@ public class JointCalibrationControler {
 		sc.getConfig().qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
 
 		final Controler controler = new Controler(sc);
-		controler.getConfig().controler().setDumpDataAtEnd(true);
+		controler.getConfig().controller().setDumpDataAtEnd(true);
 
 		controler.addOverridingModule(new AbstractModule() { // plotting modal share over iterations
 			@Override
@@ -135,7 +135,7 @@ public class JointCalibrationControler {
 		});
 
 		// for above make sure that util_dist and monetary dist rate for pt are zero.
-		ModeParams mp = controler.getConfig().planCalcScore().getModes().get("pt");
+		ModeParams mp = controler.getConfig().scoring().getModes().get("pt");
 		mp.setMarginalUtilityOfDistance(0.0);
 		mp.setMonetaryDistanceRate(0.0);
 
@@ -145,11 +145,11 @@ public class JointCalibrationControler {
 		controler.run();
 
 		// delete unnecessary iterations folder here.
-		int firstIt = controler.getConfig().controler().getFirstIteration();
-		int lastIt = controler.getConfig().controler().getLastIteration();
+		int firstIt = controler.getConfig().controller().getFirstIteration();
+		int lastIt = controler.getConfig().controller().getLastIteration();
 		for (int index =firstIt+1; index <lastIt; index ++){
 			String dirToDel = OUTPUT_DIR+"/ITERS/it."+index;
-			Logger.getLogger(JointCalibrationControler.class).info("Deleting the directory "+dirToDel);
+			LogManager.getLogger(JointCalibrationControler.class).info("Deleting the directory "+dirToDel);
 			IOUtils.deleteDirectoryRecursively(new File(dirToDel).toPath());
 		}
 
@@ -185,7 +185,7 @@ public class JointCalibrationControler {
 		String modes = CollectionUtils.setToString(new HashSet<>(PatnaUtils.EXT_MAIN_MODES));
 		config.counts().setAnalyzedModes(modes);
 		config.counts().setFilterModes(true);
-		config.strategy().setMaxAgentPlanMemorySize(10);
+		config.replanning().setMaxAgentPlanMemorySize(10);
 
 		controler.addOverridingModule(new MultiModalCountsCadytsModule(modalLinkCounts, modalLinkContainer));
 
@@ -201,7 +201,7 @@ public class JointCalibrationControler {
 			@Inject
              Population population;
 			@Inject
-             PlanCalcScoreConfigGroup planCalcScoreConfigGroup; // to modify the util parameters
+             ScoringConfigGroup planCalcScoreConfigGroup; // to modify the util parameters
 			@Inject
              ScenarioConfigGroup scenarioConfig;
 			@Inject

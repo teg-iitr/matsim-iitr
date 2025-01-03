@@ -18,16 +18,8 @@
  * *********************************************************************** */
 package playground.amit.congestionPricing.testExamples.handlers;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -35,11 +27,7 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.Population;
+import org.matsim.api.core.v01.population.*;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -56,17 +44,20 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
-
 import playground.vsp.congestion.events.CongestionEvent;
 import playground.vsp.congestion.handlers.CongestionEventHandler;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV4;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.util.*;
+
 /**
  * @author amit
  */
 class TestNetworkExperiment {
-	final Logger log = Logger.getLogger(TestNetworkExperiment.class);
+	final Logger log = LogManager.getLogger(TestNetworkExperiment.class);
 
 
 	public static void main(String[] args) {
@@ -84,7 +75,7 @@ class TestNetworkExperiment {
 		pseudoInputs.createNetwork();
 		pseudoInputs.createPopulation(numberOfPersonInPlan);
 		Scenario sc = pseudoInputs.scenario;
-		sc.getConfig().controler().setWriteEventsInterval(1);
+		sc.getConfig().controller().setWriteEventsInterval(1);
 
 		EventsManager events = EventsUtils.createEventsManager();
 		events.addHandler(new CongestionHandlerImplV4(events, sc));

@@ -18,12 +18,8 @@
  * *********************************************************************** */
 package playground.amit.analysis;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.PersonStuckEvent;
 import org.matsim.api.core.v01.events.handler.PersonStuckEventHandler;
@@ -32,8 +28,12 @@ import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.events.handler.EventHandler;
-
 import playground.vsp.analysis.modules.AbstractAnalysisModule;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * This class takes list of eventsFile as input and then returns set of all stuck (1) events and (2) persons. 
@@ -42,7 +42,7 @@ import playground.vsp.analysis.modules.AbstractAnalysisModule;
  */
 
 public class StuckAgentsFilter extends AbstractAnalysisModule {
-	private static final Logger LOG = Logger.getLogger(StuckAgentsFilter.class);
+	private static final Logger LOG = LogManager.getLogger(StuckAgentsFilter.class);
 	private final Set<Id<Person>> stuckPersonsFromEventsFiles = new HashSet<>();
 	private final Set<PersonStuckEvent> stuckEventsFromEventsFiles = new HashSet<>();
 	private final List<String> eventsFiles;

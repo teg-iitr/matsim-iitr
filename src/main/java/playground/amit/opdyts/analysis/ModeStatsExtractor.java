@@ -19,6 +19,12 @@
 
 package playground.amit.opdyts.analysis;
 
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.ScoringConfigGroup.ModeParams;
+import org.matsim.core.utils.io.IOUtils;
+import playground.amit.utils.NumberUtils;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -29,11 +35,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
-import org.matsim.core.config.Config;
-import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
-import org.matsim.core.utils.io.IOUtils;
-import playground.amit.utils.NumberUtils;
 
 /**
  * Created by amit on 18.04.18.
@@ -90,13 +91,13 @@ public class ModeStatsExtractor {
 
                 Config config = ConfigUtils.loadConfig(configFile);
 
-                Map<String, Double> ASCs = config.planCalcScore()
+                Map<String, Double> ASCs = config.scoring()
                                                  .getModes()
                                                  .values()
                                                  .stream()
                                                  .collect(Collectors.toMap(ModeParams::getMode,
                                                          ModeParams::getConstant));
-                Map<String, Integer> legs = getModalShare.apply(modeStatsFile, String.valueOf(config.controler().getLastIteration()));
+                Map<String, Integer> legs = getModalShare.apply(modeStatsFile, String.valueOf(config.controller().getLastIteration()));
 
 
                 stringBuilder.append(String.valueOf(ASCs.get("bike")))

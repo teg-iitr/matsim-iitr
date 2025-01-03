@@ -1,5 +1,6 @@
 package playground.amit.mixedTraffic.patnaIndia.covidWork.wfh;
 
+import jakarta.inject.Provider;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Leg;
@@ -17,7 +18,6 @@ import org.matsim.core.router.TripRouter;
 import org.matsim.core.utils.timing.TimeInterpretation;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import java.util.List;
 
 /**
@@ -40,7 +40,7 @@ public class WorkFromHomeModule extends AbstractModule {
             addPlanStrategyBinding(wfhStrategyName).toProvider(new Provider<PlanStrategy>() {
                 @Inject
                 Scenario sc;
-                @Inject
+                @jakarta.inject.Inject
                 Provider<TripRouter> tripRouterProvider ;
                 @Inject
                 TimeInterpretation timeInterpretation;

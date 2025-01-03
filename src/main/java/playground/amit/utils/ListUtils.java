@@ -18,9 +18,10 @@
  * *********************************************************************** */
 package playground.amit.utils;
 
+import org.apache.logging.log4j.LogManager;
+
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.log4j.Logger;
 
 /**
  * @author amit
@@ -75,7 +76,7 @@ public final class ListUtils {
 				double e =0;
 				if(list1.get(ii) == 0. && list2.get(ii)==0.) e = 0.;
 				else if(list2.get(ii)==0.) {
-					Logger.getLogger(ListUtils.class).warn("Denominator is zero which should result in Inf but setting it zero. If you dont want that, modify the static method.");
+					LogManager.getLogger(ListUtils.class).warn("Denominator is zero which should result in Inf but setting it zero. If you dont want that, modify the static method.");
 					e=0;
 				}
 				else e = list1.get(ii) / list2.get(ii);
@@ -95,7 +96,7 @@ public final class ListUtils {
 		if(list1 == null || list2 == null ) throw new NullPointerException("Either of the lists is null. Aborting ...");
 		else if (list1.isEmpty() && list2.isEmpty() ) ;
 		else if (list1.size() != list2.size()) {
-			Logger.getLogger(ListUtils.class).warn("Sizes of the lists are not equal. It will still subtract.");
+			LogManager.getLogger(ListUtils.class).warn("Sizes of the lists are not equal. It will still subtract.");
 			if(list1.size() > list2.size()) {
 				for(int ii = list2.size(); ii < list1.size(); ii++){
 					list2.set(ii, 0.);

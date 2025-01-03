@@ -22,7 +22,7 @@ package playground.amit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.testcases.MatsimTestUtils;
 
 /**
@@ -36,26 +36,26 @@ public class ModeParamCopyTest {
     public void test () {
         double sourceCarASC = 1.5;
         // create planCalcScoreConfigGroup
-        PlanCalcScoreConfigGroup sourcePlanCalcScore = new PlanCalcScoreConfigGroup();
+        ScoringConfigGroup sourcePlanCalcScore = new ScoringConfigGroup();
         sourcePlanCalcScore.getOrCreateModeParams(TransportMode.car).setConstant(sourceCarASC);
         Assert.assertEquals("ASC in source config is wrong.",sourceCarASC, sourcePlanCalcScore.getOrCreateModeParams(TransportMode.car).getConstant(), MatsimTestUtils.EPSILON);
 
         // now lets create another planCalcSCore and copy the car params from source
-        PlanCalcScoreConfigGroup copiedPlanCalcScoreConfigGroup = new PlanCalcScoreConfigGroup();
-        Assert.assertEquals("Default ASC for car in config is wrong.",0., copiedPlanCalcScoreConfigGroup.getOrCreateModeParams(TransportMode.car).getConstant(), MatsimTestUtils.EPSILON);
+        ScoringConfigGroup copiedScoringConfigGroup = new ScoringConfigGroup();
+        Assert.assertEquals("Default ASC for car in config is wrong.",0., copiedScoringConfigGroup.getOrCreateModeParams(TransportMode.car).getConstant(), MatsimTestUtils.EPSILON);
 
-        copiedPlanCalcScoreConfigGroup.addModeParams( copyOfModeParam (sourcePlanCalcScore.getOrCreateModeParams(TransportMode.car)) );
-        Assert.assertEquals("ASC in copied config is wrong.", sourceCarASC, copiedPlanCalcScoreConfigGroup.getOrCreateModeParams(TransportMode.car).getConstant(), MatsimTestUtils.EPSILON);
+        copiedScoringConfigGroup.addModeParams( copyOfModeParam (sourcePlanCalcScore.getOrCreateModeParams(TransportMode.car)) );
+        Assert.assertEquals("ASC in copied config is wrong.", sourceCarASC, copiedScoringConfigGroup.getOrCreateModeParams(TransportMode.car).getConstant(), MatsimTestUtils.EPSILON);
 
         // now change asc in copied planCalcScore only
         double copiedCarASC = 2.0;
-        copiedPlanCalcScoreConfigGroup.getOrCreateModeParams(TransportMode.car).setConstant(copiedCarASC);
+        copiedScoringConfigGroup.getOrCreateModeParams(TransportMode.car).setConstant(copiedCarASC);
 
         Assert.assertEquals("ASC in source config is wrong.", sourceCarASC, sourcePlanCalcScore.getOrCreateModeParams(TransportMode.car).getConstant(), MatsimTestUtils.EPSILON);
-        Assert.assertEquals("ASC in copied config is wrong.", copiedCarASC, copiedPlanCalcScoreConfigGroup.getOrCreateModeParams(TransportMode.car).getConstant(), MatsimTestUtils.EPSILON);
+        Assert.assertEquals("ASC in copied config is wrong.", copiedCarASC, copiedScoringConfigGroup.getOrCreateModeParams(TransportMode.car).getConstant(), MatsimTestUtils.EPSILON);
     }
-    private PlanCalcScoreConfigGroup.ModeParams copyOfModeParam(final PlanCalcScoreConfigGroup.ModeParams modeParams) {
-        PlanCalcScoreConfigGroup.ModeParams newModeParams = new PlanCalcScoreConfigGroup.ModeParams(modeParams.getMode());
+    private ScoringConfigGroup.ModeParams copyOfModeParam(final ScoringConfigGroup.ModeParams modeParams) {
+        ScoringConfigGroup.ModeParams newModeParams = new ScoringConfigGroup.ModeParams(modeParams.getMode());
         newModeParams.setConstant(modeParams.getConstant());
         return newModeParams;
     }

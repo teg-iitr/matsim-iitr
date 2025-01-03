@@ -36,8 +36,8 @@ import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
@@ -127,31 +127,31 @@ public class MultiModeNetworkTest {
 
         List<String> networkModes = new ArrayList<>(Arrays.asList( transportModes));
         config.qsim().setMainModes(networkModes);
-        config.plansCalcRoute().setNetworkModes(networkModes);
-        config.plansCalcRoute().removeModeRoutingParams("bike");
+        config.routing().setNetworkModes(networkModes);
+        config.routing().removeModeRoutingParams("bike");
         config.travelTimeCalculator().setAnalyzedModesAsString(StringUtils.join(networkModes, ","));
         config.travelTimeCalculator().setSeparateModes(true);
 
-        config.planCalcScore().getOrCreateModeParams("bike").setConstant(0.);
+        config.scoring().getOrCreateModeParams("bike").setConstant(0.);
 
         config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
 
         config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
 
-        config.controler().setOutputDirectory(helper.getOutputDirectory());
+        config.controller().setOutputDirectory(helper.getOutputDirectory());
 
-        config.controler().setLastIteration(0);
+        config.controller().setLastIteration(0);
 
-        PlanCalcScoreConfigGroup.ActivityParams homeAct = new PlanCalcScoreConfigGroup.ActivityParams("h");
-        PlanCalcScoreConfigGroup.ActivityParams workAct = new PlanCalcScoreConfigGroup.ActivityParams("w");
+        ScoringConfigGroup.ActivityParams homeAct = new ScoringConfigGroup.ActivityParams("h");
+        ScoringConfigGroup.ActivityParams workAct = new ScoringConfigGroup.ActivityParams("w");
         homeAct.setTypicalDuration(1. * 3600.);
         workAct.setTypicalDuration(1. * 3600.);
 
-        config.planCalcScore().addActivityParams(homeAct);
-        config.planCalcScore().addActivityParams(workAct);
+        config.scoring().addActivityParams(homeAct);
+        config.scoring().addActivityParams(workAct);
 
         final Controler cont = new Controler(scenario);
-        cont.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+        cont.getConfig().controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 
         final Map<Id<Person>, Tuple<Id<Link>,String>> person2departurelink2mode = new HashMap<>();
         final Map<Id<Person>, Tuple<Id<Link>,String>> person2arrivallink2mode = new HashMap<>();
@@ -240,33 +240,33 @@ public class MultiModeNetworkTest {
 
         List<String> networkModes = new ArrayList<>(Arrays.asList( transportModes));
         config.qsim().setMainModes(networkModes);
-        config.plansCalcRoute().setNetworkModes(networkModes);
+        config.routing().setNetworkModes(networkModes);
         config.travelTimeCalculator().setAnalyzedModesAsString(StringUtils.join(networkModes, ","));
         config.travelTimeCalculator().setSeparateModes(true);
 
-        config.planCalcScore().getOrCreateModeParams("bike").setConstant(0.);
+        config.scoring().getOrCreateModeParams("bike").setConstant(0.);
 
         config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
 
         config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
 
         // reset all mode routing params.
-        config.plansCalcRoute().getOrCreateModeRoutingParams("xxx").setTeleportedModeFreespeedFactor(1.);
+        config.routing().getOrCreateModeRoutingParams("xxx").setTeleportedModeFreespeedFactor(1.);
 
-        config.controler().setOutputDirectory(helper.getOutputDirectory());
+        config.controller().setOutputDirectory(helper.getOutputDirectory());
 
-        config.controler().setLastIteration(0);
+        config.controller().setLastIteration(0);
 
-        PlanCalcScoreConfigGroup.ActivityParams homeAct = new PlanCalcScoreConfigGroup.ActivityParams("h");
-        PlanCalcScoreConfigGroup.ActivityParams workAct = new PlanCalcScoreConfigGroup.ActivityParams("w");
+        ScoringConfigGroup.ActivityParams homeAct = new ScoringConfigGroup.ActivityParams("h");
+        ScoringConfigGroup.ActivityParams workAct = new ScoringConfigGroup.ActivityParams("w");
         homeAct.setTypicalDuration(1. * 3600.);
         workAct.setTypicalDuration(1. * 3600.);
 
-        config.planCalcScore().addActivityParams(homeAct);
-        config.planCalcScore().addActivityParams(workAct);
+        config.scoring().addActivityParams(homeAct);
+        config.scoring().addActivityParams(workAct);
 
         final Controler cont = new Controler(scenario);
-        cont.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+        cont.getConfig().controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 
         final Map<Id<Person>, Tuple<Id<Link>,String>> person2departurelink2mode = new HashMap<>();
         final Map<Id<Person>, Tuple<Id<Link>,String>> person2arrivallink2mode = new HashMap<>();

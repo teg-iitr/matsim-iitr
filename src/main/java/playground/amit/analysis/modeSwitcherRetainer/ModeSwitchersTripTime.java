@@ -18,9 +18,8 @@
  * *********************************************************************** */
 package playground.amit.analysis.modeSwitcherRetainer;
 
-import java.io.BufferedWriter;
-import java.util.*;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
@@ -31,6 +30,9 @@ import playground.amit.munich.utils.MunichPersonFilter;
 import playground.amit.utils.LoadMyScenarios;
 import playground.amit.utils.PersonFilter;
 
+import java.io.BufferedWriter;
+import java.util.*;
+
 /**
  *This will first find mode switchers and then returns trip times in groups. 
  *<p>
@@ -39,7 +41,7 @@ import playground.amit.utils.PersonFilter;
 
 public class ModeSwitchersTripTime {
 
-	private static final Logger LOG = Logger.getLogger(ModeSwitchersTripTime.class);
+	private static final Logger LOG = LogManager.getLogger(ModeSwitchersTripTime.class);
 
 	public ModeSwitchersTripTime(){
 		this(null, null);
@@ -71,7 +73,7 @@ public class ModeSwitchersTripTime {
 		for(String runNr : runCases){
 			ModeSwitchersTripTime mstt = new ModeSwitchersTripTime(MunichPersonFilter.MunichUserGroup.Rev_Commuter.toString(), new MunichPersonFilter());
 			Scenario scenario = LoadMyScenarios.loadScenarioFromNetworkAndConfig(dir+runNr+"/output_network.xml.gz", dir+runNr+"/output_config.xml");
-			scenario.getConfig().controler().setOutputDirectory(dir+runNr);
+			scenario.getConfig().controller().setOutputDirectory(dir+runNr);
 			mstt.processEventsFiles(scenario);
 			mstt.writeResults(dir+runNr+"/analysis/");
 		}
@@ -114,9 +116,9 @@ public class ModeSwitchersTripTime {
 	}
 
 	public void processEventsFiles (final Scenario scenario){
-		String eventsDir = scenario.getConfig().controler().getOutputDirectory();
-		int firstIteration = scenario.getConfig().controler().getFirstIteration();
-		int lastIteration = scenario.getConfig().controler().getLastIteration();
+		String eventsDir = scenario.getConfig().controller().getOutputDirectory();
+		int firstIteration = scenario.getConfig().controller().getFirstIteration();
+		int lastIteration = scenario.getConfig().controller().getLastIteration();
 		// data from event files
 		String eventsFileFirstIt = eventsDir+"/ITERS/it."+firstIteration+"/"+firstIteration+".events.xml.gz";
 		String eventsFileLastIt = eventsDir+"/ITERS/it."+lastIteration+"/"+lastIteration+".events.xml.gz";

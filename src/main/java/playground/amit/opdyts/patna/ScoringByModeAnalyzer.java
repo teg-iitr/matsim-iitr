@@ -19,18 +19,19 @@
 
 package playground.amit.opdyts.patna;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
 import playground.amit.utils.FileUtils;
 import playground.amit.utils.LoadMyScenarios;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by amit on 06.06.17.
@@ -45,7 +46,7 @@ public class ScoringByModeAnalyzer {
         Map<String, Integer> mode2Counter = new HashMap<>();
 
         Scenario scenario = LoadMyScenarios.loadScenarioFromPlansAndConfig(outputPlans, outputConfig);
-        PlanCalcScoreConfigGroup planCalcScoreConfigGroup = scenario.getConfig().planCalcScore();
+        ScoringConfigGroup planCalcScoreConfigGroup = scenario.getConfig().scoring();
 
         for (Person p : scenario.getPopulation().getPersons().values()) {
             Plan selectedPlan = p.getSelectedPlan();

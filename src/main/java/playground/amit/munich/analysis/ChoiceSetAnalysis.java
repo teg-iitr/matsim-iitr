@@ -18,23 +18,18 @@
  * *********************************************************************** */
 package playground.amit.munich.analysis;
 
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.population.*;
+import org.matsim.core.utils.io.IOUtils;
+import playground.amit.munich.utils.MunichPersonFilter;
+import playground.amit.utils.LoadMyScenarios;
+
 import java.io.BufferedWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.api.core.v01.population.Population;
-import org.matsim.core.utils.io.IOUtils;
-
-import playground.amit.munich.utils.MunichPersonFilter;
-import playground.amit.utils.LoadMyScenarios;
 
 /**
  * @author amit
@@ -60,7 +55,7 @@ public class ChoiceSetAnalysis {
 
 	private void run(Scenario sc){
 
-		BufferedWriter writer = IOUtils.getBufferedWriter(sc.getConfig().controler().getOutputDirectory()+"/analysis/"+"choiceSet_stat.txt");
+		BufferedWriter writer = IOUtils.getBufferedWriter(sc.getConfig().controller().getOutputDirectory()+"/analysis/"+"choiceSet_stat.txt");
 		try {
 			writer.write("userGroup \t modeSequence \t numberOfSuchPlans \t carsInChoiceSet \t totalScoreAllPlans \t totalBestScore \t totalExecutedScore \n ");
 			

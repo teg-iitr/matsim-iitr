@@ -18,32 +18,32 @@
  * *********************************************************************** */
 package playground.amit.munich.controlerListener;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.scenario.MutableScenario;
-
 import playground.vsp.congestion.events.CongestionEvent;
 import playground.vsp.congestion.handlers.CongestionEventHandler;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author amit
  */
 
 public class CongestionCostCollector implements CongestionEventHandler {
-	private final static Logger LOG = Logger.getLogger(CongestionCostCollector.class);
+	private final static Logger LOG = LogManager.getLogger(CongestionCostCollector.class);
 
 	private final double vttsCar;
 	private double amountSum = 0.;
 	private final Map<Id<Person>, Double> causingPerson2Cost = new HashMap<>();
 
 	public CongestionCostCollector(MutableScenario scenario) {
-        this.vttsCar = (scenario.getConfig().planCalcScore().getModes().get(TransportMode.car).getMarginalUtilityOfTraveling() - scenario
-				.getConfig().planCalcScore().getPerforming_utils_hr()) / scenario.getConfig().planCalcScore().getMarginalUtilityOfMoney();
+        this.vttsCar = (scenario.getConfig().scoring().getModes().get(TransportMode.car).getMarginalUtilityOfTraveling() - scenario
+				.getConfig().scoring().getPerforming_utils_hr()) / scenario.getConfig().scoring().getMarginalUtilityOfMoney();
 
 		LOG.info("VTTS_car: " + vttsCar);
 	}

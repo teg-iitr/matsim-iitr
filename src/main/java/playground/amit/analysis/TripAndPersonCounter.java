@@ -18,12 +18,8 @@
  * *********************************************************************** */
 package playground.amit.analysis;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.events.PersonArrivalEvent;
@@ -31,14 +27,18 @@ import org.matsim.api.core.v01.events.PersonDepartureEvent;
 import org.matsim.api.core.v01.events.handler.PersonArrivalEventHandler;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.api.core.v01.population.Person;
-
 import playground.amit.utils.MapUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author amit
  */
 public class TripAndPersonCounter implements PersonDepartureEventHandler, PersonArrivalEventHandler {
-	private static final Logger LOGGER = Logger.getLogger(TripAndPersonCounter.class);
+	private static final Logger LOGGER = LogManager.getLogger(TripAndPersonCounter.class);
 	private final Map<Id<Person>,Integer> personId2CarTripCounter;
 	private final Map<Id<Person>,Integer> personId2AllTripCounter;
 	private final List<Id<Person>> departureList;

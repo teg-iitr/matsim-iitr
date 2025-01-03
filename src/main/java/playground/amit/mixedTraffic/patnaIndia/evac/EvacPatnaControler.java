@@ -23,20 +23,15 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.QSimConfigGroup.LinkDynamics;
 import org.matsim.core.config.groups.QSimConfigGroup.VehiclesSource;
-import org.matsim.core.config.groups.VspExperimentalConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.evacuationgui.control.Controller;
-import org.matsim.evacuationgui.model.config.EvacuationConfigModule;
-import org.matsim.evacuationgui.utils.ScenarioCRSTransformation;
 import playground.amit.analysis.modalShare.ModalShareFromEvents;
 import playground.amit.analysis.tripTime.ModalTravelTimeAnalyzer;
 import playground.amit.mixedTraffic.patnaIndia.input.others.PatnaVehiclesGenerator;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter.PatnaUserGroup;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
-import playground.amit.utils.LoadMyScenarios;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
 
@@ -72,7 +67,7 @@ public class EvacPatnaControler {
 		}
 
 		Config config = ConfigUtils.loadConfig(configFile);
-		config.controler().setOutputDirectory(outDir);
+		config.controller().setOutputDirectory(outDir);
 
 		config.qsim().setLinkDynamics(linkDynamics);
 		config.qsim().setSeepModeStorageFree(isSeepModeStorageFree);
@@ -81,14 +76,14 @@ public class EvacPatnaControler {
 		
 		String outputDir ;
 		if(linkDynamics.equals(LinkDynamics.SeepageQ)) {
-			outputDir = config.controler().getOutputDirectory()+"/evac_"+linkDynamics.name()+"_"+seepModes.toString();
+			outputDir = config.controller().getOutputDirectory()+"/evac_"+linkDynamics.name()+"_"+seepModes.toString();
 			if(isSeepModeStorageFree) outputDir = outputDir.concat("_noStorageCap/");
 			else outputDir = outputDir.concat("/");
-		} else outputDir = config.controler().getOutputDirectory()+"/evac_"+linkDynamics.name()+"/";
+		} else outputDir = config.controller().getOutputDirectory()+"/evac_"+linkDynamics.name()+"/";
 		
-		config.controler().setOutputDirectory(outputDir);
-		config.controler().setDumpDataAtEnd(true);
-		config.controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
+		config.controller().setOutputDirectory(outputDir);
+		config.controller().setDumpDataAtEnd(true);
+		config.controller().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 		config.vspExperimental().setWritingOutputEvents(true);
 
 		Scenario sc = ScenarioUtils.loadScenario(config); 
@@ -98,7 +93,7 @@ public class EvacPatnaControler {
 
 		final Controler controler = new Controler(sc);
 
-//		final RandomizingTimeDistanceTravelDisutilityFactory builder_bike =  new RandomizingTimeDistanceTravelDisutilityFactory("bike", config.planCalcScore());
+//		final RandomizingTimeDistanceTravelDisutilityFactory builder_bike =  new RandomizingTimeDistanceTravelDisutilityFactory("bike", config.scoring());
 		
 		controler.addOverridingModule(new AbstractModule() {
 			@Override

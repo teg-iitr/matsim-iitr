@@ -18,10 +18,9 @@
  * *********************************************************************** */
 package playground.amit.InternalizationEmissionAndCongestion;
 
-import java.util.Set;
-
 import com.google.inject.Inject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.emissions.EmissionModule;
@@ -37,18 +36,19 @@ import org.matsim.core.controler.listener.ShutdownListener;
 import org.matsim.core.controler.listener.StartupListener;
 import org.matsim.core.events.algorithms.EventWriterXML;
 import org.matsim.core.scenario.MutableScenario;
-
 import playground.vsp.airPollution.flatEmissions.EmissionCostModule;
 import playground.vsp.airPollution.flatEmissions.EmissionInternalizationHandler;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
 import playground.vsp.congestion.handlers.MarginalCongestionPricingHandler;
 import playground.vsp.congestion.handlers.TollHandler;
 
+import java.util.Set;
+
 /**
  * @author amit after Benjamin and Ihab
  */
 public class InternalizeEmissionsCongestionControlerListener implements StartupListener, IterationStartsListener, IterationEndsListener, ShutdownListener {
-	private final Logger logger = Logger.getLogger(InternalizeEmissionsCongestionControlerListener.class);
+	private final Logger logger = LogManager.getLogger(InternalizeEmissionsCongestionControlerListener.class);
 
 	private MatsimServices controler;
 	@Inject private EmissionModule emissionModule;
@@ -81,8 +81,8 @@ public class InternalizeEmissionsCongestionControlerListener implements StartupL
 		eventsManager.addHandler(new MarginalCongestionPricingHandler(eventsManager, scenario));
 		eventsManager.addHandler(this.tollHandler);
 
-		this.firstIt = this.controler.getConfig().controler().getFirstIteration();
-		this.lastIt = this.controler.getConfig().controler().getLastIteration();
+		this.firstIt = this.controler.getConfig().controller().getFirstIteration();
+		this.lastIt = this.controler.getConfig().controller().getLastIteration();
 	}
 
 	@Override
@@ -119,10 +119,10 @@ public class InternalizeEmissionsCongestionControlerListener implements StartupL
 		}
 
 		// write out toll statistics every iteration
-		this.tollHandler.writeTollStats(this.scenario.getConfig().controler().getOutputDirectory() + "/ITERS/it." + event.getIteration() + "/tollStats.csv");
+		this.tollHandler.writeTollStats(this.scenario.getConfig().controller().getOutputDirectory() + "/ITERS/it." + event.getIteration() + "/tollStats.csv");
 
 		// write out congestion statistics every iteration
-		this.congestionHandler.writeCongestionStats(this.scenario.getConfig().controler().getOutputDirectory() + "/ITERS/it." + event.getIteration() + "/congestionStats.csv");
+		this.congestionHandler.writeCongestionStats(this.scenario.getConfig().controller().getOutputDirectory() + "/ITERS/it." + event.getIteration() + "/congestionStats.csv");
 
 	}
 

@@ -19,29 +19,22 @@
 
 package playground.amit.mixedTraffic.patnaIndia.scoring;
 
-import javax.inject.Inject;
-
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ScoringParameterSet;
 import org.matsim.core.config.groups.ScenarioConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup.ModeParams;
+import org.matsim.core.config.groups.ScoringConfigGroup.ScoringParameterSet;
 import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.ScoringFunctionFactory;
 import org.matsim.core.scoring.SumScoringFunction;
-import org.matsim.core.scoring.functions.CharyparNagelActivityScoring;
-import org.matsim.core.scoring.functions.CharyparNagelAgentStuckScoring;
-import org.matsim.core.scoring.functions.CharyparNagelLegScoring;
-import org.matsim.core.scoring.functions.CharyparNagelMoneyScoring;
-import org.matsim.core.scoring.functions.ScoringParameters;
-import org.matsim.core.scoring.functions.ScoringParametersForPerson;
-import org.matsim.core.scoring.functions.SubpopulationScoringParameters;
-
+import org.matsim.core.scoring.functions.*;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
+
+import javax.inject.Inject;
 
 /**
  * @author amit
@@ -56,7 +49,7 @@ public class PatnaScoringFunctionFactory implements ScoringFunctionFactory{
 	final ScoringParametersForPerson parameters ;
 	@Inject Network network;
 	@Inject Population population;
-	@Inject PlanCalcScoreConfigGroup planCalcScoreConfigGroup; // to modify the util parameters
+	@Inject ScoringConfigGroup planCalcScoreConfigGroup; // to modify the util parameters
 	@Inject ScenarioConfigGroup scenarioConfig;
 	
 	@Override

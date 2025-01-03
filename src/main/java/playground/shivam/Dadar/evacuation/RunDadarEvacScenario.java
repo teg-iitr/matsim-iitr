@@ -9,32 +9,28 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.api.core.v01.population.*;
-import org.matsim.contrib.osm.networkReader.LinkProperties;
-import org.matsim.contrib.osm.networkReader.OsmTags;
 import org.matsim.contrib.osm.networkReader.SupersonicOsmNetworkReader;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
-import org.matsim.core.config.groups.PlansConfigGroup;
-import org.matsim.core.config.groups.StrategyConfigGroup;
+import org.matsim.core.config.groups.ReplanningConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.network.algorithms.NetworkCleaner;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
-import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
-import playground.amit.Dehradun.DehradunUtils;
 import playground.amit.Dehradun.OD;
-import playground.amit.Dehradun.ODWriter;
 import playground.amit.jaipur.plans.ODMatrixGenerator;
 import playground.amit.utils.geometry.GeometryUtils;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
@@ -59,11 +55,11 @@ public class RunDadarEvacScenario {
         Config config = ConfigUtils.createConfig();
         config.network().setInputFile(outputMATSimNetworkFile);
         config.plans().setInputFile(plansFile);
-        config.controler().setLastIteration(10);
-        config.controler().setOutputDirectory(filesPath+"output");
-        config.controler().setDumpDataAtEnd(true);
-        config.controler().setCreateGraphs(true);
-        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+        config.controller().setLastIteration(10);
+        config.controller().setOutputDirectory(filesPath+"output");
+        config.controller().setDumpDataAtEnd(true);
+        config.controller().setCreateGraphs(true);
+        config.controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
 
         //TODO we are using 0.5 just to see some congestion.
         config.qsim().setFlowCapFactor(0.5);
@@ -71,22 +67,22 @@ public class RunDadarEvacScenario {
 
         config.vspExperimental().setWritingOutputEvents(true);
 
-        PlanCalcScoreConfigGroup pcg = config.planCalcScore();
-        PlanCalcScoreConfigGroup.ActivityParams originAct = new PlanCalcScoreConfigGroup.ActivityParams(ORIGIN_ACTIVITY);
+        ScoringConfigGroup pcg = config.scoring();
+        ScoringConfigGroup.ActivityParams originAct = new ScoringConfigGroup.ActivityParams(ORIGIN_ACTIVITY);
         originAct.setScoringThisActivityAtAll(false);
         pcg.addActivityParams(originAct);
 
-        PlanCalcScoreConfigGroup.ActivityParams destinationAct = new PlanCalcScoreConfigGroup.ActivityParams(DESTINATION_ACTIVITY);
+        ScoringConfigGroup.ActivityParams destinationAct = new ScoringConfigGroup.ActivityParams(DESTINATION_ACTIVITY);
         destinationAct.setScoringThisActivityAtAll(false);
         pcg.addActivityParams(destinationAct);
 
-        StrategyConfigGroup scg = config.strategy();
-        StrategyConfigGroup.StrategySettings reRoute = new StrategyConfigGroup.StrategySettings();
+        ReplanningConfigGroup scg = config.replanning();
+        ReplanningConfigGroup.StrategySettings reRoute = new ReplanningConfigGroup.StrategySettings();
         reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
         reRoute.setWeight(0.2);
         scg.addStrategySettings(reRoute);
 
-        StrategyConfigGroup.StrategySettings tam = new StrategyConfigGroup.StrategySettings();
+        ReplanningConfigGroup.StrategySettings tam = new ReplanningConfigGroup.StrategySettings();
         tam.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator);
         tam.setWeight(0.1);
         scg.addStrategySettings(tam);

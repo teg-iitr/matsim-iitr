@@ -31,8 +31,8 @@
 ////        Config config = ConfigUtils.loadConfig(configUrl, new MultiModeDrtConfigGroup(), new DvrpConfigGroup(),
 ////                new OTFVisConfigGroup());
 ////
-////        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-////        config.controler().setOutputDirectory(utils.getOutputDirectory());
+////        config.controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+////        config.controller().setOutputDirectory(utils.getOutputDirectory());
 ////        RunDrtExample.run(config, true);
 //    }
 //}

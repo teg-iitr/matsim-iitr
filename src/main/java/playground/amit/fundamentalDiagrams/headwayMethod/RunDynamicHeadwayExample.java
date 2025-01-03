@@ -19,7 +19,6 @@
 
 package playground.amit.fundamentalDiagrams.headwayMethod;
 
-import java.util.Arrays;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
@@ -28,7 +27,6 @@ import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
-//import org.matsim.core.mobsim.qsim.qnetsimengine.DynamicHeadwayQNetworkFactory;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
@@ -36,6 +34,8 @@ import org.matsim.vehicles.Vehicles;
 import playground.amit.fundamentalDiagrams.FDUtils;
 import playground.amit.fundamentalDiagrams.core.FDConfigGroup;
 import playground.amit.fundamentalDiagrams.core.FDModule;
+
+import java.util.Arrays;
 
 /**
  * Created by amit on 14.04.18.
@@ -47,8 +47,8 @@ public class RunDynamicHeadwayExample {
 
         Config config = ConfigUtils.createConfig();
         
-        config.controler().setOutputDirectory("../../svnit/outputFiles/carBicycle/passing/equalModalSplit_holeSpeed15KPH/");
-        config.controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
+        config.controller().setOutputDirectory("../../svnit/outputFiles/carBicycle/passing/equalModalSplit_holeSpeed15KPH/");
+        config.controller().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
 
         QSimConfigGroup qsim = config.qsim();
         qsim.setMainModes(Arrays.asList("car","bicycle"));
@@ -97,7 +97,7 @@ public class RunDynamicHeadwayExample {
 
         controler.run();
 
-        FDUtils.cleanOutputDir(scenario.getConfig().controler().getOutputDirectory());
+        FDUtils.cleanOutputDir(scenario.getConfig().controller().getOutputDirectory());
     }
 
 }

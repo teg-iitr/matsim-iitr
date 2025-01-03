@@ -18,40 +18,25 @@
  * *********************************************************************** */
 package playground.amit.fundamentalDiagrams.passingEvents;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.inject.Inject;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.events.LinkEnterEvent;
-import org.matsim.api.core.v01.events.LinkLeaveEvent;
-import org.matsim.api.core.v01.events.PersonDepartureEvent;
-import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
-import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
-import org.matsim.api.core.v01.events.handler.LinkEnterEventHandler;
-import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
-import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
-import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
-import org.matsim.api.core.v01.events.handler.VehicleLeavesTrafficEventHandler;
+import org.matsim.api.core.v01.events.*;
+import org.matsim.api.core.v01.events.handler.*;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.config.groups.ControlerConfigGroup;
+import org.matsim.core.config.groups.ControllerConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.controler.events.IterationEndsEvent;
 import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.Vehicle;
-import playground.amit.fundamentalDiagrams.core.FDConfigGroup;
-import playground.amit.fundamentalDiagrams.core.FDDataContainer;
-import playground.amit.fundamentalDiagrams.core.FDModule;
-import playground.amit.fundamentalDiagrams.core.FDNetworkGenerator;
-import playground.amit.fundamentalDiagrams.core.FDStabilityTester;
+import playground.amit.fundamentalDiagrams.core.*;
+
+import javax.inject.Inject;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * @author amit
@@ -90,7 +75,7 @@ class PassingEventsUpdator implements LinkEnterEventHandler, LinkLeaveEventHandl
 
 	@Inject
 	PassingEventsUpdator(QSimConfigGroup qSimConfigGroup, FDNetworkGenerator fdNetworkGenerator,
-						 FDDataContainer fdDataContainer, ControlerConfigGroup config,
+						 FDDataContainer fdDataContainer, ControllerConfigGroup config,
 						 FDStabilityTester tester, FDConfigGroup fdConfigGroup) {
 		this.seepModes = qSimConfigGroup.getSeepModes();
 		this.personId2TrackEnterTime = new HashMap<>();

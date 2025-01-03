@@ -19,30 +19,23 @@
 
 package playground.amit.utils.plans;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.PlanElement;
+import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigReader;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.scoring.functions.ActivityUtilityParameters;
 import org.matsim.core.utils.io.IOUtils;
 import playground.amit.utils.LoadMyScenarios;
 import playground.amit.utils.PersonFilter;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * This class checks the initial plans file and check
@@ -55,7 +48,7 @@ import playground.amit.utils.PersonFilter;
  * @author amit
  */
 public class OutputPlansConsistencyCheck {
-    private static final Logger LOG = Logger.getLogger(OutputPlansConsistencyCheck.class);
+    private static final Logger LOG = LogManager.getLogger(OutputPlansConsistencyCheck.class);
     private final Scenario sc;
 
     private final Map<Person, List<List<String>>> person2PlanIndex2ActivityTypes = new HashMap<>();
@@ -193,7 +186,7 @@ public class OutputPlansConsistencyCheck {
         Map<String, Integer> actToZeroUtilDurCount = new HashMap<>();
 
         Map<String, Integer> actType2Counter = new HashMap<>();
-        for(String act : config.planCalcScore().getActivityTypes()) {
+        for(String act : config.scoring().getActivityTypes()) {
             if (! act.contains("interaction")) {
                 actType2Counter.put(act,0);
                 actToZeroDurationCount.put(act,0);
@@ -282,7 +275,7 @@ public class OutputPlansConsistencyCheck {
     }
 
     public void writeTestResultsForActivitiesSequences() {
-        int numberOfPlansInChoiceSet = this.config.strategy().getMaxAgentPlanMemorySize();
+        int numberOfPlansInChoiceSet = this.config.replanning().getMaxAgentPlanMemorySize();
         for (int index =0; index<numberOfPlansInChoiceSet; index++){
             String outFile = this.outputDir + "analysis/plansConsistency_CountsForActivitySequences_planIndex_"+index+".txt";
             BufferedWriter writer = IOUtils.getBufferedWriter(outFile);
@@ -314,7 +307,7 @@ public class OutputPlansConsistencyCheck {
      * Also report the numbers for each user group.
      */
     public void writeTestResultsFor1stAndLastActivity() {
-        int numberOfPlansInChoiceSet = this.config.strategy().getMaxAgentPlanMemorySize();
+        int numberOfPlansInChoiceSet = this.config.replanning().getMaxAgentPlanMemorySize();
         for (int index =0; index<numberOfPlansInChoiceSet; index++){
             String outFile = this.outputDir + "analysis/plansConsistency_DifferentFirstAndLastActivities_planIndex"+index+".txt";
             LOG.info("The outcome of consistency check for equality of first and last activity in a plan is written to " + outFile);
@@ -393,7 +386,7 @@ public class OutputPlansConsistencyCheck {
     }
 
     private SortedMap<String, Double> getZeroUtilDuration() {
-        PlanCalcScoreConfigGroup params = config.planCalcScore();
+        ScoringConfigGroup params = config.scoring();
 
         SortedMap<String, Double> actType2ZeroUtilDuration = new TreeMap<>();
         params.getActivityTypes()

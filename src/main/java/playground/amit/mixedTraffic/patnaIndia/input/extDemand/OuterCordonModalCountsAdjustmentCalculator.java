@@ -19,23 +19,19 @@
 
 package playground.amit.mixedTraffic.patnaIndia.input.extDemand;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.utils.io.IOUtils;
-
 import playground.amit.mixedTraffic.patnaIndia.utils.OuterCordonUtils;
 import playground.amit.mixedTraffic.patnaIndia.utils.OuterCordonUtils.PatnaNetworkType;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.amit.utils.NumberUtils;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * Clearly, for modal counts calibration, total in-/out-traffic must be balanced for all modes.
@@ -45,7 +41,7 @@ import playground.amit.utils.NumberUtils;
 
 public final class OuterCordonModalCountsAdjustmentCalculator{
 	
-	private static final Logger LOG = Logger.getLogger(OuterCordonModalCountsAdjustmentCalculator.class);
+	private static final Logger LOG = LogManager.getLogger(OuterCordonModalCountsAdjustmentCalculator.class);
 
 	/**
 	 * mode 2 count volume in both directions.

@@ -151,10 +151,10 @@ public class BerlinEmissionAnalyzer {
 
         EmissionsConfigGroup emissionsConfigGroup  = ConfigUtils.addOrGetModule(config, EmissionsConfigGroup.class);
 //        emissionsConfigGroup.setUsingDetailedEmissionCalculation(false);
-        emissionsConfigGroup.setEmissionRoadTypeMappingFile(roadTypeMappingFile);
+//        emissionsConfigGroup.setEmissionRoadTypeMappingFile(roadTypeMappingFile);
         emissionsConfigGroup.setAverageColdEmissionFactorsFile(averageFleetColdEmissionFactorsFile);
         emissionsConfigGroup.setAverageWarmEmissionFactorsFile(averageFleetWarmEmissionFactorsFile);
-        emissionsConfigGroup.setUsingVehicleTypeIdAsVehicleDescription(false);
+//        emissionsConfigGroup.setUsingVehicleTypeIdAsVehicleDescription(false);
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
 

@@ -18,13 +18,16 @@
  * *********************************************************************** */
 package playground.amit.mixedTraffic.patnaIndia.utils;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.gbl.Gbl;
 import playground.amit.utils.PersonFilter;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author amit
@@ -32,7 +35,7 @@ import playground.amit.utils.PersonFilter;
 
 public class PatnaPersonFilter implements PersonFilter{
 
-	private static final org.apache.log4j.Logger LOG = org.apache.log4j.Logger.getLogger(PatnaPersonFilter.class);
+	private static final Logger LOG = LogManager.getLogger(PatnaPersonFilter.class);
 
 	public enum PatnaUserGroup {
 		urban, commuter, through

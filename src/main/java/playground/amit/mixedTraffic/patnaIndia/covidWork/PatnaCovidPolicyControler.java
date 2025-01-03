@@ -1,13 +1,14 @@
 package playground.amit.mixedTraffic.patnaIndia.covidWork;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.ControlerConfigGroup;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+import org.matsim.core.config.groups.ControllerConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.config.groups.VspExperimentalConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
@@ -44,7 +45,7 @@ import java.util.stream.Collectors;
 
 public class PatnaCovidPolicyControler {
 
-    public static final Logger logger = Logger.getLogger(PatnaCovidPolicyControler.class);
+    public static final Logger logger = LogManager.getLogger(PatnaCovidPolicyControler.class);
 //    private static final String wfh_walk = "WFHwalk";
 
     public static void main(String[] args) {
@@ -72,12 +73,12 @@ public class PatnaCovidPolicyControler {
         outputDir = outputDir+runCase;
 
         Config config = ConfigUtils.loadConfig(inputConfig);
-        config.controler().setOutputDirectory(outputDir);
-        config.controler().setRunId(runCase);
+        config.controller().setOutputDirectory(outputDir);
+        config.controller().setRunId(runCase);
 
         config.vehicles().setVehiclesFile(null); // vehicle types are added from vehicle file later.
-        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-        config.controler().setWriteEventsInterval(50);
+        config.controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+        config.controller().setWriteEventsInterval(50);
 
         config.travelTimeCalculator().setFilterModes(true);
         config.travelTimeCalculator().setSeparateModes(true);
@@ -118,8 +119,8 @@ public class PatnaCovidPolicyControler {
 
         final Controler controler = new Controler(scenario);
 
-        controler.getConfig().controler().setDumpDataAtEnd(true);
-        controler.getConfig().strategy().setMaxAgentPlanMemorySize(10);
+        controler.getConfig().controller().setDumpDataAtEnd(true);
+        controler.getConfig().replanning().setMaxAgentPlanMemorySize(10);
 
         controler.addOverridingModule(new AbstractModule() { // plotting modal share over iterations
             @Override
@@ -145,7 +146,7 @@ public class PatnaCovidPolicyControler {
 
 
         // for above make sure that util_dist and monetary dist rate for pt are zero.
-        PlanCalcScoreConfigGroup.ModeParams mp = controler.getConfig().planCalcScore().getModes().get("pt");
+        ScoringConfigGroup.ModeParams mp = controler.getConfig().scoring().getModes().get("pt");
         mp.setMarginalUtilityOfDistance(0.0);
         mp.setMonetaryDistanceRate(0.0);
 
@@ -162,8 +163,8 @@ public class PatnaCovidPolicyControler {
         controler.run();
 
         // delete unnecessary iterations folder here.
-        int firstIt = controler.getConfig().controler().getFirstIteration();
-        int lastIt = controler.getConfig().controler().getLastIteration();
+        int firstIt = controler.getConfig().controller().getFirstIteration();
+        int lastIt = controler.getConfig().controller().getLastIteration();
         FileUtils.deleteIntermediateIterations(outputDir,firstIt,lastIt);
 
         new File(outputDir+"/analysis/").mkdir();
@@ -181,7 +182,7 @@ public class PatnaCovidPolicyControler {
         mtta.run();
         mtta.writeResults(outputDir+"/analysis/"+runCase+"_modalTravelTime_"+userGroup+".txt");
 
-        writeModalShareFromEvents(userGroup, scenario.getConfig().controler());
+        writeModalShareFromEvents(userGroup, scenario.getConfig().controller());
 
         ModalShareFromPlans modalShareFromPlans = new ModalShareFromPlans(outputDir+"/"+runCase+".output_experienced_plans.xml.gz", userGroup, patnaPersonFilter);
         modalShareFromPlans.run();
@@ -199,7 +200,7 @@ public class PatnaCovidPolicyControler {
         StatsWriter.run(outputDir, runCase);
     }
 
-    public static void writeModalShareFromEvents(String userGroup, ControlerConfigGroup controlerConfigGroup){
+    public static void writeModalShareFromEvents(String userGroup, ControllerConfigGroup controlerConfigGroup){
         String outputDir = controlerConfigGroup.getOutputDirectory();
         String runCase = controlerConfigGroup.getRunId();
 

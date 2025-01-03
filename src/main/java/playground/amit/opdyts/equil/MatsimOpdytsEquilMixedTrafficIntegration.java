@@ -28,7 +28,7 @@
 //import com.google.common.io.Files;
 //import floetteroed.opdyts.DecisionVariableRandomizer;
 //import floetteroed.opdyts.ObjectiveFunction;
-//import org.apache.log4j.Logger;
+//import org.apache.logging.log4j.Logger;
 //import org.matsim.api.core.v01.Scenario;
 //import org.matsim.contrib.analysis.kai.KaiAnalysisListener;
 //import org.matsim.contrib.opdyts.MATSimSimulator2;
@@ -98,7 +98,7 @@
 //		Config config = ConfigUtils.loadConfig(configFile, new OpdytsConfigGroup());
 //		config.plans().setInputFile(relaxedPlans);
 //		config.vspExperimental().setVspDefaultsCheckingLevel(VspExperimentalConfigGroup.VspDefaultsCheckingLevel.warn); // must be warn, since opdyts override few things
-//		config.controler().setOutputDirectory(OUT_DIR);
+//		config.controller().setOutputDirectory(OUT_DIR);
 //
 //		// from GF, every run should have a different random seed.
 //		int randomSeed = new Random().nextInt(9999);
@@ -113,8 +113,8 @@
 //
 //		List<String> modes2consider = Arrays.asList("car","bicycle");
 //
-//		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-//		config.strategy().setFractionOfIterationsToDisableInnovation(Double.POSITIVE_INFINITY);
+//		config.controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+//		config.replanning().setFractionOfIterationsToDisableInnovation(Double.POSITIVE_INFINITY);
 //
 //		Scenario scenario = ScenarioUtils.loadScenario(config);
 //
@@ -147,8 +147,8 @@
 //						String outDir = event.getServices().getControlerIO().getOutputPath()+"/vectorElementSizeFiles/";
 //						new File(outDir).mkdirs();
 //
-//						int firstIt = event.getServices().getConfig().controler().getFirstIteration();
-//						int lastIt = event.getServices().getConfig().controler().getLastIteration();
+//						int firstIt = event.getServices().getConfig().controller().getFirstIteration();
+//						int lastIt = event.getServices().getConfig().controller().getLastIteration();
 //						int plotEveryItr = 50;
 //
 //						for (int itr = firstIt+1; itr <=lastIt; itr++) {
@@ -159,7 +159,7 @@
 //									try {
 //										Files.copy(new File(sourceFile), new File(sinkFile));
 //									} catch (IOException e) {
-//										Logger.getLogger(MatsimOpdytsEquilMixedTrafficIntegration.class).warn("Data is not copied. Reason : " + e);
+//										LogManager.getLogger(MatsimOpdytsEquilMixedTrafficIntegration.class).warn("Data is not copied. Reason : " + e);
 //									}
 //								}
 //							}
@@ -194,7 +194,7 @@
 //				RandomizedUtilityParametersChoser.ONLY_ASC, EQUIL_MIXEDTRAFFIC, null, modes2consider, ascRandomizeStyle);
 //
 //		// what would be the decision variables to optimize the objective function.
-//		ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable(scenario.getConfig().planCalcScore(),scenario, modes2consider, EQUIL_MIXEDTRAFFIC);
+//		ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable(scenario.getConfig().scoring(),scenario, modes2consider, EQUIL_MIXEDTRAFFIC);
 //
 //		MATSimOpdytsControler<ModeChoiceDecisionVariable> opdytsControler = new MATSimOpdytsControler<>(scenario);
 //		opdytsControler.addNetworkModeOccupancyAnalyzr(simulator);

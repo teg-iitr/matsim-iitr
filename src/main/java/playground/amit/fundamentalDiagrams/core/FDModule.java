@@ -20,11 +20,9 @@
 
 package playground.amit.fundamentalDiagrams.core;
 
-import java.util.Arrays;
-
-import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.FileAppender;
 import org.apache.logging.log4j.core.config.Configuration;
@@ -36,13 +34,12 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
-import org.matsim.core.config.groups.StrategyConfigGroup;
+import org.matsim.core.config.groups.ReplanningConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.controler.TerminationCriterion;
-import org.matsim.core.network.VariableIntervalTimeVariantLinkFactory;
 import org.matsim.core.network.io.NetworkWriter;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.vehicles.MatsimVehicleWriter;
@@ -50,10 +47,11 @@ import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import playground.amit.fundamentalDiagrams.core.pointsToRun.FDAgentsGenerator;
 import playground.amit.fundamentalDiagrams.core.pointsToRun.FDAgentsGeneratorControlerListner;
-import playground.amit.fundamentalDiagrams.core.pointsToRun.FDDistributionAgentsGeneratorImpl;
 import playground.amit.fundamentalDiagrams.core.pointsToRun.FDAgentsGeneratorImpl;
-import playground.shivam.trafficChar.TrafficCharQSimModule;
+import playground.amit.fundamentalDiagrams.core.pointsToRun.FDDistributionAgentsGeneratorImpl;
 import playground.shivam.trafficChar.core.TrafficCharConfigGroup;
+
+import java.util.Arrays;
 
 /**
  * @author amit after ssix
@@ -61,7 +59,7 @@ import playground.shivam.trafficChar.core.TrafficCharConfigGroup;
 
 public class FDModule extends AbstractModule {
 
-	public static final Logger LOG = Logger.getLogger(FDModule.class);
+	public static final Logger LOG = LogManager.getLogger(FDModule.class);
 
 	public static final double MAX_ACT_END_TIME = 1800.;
 
@@ -101,7 +99,7 @@ public class FDModule extends AbstractModule {
 	}
 
 	private void checkForConsistencyAndInitialize(){
-		this.runDir = scenario.getConfig().controler().getOutputDirectory();
+		this.runDir = scenario.getConfig().controller().getOutputDirectory();
 		if(runDir==null) throw new RuntimeException("Location to write data for FD is not set. Aborting...");
 
 		createLogFile();
@@ -129,28 +127,28 @@ public class FDModule extends AbstractModule {
 			}
 		}
 
-		if (scenario.getConfig().controler().getOverwriteFileSetting().equals(OverwriteFileSetting.deleteDirectoryIfExists)) {
-			LOG.warn("Overwrite file setting is set to "+scenario.getConfig().controler().getOverwriteFileSetting() 
+		if (scenario.getConfig().controller().getOverwriteFileSetting().equals(OverwriteFileSetting.deleteDirectoryIfExists)) {
+			LOG.warn("Overwrite file setting is set to "+scenario.getConfig().controller().getOverwriteFileSetting() 
 					+ ", which will also remove the fundamental diagram data file. Setting it back to "+OverwriteFileSetting.overwriteExistingFiles);
-			scenario.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
+			scenario.getConfig().controller().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
 		}
 	}
 
 	private void setUpConfig() {
 		// TODO: following need to updated.
-		scenario.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
+		scenario.getConfig().controller().setOverwriteFileSetting(OverwriteFileSetting.overwriteExistingFiles);
 
 		// required when using controler
-		PlanCalcScoreConfigGroup.ActivityParams home = new PlanCalcScoreConfigGroup.ActivityParams("home");
+		ScoringConfigGroup.ActivityParams home = new ScoringConfigGroup.ActivityParams("home");
 		home.setScoringThisActivityAtAll(false);
-		scenario.getConfig().planCalcScore().addActivityParams(home);
+		scenario.getConfig().scoring().addActivityParams(home);
 
-		PlanCalcScoreConfigGroup.ActivityParams work = new PlanCalcScoreConfigGroup.ActivityParams("work");
+		ScoringConfigGroup.ActivityParams work = new ScoringConfigGroup.ActivityParams("work");
 		work.setScoringThisActivityAtAll(false);
-		scenario.getConfig().planCalcScore().addActivityParams(work);
+		scenario.getConfig().scoring().addActivityParams(work);
 
-		scenario.getConfig().controler().setCreateGraphs(false);
-		scenario.getConfig().controler().setDumpDataAtEnd(true);
+		scenario.getConfig().controller().setCreateGraphs(false);
+		scenario.getConfig().controller().setDumpDataAtEnd(true);
 
 		scenario.getConfig().qsim().setEndTime(100*3600.); // qsim should not go beyond 100 hrs it stability is not achieved.
 
@@ -166,11 +164,11 @@ public class FDModule extends AbstractModule {
 //			netImpl.getFactory().setLinkFactory(new VariableIntervalTimeVariantLinkFactory());
 //		}
 
-		StrategyConfigGroup.StrategySettings ss = new StrategyConfigGroup.StrategySettings();
+		ReplanningConfigGroup.StrategySettings ss = new ReplanningConfigGroup.StrategySettings();
 		ss.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.KeepLastSelected);
 		ss.setWeight(1.0);
-		scenario.getConfig().strategy().addStrategySettings(ss);
-		scenario.getConfig().strategy().setFractionOfIterationsToDisableInnovation(1.0);
+		scenario.getConfig().replanning().addStrategySettings(ss);
+		scenario.getConfig().replanning().setFractionOfIterationsToDisableInnovation(1.0);
 	}
 
 	@Override

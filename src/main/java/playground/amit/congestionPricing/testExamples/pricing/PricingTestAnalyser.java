@@ -18,23 +18,22 @@
  * *********************************************************************** */
 package playground.amit.congestionPricing.testExamples.pricing;
 
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.network.Link;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.core.utils.io.IOUtils;
+import playground.amit.analysis.congestion.CausedDelayAnalyzer;
+import playground.amit.analysis.congestion.ExperiencedDelayAnalyzer;
+import playground.amit.analysis.tripTime.LinkTravelTimeCalculator;
+import playground.amit.utils.LoadMyScenarios;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.Scenario;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.utils.io.IOUtils;
-
-import playground.amit.analysis.congestion.CausedDelayAnalyzer;
-import playground.amit.analysis.congestion.ExperiencedDelayAnalyzer;
-import playground.amit.analysis.tripTime.LinkTravelTimeCalculator;
-import playground.amit.utils.LoadMyScenarios;
 
 /**
  * @author amit
@@ -72,7 +71,7 @@ class PricingTestAnalyser {
 	private void writeLinkTravelTimes (String congestionImpl){
 		Scenario sc = LoadMyScenarios.loadScenarioFromPlansNetworkAndConfig(outputDir+"/input/input_plans.xml.gz", outputDir+"/input/input_network.xml", outputDir+"/input/input_config.xml.gz");
 
-		int lastIt = sc.getConfig().controler().getLastIteration();
+		int lastIt = sc.getConfig().controller().getLastIteration();
 		String eventsFile = outputDir+"/output/"+congestionImpl+"/ITERS/it."+lastIt+"/"+lastIt+".events.xml.gz";
 
 		LinkTravelTimeCalculator lttc = new LinkTravelTimeCalculator(eventsFile);
@@ -108,7 +107,7 @@ class PricingTestAnalyser {
 
 		Scenario sc = LoadMyScenarios.loadScenarioFromPlansNetworkAndConfig(outputDir+"/input/input_plans.xml.gz", outputDir+"/input/input_network.xml", outputDir+"/input/input_config.xml.gz");
 
-		int lastIt = sc.getConfig().controler().getLastIteration();
+		int lastIt = sc.getConfig().controller().getLastIteration();
 		String eventsFile = outputDir+"/output/"+congestionImpl+"/ITERS/it."+lastIt+"/"+lastIt+".events.xml.gz";
 
 		ExperiencedDelayAnalyzer eda = new ExperiencedDelayAnalyzer(eventsFile, sc, 1);

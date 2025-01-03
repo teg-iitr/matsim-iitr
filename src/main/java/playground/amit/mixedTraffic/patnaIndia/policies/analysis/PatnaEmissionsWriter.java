@@ -25,8 +25,8 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.contrib.emissions.EmissionModule;
-import org.matsim.contrib.emissions.HbefaVehicleCategory;
 import org.matsim.contrib.emissions.EmissionUtils;
+import org.matsim.contrib.emissions.HbefaVehicleCategory;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
@@ -64,10 +64,10 @@ public class PatnaEmissionsWriter {
 
         EmissionsConfigGroup ecg = new EmissionsConfigGroup();
 //        ecg.setUsingDetailedEmissionCalculation(false);
-        ecg.setUsingVehicleTypeIdAsVehicleDescription(false);
+//        ecg.setUsingVehicleTypeIdAsVehicleDescription(false);
         ecg.setAverageColdEmissionFactorsFile(avgColdEmissFile);
         ecg.setAverageWarmEmissionFactorsFile(avgWarmEmissFile);
-        ecg.setEmissionRoadTypeMappingFile(roadTypeMappingFile);
+//        ecg.setEmissionRoadTypeMappingFile(roadTypeMappingFile);
 
         Config config = ConfigUtils.loadConfig(outputDir+"/output_config.xml.gz", ecg);
         config.plans().setInputFile(null);

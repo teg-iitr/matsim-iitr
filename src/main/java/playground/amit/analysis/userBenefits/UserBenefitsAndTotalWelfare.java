@@ -18,12 +18,8 @@
  * *********************************************************************** */
 package playground.amit.analysis.userBenefits;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
@@ -33,17 +29,21 @@ import org.matsim.core.events.MatsimEventsReader;
 import org.matsim.core.events.handler.EventHandler;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.utils.io.IOUtils;
-
 import playground.amit.utils.LoadMyScenarios;
 import playground.vsp.analysis.modules.monetaryTransferPayments.MonetaryPaymentsAnalyzer;
 import playground.vsp.analysis.modules.userBenefits.WelfareMeasure;
+
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author amit
  */
 public class UserBenefitsAndTotalWelfare {
 
-	public static final Logger LOGGER = Logger.getLogger(UserBenefitsAndTotalWelfare.class);
+	public static final Logger LOGGER = LogManager.getLogger(UserBenefitsAndTotalWelfare.class);
 	private final String outputDir;
 	private static final WelfareMeasure WM = WelfareMeasure.SELECTED;
 	private MutableScenario sc;
@@ -124,7 +124,7 @@ public class UserBenefitsAndTotalWelfare {
 			events.addHandler(eh);
 		}
 
-		int lastIteration = sc.getConfig().controler().getLastIteration();
+		int lastIteration = sc.getConfig().controller().getLastIteration();
 		MatsimEventsReader reader = new MatsimEventsReader(events);
 		reader.readFile(outputDir+runCase+"/ITERS/it."+lastIteration+"/"+lastIteration+".events.xml.gz");
 

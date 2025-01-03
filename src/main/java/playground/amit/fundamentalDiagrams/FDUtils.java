@@ -19,12 +19,13 @@
 
 package playground.amit.fundamentalDiagrams;
 
+import org.matsim.core.utils.io.IOUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-import org.matsim.core.utils.io.IOUtils;
 
 /**
  * Created by amit on 21.05.18.
@@ -45,7 +46,7 @@ public class FDUtils {
 
 
     private void updateTransimFileNameAndDir(List<Integer> runningPoint, String outputDir) {
-//        String outputDir = scenario.getConfig().controler().getOutputDirectory();
+//        String outputDir = scenario.getConfig().controller().getOutputDirectory();
         //Check if Transim veh dir exists, if not create it
         if(! new File(outputDir+"/TransVeh/").exists() ) new File(outputDir+"/TransVeh/").mkdir();
         //first, move T.veh.gz file

@@ -19,7 +19,6 @@
 
 package playground.amit.fundamentalDiagrams.dynamicPCU.surveyData;
 
-import java.util.List;
 import com.google.inject.Key;
 import com.google.inject.name.Names;
 import org.matsim.api.core.v01.Id;
@@ -41,6 +40,8 @@ import playground.amit.fundamentalDiagrams.core.FDModule;
 import playground.amit.fundamentalDiagrams.core.pointsToRun.FDAgentsGenerator;
 import playground.amit.fundamentalDiagrams.dynamicPCU.PCUMethod;
 import playground.amit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.estimation.ChandraSikdarPCUUpdator;
+
+import java.util.List;
 
 /**
  * Created by amit on 23.05.18.
@@ -64,7 +65,7 @@ public class RunSurveyData {
 
         Config config = ConfigUtils.createConfig();
 
-        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+        config.controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
 
         QSimConfigGroup qsim = config.qsim();
         List<String> mainModes = SurveyDataUtils.modes;
@@ -73,7 +74,7 @@ public class RunSurveyData {
         qsim.setTrafficDynamics(trafficDynamics);
         qsim.setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
 
-        config.controler().setOutputDirectory( parentDir+trafficDynamics+"/trackLinkLength_"+(int) trackLinkLength+"m/" );
+        config.controller().setOutputDirectory( parentDir+trafficDynamics+"/trackLinkLength_"+(int) trackLinkLength+"m/" );
 
         FDConfigGroup fdConfigGroup = ConfigUtils.addOrGetModule(config, FDConfigGroup.class);
         fdConfigGroup.setTrackLinkCapacity(6300.0);
@@ -118,7 +119,7 @@ public class RunSurveyData {
         });
         controler.run();
 
-        FDUtils.cleanOutputDir(scenario.getConfig().controler().getOutputDirectory());
+        FDUtils.cleanOutputDir(scenario.getConfig().controller().getOutputDirectory());
 
     }
 }

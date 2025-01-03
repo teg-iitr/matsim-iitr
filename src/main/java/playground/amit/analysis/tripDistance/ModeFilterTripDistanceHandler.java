@@ -19,14 +19,19 @@
 
 package playground.amit.analysis.tripDistance;
 
-import java.util.*;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.*;
 import org.matsim.api.core.v01.events.handler.*;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.events.algorithms.Vehicle2DriverEventHandler;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
 
 /**
  * Created by amit on 11/10/16.
@@ -36,7 +41,7 @@ import org.matsim.core.events.algorithms.Vehicle2DriverEventHandler;
 public class ModeFilterTripDistanceHandler implements PersonDepartureEventHandler, PersonArrivalEventHandler, LinkLeaveEventHandler,
         VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler{
 
-    private static final Logger LOG = Logger.getLogger(ModeFilterTripDistanceHandler.class);
+    private static final Logger LOG = LogManager.getLogger(ModeFilterTripDistanceHandler.class);
     private final TripRouteDistanceInTimeBinHandler delegate ;
     private final String mode2Consider;
     private final Map<Id<Person>,String> personId2mode = new HashMap<>(); // person id -- mode

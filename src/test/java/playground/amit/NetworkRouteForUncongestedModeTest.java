@@ -18,9 +18,6 @@
  * *********************************************************************** */
 package playground.amit;
 
-import java.net.URL;
-import java.util.Arrays;
-import java.util.HashSet;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -33,8 +30,8 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Plan;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
-import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.ReplanningConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.ScoringConfigGroup.ActivityParams;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
@@ -43,6 +40,10 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.examples.ExamplesUtils;
 import org.matsim.testcases.MatsimTestUtils;
+
+import java.net.URL;
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * @author amit
@@ -62,15 +63,15 @@ public class NetworkRouteForUncongestedModeTest {
 	public void testWithAllowedModesOnLink(){
 
 		Scenario sc = createSceanrio();
-		sc.getConfig().controler().setOutputDirectory(helper.getOutputDirectory());
-		sc.getConfig().plansCalcRoute().removeModeRoutingParams("ride");
+		sc.getConfig().controller().setOutputDirectory(helper.getOutputDirectory());
+		sc.getConfig().routing().removeModeRoutingParams("ride");
 		// set allowed modes on each link
 		for (Link l : sc.getNetwork().getLinks().values()) {
 			l.setAllowedModes(new HashSet<>(Arrays.asList("car","ride")));
 		}
 		
 		Controler controler = new Controler(sc);
-		controler.getConfig().controler().setOverwriteFileSetting( OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles );
+		controler.getConfig().controller().setOverwriteFileSetting( OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles );
 		
 		//overriding module to get network route for ride mode
 		controler.addOverridingModule(new AbstractModule() {
@@ -87,33 +88,33 @@ public class NetworkRouteForUncongestedModeTest {
 	private Scenario createSceanrio () {
 		Config config = ConfigUtils.createConfig();
 		config.network().setInputFile(EQUIL_NETWORK.toString());
-		config.controler().setLastIteration(1);
+		config.controller().setLastIteration(1);
 
 		{
 			ActivityParams ap = new ActivityParams();
 			ap.setActivityType("h");
 			ap.setTypicalDuration(12*3600);
-			config.planCalcScore().addActivityParams(ap);
+			config.scoring().addActivityParams(ap);
 		}
 		{
 			ActivityParams ap = new ActivityParams();
 			ap.setActivityType("w");
 			ap.setTypicalDuration(8*3600);
-			config.planCalcScore().addActivityParams(ap);
+			config.scoring().addActivityParams(ap);
 		}
 		config.qsim().setMainModes(Arrays.asList("car"));
-		config.plansCalcRoute().setNetworkModes(Arrays.asList("car","ride"));
+		config.routing().setNetworkModes(Arrays.asList("car","ride"));
 
 		{
 			StrategySettings reRoute = new StrategySettings();
 			reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute.toString());
 			reRoute.setWeight(0.2);
-			config.strategy().addStrategySettings(reRoute);
+			config.replanning().addStrategySettings(reRoute);
 
 			StrategySettings changeExpBetaStrategySettings = new StrategySettings();
 			changeExpBetaStrategySettings.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta.toString());
 			changeExpBetaStrategySettings.setWeight(0.8);
-			config.strategy().addStrategySettings(changeExpBetaStrategySettings);
+			config.replanning().addStrategySettings(changeExpBetaStrategySettings);
 		}
 
 		Scenario sc = ScenarioUtils.loadScenario(config);

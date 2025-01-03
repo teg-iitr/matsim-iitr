@@ -18,19 +18,19 @@
  * *********************************************************************** */
 package playground.amit.mixedTraffic.patnaIndia.analysis;
 
-import java.io.BufferedWriter;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.utils.io.IOUtils;
-
 import playground.amit.analysis.modalShare.ModalShareFromEvents;
 import playground.amit.analysis.modalShare.ModalShareFromPlans;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter.PatnaUserGroup;
 import playground.amit.utils.LoadMyScenarios;
+
+import java.io.BufferedWriter;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * @author amit
@@ -38,7 +38,7 @@ import playground.amit.utils.LoadMyScenarios;
 
 public class PatnaModalShareSubPop {
 
-	private final static Logger LOG = Logger.getLogger(PatnaModalShareSubPop.class);
+	private final static Logger LOG = LogManager.getLogger(PatnaModalShareSubPop.class);
 
 	private final SortedMap<PatnaUserGroup, SortedMap<String, Integer>> userGrp2Mode2Legs = new TreeMap<>();
 	private final SortedMap<PatnaUserGroup, SortedMap<String, Double>> userGrp2ModalSplit = new TreeMap<>();

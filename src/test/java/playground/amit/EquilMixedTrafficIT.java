@@ -19,10 +19,6 @@
 
 package playground.amit;
 
-import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import com.google.inject.Inject;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -45,7 +41,7 @@ import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.groups.QSimConfigGroup;
-import org.matsim.core.config.groups.StrategyConfigGroup;
+import org.matsim.core.config.groups.ReplanningConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
@@ -59,6 +55,11 @@ import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.Vehicles;
 import playground.amit.mixedTraffic.patnaIndia.router.FreeSpeedTravelTimeForBike;
+
+import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Just setting up the equil scenario for mixed traffic conditions.
@@ -76,12 +77,12 @@ public class EquilMixedTrafficIT {
     @Test
     public void runSameVehiclesTypesInTrips() {
         Config config = ConfigUtils.loadConfig(IOUtils.extendUrl(EQUIL_DIR,"config-with-mode-vehicles.xml"));
-        config.controler().setOutputDirectory(helper.getOutputDirectory());
+        config.controller().setOutputDirectory(helper.getOutputDirectory());
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
         Vehicles vehs = scenario.getVehicles();
 
-        scenario.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
+        scenario.getConfig().controller().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
         Controler controler = new Controler(scenario);
 
@@ -134,7 +135,7 @@ public class EquilMixedTrafficIT {
     public void runDifferentVehiclesTypesInTrips() {
         Config config = ConfigUtils.loadConfig(IOUtils.extendUrl(EQUIL_DIR,"config-with-mode-vehicles.xml"));
         String outDir = helper.getOutputDirectory();
-        config.controler().setOutputDirectory(outDir);
+        config.controller().setOutputDirectory(outDir);
 
         // is using VehiclesSource.modeVehicleTypesFromVehiclesData, only vehicleTypes are required.
         config.vehicles().setVehiclesFile(null);
@@ -143,7 +144,7 @@ public class EquilMixedTrafficIT {
         config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
 //        config.plans().setInputFile(EQUIL_DIR+"/plans2000.xml.gz");
 
-        config.planCalcScore().getOrCreateModeParams("bicycle").setMarginalUtilityOfTraveling(0.);
+        config.scoring().getOrCreateModeParams("bicycle").setMarginalUtilityOfTraveling(0.);
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
         Vehicles vehs = scenario.getVehicles();
@@ -179,17 +180,17 @@ public class EquilMixedTrafficIT {
         }
 
         //
-        StrategyConfigGroup.StrategySettings ss = new StrategyConfigGroup.StrategySettings();
+        StrategyConfigGroup.StrategySettings ss = new ReplanningConfigGroup.StrategySettings();
         ss.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeSingleTripMode);
         ss.setWeight(0.2);
 
-        scenario.getConfig().strategy().addStrategySettings(ss);
+        scenario.getConfig().replanning().addStrategySettings(ss);
         scenario.getConfig().changeMode().setModes(new String [] {"car","bicycle"});
 
-        scenario.getConfig().strategy().setFractionOfIterationsToDisableInnovation(0.8);
+        scenario.getConfig().replanning().setFractionOfIterationsToDisableInnovation(0.8);
 
-        scenario.getConfig().controler().setDumpDataAtEnd(true);
-        scenario.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
+        scenario.getConfig().controller().setDumpDataAtEnd(true);
+        scenario.getConfig().controller().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
         ModalMaxSpeedEventHandler speedEventHandler = new ModalMaxSpeedEventHandler();
 

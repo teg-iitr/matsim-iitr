@@ -18,13 +18,15 @@
  * *********************************************************************** */
 package playground.amit.munich.calibration;
 
-import java.io.File;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import playground.amit.analysis.tripDistance.LegModeRouteDistanceDistributionAnalyzer;
 import playground.amit.munich.utils.MunichPersonFilter;
 import playground.amit.utils.LoadMyScenarios;
 import playground.vsp.analysis.modules.legModeDistanceDistribution.LegModeDistanceDistribution;
+
+import java.io.File;
 
 /**
  * @author amit
@@ -33,7 +35,7 @@ public class LegModeRouteDistancDistribution {
 
 	private final static String RUN_DIR = "../../../repos/runs-svn/detEval/emissionCongestionInternalization/output/1pct/run10/policies/";
 	private final static String [] RUNS_CASES = {"bau","ei","ci","eci","10ei"};
-	private static final Logger LOG = Logger.getLogger(LegModeRouteDistancDistribution.class);
+	private static final Logger LOG = LogManager.getLogger(LegModeRouteDistancDistribution.class);
 
 	public static void main(String[] args) {
 		LegModeRouteDistancDistribution ms= new LegModeRouteDistancDistribution();
@@ -42,7 +44,7 @@ public class LegModeRouteDistancDistribution {
 			String configFile = RUN_DIR+str+"/output_config.xml";
 			String networkFile = RUN_DIR+str+"/output_network.xml.gz";
 			Scenario sc = LoadMyScenarios.loadScenarioFromNetworkAndConfig(networkFile,configFile);
-			sc.getConfig().controler().setOutputDirectory(RUN_DIR+str);
+			sc.getConfig().controller().setOutputDirectory(RUN_DIR+str);
 			ms.runRoutesDistance(str, sc);
 		}
 	}
@@ -52,8 +54,8 @@ public class LegModeRouteDistancDistribution {
 	 */
 	private void runRoutesDistance(final String runNr, final Scenario sc){
 		MunichPersonFilter.MunichUserGroup ug =  MunichPersonFilter.MunichUserGroup.Urban;
-		int lastIteration = sc.getConfig().controler().getLastIteration();
-		String eventsFile = sc.getConfig().controler().getOutputDirectory()+"/ITERS/it."+lastIteration+"/"+lastIteration+".events.xml.gz";
+		int lastIteration = sc.getConfig().controller().getLastIteration();
+		String eventsFile = sc.getConfig().controller().getOutputDirectory()+"/ITERS/it."+lastIteration+"/"+lastIteration+".events.xml.gz";
 		LegModeRouteDistanceDistributionAnalyzer lmdfed = new LegModeRouteDistanceDistributionAnalyzer(/*ug*/);
 		lmdfed.init(sc,eventsFile);
 		lmdfed.preProcessData();

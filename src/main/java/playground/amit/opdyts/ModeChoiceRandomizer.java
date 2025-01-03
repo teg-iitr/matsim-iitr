@@ -24,12 +24,12 @@
 //import java.util.List;
 //import java.util.Random;
 //import java.util.stream.Collectors;
-//import org.apache.log4j.Logger;
+//import org.apache.logging.log4j.Logger;
 //import org.matsim.api.core.v01.Scenario;
 //import org.matsim.api.core.v01.TransportMode;
 //import org.matsim.contrib.opdyts.OpdytsIterationWrapper;
 //import org.matsim.contrib.opdyts.utils.OpdytsConfigGroup;
-//import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+//import org.matsim.core.config.groups.ScoringConfigGroup;
 //import org.matsim.core.gbl.MatsimRandom;
 //
 //import floetteroed.opdyts.DecisionVariableRandomizer;
@@ -39,7 +39,7 @@
 // */
 //
 //public final class ModeChoiceRandomizer implements DecisionVariableRandomizer<ModeChoiceDecisionVariable> {
-//    private static final Logger log = Logger.getLogger(ModeChoiceRandomizer.class);
+//    private static final Logger log = LogManager.getLogger(ModeChoiceRandomizer.class);
 //
 //    public enum ASCRandomizerStyle {
 //        axial_randomVariation, // combinations like (0,+), (0,-), (+,0), (-,0)
@@ -113,15 +113,15 @@
 //	public List<ModeChoiceDecisionVariable> newRandomVariations(ModeChoiceDecisionVariable decisionVariable) {
 //        List<ModeChoiceDecisionVariable> result ;
 //
-//        final PlanCalcScoreConfigGroup oldScoringConfig = decisionVariable.getScoreConfig();
-//        PlanCalcScoreConfigGroup.ScoringParameterSet oldParameterSet = oldScoringConfig.getScoringParametersPerSubpopulation().get(this.subPopName);
+//        final ScoringConfigGroup oldScoringConfig = decisionVariable.getScoreConfig();
+//        ScoringConfigGroup.ScoringParameterSet oldParameterSet = oldScoringConfig.getScoringParametersPerSubpopulation().get(this.subPopName);
 //
 //        int totalNumberOfCombination = (int) Math.pow(2, (this.considerdModes.size()-1)); // exclude car
-//        List<PlanCalcScoreConfigGroup> allCombinations = new ArrayList<>(totalNumberOfCombination);
+//        List<ScoringConfigGroup> allCombinations = new ArrayList<>(totalNumberOfCombination);
 //        List<String> remainingModes = new ArrayList<>(this.considerdModes);
 //
 //        { // create one planCalcScoreConfigGroup with all starting params.
-//            PlanCalcScoreConfigGroup configGroupWithStartingModeParams = copyOfPlanCalcScore(oldParameterSet);
+//            ScoringConfigGroup configGroupWithStartingModeParams = copyOfPlanCalcScore(oldParameterSet);
 //            allCombinations.add(configGroupWithStartingModeParams);
 //            remainingModes.remove(TransportMode.car);
 //        }
@@ -163,7 +163,7 @@
 //        else return this.stepSizeGenerator.getStepSize(this.opdytsIterationWrapper.getIteration());
 //    }
 //
-//    private void createGridCombinations(final PlanCalcScoreConfigGroup.ScoringParameterSet oldParameterSet, final List<PlanCalcScoreConfigGroup> allCombinations, final List<String> remainingModes, final double randomVariationOfStepSize) {
+//    private void createGridCombinations(final ScoringConfigGroup.ScoringParameterSet oldParameterSet, final List<ScoringConfigGroup> allCombinations, final List<String> remainingModes, final double randomVariationOfStepSize) {
 //        // create combinations with one mode and call createGridCombinations again
 //        if (remainingModes.isEmpty()) {
 //            // don't do anything
@@ -172,13 +172,13 @@
 //            if (mode.equals(TransportMode.car)) {
 //                throw new RuntimeException("The parameters of the car remain unchanged. Therefore, car mode should not end up here, it should have been removed in the previous step. ");
 //            } else {
-//                PlanCalcScoreConfigGroup.ModeParams sourceModeParam = copyOfModeParam(oldParameterSet.getModes().get(mode));
+//                ScoringConfigGroup.ModeParams sourceModeParam = copyOfModeParam(oldParameterSet.getModes().get(mode));
 //                {// positive: since this mode is never updated before, update existing one only
 //                    double newASC =  sourceModeParam.getConstant() + getStepSize() * randomVariationOfStepSize;
 //                    allCombinations.parallelStream().forEach(e -> e.getOrCreateScoringParameters(this.subPopName).getOrCreateModeParams(mode).setConstant(newASC) );
 //                }
 //                { // negative: since this mode is already updated above, first copy existing ones, update values and then add them to main collection
-//                    List<PlanCalcScoreConfigGroup> tempCombinations = new ArrayList<>();
+//                    List<ScoringConfigGroup> tempCombinations = new ArrayList<>();
 //                    allCombinations.parallelStream().forEach(e -> tempCombinations.add(copyOfPlanCalcScore(e.getScoringParameters(this.subPopName))));
 //                    double newASC =  sourceModeParam.getConstant() - getStepSize() * randomVariationOfStepSize;
 //                    tempCombinations.parallelStream().forEach(e -> e.getOrCreateScoringParameters(this.subPopName).getOrCreateModeParams(mode).setConstant(newASC) );
@@ -189,21 +189,21 @@
 //        }
 //    }
 //
-//    private List<PlanCalcScoreConfigGroup> createAxialCombinations(final PlanCalcScoreConfigGroup.ScoringParameterSet oldParameterSet, final double randomVariationOfStepSize) {
+//    private List<ScoringConfigGroup> createAxialCombinations(final ScoringConfigGroup.ScoringParameterSet oldParameterSet, final double randomVariationOfStepSize) {
 //
-//        final List<PlanCalcScoreConfigGroup> allCombinations = new ArrayList<>();
+//        final List<ScoringConfigGroup> allCombinations = new ArrayList<>();
 //        for(String mode : this.considerdModes) {
 //            if ( mode.equals(TransportMode.car)) continue;
 //            { // positive
-//                PlanCalcScoreConfigGroup configGroupWithStartingModeParams = copyOfPlanCalcScore(oldParameterSet);
-//                PlanCalcScoreConfigGroup.ModeParams sourceModeParam = configGroupWithStartingModeParams.getOrCreateScoringParameters(this.subPopName).getModes().get(mode);
+//                ScoringConfigGroup configGroupWithStartingModeParams = copyOfPlanCalcScore(oldParameterSet);
+//                ScoringConfigGroup.ModeParams sourceModeParam = configGroupWithStartingModeParams.getOrCreateScoringParameters(this.subPopName).getModes().get(mode);
 //                double newASC =  sourceModeParam.getConstant() + getStepSize() * randomVariationOfStepSize;
 //                sourceModeParam.setConstant(newASC);
 //                allCombinations.add(configGroupWithStartingModeParams);
 //            }
 //            { // negative
-//                PlanCalcScoreConfigGroup configGroupWithStartingModeParams = copyOfPlanCalcScore(oldParameterSet);
-//                PlanCalcScoreConfigGroup.ModeParams sourceModeParam = configGroupWithStartingModeParams.getOrCreateScoringParameters(this.subPopName).getModes().get(mode);
+//                ScoringConfigGroup configGroupWithStartingModeParams = copyOfPlanCalcScore(oldParameterSet);
+//                ScoringConfigGroup.ModeParams sourceModeParam = configGroupWithStartingModeParams.getOrCreateScoringParameters(this.subPopName).getModes().get(mode);
 //                double newASC =  sourceModeParam.getConstant() - getStepSize() *  randomVariationOfStepSize;
 //                sourceModeParam.setConstant(newASC);
 //                allCombinations.add(configGroupWithStartingModeParams);
@@ -212,8 +212,8 @@
 //        return allCombinations;
 //    }
 //
-//    private PlanCalcScoreConfigGroup.ModeParams copyOfModeParam(final PlanCalcScoreConfigGroup.ModeParams modeParams) {
-//        PlanCalcScoreConfigGroup.ModeParams newModeParams = new PlanCalcScoreConfigGroup.ModeParams(modeParams.getMode());
+//    private ScoringConfigGroup.ModeParams copyOfModeParam(final ScoringConfigGroup.ModeParams modeParams) {
+//        ScoringConfigGroup.ModeParams newModeParams = new ScoringConfigGroup.ModeParams(modeParams.getMode());
 //        newModeParams.setConstant(modeParams.getConstant());
 //        newModeParams.setMarginalUtilityOfDistance(modeParams.getMarginalUtilityOfDistance());
 //        newModeParams.setMarginalUtilityOfTraveling(modeParams.getMarginalUtilityOfTraveling());
@@ -221,10 +221,10 @@
 //        return newModeParams;
 //    }
 //
-//    private PlanCalcScoreConfigGroup copyOfPlanCalcScore(final PlanCalcScoreConfigGroup.ScoringParameterSet oldParameterSet){
-//        PlanCalcScoreConfigGroup configGroupWithStartingModeParams = new PlanCalcScoreConfigGroup();
+//    private ScoringConfigGroup copyOfPlanCalcScore(final ScoringConfigGroup.ScoringParameterSet oldParameterSet){
+//        ScoringConfigGroup configGroupWithStartingModeParams = new ScoringConfigGroup();
 //        for ( String newMode : this.considerdModes) {
-//            PlanCalcScoreConfigGroup.ModeParams modeParams = oldParameterSet.getModes().get(newMode);
+//            ScoringConfigGroup.ModeParams modeParams = oldParameterSet.getModes().get(newMode);
 //            configGroupWithStartingModeParams.getScoringParametersPerSubpopulation().get(this.subPopName).addModeParams(copyOfModeParam(modeParams) );
 //        }
 //        return configGroupWithStartingModeParams;

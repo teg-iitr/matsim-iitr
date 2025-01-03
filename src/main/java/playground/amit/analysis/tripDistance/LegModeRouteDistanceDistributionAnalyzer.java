@@ -18,16 +18,8 @@
  * *********************************************************************** */
 package playground.amit.analysis.tripDistance;
 
-import java.io.BufferedWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.SortedSet;
-import java.util.TreeMap;
-import java.util.TreeSet;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
@@ -39,6 +31,9 @@ import org.matsim.core.utils.io.IOUtils;
 import playground.amit.munich.utils.MunichPersonFilter;
 import playground.vsp.analysis.modules.AbstractAnalysisModule;
 
+import java.io.BufferedWriter;
+import java.util.*;
+
 /**
  * @author amit
  */
@@ -46,7 +41,7 @@ public class LegModeRouteDistanceDistributionAnalyzer extends AbstractAnalysisMo
 
 	private final List<Integer> distanceClasses;
 	private SortedSet<String> usedModes;
-	private final static Logger LOG = Logger.getLogger(LegModeRouteDistanceDistributionAnalyzer.class);
+	private final static Logger LOG = LogManager.getLogger(LegModeRouteDistanceDistributionAnalyzer.class);
 
 	private final SortedMap<String, SortedMap<Integer, Integer>> mode2DistanceClass2LegCount ;
 	private SortedMap<String, Map<Id<Person>, List<Double>>> mode2PersonId2dist;

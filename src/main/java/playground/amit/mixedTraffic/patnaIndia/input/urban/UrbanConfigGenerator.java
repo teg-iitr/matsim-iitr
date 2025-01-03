@@ -3,13 +3,12 @@ package playground.amit.mixedTraffic.patnaIndia.input.urban;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
-import org.matsim.core.config.groups.PlansCalcRouteConfigGroup.ModeRoutingParams;
 import org.matsim.core.config.groups.QSimConfigGroup.LinkDynamics;
 import org.matsim.core.config.groups.QSimConfigGroup.SnapshotStyle;
-import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
-
+import org.matsim.core.config.groups.ReplanningConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.RoutingConfigGroup.ModeRoutingParams;
+import org.matsim.core.config.groups.ScoringConfigGroup.ActivityParams;
+import org.matsim.core.config.groups.ScoringConfigGroup.ModeParams;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 
 public class UrbanConfigGenerator {
@@ -28,10 +27,10 @@ public class UrbanConfigGenerator {
 	 */
 	public  void createBasicConfigSettings () {
 		config = ConfigUtils.createConfig();
-		config.controler().setFirstIteration(0);
-		config.controler().setLastIteration(200);
-		config.controler().setWriteEventsInterval(0);
-		config.controler().setWritePlansInterval(0);
+		config.controller().setFirstIteration(0);
+		config.controller().setLastIteration(200);
+		config.controller().setWriteEventsInterval(0);
+		config.controller().setWritePlansInterval(0);
 		
 		config.counts().setWriteCountsInterval(0);
 		config.counts().setCountsScaleFactor(94.52);
@@ -59,11 +58,11 @@ public class UrbanConfigGenerator {
 		timeAllocationMutator.setStrategyName("TimeAllocationMutator");
 		timeAllocationMutator.setWeight(0.05);
 
-		config.strategy().addStrategySettings(expChangeBeta);
-		config.strategy().addStrategySettings(reRoute);
-		config.strategy().addStrategySettings(timeAllocationMutator);
+		config.replanning().addStrategySettings(expChangeBeta);
+		config.replanning().addStrategySettings(reRoute);
+		config.replanning().addStrategySettings(timeAllocationMutator);
 
-		config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
+		config.replanning().setFractionOfIterationsToDisableInnovation(0.8);
 
 		config.plans().setRemovingUnneccessaryPlanAttributes(true);
 		config.vspExperimental().addParam("vspDefaultsCheckingLevel", "abort");
@@ -71,54 +70,54 @@ public class UrbanConfigGenerator {
 
 		ActivityParams workAct = new ActivityParams("work");
 		workAct.setTypicalDuration(8*3600);
-		config.planCalcScore().addActivityParams(workAct);
+		config.scoring().addActivityParams(workAct);
 
 		ActivityParams homeAct = new ActivityParams("home");
 		homeAct.setTypicalDuration(12*3600);
-		config.planCalcScore().addActivityParams(homeAct);
+		config.scoring().addActivityParams(homeAct);
 
-		config.planCalcScore().setMarginalUtlOfWaiting_utils_hr(0);
-		config.planCalcScore().setPerforming_utils_hr(6.0);
+		config.scoring().setMarginalUtlOfWaiting_utils_hr(0);
+		config.scoring().setPerforming_utils_hr(6.0);
 
 		ModeParams car = new ModeParams("car");
 		car.setConstant(-3.30);
 		car.setMarginalUtilityOfTraveling(0.0);
-		config.planCalcScore().addModeParams(car);
+		config.scoring().addModeParams(car);
 
 		ModeParams bike = new ModeParams("bike");
 		bike.setConstant(0.0);
 		bike.setMarginalUtilityOfTraveling(0.0);
-		config.planCalcScore().addModeParams(bike);
+		config.scoring().addModeParams(bike);
 
 		ModeParams motorbike = new ModeParams("motorbike");
 		motorbike.setConstant(-2.20);
 		motorbike.setMarginalUtilityOfTraveling(0.0);
-		config.planCalcScore().addModeParams(motorbike);
+		config.scoring().addModeParams(motorbike);
 
 		ModeParams pt = new ModeParams("pt");
 		pt.setConstant(-3.40);
 		pt.setMarginalUtilityOfTraveling(0.0);
-		config.planCalcScore().addModeParams(pt);
+		config.scoring().addModeParams(pt);
 
 		ModeParams walk = new ModeParams("walk");
 		walk.setConstant(0.0);
 		walk.setMarginalUtilityOfTraveling(0.0);
-		config.planCalcScore().addModeParams(walk);
+		config.scoring().addModeParams(walk);
 
-		config.plansCalcRoute().setNetworkModes(PatnaUtils.URBAN_MAIN_MODES);
+		config.routing().setNetworkModes(PatnaUtils.URBAN_MAIN_MODES);
 
 		{
 			ModeRoutingParams mrp = new ModeRoutingParams("walk");
 			mrp.setTeleportedModeSpeed(4./3.6);
 			mrp.setBeelineDistanceFactor(1.1);
-			config.plansCalcRoute().addModeRoutingParams(mrp);
+			config.routing().addModeRoutingParams(mrp);
 		}
 
 		{
 			ModeRoutingParams mrp = new ModeRoutingParams("pt");
 			mrp.setTeleportedModeSpeed(20./3.6);
 			mrp.setBeelineDistanceFactor(1.5);
-			config.plansCalcRoute().addModeRoutingParams(mrp);
+			config.routing().addModeRoutingParams(mrp);
 		}
 	}
 

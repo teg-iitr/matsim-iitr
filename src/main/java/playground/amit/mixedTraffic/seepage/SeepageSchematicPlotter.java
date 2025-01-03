@@ -19,9 +19,8 @@
 
 package playground.amit.mixedTraffic.seepage;
 
-import java.util.*;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -34,18 +33,14 @@ import org.matsim.api.core.v01.events.handler.LinkLeaveEventHandler;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.Population;
+import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.ControlerConfigGroup;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
+import org.matsim.core.config.groups.ControllerConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup.LinkDynamics;
 import org.matsim.core.config.groups.QSimConfigGroup.SnapshotStyle;
 import org.matsim.core.config.groups.QSimConfigGroup.VehiclesSource;
+import org.matsim.core.config.groups.ScoringConfigGroup.ActivityParams;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
@@ -58,12 +53,14 @@ import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 
+import java.util.*;
+
 /**
  * Tests that in congested part, walk (seep mode) can overtake (seep) car mode.
  * 
  */
 public class SeepageSchematicPlotter {
-	static private final Logger log = Logger.getLogger( SeepageSchematicPlotter.class);
+	static private final Logger log = LogManager.getLogger( SeepageSchematicPlotter.class);
 
 	public static void main(String [] args){
 
@@ -74,22 +71,22 @@ public class SeepageSchematicPlotter {
 		sc.getConfig().qsim().setSnapshotPeriod(1);
 		sc.getConfig().qsim().setSnapshotStyle(SnapshotStyle.queue);
 
-		sc.getConfig().controler().setSnapshotFormat(List.of(ControlerConfigGroup.SnapshotFormat.transims, ControlerConfigGroup.SnapshotFormat.otfvis));
-		sc.getConfig().controler().setOutputDirectory("./output/");
-		sc.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
+		sc.getConfig().controller().setSnapshotFormat(List.of(ControllerConfigGroup.SnapshotFormat.transims, ControllerConfigGroup.SnapshotFormat.otfvis));
+		sc.getConfig().controller().setOutputDirectory("./output/");
+		sc.getConfig().controller().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
-		sc.getConfig().controler().setLastIteration(0);
-		sc.getConfig().controler().setWriteEventsInterval(1);
-		sc.getConfig().controler().setCreateGraphs(false);
-		sc.getConfig().controler().setDumpDataAtEnd(false);
+		sc.getConfig().controller().setLastIteration(0);
+		sc.getConfig().controller().setWriteEventsInterval(1);
+		sc.getConfig().controller().setCreateGraphs(false);
+		sc.getConfig().controller().setDumpDataAtEnd(false);
 
 		ActivityParams homeAct = new ActivityParams("h");
 		ActivityParams workAct = new ActivityParams("w");
 		homeAct.setTypicalDuration(1*3600);
 		workAct.setTypicalDuration(1*3600);
 
-		sc.getConfig().planCalcScore().addActivityParams(homeAct);
-		sc.getConfig().planCalcScore().addActivityParams(workAct);
+		sc.getConfig().scoring().addActivityParams(homeAct);
+		sc.getConfig().scoring().addActivityParams(workAct);
 
 		sc.getConfig().qsim().setLinkWidthForVis((float)0);
 		sc.getNetwork().setEffectiveLaneWidth(0.);

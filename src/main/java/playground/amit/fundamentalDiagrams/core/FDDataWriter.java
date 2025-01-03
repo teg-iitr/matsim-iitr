@@ -19,15 +19,16 @@
 
 package playground.amit.fundamentalDiagrams.core;
 
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
-import java.util.Arrays;
-import javax.inject.Inject;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.controler.events.IterationEndsEvent;
 import org.matsim.core.controler.events.ShutdownEvent;
 import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.controler.listener.ShutdownListener;
+
+import javax.inject.Inject;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
+import java.util.Arrays;
 
 /**
  * Created by amit on 20.05.18.
@@ -59,7 +60,7 @@ public class FDDataWriter implements IterationEndsListener, ShutdownListener {
         travelModes = scenario.getConfig().qsim().getMainModes().toArray(new String[0]);
 
         try {
-            this.writer = new PrintStream(scenario.getConfig().controler().getOutputDirectory()+"/data.txt");
+            this.writer = new PrintStream(scenario.getConfig().controller().getOutputDirectory()+"/data.txt");
         } catch (FileNotFoundException e) {
             throw new RuntimeException("Data is not written/read. Reason : " + e);
         }

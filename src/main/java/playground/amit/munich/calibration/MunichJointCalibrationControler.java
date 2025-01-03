@@ -19,10 +19,6 @@
 
 package playground.amit.munich.calibration;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.config.ConfigUtils;
@@ -34,6 +30,11 @@ import org.matsim.core.utils.io.IOUtils;
 import playground.amit.analysis.modalShare.ModalShareFromEvents;
 import playground.amit.munich.utils.MunichPersonFilter;
 import playground.amit.utils.FileUtils;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Using v3 files, i.e., sub-activities, sub populations and wrapping of sub-activities.
@@ -69,11 +70,11 @@ public class MunichJointCalibrationControler {
 
         Scenario sc = ScenarioUtils.loadScenario(ConfigUtils.loadConfig(configFile));
 
-        sc.getConfig().planCalcScore().getModes().get("pt").setConstant(ascUrban);
-        sc.getConfig().planCalcScore().getModes().get("pt_"+ug).setConstant(ascUrban);
+        sc.getConfig().scoring().getModes().get("pt").setConstant(ascUrban);
+        sc.getConfig().scoring().getModes().get("pt_"+ug).setConstant(ascUrban);
 
-        sc.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
-        sc.getConfig().controler().setOutputDirectory(outDir);
+        sc.getConfig().controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+        sc.getConfig().controller().setOutputDirectory(outDir);
 
         sc.getConfig().changeMode().setModes(availableModes);
 
@@ -97,9 +98,9 @@ public class MunichJointCalibrationControler {
         controler.run();
 
         // delete unnecessary iterations folder here.
-        int firstIt = controler.getConfig().controler().getFirstIteration();
-        int lastIt = controler.getConfig().controler().getLastIteration();
-        String OUTPUT_DIR = controler.getConfig().controler().getOutputDirectory();
+        int firstIt = controler.getConfig().controller().getFirstIteration();
+        int lastIt = controler.getConfig().controller().getLastIteration();
+        String OUTPUT_DIR = controler.getConfig().controller().getOutputDirectory();
         for (int index =firstIt+1; index <lastIt; index ++){
             String dirToDel = OUTPUT_DIR+"/ITERS/it."+index;
             IOUtils.deleteDirectoryRecursively(new File(dirToDel).toPath());

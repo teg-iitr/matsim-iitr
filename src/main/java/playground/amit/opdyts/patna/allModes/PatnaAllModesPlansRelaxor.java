@@ -19,25 +19,26 @@
 
 package playground.amit.opdyts.patna.allModes;
 
-import java.util.Arrays;
-import java.util.List;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
-import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
-import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
-import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
-import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
 import playground.amit.mixedTraffic.patnaIndia.scoring.PtFareEventHandler;
 import playground.amit.opdyts.OpdytsScenario;
 import playground.amit.opdyts.analysis.OpdytsModalStatsControlerListener;
 import playground.amit.opdyts.patna.PatnaOneBinDistanceDistribution;
 import playground.amit.utils.FileUtils;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author amit
@@ -59,7 +60,7 @@ class PatnaAllModesPlansRelaxor {
 		}
 
 		Config config= ConfigUtils.loadConfig(configFile);
-		config.controler().setOutputDirectory(outDir);
+		config.controller().setOutputDirectory(outDir);
 
 		new PatnaAllModesPlansRelaxor().run(config);
 	}
@@ -68,7 +69,7 @@ class PatnaAllModesPlansRelaxor {
 	public void run (Config config) {
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
-		scenario.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+		scenario.getConfig().controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 
 		List<String> modes2consider = Arrays.asList("car","bike","motorbike","pt","walk");
 
@@ -91,15 +92,15 @@ class PatnaAllModesPlansRelaxor {
 		});
 
 		// for above make sure that util_dist and monetary dist rate for pt are zero.
-		PlanCalcScoreConfigGroup.ModeParams mp = controler.getConfig().planCalcScore().getModes().get("pt");
+		ScoringConfigGroup.ModeParams mp = controler.getConfig().scoring().getModes().get("pt");
 		mp.setMarginalUtilityOfDistance(0.0);
 		mp.setMonetaryDistanceRate(0.0);
 
 		controler.run();
 
 		// delete unnecessary iterations folder here.
-		int firstIt = controler.getConfig().controler().getFirstIteration();
-		int lastIt = controler.getConfig().controler().getLastIteration();
-		FileUtils.deleteIntermediateIterations(config.controler().getOutputDirectory(),firstIt,lastIt);
+		int firstIt = controler.getConfig().controller().getFirstIteration();
+		int lastIt = controler.getConfig().controller().getLastIteration();
+		FileUtils.deleteIntermediateIterations(config.controller().getOutputDirectory(),firstIt,lastIt);
 	}
 }

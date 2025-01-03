@@ -1,6 +1,7 @@
 package playground.amit.mixedTraffic.patnaIndia.covidWork;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -15,13 +16,14 @@ import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.amit.utils.LoadMyScenarios;
+
 import java.util.*;
 /**
  * @author amit
  */
 
 public class FilterDemandBasedOnTripPurpose {
-    private final Logger logger = Logger.getLogger(FilterDemandBasedOnTripPurpose.class);
+    private final Logger logger = LogManager.getLogger(FilterDemandBasedOnTripPurpose.class);
 
     private static final Random random = MatsimRandom.getRandom();
     private final Collection<SimpleFeature> features;

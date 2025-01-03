@@ -19,14 +19,7 @@
 
 package playground.amit.analysis.activity.departureArrival;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.events.ActivityStartEvent;
@@ -39,6 +32,8 @@ import org.matsim.api.core.v01.events.handler.PersonStuckEventHandler;
 import org.matsim.api.core.v01.events.handler.TransitDriverStartsEventHandler;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.pt.PtConstants;
+
+import java.util.*;
 
 /**
  * (1) This excludes the departure of transit drivers.
@@ -145,7 +140,7 @@ public class DepartureTimeHandler implements PersonDepartureEventHandler, Transi
 
 	public void handleRemainingTransitUsers(){
 		if(!modesForTransitUsers.isEmpty()) {
-			Logger.getLogger(DepartureTimeHandler.class).warn("A few transit users are not handle due to stuckAndAbort. Handling them now.");
+			LogManager.getLogger(DepartureTimeHandler.class).warn("A few transit users are not handle due to stuckAndAbort. Handling them now.");
 			for(Id<Person> pId : modesForTransitUsers.keySet()){
 				List<String> modes = modesForTransitUsers.get(pId);
 				String legMode = modes.contains(TransportMode.pt) ? TransportMode.pt : TransportMode.walk;

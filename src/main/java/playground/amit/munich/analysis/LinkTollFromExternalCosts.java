@@ -18,20 +18,19 @@
  * *********************************************************************** */
 package playground.amit.munich.analysis;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedMap;
-
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.core.config.Config;
-
 import playground.amit.analysis.congestion.CausedDelayAnalyzer;
 import playground.amit.analysis.emission.EmissionLinkAnalyzer;
 import playground.vsp.airPollution.flatEmissions.EmissionCostFactors;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.SortedMap;
 
 /**
  * @author amit
@@ -97,12 +96,12 @@ public class LinkTollFromExternalCosts {
 
 		Config config = sc.getConfig();
 
-		double vttsCar = ((config.planCalcScore().getModes().get(TransportMode.car).getMarginalUtilityOfTraveling() /3600) +
-				(config.planCalcScore().getPerforming_utils_hr()/3600)) 
-				/ (config.planCalcScore().getMarginalUtilityOfMoney());
+		double vttsCar = ((config.scoring().getModes().get(TransportMode.car).getMarginalUtilityOfTraveling() /3600) +
+				(config.scoring().getPerforming_utils_hr()/3600)) 
+				/ (config.scoring().getMarginalUtilityOfMoney());
 
-		int lastIt = config.controler().getLastIteration();
-		String eventsFile = config.controler().getOutputDirectory()+"/ITERS/it."+lastIt+"/"+lastIt+".events.xml.gz";
+		int lastIt = config.controller().getLastIteration();
+		String eventsFile = config.controller().getOutputDirectory()+"/ITERS/it."+lastIt+"/"+lastIt+".events.xml.gz";
 
 		CausedDelayAnalyzer delayAnalyzer = new CausedDelayAnalyzer(eventsFile,sc,noOfTimeBin);
 		delayAnalyzer.run();
@@ -119,8 +118,8 @@ public class LinkTollFromExternalCosts {
 	}
 
 	public Map<Id<Link>, Double> getLink2EmissionToll(final Scenario sc){
-		int lastIt = sc.getConfig().controler().getLastIteration();
-		String emissionEventsFile = sc.getConfig().controler().getOutputDirectory()+"/ITERS/it."+lastIt+"/"+lastIt+".emission.events.xml.gz";
+		int lastIt = sc.getConfig().controller().getLastIteration();
+		String emissionEventsFile = sc.getConfig().controller().getOutputDirectory()+"/ITERS/it."+lastIt+"/"+lastIt+".emission.events.xml.gz";
 		EmissionLinkAnalyzer emissionAnalyzer = new EmissionLinkAnalyzer(sc.getConfig().qsim().getEndTime().seconds(), emissionEventsFile, noOfTimeBin);
 		emissionAnalyzer.preProcessData();
 		emissionAnalyzer.postProcessData();

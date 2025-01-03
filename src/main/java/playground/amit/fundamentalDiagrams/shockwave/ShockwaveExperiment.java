@@ -18,13 +18,11 @@
  * *********************************************************************** */
 package playground.amit.fundamentalDiagrams.shockwave;
 
-import java.util.Arrays;
-import java.util.List;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.ControlerConfigGroup;
+import org.matsim.core.config.groups.ControllerConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup.LinkDynamics;
 import org.matsim.core.config.groups.VspExperimentalConfigGroup;
@@ -41,6 +39,9 @@ import org.matsim.vehicles.Vehicles;
 import playground.amit.fundamentalDiagrams.FDUtils;
 import playground.amit.fundamentalDiagrams.core.FDModule;
 import playground.amit.utils.FileUtils;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author amit
@@ -66,10 +67,10 @@ public class ShockwaveExperiment {
         qSimConfigGroup.setUsingFastCapacityUpdate(true);
 
 		scenario.getConfig().vspExperimental().setVspDefaultsCheckingLevel(VspExperimentalConfigGroup.VspDefaultsCheckingLevel.warn);
-		scenario.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+		scenario.getConfig().controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
 
 		scenario.getConfig().qsim().setSnapshotPeriod(1.0);
-		scenario.getConfig().controler().setSnapshotFormat(List.of( ControlerConfigGroup.SnapshotFormat.transims, ControlerConfigGroup.SnapshotFormat.otfvis));
+		scenario.getConfig().controller().setSnapshotFormat(List.of( ControllerConfigGroup.SnapshotFormat.transims, ControllerConfigGroup.SnapshotFormat.otfvis));
 		scenario.getConfig().qsim().setSnapshotStyle(QSimConfigGroup.SnapshotStyle.withHoles);
 
 		Vehicles vehicles = scenario.getVehicles();
@@ -80,7 +81,7 @@ public class ShockwaveExperiment {
 			vehicles.addVehicleType(car);
 		}
 
-		scenario.getConfig().controler().setOutputDirectory(RUN_DIR);
+		scenario.getConfig().controller().setOutputDirectory(RUN_DIR);
 
 		//set flow capacity of the base link to zero for 1 min.
 		scenario.getConfig().qsim().setStuckTime(10*3600);
@@ -111,6 +112,6 @@ public class ShockwaveExperiment {
 		controler.addOverridingModule(new FDModule(scenario));
 		controler.run();
 
-		FDUtils.cleanOutputDir(scenario.getConfig().controler().getOutputDirectory());
+		FDUtils.cleanOutputDir(scenario.getConfig().controller().getOutputDirectory());
 	}
 }

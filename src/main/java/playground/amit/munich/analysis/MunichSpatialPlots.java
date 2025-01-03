@@ -18,12 +18,6 @@
  * *********************************************************************** */
 package playground.amit.munich.analysis;
 
-import java.io.BufferedWriter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.locationtech.jts.geom.Point;
 import org.matsim.api.core.v01.Id;
@@ -41,7 +35,6 @@ import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.io.IOUtils;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-
 import playground.amit.analysis.congestion.ExperiencedDelayAnalyzer;
 import playground.amit.analysis.emission.EmissionLinkAnalyzer;
 import playground.amit.analysis.spatial.GeneralGrid.GridType;
@@ -53,6 +46,12 @@ import playground.amit.utils.LoadMyScenarios;
 import playground.amit.utils.geometry.GeometryUtils;
 import playground.vsp.analysis.modules.monetaryTransferPayments.MonetaryPaymentsAnalyzer;
 import playground.vsp.analysis.modules.userBenefits.WelfareMeasure;
+
+import java.io.BufferedWriter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
 
 /**
  * @author amit
@@ -423,10 +422,10 @@ public class MunichSpatialPlots {
 			events.addHandler(eh);
 		}
 
-		int lastIteration = sc.getConfig().controler().getLastIteration();
+		int lastIteration = sc.getConfig().controller().getLastIteration();
 
 		MatsimEventsReader reader = new MatsimEventsReader(events);
-		reader.readFile(sc.getConfig().controler().getOutputDirectory()+"/ITERS/it."+lastIteration+"/"+lastIteration+".events.xml.gz");
+		reader.readFile(sc.getConfig().controller().getOutputDirectory()+"/ITERS/it."+lastIteration+"/"+lastIteration+".events.xml.gz");
 
 		paymentsAnalzer.postProcessData();
 		return paymentsAnalzer.getPersonId2amount();

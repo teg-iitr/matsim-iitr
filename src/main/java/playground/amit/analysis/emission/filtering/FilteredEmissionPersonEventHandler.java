@@ -18,11 +18,8 @@
  * *********************************************************************** */
 package playground.amit.analysis.emission.filtering;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
 import org.matsim.api.core.v01.events.VehicleLeavesTrafficEvent;
@@ -36,17 +33,20 @@ import org.matsim.contrib.emissions.events.ColdEmissionEventHandler;
 import org.matsim.contrib.emissions.events.WarmEmissionEvent;
 import org.matsim.contrib.emissions.events.WarmEmissionEventHandler;
 import org.matsim.vehicles.Vehicle;
-
 import playground.amit.analysis.emission.EmissionPersonEventHandler;
 import playground.amit.utils.AreaFilter;
 import playground.amit.utils.PersonFilter;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author amit
  */
 
 public class FilteredEmissionPersonEventHandler implements ColdEmissionEventHandler, WarmEmissionEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
-	private static final Logger LOGGER = Logger.getLogger(FilteredEmissionPersonEventHandler.class.getName());
+	private static final Logger LOGGER = LogManager.getLogger(FilteredEmissionPersonEventHandler.class.getName());
 
 	private final Map<Id<Vehicle>, Id<Person>> vehicleId2PersonId2 = new HashMap<>();
 	private final EmissionPersonEventHandler delegate;

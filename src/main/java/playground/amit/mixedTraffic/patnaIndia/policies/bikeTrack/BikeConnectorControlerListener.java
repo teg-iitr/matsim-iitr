@@ -19,12 +19,8 @@
 
 package playground.amit.mixedTraffic.patnaIndia.policies.bikeTrack;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
-import javax.inject.Inject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -54,6 +50,12 @@ import org.matsim.core.utils.timing.TimeInterpretation;
 import playground.amit.analysis.linkVolume.ModeFilterLinkVolumeHandler;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 
+import javax.inject.Inject;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
+
 /**
  * The idea is to first connect the proposed bike track to regular network by all possible connectors
  * and then start removing one by one connector.
@@ -63,7 +65,7 @@ import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 
 class BikeConnectorControlerListener implements StartupListener, IterationStartsListener, IterationEndsListener, ShutdownListener {
 
-    private static final Logger LOG = Logger.getLogger(PatnaBikeTrackConnectionControler.class);
+    private static final Logger LOG = LogManager.getLogger(PatnaBikeTrackConnectionControler.class);
     private static final List<String> allowedModes = Arrays.asList(TransportMode.bike);
 
     private final int numberOfBikeConnectorsRequired;
@@ -147,7 +149,7 @@ class BikeConnectorControlerListener implements StartupListener, IterationStarts
                 LOG.info("========================== The free speed on the link " + connector2remove + " is set to " + aboutZeroFreeSpeed + " m/s. The count on this link is "+linkId2Count.get(connector2remove));
                 LOG.info("========================== Effectively, number of bike track connectors are " + this.bikeConnectorLinks.size());
 
-                String outNetworkFile = event.getServices().getConfig().controler().getOutputDirectory() + "/ITERS/it." + event.getIteration() + "/" + event.getIteration() + ".network.xml.gz";
+                String outNetworkFile = event.getServices().getConfig().controller().getOutputDirectory() + "/ITERS/it." + event.getIteration() + "/" + event.getIteration() + ".network.xml.gz";
                 new NetworkWriter(scenario.getNetwork()).write(outNetworkFile);
             } else {
                 terminateSimulation = true;
@@ -157,7 +159,7 @@ class BikeConnectorControlerListener implements StartupListener, IterationStarts
     }
 
     private boolean isRemovingBikeConnector(int iteration) {
-        return iteration >= this.scenario.getConfig().controler().getFirstIteration() + initialStabilizationIterations // let most persons use bike track.
+        return iteration >= this.scenario.getConfig().controller().getFirstIteration() + initialStabilizationIterations // let most persons use bike track.
                 && iteration % this.removeConnectorAfterIteration == 0;
     }
 
@@ -181,7 +183,7 @@ class BikeConnectorControlerListener implements StartupListener, IterationStarts
 
     @Override
     public void notifyShutdown(ShutdownEvent event) {
-        String outFile = event.getServices().getConfig().controler().getOutputDirectory() + "/removed_connectorLinks.txt";
+        String outFile = event.getServices().getConfig().controller().getOutputDirectory() + "/removed_connectorLinks.txt";
         BufferedWriter writer = IOUtils.getBufferedWriter(outFile);
         this.removedConnectorLinks.forEach(link -> {
             try {
@@ -222,7 +224,7 @@ class BikeConnectorControlerListener implements StartupListener, IterationStarts
         TripRouterFactoryBuilderWithDefaults routerFactory = new TripRouterFactoryBuilderWithDefaults();
         routerFactory.setTravelTime(travelTime);
         routerFactory.setTravelDisutility( this.travelDisutilityFactories.get(TransportMode.bike).createTravelDisutility(travelTime) );
-//                new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.bike, scenario.getConfig().planCalcScore()).createTravelDisutility(travelTime));
+//                new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.bike, scenario.getConfig().scoring()).createTravelDisutility(travelTime));
 
         final TripRouter tripRouter = routerFactory.build(this.scenario).get();
         final TimeInterpretation timeInterpretation = TimeInterpretation.create(this.scenario.getConfig());

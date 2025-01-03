@@ -7,7 +7,7 @@ import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.mobsim.qsim.AbstractQSimModule;
 import org.matsim.core.mobsim.qsim.qnetsimengine.ConfigurableQNetworkFactory;
 import org.matsim.core.mobsim.qsim.qnetsimengine.QNetworkFactory;
-import org.matsim.core.mobsim.qsim.qnetsimengine.linkspeedcalculator.DefaultLinkSpeedCalculator;
+
 
 /**
  * @author Amit, created on 11-03-2022
@@ -27,7 +27,6 @@ public class FDQSimModule extends AbstractQSimModule {
             @Override
             public QNetworkFactory get() {
                 final ConfigurableQNetworkFactory factory = new ConfigurableQNetworkFactory(events, scenario);
-                factory.setLinkSpeedCalculator(new DefaultLinkSpeedCalculator());
                 return factory;
             }
         });

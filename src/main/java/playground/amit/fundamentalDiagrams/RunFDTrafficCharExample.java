@@ -58,7 +58,7 @@ public class RunFDTrafficCharExample {
 
         String myDir = "output/FDTrafficCharExample";
         String outFolder ="/1lane/";
-        scenario.getConfig().controler().setOutputDirectory(myDir+outFolder);
+        scenario.getConfig().controller().setOutputDirectory(myDir+outFolder);
 
 
         QSimConfigGroup qsim = scenario.getConfig().qsim();

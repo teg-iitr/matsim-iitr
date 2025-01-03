@@ -19,7 +19,8 @@
 
 package org.matsim.core.mobsim.qsim.qnetsimengine;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.PersonStuckEvent;
@@ -44,17 +45,12 @@ import org.matsim.core.mobsim.qsim.qnetsimengine.linkspeedcalculator.LinkSpeedCa
 import org.matsim.core.mobsim.qsim.qnetsimengine.vehicleq.FIFOVehicleQ;
 import org.matsim.core.mobsim.qsim.qnetsimengine.vehicleq.PassingVehicleQ;
 import org.matsim.core.mobsim.qsim.qnetsimengine.vehicleq.VehicleQ;
-import org.matsim.core.utils.misc.Time;
 import org.matsim.lanes.Lane;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 import org.matsim.vis.snapshotwriters.VisVehicle;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 
 /**
  * Separating out the "lane" functionality from the "link" functionality.
@@ -74,7 +70,7 @@ import java.util.Queue;
  * @author nagel
  */
 final class DynamicHeadwayQueueWithBuffer implements QLaneI, SignalizeableItem {
-	private static final Logger log = Logger.getLogger(DynamicHeadwayQueueWithBuffer.class);
+	private static final Logger log = LogManager.getLogger(DynamicHeadwayQueueWithBuffer.class);
 
 	static final class Builder implements LaneFactory {
 		private VehicleQ<QVehicle> vehicleQueue = new FIFOVehicleQ();

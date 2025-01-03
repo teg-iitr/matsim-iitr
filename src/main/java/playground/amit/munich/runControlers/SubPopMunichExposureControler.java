@@ -18,11 +18,8 @@
  * *********************************************************************** */
 package playground.amit.munich.runControlers;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import javax.inject.Inject;
-import javax.inject.Provider;
+import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
@@ -36,7 +33,6 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.replanning.PlanStrategy;
 import org.matsim.core.replanning.PlanStrategyImpl.Builder;
 import org.matsim.core.replanning.modules.ReRoute;
-import org.matsim.core.replanning.modules.SubtourModeChoice;
 import org.matsim.core.replanning.selectors.RandomPlanSelector;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.router.TripRouter;
@@ -45,6 +41,10 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.timing.TimeInterpretation;
 import playground.amit.utils.FileUtils;
 import playground.vsp.airPollution.exposure.*;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author amit
@@ -85,7 +85,7 @@ public class SubPopMunichExposureControler {
 		String outputDir = args[4];
 		
 		Config config = ConfigUtils.loadConfig(configFile);
-		config.controler().setOutputDirectory(outputDir);
+		config.controller().setOutputDirectory(outputDir);
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 		
@@ -103,7 +103,7 @@ public class SubPopMunichExposureControler {
 			public void install() {
 				final Provider<TripRouter> tripRouterProvider = binder().getProvider(TripRouter.class);
 
-				addPlanStrategyBinding(DefaultPlanStrategiesModule.DefaultStrategy.SubtourModeChoice.concat("_").concat("COMMUTER_REV_COMMUTER")).toProvider(new javax.inject.Provider<PlanStrategy>() {
+				addPlanStrategyBinding(DefaultPlanStrategiesModule.DefaultStrategy.SubtourModeChoice.concat("_").concat("COMMUTER_REV_COMMUTER")).toProvider(new Provider<PlanStrategy>() {
 					final String[] availableModes = {"car", "pt_COMMUTER_REV_COMMUTER"};
 					final String[] chainBasedModes = {"car", "bike"};
 					@Inject
@@ -136,14 +136,14 @@ public class SubPopMunichExposureControler {
 		ecg.setAverageWarmEmissionFactorsFile(hbefaDirectory+"EFA_HOT_vehcat_2005average.txt");
 		ecg.setDetailedColdEmissionFactorsFile(hbefaDirectory+"EFA_ColdStart_SubSegm_2005detailed.txt");
 		ecg.setDetailedWarmEmissionFactorsFile(hbefaDirectory+"EFA_HOT_SubSegm_2005detailed.txt");
-		ecg.setUsingVehicleTypeIdAsVehicleDescription(true);
+//		ecg.setUsingVehicleTypeIdAsVehicleDescription(true);
 
 		String emissionRelatedInputFilesDir ;
 		
 		if(isRunningOnCluster) emissionRelatedInputFilesDir = "../../munich/input/";
 		else emissionRelatedInputFilesDir = FileUtils.RUNS_SVN+"/detEval/emissionCongestionInternalization/otherRuns/input/";
 		
-		ecg.setEmissionRoadTypeMappingFile(emissionRelatedInputFilesDir + "/roadTypeMapping.txt");
+//		ecg.setEmissionRoadTypeMappingFile(emissionRelatedInputFilesDir + "/roadTypeMapping.txt");
 
 		// no idea if this functionality is available anymore. Amit May'20
 //		ecg.setEmissionEfficiencyFactor(Double.parseDouble(emissionEfficiencyFactor));
@@ -151,8 +151,8 @@ public class SubPopMunichExposureControler {
 		GridTools gt = new GridTools(scenario.getNetwork().getLinks(), xMin, xMax, yMin, yMax, noOfXCells, noOfYCells);
 
 		ResponsibilityGridTools rgt = new ResponsibilityGridTools(timeBinSize, noOfTimeBins, gt);
-		ecg.setConsideringCO2Costs(Boolean.parseBoolean(considerCO2Costs));
-		ecg.setEmissionCostMultiplicationFactor(Double.parseDouble(emissionCostMultiplicationFactor));
+//		ecg.setConsideringCO2Costs(Boolean.parseBoolean(considerCO2Costs));
+//		ecg.setEmissionCostMultiplicationFactor(Double.parseDouble(emissionCostMultiplicationFactor));
 
 		final EmissionResponsibilityTravelDisutilityCalculatorFactory emfac = new EmissionResponsibilityTravelDisutilityCalculatorFactory(
 				new RandomizingTimeDistanceTravelDisutilityFactory(TransportMode.car, controler.getConfig())
@@ -172,7 +172,7 @@ public class SubPopMunichExposureControler {
 		});
 		
 //		controler.addControlerListener(new InternalizeEmissionResponsibilityControlerListener(emissionModule, emissionCostModule, rgt, gt));
-		controler.getConfig().controler().setOverwriteFileSetting( OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles );
+		controler.getConfig().controller().setOverwriteFileSetting( OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles );
 		
 		// additional things to get the networkRoute for ride mode. For this, ride mode must be assigned in networkModes of the config file.
 		controler.addOverridingModule(new AbstractModule() {

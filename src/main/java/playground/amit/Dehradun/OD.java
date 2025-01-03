@@ -5,6 +5,7 @@ import org.matsim.api.core.v01.network.Node;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.utils.objectattributes.attributable.Attributable;
 import org.matsim.utils.objectattributes.attributable.Attributes;
+import org.matsim.utils.objectattributes.attributable.AttributesImpl;
 
 /**
  * @author Amit
@@ -14,7 +15,7 @@ public class OD  implements Attributable {
     private final String destination;
     private final Id<OD> id;
     private double numberOfTrips = 0;
-    private final Attributes attributes = new Attributes();
+    private final Attributes attributes = new AttributesImpl();
     private Node origin_metro_stop ;
     private Node destination_metro_stop ;
 

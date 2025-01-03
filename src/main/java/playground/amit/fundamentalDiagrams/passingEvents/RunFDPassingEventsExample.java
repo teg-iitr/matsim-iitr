@@ -49,7 +49,7 @@ public class RunFDPassingEventsExample {
 
         String myDir = FileUtils.RUNS_SVN+"/dynamicPCU/raceTrack/test";
         String outFolder ="/1lane/";
-        scenario.getConfig().controler().setOutputDirectory(myDir+outFolder);
+        scenario.getConfig().controller().setOutputDirectory(myDir+outFolder);
 
         Controler controler = new Controler(scenario);
         controler.addOverridingModule(new FDModule(scenario));
@@ -62,6 +62,6 @@ public class RunFDPassingEventsExample {
         });
         controler.run();
 
-        FDUtils.cleanOutputDir(scenario.getConfig().controler().getOutputDirectory());
+        FDUtils.cleanOutputDir(scenario.getConfig().controller().getOutputDirectory());
     }
 }

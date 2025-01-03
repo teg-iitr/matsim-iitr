@@ -1,5 +1,7 @@
 package playground.amit.mixedTraffic.patnaIndia.covidWork;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import org.matsim.core.config.groups.ChangeModeConfigGroup;
 import org.matsim.core.config.groups.GlobalConfigGroup;
 import org.matsim.core.replanning.PlanStrategy;
@@ -11,8 +13,7 @@ import org.matsim.core.router.TripRouter;
 import org.matsim.core.utils.timing.TimeInterpretation;
 import org.matsim.facilities.ActivityFacilities;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
+
 /**
  * @author amit
  */

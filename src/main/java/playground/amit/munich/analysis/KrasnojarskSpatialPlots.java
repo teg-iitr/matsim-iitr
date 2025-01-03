@@ -18,17 +18,12 @@
  * *********************************************************************** */
 package playground.amit.munich.analysis;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedMap;
-
 import org.locationtech.jts.geom.Point;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.emissions.Pollutant;
 import org.matsim.core.utils.geometry.geotools.MGC;
-
 import playground.amit.analysis.congestion.ExperiencedDelayAnalyzer;
 import playground.amit.analysis.emission.EmissionLinkAnalyzer;
 import playground.amit.analysis.spatial.GeneralGrid.GridType;
@@ -36,6 +31,10 @@ import playground.amit.analysis.spatial.SpatialDataInputs;
 import playground.amit.analysis.spatial.SpatialDataInputs.LinkWeightMethod;
 import playground.amit.analysis.spatial.SpatialInterpolation;
 import playground.amit.utils.LoadMyScenarios;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.SortedMap;
 
 /**
  * @author amit
@@ -392,10 +391,10 @@ public class KrasnojarskSpatialPlots {
 //			events.addHandler(eh);
 //		}
 //
-//		int lastIteration = sc.getConfig().controler().getLastIteration();
+//		int lastIteration = sc.getConfig().controller().getLastIteration();
 //
 //		MatsimEventsReader reader = new MatsimEventsReader(events);
-//		reader.readFile(sc.getConfig().controler().getOutputDirectory()+"/ITERS/it."+lastIteration+"/"+lastIteration+".events.xml.gz");
+//		reader.readFile(sc.getConfig().controller().getOutputDirectory()+"/ITERS/it."+lastIteration+"/"+lastIteration+".events.xml.gz");
 //
 //		paymentsAnalzer.postProcessData();
 //		return paymentsAnalzer.getPersonId2amount();

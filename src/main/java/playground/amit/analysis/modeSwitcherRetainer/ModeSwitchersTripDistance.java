@@ -18,15 +18,8 @@
  * *********************************************************************** */
 package playground.amit.analysis.modeSwitcherRetainer;
 
-import java.io.BufferedWriter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
@@ -42,6 +35,9 @@ import playground.amit.munich.utils.MunichPersonFilter;
 import playground.amit.utils.LoadMyScenarios;
 import playground.amit.utils.PersonFilter;
 
+import java.io.BufferedWriter;
+import java.util.*;
+
 
 /**
  * This will first find mode switchers and then returns trip distances in groups. 
@@ -51,7 +47,7 @@ import playground.amit.utils.PersonFilter;
 
 public class ModeSwitchersTripDistance {
 
-	private static final Logger LOG = Logger.getLogger(ModeSwitchersTripDistance.class);
+	private static final Logger LOG = LogManager.getLogger(ModeSwitchersTripDistance.class);
 
 	public ModeSwitchersTripDistance(){
 		this(null, null, TripDistanceType.ROUTE_DISTANCE);
@@ -83,7 +79,7 @@ public class ModeSwitchersTripDistance {
 		for(String runCase : runCases){
 			ModeSwitchersTripDistance mstd = new ModeSwitchersTripDistance(MunichPersonFilter.MunichUserGroup.Rev_Commuter.toString(), new MunichPersonFilter(), TripDistanceType.BEELINE_DISTANCE);
 			Scenario sc = LoadMyScenarios.loadScenarioFromNetworkAndConfig(dir+runCase+"/output_network.xml.gz", dir+runCase+"/output_config.xml");
-			sc.getConfig().controler().setOutputDirectory(dir+runCase);
+			sc.getConfig().controller().setOutputDirectory(dir+runCase);
 			mstd.processEventsFiles(sc);
 			mstd.writeResults(dir+runCase+"/analysis/");
 		}
@@ -91,9 +87,9 @@ public class ModeSwitchersTripDistance {
 
 	public void processEventsFiles (final Scenario scenario){
 		// data from event files
-		String outputFilesDir = scenario.getConfig().controler().getOutputDirectory();
-		int firstIteration = scenario.getConfig().controler().getFirstIteration();
-		int lastIteration = scenario.getConfig().controler().getLastIteration();
+		String outputFilesDir = scenario.getConfig().controller().getOutputDirectory();
+		int firstIteration = scenario.getConfig().controller().getFirstIteration();
+		int lastIteration = scenario.getConfig().controller().getLastIteration();
 
 		String eventsFileFirstIt = outputFilesDir+"/ITERS/it."+firstIteration+"/"+firstIteration+".events.xml.gz";
 		String eventsFileLastIt = outputFilesDir+"/ITERS/it."+lastIteration+"/"+lastIteration+".events.xml.gz";

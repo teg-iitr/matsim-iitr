@@ -28,8 +28,6 @@ import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.mobsim.framework.MobsimTimer;
 import org.matsim.core.mobsim.qsim.interfaces.AgentCounter;
-import org.matsim.core.mobsim.qsim.qnetsimengine.*;
-import org.matsim.core.mobsim.qsim.qnetsimengine.linkspeedcalculator.DefaultLinkSpeedCalculator;
 import org.matsim.core.mobsim.qsim.qnetsimengine.linkspeedcalculator.LinkSpeedCalculator;
 import org.matsim.vis.snapshotwriters.SnapshotLinkWidthCalculator;
 import playground.shivam.trafficChar.core.TrafficCharConfigGroup;
@@ -37,8 +35,6 @@ import playground.shivam.trafficChar.core.TrafficCharConfigGroup;
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.matsim.core.mobsim.qsim.qnetsimengine.AbstractQNetsimEngine.createAgentSnapshotInfoBuilder;
 
 
 /**
@@ -55,18 +51,19 @@ public final class TrafficCharQNetworkFactory implements QNetworkFactory {
 	private final Scenario scenario;
 //	private NetsimEngineContext context;
 	private QNetsimEngineI.NetsimInternalInterface netsimEngine;
-	private LinkSpeedCalculator linkSpeedCalculator = new DefaultLinkSpeedCalculator();
+	private LinkSpeedCalculator linkSpeedCalculator;// = new DefaultLinkSpeedCalculator();
 	private TurnAcceptanceLogic turnAcceptanceLogic = new DefaultTurnAcceptanceLogic();
 	private final TrafficCharConfigGroup tcConfigGroup;
 	private final Map<String, NetsimEngineContext> roadType2Contexts = new HashMap<>();
 
 	@Inject
-	public TrafficCharQNetworkFactory(EventsManager events, Scenario scenario ) {
+	public TrafficCharQNetworkFactory(EventsManager events, Scenario scenario, LinkSpeedCalculator linkSpeedCalculator ) {
 		this.events = events;
 		this.scenario = scenario;
 		this.network = scenario.getNetwork();
 		this.qsimConfig = scenario.getConfig().qsim();
 		this.tcConfigGroup = (TrafficCharConfigGroup) scenario.getConfig().getModules().get(TrafficCharConfigGroup.GROUP_NAME);
+		this.linkSpeedCalculator = linkSpeedCalculator;
 	}
 
 	@Override

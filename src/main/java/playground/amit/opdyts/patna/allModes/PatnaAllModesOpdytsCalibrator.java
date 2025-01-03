@@ -34,7 +34,7 @@
 //import org.matsim.contrib.opdyts.utils.OpdytsConfigGroup;
 //import org.matsim.core.config.Config;
 //import org.matsim.core.config.ConfigUtils;
-//import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+//import org.matsim.core.config.groups.ScoringConfigGroup;
 //import org.matsim.core.config.groups.VspExperimentalConfigGroup;
 //import org.matsim.core.controler.AbstractModule;
 //import org.matsim.core.controler.OutputDirectoryHierarchy;
@@ -117,7 +117,7 @@
 //		Config config = ConfigUtils.loadConfig(configFile, new OpdytsConfigGroup());
 //		config.plans().setInputFile(relaxedPlans);
 //		config.vspExperimental().setVspDefaultsCheckingLevel(VspExperimentalConfigGroup.VspDefaultsCheckingLevel.warn); // must be warn, since opdyts override few things
-//		config.controler().setOutputDirectory(OUT_DIR);
+//		config.controller().setOutputDirectory(OUT_DIR);
 //
 //		// from GF, every run should have a different random seed.
 //		if (!useConfigRandomSeed) {
@@ -125,8 +125,8 @@
 //			config.global().setRandomSeed(randomSeed);
 //		}
 //
-//		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-//		config.strategy().setFractionOfIterationsToDisableInnovation(Double.POSITIVE_INFINITY);
+//		config.controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+//		config.replanning().setFractionOfIterationsToDisableInnovation(Double.POSITIVE_INFINITY);
 //
 //		OpdytsConfigGroup opdytsConfigGroup = ConfigUtils.addOrGetModule(config, OpdytsConfigGroup.GROUP_NAME, OpdytsConfigGroup.class ) ;
 //		opdytsConfigGroup.setOutputDirectory(OUT_DIR);
@@ -138,14 +138,14 @@
 //		Scenario scenario = ScenarioUtils.loadScenario(config);
 //
 //		Set<String> networkModes = new HashSet<>(scenario.getConfig().qsim().getMainModes());
-//		Set<String> teleportationModes = new HashSet<>(scenario.getConfig().plansCalcRoute().getModeRoutingParams().keySet());
+//		Set<String> teleportationModes = new HashSet<>(scenario.getConfig().routing().getModeRoutingParams().keySet());
 //
 //		Set<String> allModes = new LinkedHashSet<>(networkModes);
 //		allModes.addAll(teleportationModes);
 //
 //		// adding pt fare system based on distance
 //		// for above make sure that util_dist and monetary dist rate for pt are zero.
-//		PlanCalcScoreConfigGroup.ModeParams mp = scenario.getConfig().planCalcScore().getModes().get("pt");
+//		ScoringConfigGroup.ModeParams mp = scenario.getConfig().scoring().getModes().get("pt");
 //		mp.setMarginalUtilityOfDistance(0.0);
 //		mp.setMonetaryDistanceRate(0.0);
 //
@@ -217,7 +217,7 @@
 //				RandomizedUtilityParametersChoser.ONLY_ASC, PATNA_1_PCT, null, allModes, ascRandomizeStyle);
 //
 //		// what would be the decision variables to optimize the objective function.
-//		ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable(scenario.getConfig().planCalcScore(),scenario, allModes, PATNA_1_PCT);
+//		ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable(scenario.getConfig().scoring(),scenario, allModes, PATNA_1_PCT);
 //
 //		opdytsControler.addNetworkModeOccupancyAnalyzr(simulator);
 //		opdytsControler.run(simulator, decisionVariableRandomizer, initialDecisionVariable, objectiveFunction);

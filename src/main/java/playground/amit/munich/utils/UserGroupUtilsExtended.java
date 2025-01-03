@@ -18,18 +18,20 @@
  * *********************************************************************** */
 package playground.amit.munich.utils;
 
-import java.util.*;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.Population;
 import playground.amit.utils.ListUtils;
 
+import java.util.*;
+
 /**
  * @author amit
  */
 public class UserGroupUtilsExtended {
-	private final Logger logger = Logger.getLogger(UserGroupUtilsExtended.class);
+	private final Logger logger = LogManager.getLogger(UserGroupUtilsExtended.class);
 
 	public SortedMap<String, Double> calculateTravelMode2Mean(Map<String, Map<Id<Person>, Double>> inputMap, Population relavantPop){	
 		this.logger.info("Calculating mean(average) ...");

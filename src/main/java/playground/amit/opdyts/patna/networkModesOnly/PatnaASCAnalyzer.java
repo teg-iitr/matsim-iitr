@@ -70,11 +70,11 @@ public class PatnaASCAnalyzer {
 
     public void run (String configFile, String outDir, double ascBike, double ascMotorbike) { // so that multiple runs are possible on cluster
         Config config = ConfigUtils.loadConfig(configFile);
-        config.controler().setLastIteration(300);
-        config.controler().setOutputDirectory(outDir+"/bikeASC"+ascBike+"_motorbikeASC"+ascMotorbike+"/");
-        config.planCalcScore().getModes().get("bike").setConstant(ascBike);
-        config.planCalcScore().getModes().get("motorbike").setConstant(ascMotorbike);
-        config.strategy().setFractionOfIterationsToDisableInnovation(Double.POSITIVE_INFINITY);
+        config.controller().setLastIteration(300);
+        config.controller().setOutputDirectory(outDir+"/bikeASC"+ascBike+"_motorbikeASC"+ascMotorbike+"/");
+        config.scoring().getModes().get("bike").setConstant(ascBike);
+        config.scoring().getModes().get("motorbike").setConstant(ascMotorbike);
+        config.replanning().setFractionOfIterationsToDisableInnovation(Double.POSITIVE_INFINITY);
         new PatnaNetworkModesPlansRelaxor().run(config);
     }
 }

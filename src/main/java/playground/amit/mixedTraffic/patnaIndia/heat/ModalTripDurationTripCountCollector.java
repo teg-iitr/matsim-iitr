@@ -1,6 +1,6 @@
 package playground.amit.mixedTraffic.patnaIndia.heat;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.PersonArrivalEvent;
@@ -117,7 +117,7 @@ public class ModalTripDurationTripCountCollector implements  PersonDepartureEven
 
     @Override
     public void handleEvent(PersonStuckEvent personStuckEvent) {
-        Logger.getLogger(ModalTripDurationTripCountCollector.class).error("Stuck and abort event :"+personStuckEvent.toString());
+        LogManager.getLogger(ModalTripDurationTripCountCollector.class).error("Stuck and abort event :"+personStuckEvent.toString());
     }
 
     private void processData(Scenario scenario){

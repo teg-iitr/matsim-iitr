@@ -107,7 +107,7 @@
 //		Config config = ConfigUtils.loadConfig(configFile, new OpdytsConfigGroup());
 //		config.plans().setInputFile(relaxedPlans);
 //		config.vspExperimental().setVspDefaultsCheckingLevel(VspExperimentalConfigGroup.VspDefaultsCheckingLevel.warn); // must be warn, since opdyts override few things
-//		config.controler().setOutputDirectory(OUT_DIR);
+//		config.controller().setOutputDirectory(OUT_DIR);
 //
 //		// from GF, every run should have a different random seed.
 //		if (!useConfigRandomSeed) {
@@ -125,8 +125,8 @@
 //
 //		List<String> modes2consider = Arrays.asList("car","bike","motorbike");
 //
-//		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-//		config.strategy().setFractionOfIterationsToDisableInnovation(Double.POSITIVE_INFINITY);
+//		config.controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+//		config.replanning().setFractionOfIterationsToDisableInnovation(Double.POSITIVE_INFINITY);
 //
 //		Scenario scenario = ScenarioUtils.loadScenario(config);
 //
@@ -176,7 +176,7 @@
 //		}
 //
 //		// what would be the decision variables to optimize the objective function.
-//		ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable(scenario.getConfig().planCalcScore(),scenario, modes2consider, PATNA_1_PCT);
+//		ModeChoiceDecisionVariable initialDecisionVariable = new ModeChoiceDecisionVariable(scenario.getConfig().scoring(),scenario, modes2consider, PATNA_1_PCT);
 //
 //		opdytsControler.addNetworkModeOccupancyAnalyzr(simulator);
 //		opdytsControler.run(simulator, decisionVariableRandomizer, initialDecisionVariable, objectiveFunction);

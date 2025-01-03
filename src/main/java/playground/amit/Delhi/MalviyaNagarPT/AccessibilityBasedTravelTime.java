@@ -1,20 +1,14 @@
 package playground.amit.Delhi.MalviyaNagarPT;
 
-import org.apache.log4j.Logger;
-import org.matsim.api.core.v01.Coord;
-import org.matsim.api.core.v01.Id;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
 import org.matsim.core.router.util.TravelTime;
-import org.matsim.core.trafficmonitoring.FreeSpeedTravelTime;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.Vehicle;
 import playground.amit.utils.FileUtils;
 
-import javax.inject.Inject;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
@@ -24,7 +18,7 @@ import java.util.Map;
  * Created by Amit on 01/12/2020
  */
 public class AccessibilityBasedTravelTime implements TravelTime {
-    private static final Logger log = Logger.getLogger(AccessibilityBasedTravelTime.class ) ;
+    private static final Logger log = LogManager.getLogger(AccessibilityBasedTravelTime.class ) ;
 
     private static final String odMatrix = FileUtils.getLocalGDrivePath()+"project_data/delhiMalviyaNagar_PT/2016-10_MalviyaNagarODSurveyData.txt";
 

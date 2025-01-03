@@ -19,13 +19,8 @@
 
 package playground.amit.analysis.tripDistance;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.LinkLeaveEvent;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
@@ -44,12 +39,19 @@ import org.matsim.core.utils.io.IOUtils;
 import playground.amit.munich.utils.MunichPersonFilter;
 import playground.amit.utils.*;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 /**
  * @author amit
  */
 
 public class TravelDistanceHandler implements LinkLeaveEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
-	private static final Logger LOGGER = Logger.getLogger(TravelDistanceHandler.class.getName());
+	private static final Logger LOGGER = LogManager.getLogger(TravelDistanceHandler.class.getName());
 
 	private final Vehicle2DriverEventHandler veh2DriverDelegate = new Vehicle2DriverEventHandler();
 	private final PersonFilter pf ;

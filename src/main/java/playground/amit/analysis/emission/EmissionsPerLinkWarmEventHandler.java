@@ -19,7 +19,8 @@
  * *********************************************************************** */
 package playground.amit.analysis.emission;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.emissions.Pollutant;
@@ -35,7 +36,7 @@ import java.util.Map;
  *
  */
 public class EmissionsPerLinkWarmEventHandler implements WarmEmissionEventHandler{
-	private static final Logger logger = Logger.getLogger(EmissionsPerLinkWarmEventHandler.class);
+	private static final Logger logger = LogManager.getLogger(EmissionsPerLinkWarmEventHandler.class);
 
 	Map<Double, Map<Id<Link>, Map<Pollutant, Double>>> time2warmEmissionsTotal = new HashMap<>();
 	Map<Double, Map<Id<Link>, Double>> time2linkIdLeaveCount = new HashMap<>();

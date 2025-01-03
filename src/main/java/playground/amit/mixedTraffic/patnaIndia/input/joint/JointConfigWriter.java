@@ -19,24 +19,23 @@
 
 package playground.amit.mixedTraffic.patnaIndia.input.joint;
 
-import java.io.File;
-
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
-import org.matsim.core.config.groups.PlansCalcRouteConfigGroup.ModeRoutingParams;
 import org.matsim.core.config.groups.QSimConfigGroup.LinkDynamics;
 import org.matsim.core.config.groups.QSimConfigGroup.SnapshotStyle;
 import org.matsim.core.config.groups.QSimConfigGroup.VehiclesSource;
-import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.ReplanningConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.RoutingConfigGroup.ModeRoutingParams;
+import org.matsim.core.config.groups.ScoringConfigGroup.ActivityParams;
+import org.matsim.core.config.groups.ScoringConfigGroup.ModeParams;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
-
 import playground.amit.mixedTraffic.patnaIndia.utils.OuterCordonUtils;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter.PatnaUserGroup;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
+
+import java.io.File;
 
 /**
  * @author amit
@@ -79,10 +78,10 @@ public class JointConfigWriter {
 		config.qsim().setVehiclesSource(VehiclesSource.modeVehicleTypesFromVehiclesData);
 		config.vehicles().setVehiclesFile(JOINT_VEHICLES_10PCT);
 
-		config.controler().setFirstIteration(0);
-		config.controler().setLastIteration(200);
-		config.controler().setWriteEventsInterval(100);
-		config.controler().setWritePlansInterval(100);
+		config.controller().setFirstIteration(0);
+		config.controller().setLastIteration(200);
+		config.controller().setWriteEventsInterval(100);
+		config.controller().setWritePlansInterval(100);
 
 		config.counts().setInputFile(JOINT_COUNTS_10PCT);
 		config.counts().setWriteCountsInterval(100);
@@ -101,19 +100,19 @@ public class JointConfigWriter {
 			expChangeBeta.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta);
 			expChangeBeta.setSubpopulation(PatnaUserGroup.urban.name());
 			expChangeBeta.setWeight(0.7);
-			config.strategy().addStrategySettings(expChangeBeta);
+			config.replanning().addStrategySettings(expChangeBeta);
 
 			StrategySettings reRoute = new StrategySettings();
 			reRoute.setStrategyName(DefaultStrategy.ReRoute);
 			reRoute.setSubpopulation(PatnaUserGroup.urban.name());
 			reRoute.setWeight(0.15);
-			config.strategy().addStrategySettings(reRoute);
+			config.replanning().addStrategySettings(reRoute);
 
 			StrategySettings timeAllocationMutator	= new StrategySettings();
 			timeAllocationMutator.setStrategyName(DefaultStrategy.TimeAllocationMutator);
 			timeAllocationMutator.setSubpopulation(PatnaUserGroup.urban.name());
 			timeAllocationMutator.setWeight(0.05);
-			config.strategy().addStrategySettings(timeAllocationMutator);
+			config.replanning().addStrategySettings(timeAllocationMutator);
 
 			config.timeAllocationMutator().setAffectingDuration(false);
 			config.timeAllocationMutator().setMutationRange(7200.);
@@ -122,7 +121,7 @@ public class JointConfigWriter {
 			modeChoice.setStrategyName(DefaultStrategy.ChangeTripMode);
 			modeChoice.setSubpopulation(PatnaUserGroup.urban.name());
 			modeChoice.setWeight(0.1);
-			config.strategy().addStrategySettings(modeChoice);
+			config.replanning().addStrategySettings(modeChoice);
 
 			config.changeMode().setModes(PatnaUtils.URBAN_ALL_MODES.toArray(new String [PatnaUtils.URBAN_ALL_MODES.size()]));
 		}
@@ -132,13 +131,13 @@ public class JointConfigWriter {
 			expChangeBeta.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta);
 			expChangeBeta.setSubpopulation(PatnaUserGroup.commuter.name());
 			expChangeBeta.setWeight(0.85);
-			config.strategy().addStrategySettings(expChangeBeta);
+			config.replanning().addStrategySettings(expChangeBeta);
 
 			StrategySettings reRoute = new StrategySettings();
 			reRoute.setStrategyName(DefaultStrategy.ReRoute);
 			reRoute.setSubpopulation(PatnaUserGroup.commuter.name());
 			reRoute.setWeight(0.15);
-			config.strategy().addStrategySettings(reRoute);
+			config.replanning().addStrategySettings(reRoute);
 		}
 
 		{//through
@@ -146,16 +145,16 @@ public class JointConfigWriter {
 			expChangeBeta.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta);
 			expChangeBeta.setSubpopulation(PatnaUserGroup.through.name());
 			expChangeBeta.setWeight(0.85);
-			config.strategy().addStrategySettings(expChangeBeta);
+			config.replanning().addStrategySettings(expChangeBeta);
 
 			StrategySettings reRoute = new StrategySettings();
 			reRoute.setStrategyName(DefaultStrategy.ReRoute);
 			reRoute.setSubpopulation(PatnaUserGroup.through.name());
 			reRoute.setWeight(0.15);
-			config.strategy().addStrategySettings(reRoute);
+			config.replanning().addStrategySettings(reRoute);
 		}
 
-		config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
+		config.replanning().setFractionOfIterationsToDisableInnovation(0.8);
 		config.plans().setRemovingUnneccessaryPlanAttributes(true);
 		config.vspExperimental().addParam("vspDefaultsCheckingLevel", "abort");
 		config.vspExperimental().setWritingOutputEvents(true);
@@ -163,50 +162,50 @@ public class JointConfigWriter {
 		{//activities --> urban
 			ActivityParams workAct = new ActivityParams("work");
 			workAct.setTypicalDuration(8*3600);
-			config.planCalcScore().addActivityParams(workAct);
+			config.scoring().addActivityParams(workAct);
 
 			ActivityParams homeAct = new ActivityParams("home");
 			homeAct.setTypicalDuration(12*3600);
-			config.planCalcScore().addActivityParams(homeAct);
+			config.scoring().addActivityParams(homeAct);
 
 			ActivityParams edu = new ActivityParams("educational");
 			edu.setTypicalDuration(7*3600);
-			config.planCalcScore().addActivityParams(edu);
+			config.scoring().addActivityParams(edu);
 
 			ActivityParams soc = new ActivityParams("social");
 			soc.setTypicalDuration(5*3600);
-			config.planCalcScore().addActivityParams(soc);
+			config.scoring().addActivityParams(soc);
 
 			ActivityParams oth = new ActivityParams("other");
 			oth.setTypicalDuration(5*3600);
-			config.planCalcScore().addActivityParams(oth);
+			config.scoring().addActivityParams(oth);
 
 			ActivityParams unk = new ActivityParams("unknown");
 			unk.setTypicalDuration(7*3600);
-			config.planCalcScore().addActivityParams(unk);
+			config.scoring().addActivityParams(unk);
 		}
 		{//activities --> commuters/through
 			ActivityParams ac1 = new ActivityParams("E2E_Start");
 			ac1.setTypicalDuration(10*60*60);
-			config.planCalcScore().addActivityParams(ac1);
+			config.scoring().addActivityParams(ac1);
 
 			ActivityParams act2 = new ActivityParams("E2E_End");
 			act2.setTypicalDuration(10*60*60);
-			config.planCalcScore().addActivityParams(act2);
+			config.scoring().addActivityParams(act2);
 
 			ActivityParams act3 = new ActivityParams("E2I_Start");
 			act3.setTypicalDuration(12*60*60);
-			config.planCalcScore().addActivityParams(act3);
+			config.scoring().addActivityParams(act3);
 
 			for(String area : OuterCordonUtils.getAreaType2ZoneIds().keySet()){
 				ActivityParams act4 = new ActivityParams("E2I_mid_"+area.substring(0,3));
 				act4.setTypicalDuration(8*60*60);
-				config.planCalcScore().addActivityParams(act4);			
+				config.scoring().addActivityParams(act4);			
 			}
 		}
 
-		config.planCalcScore().setMarginalUtlOfWaiting_utils_hr(0);
-		config.planCalcScore().setPerforming_utils_hr(0.30);
+		config.scoring().setMarginalUtlOfWaiting_utils_hr(0);
+		config.scoring().setPerforming_utils_hr(0.30);
 
 		for(String mode : PatnaUtils.ALL_MODES){
 			ModeParams modeParam = new ModeParams(mode);
@@ -234,22 +233,22 @@ public class JointConfigWriter {
 				modeParam.setMarginalUtilityOfTraveling(0.0);
 				modeParam.setMonetaryDistanceRate(0.0); break;
 			}
-			config.planCalcScore().addModeParams(modeParam);
+			config.scoring().addModeParams(modeParam);
 		}
 
-		config.plansCalcRoute().setNetworkModes(PatnaUtils.ALL_MAIN_MODES);
+		config.routing().setNetworkModes(PatnaUtils.ALL_MAIN_MODES);
 
 		{
 			ModeRoutingParams mrp = new ModeRoutingParams("walk");
 			mrp.setTeleportedModeSpeed(5./3.6);
 			mrp.setBeelineDistanceFactor(1.5);
-			config.plansCalcRoute().addModeRoutingParams(mrp);
+			config.routing().addModeRoutingParams(mrp);
 		}
 		{
 			ModeRoutingParams mrp = new ModeRoutingParams("pt");
 			mrp.setTeleportedModeSpeed(20./3.6);
 			mrp.setBeelineDistanceFactor(1.5);
-			config.plansCalcRoute().addModeRoutingParams(mrp);
+			config.routing().addModeRoutingParams(mrp);
 		}
 	}
 }

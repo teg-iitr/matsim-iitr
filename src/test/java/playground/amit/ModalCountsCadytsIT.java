@@ -19,11 +19,6 @@
 
 package playground.amit;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import javax.inject.Inject;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -35,10 +30,10 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.cadyts.general.CadytsScoring;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.ControlerConfigGroup.MobsimType;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
+import org.matsim.core.config.groups.ControllerConfigGroup.MobsimType;
 import org.matsim.core.config.groups.QSimConfigGroup;
-import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.ReplanningConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.ScoringConfigGroup.ActivityParams;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
@@ -46,11 +41,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.ScoringFunctionFactory;
 import org.matsim.core.scoring.SumScoringFunction;
-import org.matsim.core.scoring.functions.CharyparNagelActivityScoring;
-import org.matsim.core.scoring.functions.CharyparNagelAgentStuckScoring;
-import org.matsim.core.scoring.functions.CharyparNagelLegScoring;
-import org.matsim.core.scoring.functions.ScoringParameters;
-import org.matsim.core.scoring.functions.ScoringParametersForPerson;
+import org.matsim.core.scoring.functions.*;
 import org.matsim.counts.Count;
 import org.matsim.counts.Counts;
 import org.matsim.testcases.MatsimTestUtils;
@@ -61,6 +52,12 @@ import playground.vsp.cadyts.multiModeCadyts.ModalCountsCadytsContext;
 import playground.vsp.cadyts.multiModeCadyts.ModalCountsLinkIdentifier;
 import playground.vsp.cadyts.multiModeCadyts.ModalCountsReader;
 import playground.vsp.cadyts.multiModeCadyts.MultiModalCountsCadytsModule;
+
+import javax.inject.Inject;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * amit after CadytsCarIT in cadyts contrib.
@@ -85,14 +82,14 @@ public class ModalCountsCadytsIT {
 		config.qsim().setMainModes(mainModes );
 		config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
 
-		config.controler().setLastIteration(lastIteration);
+		config.controller().setLastIteration(lastIteration);
 
-		config.planCalcScore().setBrainExpBeta(beta);
+		config.scoring().setBrainExpBeta(beta);
 
 		StrategySettings strategySettings = new StrategySettings() ;
 		strategySettings.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta.toString());
 		strategySettings.setWeight(1.0);
-		config.strategy().addStrategySettings(strategySettings);
+		config.replanning().addStrategySettings(strategySettings);
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 
@@ -243,23 +240,23 @@ public class ModalCountsCadytsIT {
 		config.global().setRandomSeed(4711) ;
 		config.network().setInputFile(inputDir + "network.xml") ;
 		config.plans().setInputFile(inputDir + "plans.xml") ;
-		config.controler().setFirstIteration(1) ;
-		config.controler().setLastIteration(10) ;
-		config.controler().setOutputDirectory(outputDir) ;
-		config.controler().setWriteEventsInterval(1) ;
-		config.controler().setMobsim(MobsimType.qsim.toString()) ;
+		config.controller().setFirstIteration(1) ;
+		config.controller().setLastIteration(10) ;
+		config.controller().setOutputDirectory(outputDir) ;
+		config.controller().setWriteEventsInterval(1) ;
+		config.controller().setMobsim(MobsimType.qsim.toString()) ;
 		config.qsim().setFlowCapFactor(1.) ;
 		config.qsim().setStorageCapFactor(1.) ;
 		config.qsim().setStuckTime(10.) ;
 		config.qsim().setRemoveStuckVehicles(false) ;
 		{
 			ActivityParams params = new ActivityParams("h") ;
-			config.planCalcScore().addActivityParams(params ) ;
+			config.scoring().addActivityParams(params ) ;
 			params.setTypicalDuration(12*60*60.) ;
 		}
 		{
 			ActivityParams params = new ActivityParams("w") ;
-			config.planCalcScore().addActivityParams(params ) ;
+			config.scoring().addActivityParams(params ) ;
 			params.setTypicalDuration(8*60*60.) ;
 		}
 		config.counts().setInputFile(inputDir + "countsCarBike.xml");

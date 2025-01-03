@@ -18,10 +18,6 @@
  * *********************************************************************** */
 package playground.amit.analysis.activity.scoring;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Person;
@@ -33,15 +29,12 @@ import org.matsim.core.scoring.EventsToScore;
 import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.ScoringFunctionFactory;
 import org.matsim.core.scoring.SumScoringFunction;
-import org.matsim.core.scoring.functions.CharyparNagelActivityScoring;
-import org.matsim.core.scoring.functions.CharyparNagelAgentStuckScoring;
-import org.matsim.core.scoring.functions.CharyparNagelLegScoring;
-import org.matsim.core.scoring.functions.CharyparNagelMoneyScoring;
-import org.matsim.core.scoring.functions.ScoringParametersForPerson;
-import org.matsim.core.scoring.functions.SubpopulationScoringParameters;
-import org.matsim.core.scoring.functions.ScoringParameters;
-
+import org.matsim.core.scoring.functions.*;
 import playground.vsp.analysis.modules.AbstractAnalysisModule;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * To get desired part of utility for each person.
@@ -71,7 +64,7 @@ public class UtilityByPartsAnalyzer extends AbstractAnalysisModule {
 
 	public void run(final Scenario sc, final String outputDir){
 		this.sc = sc;
-		int lastIt = sc.getConfig().controler().getLastIteration();
+		int lastIt = sc.getConfig().controller().getLastIteration();
 		this.eventsFile = outputDir+"/ITERS/it."+lastIt+"/"+lastIt+".events.xml.gz";
 		ScoringFunctionFactory sfFactory = getScoringFunctionFactory(sc);
 		this.events2Score = EventsToScore.createWithScoreUpdating(sc, sfFactory, events);

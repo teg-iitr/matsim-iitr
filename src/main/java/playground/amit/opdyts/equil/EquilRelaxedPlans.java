@@ -19,7 +19,6 @@
 
 package playground.amit.opdyts.equil;
 
-import java.util.Arrays;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -27,15 +26,17 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
-import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
-import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
-import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
-import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
 import playground.amit.mixedTraffic.patnaIndia.router.FreeSpeedTravelTimeForBike;
 import playground.amit.opdyts.DistanceDistribution;
 import playground.amit.opdyts.OpdytsScenario;
 import playground.amit.opdyts.analysis.OpdytsModalStatsControlerListener;
 import playground.amit.utils.FileUtils;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
+
+import java.util.Arrays;
 
 /**
  * Created by amit on 11.10.17.
@@ -62,9 +63,9 @@ public class EquilRelaxedPlans {
 
     private static void runConfig(String configFile, String outputDir, boolean usingBicycleTravelTime){
         Scenario scenario = ScenarioUtils.loadScenario(ConfigUtils.loadConfig(configFile));
-        scenario.getConfig().controler().setDumpDataAtEnd(true);
-        scenario.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-        scenario.getConfig().controler().setOutputDirectory(outputDir);
+        scenario.getConfig().controller().setDumpDataAtEnd(true);
+        scenario.getConfig().controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+        scenario.getConfig().controller().setOutputDirectory(outputDir);
 
         Controler controler = new Controler(scenario);
         controler.addOverridingModule(new AbstractModule() {
@@ -87,15 +88,15 @@ public class EquilRelaxedPlans {
 
         Config config = ConfigUtils.loadConfig(configFile);
         config.plans().setInputFile(relaxedPlans);
-        config.planCalcScore().getOrCreateModeParams(mode).setConstant(ascBicycle);
+        config.scoring().getOrCreateModeParams(mode).setConstant(ascBicycle);
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
 
-        scenario.getConfig().controler().setLastIteration(100);
-        scenario.getConfig().controler().setOutputDirectory(outputDir);
+        scenario.getConfig().controller().setLastIteration(100);
+        scenario.getConfig().controller().setOutputDirectory(outputDir);
 
-        scenario.getConfig().controler().setDumpDataAtEnd(true);
-        scenario.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+        scenario.getConfig().controller().setDumpDataAtEnd(true);
+        scenario.getConfig().controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 
 
         OpdytsScenario EQUIL_MIXEDTRAFFIC = mode.equals("bicycle") ? OpdytsScenario.EQUIL_MIXEDTRAFFIC :OpdytsScenario.EQUIL;

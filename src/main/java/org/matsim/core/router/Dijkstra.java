@@ -1,27 +1,21 @@
 package org.matsim.core.router;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.router.priorityqueue.WrappedBinaryMinHeap;
-import org.matsim.core.router.util.DijkstraNodeData;
-import org.matsim.core.router.util.LeastCostPathCalculator;
-import org.matsim.core.router.util.PreProcessDijkstra;
-import org.matsim.core.router.util.TravelDisutility;
-import org.matsim.core.router.util.TravelTime;
+import org.matsim.core.router.util.*;
 import org.matsim.core.utils.collections.RouterPriorityQueue;
 import org.matsim.vehicles.Vehicle;
 
+import java.util.*;
+
 public class Dijkstra implements LeastCostPathCalculator {
-    private static final Logger log = Logger.getLogger(Dijkstra.class);
+    private static final Logger log = LogManager.getLogger(Dijkstra.class);
     protected Network network;
     protected final TravelDisutility costFunction;
     protected final TravelTime timeFunction;

@@ -19,16 +19,12 @@
 
 package playground.amit.templates;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.google.inject.Inject;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.analysis.kai.KaiAnalysisListener;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.config.groups.VspExperimentalConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
@@ -42,15 +38,17 @@ import org.matsim.core.controler.listener.StartupListener;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
-
-import com.google.inject.Inject;
-
+import playground.amit.mixedTraffic.patnaIndia.scoring.PtFareEventHandler;
+import playground.amit.utils.FileUtils;
 import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
-import playground.amit.mixedTraffic.patnaIndia.scoring.PtFareEventHandler;
-import playground.amit.utils.FileUtils;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by amit on 05.04.17.
@@ -74,11 +72,11 @@ public class PatnaTravelTimeCalculatorReplacementTest {
         {
             Config config= ConfigUtils.loadConfig(configFile);
             config.linkStats().setAverageLinkStatsOverIterations(1);
-            config.controler().setOutputDirectory(OUT_DIR+"/noReplacementOfTravelTime/");
-            config.controler().setFirstIteration( 0 );
-            config.controler().setLastIteration( 40 );
-            config.controler().setCreateGraphs(true);
-            config.strategy().setFractionOfIterationsToDisableInnovation(1); // this is must
+            config.controller().setOutputDirectory(OUT_DIR+"/noReplacementOfTravelTime/");
+            config.controller().setFirstIteration( 0 );
+            config.controller().setLastIteration( 40 );
+            config.controller().setCreateGraphs(true);
+            config.replanning().setFractionOfIterationsToDisableInnovation(1); // this is must
             Controler controler = getControler(config);
             controler.run();
         }
@@ -90,23 +88,23 @@ public class PatnaTravelTimeCalculatorReplacementTest {
             modalTravelTimeForReplacement.clear();
             Config config1= ConfigUtils.loadConfig(configFile);
             config1.linkStats().setAverageLinkStatsOverIterations(1);
-            config1.controler().setOutputDirectory(OUT_DIR+"/beforeReplacementOfTravelTime/");
-            config1.controler().setFirstIteration( 0 );
-            config1.controler().setLastIteration( 20 );
-            config1.controler().setCreateGraphs(true);
-            config1.strategy().setFractionOfIterationsToDisableInnovation(1); // this is must
+            config1.controller().setOutputDirectory(OUT_DIR+"/beforeReplacementOfTravelTime/");
+            config1.controller().setFirstIteration( 0 );
+            config1.controller().setLastIteration( 20 );
+            config1.controller().setCreateGraphs(true);
+            config1.replanning().setFractionOfIterationsToDisableInnovation(1); // this is must
             Controler controler1 = getControler(config1);
             controler1.run();
 
             Config config2= ConfigUtils.loadConfig(configFile);
             config2.linkStats().setAverageLinkStatsOverIterations(1);
-            config2.controler().setOutputDirectory(OUT_DIR+"/afterReplacementOfTravelTime2/");
-            config2.controler().setFirstIteration( 20 );
-            config2.controler().setLastIteration( 40 );
-            config2.controler().setCreateGraphs(true);
-            config2.strategy().setFractionOfIterationsToDisableInnovation(1); // this is must
+            config2.controller().setOutputDirectory(OUT_DIR+"/afterReplacementOfTravelTime2/");
+            config2.controller().setFirstIteration( 20 );
+            config2.controller().setLastIteration( 40 );
+            config2.controller().setCreateGraphs(true);
+            config2.replanning().setFractionOfIterationsToDisableInnovation(1); // this is must
 
-            config2.plans().setInputFile( config1.controler().getOutputDirectory()+"/output_plans.xml.gz" );
+            config2.plans().setInputFile( config1.controller().getOutputDirectory()+"/output_plans.xml.gz" );
 
             Controler controler2 = getControler(config2);
 
@@ -131,7 +129,7 @@ public class PatnaTravelTimeCalculatorReplacementTest {
         config.vspExperimental().setVspDefaultsCheckingLevel(VspExperimentalConfigGroup.VspDefaultsCheckingLevel.abort);
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
-        scenario.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+        scenario.getConfig().controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 
         List<String> modes2consider = Arrays.asList("car","bike","motorbike","pt","walk");
 
@@ -160,7 +158,7 @@ public class PatnaTravelTimeCalculatorReplacementTest {
             }
         });
         // for above make sure that util_dist and monetary dist rate for pt are zero.
-        PlanCalcScoreConfigGroup.ModeParams mp = controler.getConfig().planCalcScore().getModes().get("pt");
+        ScoringConfigGroup.ModeParams mp = controler.getConfig().scoring().getModes().get("pt");
         mp.setMarginalUtilityOfDistance(0.0);
         mp.setMonetaryDistanceRate(0.0);
 

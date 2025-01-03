@@ -1,14 +1,18 @@
 package playground.amit.mixedTraffic.patnaIndia.covidWork.wfh;
 
 import com.google.inject.Inject;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.events.*;
+import org.matsim.api.core.v01.events.ActivityEndEvent;
+import org.matsim.api.core.v01.events.ActivityStartEvent;
+import org.matsim.api.core.v01.events.Event;
+import org.matsim.api.core.v01.events.PersonMoneyEvent;
 import org.matsim.api.core.v01.events.handler.ActivityEndEventHandler;
 import org.matsim.api.core.v01.events.handler.ActivityStartEventHandler;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.api.experimental.events.EventsManager;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.controler.events.AfterMobsimEvent;
 import org.matsim.core.controler.listener.AfterMobsimListener;
@@ -28,7 +32,7 @@ import java.util.Map;
  */
 public class WFHPricing implements ActivityStartEventHandler, ActivityEndEventHandler, AfterMobsimListener {
 
-    private final static Logger LOGGER = Logger.getLogger(WFHPricing.class);
+    private final static Logger LOGGER = LogManager.getLogger(WFHPricing.class);
 
     private final String TYPE = "PENALTY_WORKING_HOME";
     private final String PARTNER = "SELF";
@@ -37,7 +41,7 @@ public class WFHPricing implements ActivityStartEventHandler, ActivityEndEventHa
     private BufferedWriter out;
 
     @Inject
-    private PlanCalcScoreConfigGroup planCalcScoreConfigGroup;
+    private ScoringConfigGroup planCalcScoreConfigGroup;
     @Inject
     private EventsManager events;
     @Inject

@@ -19,12 +19,6 @@
 
 package playground.amit.fundamentalDiagrams.dynamicPCU.areaSpeedRatioMethod.estimation;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
 import com.google.inject.Inject;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -41,14 +35,17 @@ import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
-import playground.amit.fundamentalDiagrams.core.FDConfigGroup;
-import playground.amit.fundamentalDiagrams.core.FDDataContainer;
-import playground.amit.fundamentalDiagrams.core.FDModule;
-import playground.amit.fundamentalDiagrams.core.FDNetworkGenerator;
-import playground.amit.fundamentalDiagrams.core.FDStabilityTester;
+import playground.amit.fundamentalDiagrams.core.*;
 import playground.amit.fundamentalDiagrams.dynamicPCU.PCUMethod;
 import playground.amit.fundamentalDiagrams.headwayMethod.HeadwayHandler;
 import playground.amit.utils.NumberUtils;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Created by amit on 29.06.17.
@@ -91,7 +88,7 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
         this.trackingStartLink = fdNetworkGenerator.getFirstLinkIdOfTrack();
         this.trackingEndLink = fdNetworkGenerator.getLastLinkIdOfTrack();
         this.lengthOfTrack = fdNetworkGenerator.getLengthOfTrack();
-        this.delegate = new HeadwayHandler(scenario.getVehicles(), fdNetworkGenerator, fdStabilityTester, fdDataContainer, scenario.getConfig().controler(), fdConfigGroup);
+        this.delegate = new HeadwayHandler(scenario.getVehicles(), fdNetworkGenerator, fdStabilityTester, fdDataContainer, scenario.getConfig().controller(), fdConfigGroup);
         this.qsimDefaultHeadway = 3600. / fdConfigGroup.getTrackLinkCapacity();
         this.fdConfigGroup = fdConfigGroup;
     }
@@ -194,8 +191,8 @@ public class ChandraSikdarPCUUpdator implements VehicleEntersTrafficEventHandler
     public void notifyIterationEnds(IterationEndsEvent event) {
         this.delegate.notifyIterationEnds(event);
         //arrival only possible once stability is achieved
-        String file = this.scenario.getConfig().controler().getOutputDirectory() + "/modeToDynamicPCUs.txt";
-        if (event.getIteration()==this.scenario.getConfig().controler().getFirstIteration()){
+        String file = this.scenario.getConfig().controller().getOutputDirectory() + "/modeToDynamicPCUs.txt";
+        if (event.getIteration()==this.scenario.getConfig().controller().getFirstIteration()){
             if ( new File(file).delete() ){
                 FDModule.LOG.warn("Removing existing file: "+file);
             }

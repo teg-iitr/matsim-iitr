@@ -18,12 +18,9 @@
  * *********************************************************************** */
 package playground.amit.munich.runControlers;
 
-import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
-import javax.inject.Inject;
-import javax.inject.Provider;
-import org.apache.log4j.Logger;
+import jakarta.inject.Inject;
+import jakarta.inject.Provider;
+import org.apache.logging.log4j.LogManager;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
@@ -31,14 +28,13 @@ import org.matsim.contrib.emissions.EmissionModule;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.replanning.PlanStrategy;
 import org.matsim.core.replanning.PlanStrategyImpl.Builder;
 import org.matsim.core.replanning.modules.ReRoute;
-import org.matsim.core.replanning.modules.SubtourModeChoice;
 import org.matsim.core.replanning.selectors.RandomPlanSelector;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.router.TripRouter;
@@ -60,6 +56,10 @@ import playground.vsp.congestion.controler.MarginalCongestionPricingContolerList
 import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
 import playground.vsp.congestion.handlers.TollHandler;
 import playground.vsp.congestion.routing.TollDisutilityCalculatorFactory;
+
+import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author amit
@@ -89,13 +89,13 @@ public class SubPopMunichControler {
 		String outputDir = args[4];
 
 		Config config = ConfigUtils.loadConfig(configFile, new EmissionsConfigGroup());
-		config.controler().setOutputDirectory(outputDir);
-		config.planCalcScore().getActivityParams().stream().forEach(act->act.setTypicalDurationScoreComputation(
-				PlanCalcScoreConfigGroup.TypicalDurationScoreComputation.uniform));
+		config.controller().setOutputDirectory(outputDir);
+		config.scoring().getActivityParams().stream().forEach(act->act.setTypicalDurationScoreComputation(
+				ScoringConfigGroup.TypicalDurationScoreComputation.uniform));
 
-		config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
-		config.controler().setCreateGraphs(true);
-		config.controler().setDumpDataAtEnd(true);
+		config.controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+		config.controller().setCreateGraphs(true);
+		config.controller().setDumpDataAtEnd(true);
 
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 
@@ -105,7 +105,7 @@ public class SubPopMunichControler {
 			@Override
 			public void install() {
 				String ug = "COMMUTER_REV_COMMUTER";
-				addPlanStrategyBinding(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute.concat("_").concat(ug)).toProvider(new javax.inject.Provider<PlanStrategy>() {
+				addPlanStrategyBinding(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute.concat("_").concat(ug)).toProvider(new Provider<PlanStrategy>() {
 					@Inject
 					Scenario sc;
 					@Inject
@@ -127,7 +127,7 @@ public class SubPopMunichControler {
 			@Override
 			public void install() {
 				String ug = "COMMUTER_REV_COMMUTER";
-				addPlanStrategyBinding(DefaultPlanStrategiesModule.DefaultStrategy.SubtourModeChoice.concat("_").concat(ug)).toProvider(new javax.inject.Provider<PlanStrategy>() {
+				addPlanStrategyBinding(DefaultPlanStrategiesModule.DefaultStrategy.SubtourModeChoice.concat("_").concat(ug)).toProvider(new Provider<PlanStrategy>() {
 					final String[] availableModes = {"car", "pt_".concat(ug)};
 					final String[] chainBasedModes = {"car", "bike"};
 					@Inject
@@ -177,7 +177,7 @@ public class SubPopMunichControler {
 		} else if(internalizeCongestion){
 
 			TollHandler tollHandler = new TollHandler(controler.getScenario());
-			final TollDisutilityCalculatorFactory tollDisutilityCalculatorFactory = new TollDisutilityCalculatorFactory(tollHandler, config.planCalcScore());
+			final TollDisutilityCalculatorFactory tollDisutilityCalculatorFactory = new TollDisutilityCalculatorFactory(tollHandler, config.scoring());
 			controler.addOverridingModule(new AbstractModule() {
 				@Override
 				public void install() {
@@ -222,12 +222,12 @@ public class SubPopMunichControler {
 		controler.run();
 
 		// delete unnecessary iterations folder here.
-		int firstIt = controler.getConfig().controler().getFirstIteration();
-		int lastIt = controler.getConfig().controler().getLastIteration();
-		String OUTPUT_DIR = config.controler().getOutputDirectory();
+		int firstIt = controler.getConfig().controller().getFirstIteration();
+		int lastIt = controler.getConfig().controller().getLastIteration();
+		String OUTPUT_DIR = config.controller().getOutputDirectory();
 		for (int index =firstIt+1; index <lastIt; index ++){
 			String dirToDel = OUTPUT_DIR+"/ITERS/it."+index;
-			Logger.getLogger(JointCalibrationControler.class).info("Deleting the directory "+dirToDel);
+			LogManager.getLogger(JointCalibrationControler.class).info("Deleting the directory "+dirToDel);
 			IOUtils.deleteDirectoryRecursively(new File(dirToDel).toPath());
 		}
 

@@ -18,13 +18,9 @@
  * *********************************************************************** */
 package playground.amit.analysis.emission.experienced;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.apache.log4j.Logger;
+import com.google.inject.Inject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
 import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
@@ -35,13 +31,16 @@ import org.matsim.contrib.emissions.events.WarmEmissionEvent;
 import org.matsim.contrib.emissions.events.WarmEmissionEventHandler;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.vehicles.Vehicle;
-
-import com.google.inject.Inject;
-
 import playground.amit.analysis.emission.EmissionCostHandler;
 import playground.amit.utils.MapUtils;
 import playground.amit.utils.PersonFilter;
 import playground.vsp.airPollution.exposure.EmissionResponsibilityCostModule;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Emission costs (air pollution exposure cost module is used).
@@ -51,7 +50,7 @@ import playground.vsp.airPollution.exposure.EmissionResponsibilityCostModule;
 
 public class ExperiencedEmissionCostHandler implements VehicleEntersTrafficEventHandler, WarmEmissionEventHandler, ColdEmissionEventHandler, EmissionCostHandler{
 
-	private static final Logger LOG = Logger.getLogger(ExperiencedEmissionCostHandler.class);
+	private static final Logger LOG = LogManager.getLogger(ExperiencedEmissionCostHandler.class);
 
 	private final Map<Double, Map<Id<Vehicle>, Double>> vehicleId2ColdEmissCosts = new HashMap<>();
 	private final Map<Double, Map<Id<Vehicle>, Double>> vehicleId2WarmEmissCosts = new HashMap<>();

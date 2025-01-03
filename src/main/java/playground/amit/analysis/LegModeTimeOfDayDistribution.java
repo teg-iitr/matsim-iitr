@@ -19,12 +19,8 @@
 
 package playground.amit.analysis;
 
-import java.io.BufferedWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.events.PersonDepartureEvent;
 import org.matsim.api.core.v01.events.handler.PersonDepartureEventHandler;
 import org.matsim.core.api.experimental.events.EventsManager;
@@ -36,12 +32,18 @@ import playground.amit.munich.utils.MunichPersonFilter;
 import playground.amit.munich.utils.MunichPersonFilter.MunichUserGroup;
 import playground.vsp.analysis.modules.AbstractAnalysisModule;
 
+import java.io.BufferedWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 /**
  * @author amit
  */
 
 public class LegModeTimeOfDayDistribution extends AbstractAnalysisModule{
-	public static final Logger LOG = Logger.getLogger(LegModeTimeOfDayDistribution.class);
+	public static final Logger LOG = LogManager.getLogger(LegModeTimeOfDayDistribution.class);
 	private final LegModeTimeOfDayHandler lmtdh;
 	private final String eventsFile ; 
 	private String outFilePrefix= "";

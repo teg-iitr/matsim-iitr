@@ -18,7 +18,8 @@
  * *********************************************************************** */
 package playground.amit.utils.plans;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.ConfigUtils;
@@ -33,7 +34,7 @@ import playground.amit.utils.LoadMyScenarios;
  */
 public class SelectedPlansFilter {
 
-	private static final Logger LOG = Logger.getLogger(SelectedPlansFilter.class);
+	private static final Logger LOG = LogManager.getLogger(SelectedPlansFilter.class);
 
 	private final static String RUN_DIR = FileUtils.SHARED_SVN+"/projects/detailedEval/matsim-input-files/";
 	private final static String INPUT_PLANS = RUN_DIR + "/population_1pct_v2_baseCaseOutputPlans.xml.gz";

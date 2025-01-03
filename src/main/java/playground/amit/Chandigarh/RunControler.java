@@ -3,8 +3,8 @@ package playground.amit.Chandigarh;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
-import org.matsim.core.config.groups.StrategyConfigGroup;
+import org.matsim.core.config.groups.ReplanningConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
@@ -22,25 +22,25 @@ public class RunControler {
         Config config = ConfigUtils.createConfig();
         config.network().setInputFile(network);
         config.plans().setInputFile(plans);
-        config.controler().setOutputDirectory(output);
-        config.controler().setLastIteration(10);
-        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
-        config.controler().setDumpDataAtEnd(true);
+        config.controller().setOutputDirectory(output);
+        config.controller().setLastIteration(10);
+        config.controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+        config.controller().setDumpDataAtEnd(true);
         config.counts().setInputFile(countsFile);
         config.counts().setWriteCountsInterval(5);
         config.counts().setOutputFormat("all");
 
-        PlanCalcScoreConfigGroup.ActivityParams startAct = new PlanCalcScoreConfigGroup.ActivityParams(ChandigarhConstants.start_act_type);
+        ScoringConfigGroup.ActivityParams startAct = new ScoringConfigGroup.ActivityParams(ChandigarhConstants.start_act_type);
         startAct.setTypicalDuration(6*3600.);
-        PlanCalcScoreConfigGroup.ActivityParams endAct = new PlanCalcScoreConfigGroup.ActivityParams(ChandigarhConstants.end_act_type);
+        ScoringConfigGroup.ActivityParams endAct = new ScoringConfigGroup.ActivityParams(ChandigarhConstants.end_act_type);
         endAct.setTypicalDuration(16*3600.);
-        config.planCalcScore().addActivityParams(startAct);
-        config.planCalcScore().addActivityParams(endAct);
+        config.scoring().addActivityParams(startAct);
+        config.scoring().addActivityParams(endAct);
 
-        StrategyConfigGroup.StrategySettings reRoute = new StrategyConfigGroup.StrategySettings();
+        ReplanningConfigGroup.StrategySettings reRoute = new ReplanningConfigGroup.StrategySettings();
         reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute); // though, this must not have any effect.
         reRoute.setWeight(0.3);
-        config.strategy().addStrategySettings(reRoute);
+        config.replanning().addStrategySettings(reRoute);
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
 

@@ -18,13 +18,8 @@
  * *********************************************************************** */
 package playground.amit.mixedTraffic.seepage.TestSetUp;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.LinkLeaveEvent;
@@ -35,6 +30,8 @@ import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.events.EventsUtils;
 import org.matsim.core.events.MatsimEventsReader;
 
+import java.util.*;
+
 
 /**
  * @author amit
@@ -43,7 +40,7 @@ public class AverageLinkFlowHandler implements LinkEnterEventHandler, LinkLeaveE
 
 	private final Map<Id<Link>,List<Double>> enterTimes = new HashMap<>();
 	private final Map<Id<Link>,List<Double>> leaveTimes = new HashMap<>();
-	public static final Logger LOG = Logger.getLogger(AverageLinkFlowHandler.class);
+	public static final Logger LOG = LogManager.getLogger(AverageLinkFlowHandler.class);
 	
 	public static void main(String[] args) {
 		String outputDir =  "/Users/amit/Documents/repos/shared-svn/projects/mixedTraffic/seepage/xt_1Link/seepage/";

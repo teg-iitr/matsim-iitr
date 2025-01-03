@@ -18,17 +18,15 @@
  * *********************************************************************** */
 package playground.amit.InternalizationEmissionAndCongestion;
 
-import java.util.Map;
-import java.util.Set;
-import org.apache.log4j.Logger;
-import org.jfree.util.Log;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.emissions.EmissionModule;
 import org.matsim.contrib.emissions.LinkEmissionsCalculator;
 import org.matsim.contrib.emissions.Pollutant;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.vehicles.Vehicle;
@@ -37,12 +35,15 @@ import org.matsim.vehicles.Vehicles;
 import playground.vsp.airPollution.flatEmissions.EmissionCostModule;
 import playground.vsp.congestion.handlers.TollHandler;
 
+import java.util.Map;
+import java.util.Set;
+
 /**
  * @author amit after Banjamin and Ihab
  */
 public class EmissionCongestionTravelDisutilityCalculator implements TravelDisutility{
 
-	private final Logger logger = Logger.getLogger(EmissionCongestionTravelDisutilityCalculator.class);
+	private final Logger logger = LogManager.getLogger(EmissionCongestionTravelDisutilityCalculator.class);
 	
 	/*
 	 * Blur the Social Cost to speed up the relaxation process. Values between
@@ -61,7 +62,7 @@ public class EmissionCongestionTravelDisutilityCalculator implements TravelDisut
 
 	private final Vehicles emissionVehicles;
 
-	public EmissionCongestionTravelDisutilityCalculator(TravelDisutility randomizingTimeDistanceTravelDisutilityFactory, TravelTime timeCalculator, PlanCalcScoreConfigGroup cnScoringGroup, EmissionModule emissionModule, EmissionCostModule emissionCostModule, double sigma, Set<Id<Link>> hotspotLinks, TollHandler tollHandler, Vehicles vehicles) {
+	public EmissionCongestionTravelDisutilityCalculator(TravelDisutility randomizingTimeDistanceTravelDisutilityFactory, TravelTime timeCalculator, ScoringConfigGroup cnScoringGroup, EmissionModule emissionModule, EmissionCostModule emissionCostModule, double sigma, Set<Id<Link>> hotspotLinks, TollHandler tollHandler, Vehicles vehicles) {
 		this.randomizedTimeDistanceTravelDisutility = randomizingTimeDistanceTravelDisutilityFactory;
 		this.timeCalculator = timeCalculator;
 		this.marginalUtlOfMoney = cnScoringGroup.getMarginalUtilityOfMoney();
@@ -90,7 +91,7 @@ public class EmissionCongestionTravelDisutilityCalculator implements TravelDisut
 			// the link travel disutility is asked without information about the vehicle
 			if (person == null){
 				// additionally, no person is given -> a default vehicle type is used
-				Log.warn("No person and no vehicle is given to calculate the link travel disutility. The default vehicle type is used to estimate emission disutility.");
+				logger.warn("No person and no vehicle is given to calculate the link travel disutility. The default vehicle type is used to estimate emission disutility.");
 				emissionVehicle = VehicleUtils.getFactory().createVehicle(Id.createVehicleId("defaultVehicle"), VehicleUtils.getDefaultVehicleType());
 			} else {
 				// a person is given -> use the vehicle for that person given in emissionModule

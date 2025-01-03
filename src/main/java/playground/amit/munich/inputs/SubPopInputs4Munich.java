@@ -18,26 +18,21 @@
  * *********************************************************************** */
 package playground.amit.munich.inputs;
 
-import java.util.Collection;
-import java.util.List;
-
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.api.core.v01.population.Population;
-import org.matsim.api.core.v01.population.PopulationWriter;
+import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
-import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.ReplanningConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.ScoringConfigGroup.ModeParams;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
-
 import playground.amit.munich.utils.MunichPersonFilter;
 import playground.amit.munich.utils.MunichPersonFilter.MunichUserGroup;
 import playground.amit.utils.LoadMyScenarios;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @author amit
@@ -96,7 +91,7 @@ public class SubPopInputs4Munich {
 		config.plans().setInputPersonAttributeFile(outPopAttributeFile); // this should be included in the population input file. theresa, aug'19
 
 		// get the existing strategies and add others user grp to it.
-		Collection<StrategySettings> strategySettings = config.strategy().getStrategySettings();
+		Collection<StrategySettings> strategySettings = config.replanning().getStrategySettings();
 
 		for(StrategySettings ss : strategySettings){
 			ss.setSubpopulation(MunichUserGroup.Urban.toString());
@@ -108,30 +103,30 @@ public class SubPopInputs4Munich {
 			reroute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
 			reroute.setSubpopulation(ug);
 			reroute.setWeight(0.15);
-			config.strategy().addStrategySettings(reroute);
+			config.replanning().addStrategySettings(reroute);
 
 			StrategySettings expBeta = new StrategySettings();
 			expBeta.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta);
 			expBeta.setSubpopulation(ug);
 			expBeta.setWeight(0.7);
-			config.strategy().addStrategySettings(expBeta);
+			config.replanning().addStrategySettings(expBeta);
 
 			StrategySettings modeChoiceComm = new StrategySettings();
 			modeChoiceComm.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.SubtourModeChoice.concat("_").concat(ug));
 			modeChoiceComm.setWeight(0.15);
 			modeChoiceComm.setSubpopulation(ug);
-			config.strategy().addStrategySettings(modeChoiceComm);
+			config.replanning().addStrategySettings(modeChoiceComm);
 
 			// first use existing pt mode parameters and set them as new pt mode parameters
-			ModeParams ptParams = config.planCalcScore().getModes().get(TransportMode.pt);
+			ModeParams ptParams = config.scoring().getModes().get(TransportMode.pt);
 
-			config.planCalcScore().getOrCreateModeParams("pt_".concat(ug)).setConstant(-0.3);
-			config.planCalcScore().getOrCreateModeParams("pt_".concat(ug)).setMarginalUtilityOfDistance(ptParams.getMarginalUtilityOfDistance());
-			config.planCalcScore().getOrCreateModeParams("pt_".concat(ug)).setMarginalUtilityOfTraveling(ptParams.getMarginalUtilityOfTraveling());
-			config.planCalcScore().getOrCreateModeParams("pt_".concat(ug)).setMonetaryDistanceRate(ptParams.getMonetaryDistanceRate());
+			config.scoring().getOrCreateModeParams("pt_".concat(ug)).setConstant(-0.3);
+			config.scoring().getOrCreateModeParams("pt_".concat(ug)).setMarginalUtilityOfDistance(ptParams.getMarginalUtilityOfDistance());
+			config.scoring().getOrCreateModeParams("pt_".concat(ug)).setMarginalUtilityOfTraveling(ptParams.getMarginalUtilityOfTraveling());
+			config.scoring().getOrCreateModeParams("pt_".concat(ug)).setMonetaryDistanceRate(ptParams.getMonetaryDistanceRate());
 
 			// teleportation speeds for different pts
-			config.plansCalcRoute().getOrCreateModeRoutingParams("pt_".concat(ug)).setTeleportedModeSpeed(50.0/3.6);
+			config.routing().getOrCreateModeRoutingParams("pt_".concat(ug)).setTeleportedModeSpeed(50.0/3.6);
 		}
 		{
 			String ug = MunichUserGroup.Freight.toString();
@@ -139,16 +134,16 @@ public class SubPopInputs4Munich {
 			reroute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
 			reroute.setSubpopulation(ug);
 			reroute.setWeight(0.30);
-			config.strategy().addStrategySettings(reroute);
+			config.replanning().addStrategySettings(reroute);
 
 			StrategySettings expBeta = new StrategySettings();
 			expBeta.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta);
 			expBeta.setSubpopulation(ug);
 			expBeta.setWeight(0.70);
-			config.strategy().addStrategySettings(expBeta);
+			config.replanning().addStrategySettings(expBeta);
 		}
 
-		config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
+		config.replanning().setFractionOfIterationsToDisableInnovation(0.8);
 		new ConfigWriter(config).write(outConfigFile);
 	}
 }

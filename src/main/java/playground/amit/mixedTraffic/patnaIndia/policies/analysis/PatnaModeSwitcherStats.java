@@ -50,7 +50,7 @@ public class PatnaModeSwitcherStats {
 
     private void run(){
         Scenario scenario = LoadMyScenarios.loadScenarioFromNetworkAndConfig(dir+"/output_network.xml.gz",dir+"/output_config.xml.gz");
-        scenario.getConfig().controler().setOutputDirectory(dir);
+        scenario.getConfig().controller().setOutputDirectory(dir);
 
         ModeSwitchersTripTime mstt = new ModeSwitchersTripTime(userGroup, pf);
         mstt.processEventsFiles(scenario);

@@ -19,7 +19,7 @@
 
 package playground.amit.emissions.flatEmissions;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -31,9 +31,8 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
 import org.matsim.api.core.v01.events.handler.VehicleEntersTrafficEventHandler;
 import org.matsim.contrib.emissions.EmissionModule;
-import org.matsim.contrib.emissions.events.*;
 import org.matsim.contrib.emissions.HbefaVehicleCategory;
-
+import org.matsim.contrib.emissions.events.*;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.config.Config;
@@ -72,7 +71,7 @@ import java.util.List;
 @RunWith(Parameterized.class)
 public class EmissionEventsTest {
 
-    private static Logger LOG = Logger.getLogger(EmissionEventsTest.class);
+    private static Logger LOG = LogManager.getLogger(EmissionEventsTest.class);
 
     @Rule
     public MatsimTestUtils helper = new MatsimTestUtils();
@@ -213,8 +212,8 @@ public class EmissionEventsTest {
         vehs.addVehicle(carVeh);
 
         sc.getConfig().qsim().setUsePersonIdForMissingVehicleId(true);
-        sc.getConfig().plansCalcRoute().getOrCreateModeRoutingParams(TransportMode.pt).setTeleportedModeFreespeedFactor(1.5);
-        sc.getConfig().controler().setLastIteration(0);
+        sc.getConfig().routing().getOrCreateModeRoutingParams(TransportMode.pt).setTeleportedModeFreespeedFactor(1.5);
+        sc.getConfig().controller().setLastIteration(0);
 
         equilTestSetUp.createActiveAgents(sc, carPersonId, TransportMode.car, 6.0 * 3600.);
         emissionSettings(sc, this.isWritingEmissionsEvents);
@@ -222,7 +221,7 @@ public class EmissionEventsTest {
         Controler controler = new Controler(sc);
 
         String outputDirectory = helper.getOutputDirectory();
-        sc.getConfig().controler().setOutputDirectory(outputDirectory);
+        sc.getConfig().controller().setOutputDirectory(outputDirectory);
 
         controler.addOverridingModule(new AbstractModule() {
             @Override
@@ -232,7 +231,7 @@ public class EmissionEventsTest {
         });
         controler.run();
 
-        int lastItr = controler.getConfig().controler().getLastIteration();
+        int lastItr = controler.getConfig().controller().getLastIteration();
         String eventsFile = outputDirectory + "/ITERS/it."+lastItr+"/"+lastItr+".events.xml.gz";
 
         EventsManager eventsManager = EventsUtils.createEventsManager();

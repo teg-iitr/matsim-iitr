@@ -19,14 +19,16 @@
 
 package playground.amit.clustering;
 
-import java.awt.*;
-import java.util.*;
-import java.util.List;
-import javax.swing.*;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jfree.chart.ChartPanel;
 import org.matsim.core.utils.charts.XYScatterChart;
 import playground.amit.utils.NumberUtils;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
+import java.util.*;
 
 /**
  *
@@ -53,7 +55,7 @@ public class ClusterAlgorithm {
          */
         K_MEANS }
 
-    private static final Logger LOGGER = Logger.getLogger(ClusterAlgorithm.class);
+    private static final Logger LOGGER = LogManager.getLogger(ClusterAlgorithm.class);
 
     private final int numberOfClusters;
     private final BoundingBox boundingBox;

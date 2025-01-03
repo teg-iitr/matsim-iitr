@@ -19,15 +19,14 @@
 
 package playground.amit.utils;
 
-import java.util.Collection;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.locationtech.jts.geom.Geometry;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.core.utils.gis.ShapeFileReader;
-
 import playground.amit.utils.geometry.GeometryUtils;
+
+import java.util.Collection;
 
 /**
  * @author amit
@@ -50,7 +49,7 @@ public class AreaFilter {
 	 */
 	public AreaFilter (){
 		this.features = GeometryUtils.getSimplifiedGeometries( ShapeFileReader.getAllFeatures(MUNICH_SHAPE_FILE) );
-		Logger.getLogger(AreaFilter.class).info("Reading Munich city area shape file...");
+		LogManager.getLogger(AreaFilter.class).info("Reading Munich city area shape file...");
 	}
 
 	public boolean isCellInsideShape(final Coord cellCentroid) {

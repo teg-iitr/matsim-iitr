@@ -57,8 +57,8 @@ public class ColdWarmEmissionStats {
         for (int index =0; index <runCases.length; index++) {
             String runCase = runCases[index];
             EmissionsConfigGroup configGroup = new EmissionsConfigGroup();
-            configGroup.setEmissionCostMultiplicationFactor(emissionCostFactor[index]);
-            configGroup.setConsideringCO2Costs(true);
+//            configGroup.setEmissionCostMultiplicationFactor(emissionCostFactor[index]);
+//            configGroup.setConsideringCO2Costs(true);
 
             EmissionCostModule emissionCostModule = new EmissionCostModule(configGroup);
             CausedEmissionCostHandler handler = new CausedEmissionCostHandler(emissionCostModule);

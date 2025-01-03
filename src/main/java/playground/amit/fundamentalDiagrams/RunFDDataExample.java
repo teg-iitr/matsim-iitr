@@ -47,7 +47,7 @@ public class RunFDDataExample {
 
         String myDir = "output/FDDataExample";
         String outFolder ="/1lane/";
-        scenario.getConfig().controler().setOutputDirectory(myDir+outFolder);
+        scenario.getConfig().controller().setOutputDirectory(myDir+outFolder);
 
 
         QSimConfigGroup qsim = scenario.getConfig().qsim();
@@ -57,6 +57,6 @@ public class RunFDDataExample {
         controler.addOverridingModule(new FDModule(scenario));
         controler.run();
 
-//        FDUtils.cleanOutputDir(scenario.getConfig().controler().getOutputDirectory());
+//        FDUtils.cleanOutputDir(scenario.getConfig().controller().getOutputDirectory());
     }
 }

@@ -18,7 +18,6 @@
  * *********************************************************************** */
 package playground.amit.congestionPricing.testExamples.pricing;
 
-import java.io.File;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -31,8 +30,8 @@ import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
-import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.ReplanningConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.ScoringConfigGroup.ActivityParams;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
@@ -44,6 +43,8 @@ import playground.vsp.congestion.handlers.CongestionHandlerImplV3;
 import playground.vsp.congestion.handlers.CongestionHandlerImplV4;
 import playground.vsp.congestion.handlers.TollHandler;
 import playground.vsp.congestion.routing.TollDisutilityCalculatorFactory;
+
+import java.io.File;
 
 /**
  * @author amit
@@ -97,7 +98,7 @@ class CongestionPricingTestExample {
 
 		if(isComparing){
 			TollHandler tollHandler = new TollHandler(sc);
-			final TollDisutilityCalculatorFactory fact = new TollDisutilityCalculatorFactory(tollHandler, controler.getConfig().planCalcScore());
+			final TollDisutilityCalculatorFactory fact = new TollDisutilityCalculatorFactory(tollHandler, controler.getConfig().scoring());
 
 			controler.addOverridingModule(new AbstractModule() {
 				@Override
@@ -128,25 +129,25 @@ class CongestionPricingTestExample {
 
 		Config config = sc.getConfig();
 
-		config.controler().setOutputDirectory(outputDir+"/output/"+congestionImpl);
-		config.controler().setFirstIteration(0);
-		config.controler().setLastIteration(20);
-		config.controler().setWriteEventsInterval(10);
-		config.controler().setMobsim("qsim");
-		config.controler().setOverwriteFileSetting( OverwriteFileSetting.deleteDirectoryIfExists );
+		config.controller().setOutputDirectory(outputDir+"/output/"+congestionImpl);
+		config.controller().setFirstIteration(0);
+		config.controller().setLastIteration(20);
+		config.controller().setWriteEventsInterval(10);
+		config.controller().setMobsim("qsim");
+		config.controller().setOverwriteFileSetting( OverwriteFileSetting.deleteDirectoryIfExists );
 
 		config.qsim().setEndTime(9*3600.);
 
 		StrategySettings reRoute = new StrategySettings();
 		reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
 		reRoute.setWeight(0.10);
-		config.strategy().addStrategySettings(reRoute);
-		config.strategy().setFractionOfIterationsToDisableInnovation(0.7);
+		config.replanning().addStrategySettings(reRoute);
+		config.replanning().setFractionOfIterationsToDisableInnovation(0.7);
 
 		StrategySettings changeExpBeta = new StrategySettings();
 		changeExpBeta.setStrategyName("ChangeExpBeta");
 		changeExpBeta.setWeight(0.9);
-		config.strategy().addStrategySettings(changeExpBeta);
+		config.replanning().addStrategySettings(changeExpBeta);
 
 		ActivityParams o1 = new ActivityParams("o1");
 		ActivityParams o2 = new ActivityParams("o2");
@@ -158,10 +159,10 @@ class CongestionPricingTestExample {
 		d1.setTypicalDuration(8*3600);
 		d2.setTypicalDuration(8*3600);
 
-		config.planCalcScore().addActivityParams(o1);
-		config.planCalcScore().addActivityParams(o2);
-		config.planCalcScore().addActivityParams(d1);
-		config.planCalcScore().addActivityParams(d2);
+		config.scoring().addActivityParams(o1);
+		config.scoring().addActivityParams(o2);
+		config.scoring().addActivityParams(d1);
+		config.scoring().addActivityParams(d2);
 
 		new ConfigWriter(config).write(outputDir+"/input/input_config.xml.gz");
 	}

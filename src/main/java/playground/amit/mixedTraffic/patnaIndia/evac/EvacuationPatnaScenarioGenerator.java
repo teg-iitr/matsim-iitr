@@ -18,40 +18,24 @@
  * *********************************************************************** */
 package playground.amit.mixedTraffic.patnaIndia.evac;
 
-import java.io.File;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-
-import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.Geometry;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Leg;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.api.core.v01.population.Population;
-import org.matsim.api.core.v01.population.PopulationFactory;
-import org.matsim.api.core.v01.population.PopulationWriter;
-import org.matsim.api.core.v01.population.Route;
+import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigWriter;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
-import org.matsim.core.config.groups.PlansCalcRouteConfigGroup.ModeRoutingParams;
 import org.matsim.core.config.groups.PlansConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup.LinkDynamics;
-import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.ReplanningConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.RoutingConfigGroup.ModeRoutingParams;
+import org.matsim.core.config.groups.ScoringConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup.ActivityParams;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
-import org.matsim.evacuationgui.scenariogenerator.EvacuationNetworkGenerator;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.io.NetworkWriter;
 import org.matsim.core.router.DefaultRoutingModules;
@@ -63,11 +47,11 @@ import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
+import org.matsim.evacuationgui.scenariogenerator.EvacuationNetworkGenerator;
 import org.matsim.evacuationgui.utils.ScenarioCRSTransformation;
 import org.matsim.facilities.FacilitiesUtils;
-import org.matsim.utils.objectattributes.attributable.Attributes;
+import org.matsim.utils.objectattributes.attributable.AttributesImpl;
 import org.opengis.feature.simple.SimpleFeature;
-
 import playground.amit.analysis.modalShare.ModalShareFromEvents;
 import playground.amit.analysis.tripTime.ModalTravelTimeAnalyzer;
 import playground.amit.mixedTraffic.patnaIndia.input.others.PatnaVehiclesGenerator;
@@ -77,6 +61,12 @@ import playground.amit.utils.FileUtils;
 import playground.amit.utils.LoadMyScenarios;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
+
+import java.io.File;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author amit
@@ -112,15 +102,15 @@ public class EvacuationPatnaScenarioGenerator {
         Config config = scenario.getConfig();
         config.network().setInputFile(outNetworkFile);
         config.plans().setInputFile(outPopFile);
-        config.controler().setOutputDirectory("output/evacTest");
+        config.controller().setOutputDirectory("output/evacTest");
 
         //config.addModule(new EvacuationConfigModule("evacuation"));
 
-        config.controler().setFirstIteration(0);
-        config.controler().setLastIteration(100);
-        config.controler().setMobsim("qsim");
-        config.controler().setWriteEventsInterval(20);
-        config.controler().setWritePlansInterval(20);
+        config.controller().setFirstIteration(0);
+        config.controller().setLastIteration(100);
+        config.controller().setMobsim("qsim");
+        config.controller().setWriteEventsInterval(20);
+        config.controller().setWritePlansInterval(20);
 
 
         config.global().setCoordinateSystem("EPSG:7759");
@@ -142,10 +132,10 @@ public class EvacuationPatnaScenarioGenerator {
         reRoute.setStrategyName("ReRoute");
         reRoute.setWeight(0.1);
 
-        config.strategy().setMaxAgentPlanMemorySize(5);
-        config.strategy().addStrategySettings(expChangeBeta);
-        config.strategy().addStrategySettings(reRoute);
-        config.strategy().setFractionOfIterationsToDisableInnovation(0.75);
+        config.replanning().setMaxAgentPlanMemorySize(5);
+        config.replanning().addStrategySettings(expChangeBeta);
+        config.replanning().addStrategySettings(reRoute);
+        config.replanning().setFractionOfIterationsToDisableInnovation(0.75);
 
         //vsp default
         config.vspExperimental().addParam("vspDefaultsCheckingLevel", "ignore");
@@ -155,39 +145,39 @@ public class EvacuationPatnaScenarioGenerator {
 
         ActivityParams homeAct = new ActivityParams("home");
         homeAct.setTypicalDuration(1 * 3600);
-        config.planCalcScore().addActivityParams(homeAct);
+        config.scoring().addActivityParams(homeAct);
 
         ActivityParams evacAct = new ActivityParams("evac");
         evacAct.setTypicalDuration(1 * 3600);
-        config.planCalcScore().addActivityParams(evacAct);
+        config.scoring().addActivityParams(evacAct);
 
-        config.plansCalcRoute().setNetworkModes(PatnaUtils.EXT_MAIN_MODES);
-        config.planCalcScore().addModeParams(new PlanCalcScoreConfigGroup.ModeParams("motorbike"));
-        config.planCalcScore().addModeParams(new PlanCalcScoreConfigGroup.ModeParams("truck"));
+        config.routing().setNetworkModes(PatnaUtils.EXT_MAIN_MODES);
+        config.scoring().addModeParams(new ScoringConfigGroup.ModeParams("motorbike"));
+        config.scoring().addModeParams(new ScoringConfigGroup.ModeParams("truck"));
         {
             ModeRoutingParams mrp = new ModeRoutingParams("walk");
             mrp.setTeleportedModeSpeed(4. / 3.6);
             mrp.setBeelineDistanceFactor(1.5);
-            config.plansCalcRoute().addModeRoutingParams(mrp);
+            config.routing().addModeRoutingParams(mrp);
         }
         {
             ModeRoutingParams mrp = new ModeRoutingParams("pt");
             mrp.setTeleportedModeSpeed(20. / 3.6);
             mrp.setBeelineDistanceFactor(1.5);
-            config.plansCalcRoute().addModeRoutingParams(mrp);
+            config.routing().addModeRoutingParams(mrp);
         }
 
-        String outputDir = config.controler().getOutputDirectory()+"/evac_"+ config.qsim().getLinkDynamics().name()+"/";
-        config.controler().setOutputDirectory(outputDir);
-        config.controler().setDumpDataAtEnd(true);
-        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+        String outputDir = config.controller().getOutputDirectory()+"/evac_"+ config.qsim().getLinkDynamics().name()+"/";
+        config.controller().setOutputDirectory(outputDir);
+        config.controller().setDumpDataAtEnd(true);
+        config.controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
         config.vspExperimental().setWritingOutputEvents(true);
         this.scenario.getConfig().qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
         PatnaVehiclesGenerator.createAndAddVehiclesToScenario(this.scenario, PatnaUtils.EXT_MAIN_MODES);
 
         final Controler controler = new Controler(this.scenario);
 
-//		final RandomizingTimeDistanceTravelDisutilityFactory builder_bike =  new RandomizingTimeDistanceTravelDisutilityFactory("bike", config.planCalcScore());
+//		final RandomizingTimeDistanceTravelDisutilityFactory builder_bike =  new RandomizingTimeDistanceTravelDisutilityFactory("bike", config.scoring());
 
         controler.addOverridingModule(new AbstractModule() {
             @Override
@@ -336,7 +326,7 @@ public class EvacuationPatnaScenarioGenerator {
                                 FacilitiesUtils.toFacility(evacAct, null),
                                 home.getEndTime().seconds(),
                                 pOut,
-                                new Attributes());
+                                new AttributesImpl());
 
                         Route route = ((Leg) routeInfo.get(0)).getRoute();
                         route.setStartLinkId(home.getLinkId());
@@ -354,7 +344,7 @@ public class EvacuationPatnaScenarioGenerator {
                     //				routeFactory.setRouteFactory(leg.getMode(), new GenericRouteFactory());
                     //
                     //				TripRouter router = new TripRouter();
-                    //				router.setRoutingModule(leg.getMode(), DefaultRoutingModules.createTeleportationRouter(leg.getMode(), popFact, scOut.getConfig().plansCalcRoute().getModeRoutingParams().get(leg.getMode())));
+                    //				router.setRoutingModule(leg.getMode(), DefaultRoutingModules.createTeleportationRouter(leg.getMode(), popFact, scOut.getConfig().routing().getModeRoutingParams().get(leg.getMode())));
                     //				List<? extends PlanElement> routeInfo = router.calcRoute(leg.getMode(), new ActivityWrapperFacility(home), new ActivityWrapperFacility(evacAct), home.getEndTime(), pOut);
                     //
                     //				Route route = ((Leg)routeInfo.get(0)).getRoute();

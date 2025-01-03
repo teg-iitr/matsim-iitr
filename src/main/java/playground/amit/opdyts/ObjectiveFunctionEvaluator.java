@@ -19,15 +19,17 @@
 
 package playground.amit.opdyts;
 
+import com.google.inject.Inject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.matsim.contrib.analysis.kai.Databins;
+import org.matsim.core.config.groups.ReplanningConfigGroup;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
-import com.google.inject.Inject;
-import org.apache.log4j.Logger;
-import org.matsim.contrib.analysis.kai.Databins;
-import org.matsim.core.config.groups.StrategyConfigGroup;
 
 /**
  * Created by amit on 28/11/2016.
@@ -35,7 +37,7 @@ import org.matsim.core.config.groups.StrategyConfigGroup;
 
 public class ObjectiveFunctionEvaluator {
 
-    private static final Logger log = Logger.getLogger(ObjectiveFunctionEvaluator.class);
+    private static final Logger log = LogManager.getLogger(ObjectiveFunctionEvaluator.class);
     private final SortedMap<String, Double> mode2share = new TreeMap<>();
 
     public enum ObjectiveFunctionType {
@@ -52,7 +54,7 @@ public class ObjectiveFunctionEvaluator {
     private final ObjectiveFunctionType objectiveFunctionType = ObjectiveFunctionType.SUM_SQR_DIFF_NORMALIZED;
 
     @Inject
-    private StrategyConfigGroup strategyConfigGroup;
+    private ReplanningConfigGroup strategyConfigGroup;
 
     private final double probOfRandomReplanning;
 

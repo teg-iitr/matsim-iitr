@@ -26,21 +26,21 @@ import org.matsim.contrib.emissions.HbefaVehicleCategory;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.config.groups.VspExperimentalConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.vehicles.VehicleType;
+import playground.amit.mixedTraffic.patnaIndia.policies.PatnaPolicyControler;
+import playground.amit.mixedTraffic.patnaIndia.router.FreeSpeedTravelTimeForBike;
+import playground.amit.mixedTraffic.patnaIndia.scoring.PtFareEventHandler;
+import playground.amit.utils.FileUtils;
 import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
 import playground.vsp.cadyts.multiModeCadyts.MultiModeCountsControlerListener;
-import playground.amit.mixedTraffic.patnaIndia.policies.PatnaPolicyControler;
-import playground.amit.mixedTraffic.patnaIndia.router.FreeSpeedTravelTimeForBike;
-import playground.amit.mixedTraffic.patnaIndia.scoring.PtFareEventHandler;
-import playground.amit.utils.FileUtils;
 
 /**
  * Created by amit on 23/12/2016.
@@ -64,18 +64,18 @@ public class PatnaOnlineEmissionsWriter {
         config.plans().setInputPersonAttributeFile(filesDir+"/output_personAttributes.xml.gz");
         config.vehicles().setVehiclesFile(filesDir+"/output_vehicles.xml.gz");
 
-        int lastIt = config.controler().getLastIteration();
-        config.controler().setFirstIteration(lastIt);
-        config.controler().setLastIteration(lastIt);
-        config.controler().setOutputDirectory(outputDir);
+        int lastIt = config.controller().getLastIteration();
+        config.controller().setFirstIteration(lastIt);
+        config.controller().setLastIteration(lastIt);
+        config.controller().setOutputDirectory(outputDir);
         config.vspExperimental().setVspDefaultsCheckingLevel(VspExperimentalConfigGroup.VspDefaultsCheckingLevel.warn);
 
         EmissionsConfigGroup ecg = ConfigUtils.addOrGetModule(config, EmissionsConfigGroup.class);
 //        ecg.setUsingDetailedEmissionCalculation(false);
-        ecg.setUsingVehicleTypeIdAsVehicleDescription(false);
+//        ecg.setUsingVehicleTypeIdAsVehicleDescription(false);
         ecg.setAverageColdEmissionFactorsFile(avgColdEmissFile);
         ecg.setAverageWarmEmissionFactorsFile(avgWarmEmissFile);
-        ecg.setEmissionRoadTypeMappingFile(roadTypeMappingFile);
+//        ecg.setEmissionRoadTypeMappingFile(roadTypeMappingFile);
         ecg.setWritingEmissionsEvents(true);
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
@@ -94,8 +94,8 @@ public class PatnaOnlineEmissionsWriter {
 
         final Controler controler = new Controler(scenario);
 
-        controler.getConfig().controler().setDumpDataAtEnd(true);
-        controler.getConfig().strategy().setMaxAgentPlanMemorySize(10);
+        controler.getConfig().controller().setDumpDataAtEnd(true);
+        controler.getConfig().replanning().setMaxAgentPlanMemorySize(10);
 
         controler.addOverridingModule(new AbstractModule() { // plotting modal share over iterations
             @Override
@@ -119,7 +119,7 @@ public class PatnaOnlineEmissionsWriter {
             }
         });
         // for above make sure that util_dist and monetary dist rate for pt are zero.
-        PlanCalcScoreConfigGroup.ModeParams mp = controler.getConfig().planCalcScore().getModes().get("pt");
+        ScoringConfigGroup.ModeParams mp = controler.getConfig().scoring().getModes().get("pt");
         mp.setMarginalUtilityOfDistance(0.0);
         mp.setMonetaryDistanceRate(0.0);
 

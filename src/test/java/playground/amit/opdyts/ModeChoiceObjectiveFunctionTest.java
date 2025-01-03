@@ -6,7 +6,7 @@
 //import java.util.TreeMap;
 //import floetteroed.opdyts.ObjectiveFunction;
 //import floetteroed.opdyts.SimulatorState;
-//import org.apache.log4j.Logger;
+//import org.apache.logging.log4j.Logger;
 //import org.junit.Rule;
 //import org.junit.Test;
 //import org.matsim.api.core.v01.Coord;
@@ -35,7 +35,7 @@
 //import org.matsim.testcases.MatsimTestUtils;
 //
 //public class ModeChoiceObjectiveFunctionTest {
-//	private static final Logger log = Logger.getLogger(ModeChoiceObjectiveFunctionTest.class ) ;
+//	private static final Logger log = LogManager.getLogger(ModeChoiceObjectiveFunctionTest.class ) ;
 //
 //	@Rule
 //	public final MatsimTestUtils helper = new MatsimTestUtils();
@@ -71,7 +71,7 @@
 //			ModeChoiceObjectiveFunction objective = new ModeChoiceObjectiveFunction(distriInfo);
 //
 //			final Config config = ConfigUtils.createConfig();
-//			config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+//			config.controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
 //			Scenario scenario = ScenarioUtils.createScenario(config);
 //			Population pop = scenario.getPopulation();
 //			PopulationFactory pf = pop.getFactory();

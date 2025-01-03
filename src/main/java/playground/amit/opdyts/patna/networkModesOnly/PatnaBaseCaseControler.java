@@ -19,10 +19,8 @@
 
 package playground.amit.opdyts.patna.networkModesOnly;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -30,14 +28,18 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
-import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
-import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
-import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
-import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
 import playground.amit.opdyts.DistanceDistribution;
 import playground.amit.opdyts.OpdytsScenario;
 import playground.amit.opdyts.analysis.OpdytsModalStatsControlerListener;
 import playground.amit.utils.FileUtils;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventHandler;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
+import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
+
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by amit on 22.05.17.
@@ -45,7 +47,7 @@ import playground.amit.utils.FileUtils;
 
 public class PatnaBaseCaseControler {
 
-    public static final Logger LOGGER = Logger.getLogger(PatnaBaseCaseControler.class);
+    public static final Logger LOGGER = LogManager.getLogger(PatnaBaseCaseControler.class);
 
     private enum PatnaBestDecisionVariable {
         REPORTED_BEST, // (from GF) reported as best overall decision variable in opdyts.log
@@ -78,16 +80,16 @@ public class PatnaBaseCaseControler {
         Config config = ConfigUtils.loadConfig(configFile);
         String tempOutDir = baseDir+"/"+patnaBestDecisionVariable+"/plainRun2GetPlansFile/";
         if (! new File(tempOutDir).exists() ) new File(tempOutDir).mkdirs();
-        config.controler().setOutputDirectory(tempOutDir);
-        config.controler().setFirstIteration(firstIteration);
-        config.controler().setLastIteration(lastIteration);
+        config.controller().setOutputDirectory(tempOutDir);
+        config.controller().setFirstIteration(firstIteration);
+        config.controller().setLastIteration(lastIteration);
 
         if(patnaBestDecisionVariable.equals(PatnaBestDecisionVariable.REPORTED_BEST)) {
-            config.planCalcScore().getOrCreateModeParams("bike").setConstant(0.94);
-            config.planCalcScore().getOrCreateModeParams("motorbike").setConstant(0.28);
+            config.scoring().getOrCreateModeParams("bike").setConstant(0.94);
+            config.scoring().getOrCreateModeParams("motorbike").setConstant(0.28);
         } else {
-            config.planCalcScore().getOrCreateModeParams("bike").setConstant(1.55);
-            config.planCalcScore().getOrCreateModeParams("motorbike").setConstant(0.63);
+            config.scoring().getOrCreateModeParams("bike").setConstant(1.55);
+            config.scoring().getOrCreateModeParams("motorbike").setConstant(0.63);
         }
 
         // plain run to get plans files in first two iterations.
@@ -101,9 +103,9 @@ public class PatnaBaseCaseControler {
                 if (! new File(outDir).exists() ) new File(outDir).mkdirs();
 
                 config.plans().setInputFile(plansFile);
-                config.controler().setOutputDirectory(outDir);
-                config.controler().setFirstIteration(firstIt);
-                config.controler().setLastIteration(lastIt);
+                config.controller().setOutputDirectory(outDir);
+                config.controller().setFirstIteration(firstIt);
+                config.controller().setLastIteration(lastIt);
                 new PatnaBaseCaseControler().runControler(config,patnaBestDecisionVariable);
             }
         }
@@ -124,14 +126,14 @@ public class PatnaBaseCaseControler {
             LOGGER.info("used decision variable is the decision variable which is reported as best overall decision variable in opdyts.log file.");
         }
 
-        LOGGER.info("Used ASCs for bike and motorbiek modes are "+config.planCalcScore().getOrCreateModeParams("bike").getConstant()+" and "+
-                config.planCalcScore().getOrCreateModeParams("motorbike").getConstant()+" respectively.");
+        LOGGER.info("Used ASCs for bike and motorbiek modes are "+config.scoring().getOrCreateModeParams("bike").getConstant()+" and "+
+                config.scoring().getOrCreateModeParams("motorbike").getConstant()+" respectively.");
 
-        LOGGER.info("The first and last iterations are "+ config.controler().getFirstIteration() + " and " + config.controler().getLastIteration() +" respectively.");
+        LOGGER.info("The first and last iterations are "+ config.controller().getFirstIteration() + " and " + config.controller().getLastIteration() +" respectively.");
         LOGGER.info("====================================================");
 
         Scenario scenario = ScenarioUtils.loadScenario(config);
-        scenario.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
+        scenario.getConfig().controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.deleteDirectoryIfExists);
 
         List<String> modes2consider = Arrays.asList("car","bike","motorbike");
         DistanceDistribution referenceStudyDistri = new PatnaNetworkModesOneBinDistanceDistribution(OPDYTS_SCENARIO_PATNA);

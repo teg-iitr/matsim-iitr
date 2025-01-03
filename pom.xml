@@ -19,13 +19,14 @@
 		<matsim.version>2024.0</matsim.version>
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
-		<log4j.version>2.18.0</log4j.version>
-		<geotools.version>28.1</geotools.version>
+		<log4j.version>2.24.0</log4j.version>
+		<geotools.version>31.3</geotools.version>
 	</properties>
 
 	<repositories>
 		<repository>
 			<id>matsim</id>
+			<name>MATSim Maven repository</name>
 			<url>https://repo.matsim.org/repository/matsim/</url>
 		</repository>
 		<repository>

@@ -19,18 +19,19 @@
  * *********************************************************************** */
 package playground.amit.emissions.flatEmissions;
 
-import java.util.Set;
 import com.google.inject.Inject;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.emissions.EmissionModule;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
 import org.matsim.core.router.util.TravelDisutility;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.vehicles.Vehicles;
 import playground.vsp.airPollution.flatEmissions.EmissionCostModule;
+
+import java.util.Set;
 
 
 /**
@@ -41,7 +42,7 @@ public class EmissionModalTravelDisutilityCalculatorFactory implements TravelDis
 
 	@Inject private EmissionModule emissionModule;
 	@Inject private EmissionCostModule emissionCostModule;
-	@Inject private PlanCalcScoreConfigGroup cnScoringGroup;
+	@Inject private ScoringConfigGroup cnScoringGroup;
 	@Inject private QSimConfigGroup qsimConfigGroup;
 	@Inject private Vehicles vehicles;
 

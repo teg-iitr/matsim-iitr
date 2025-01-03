@@ -19,17 +19,19 @@
 
 package playground.amit.opdyts;
 
-import java.io.File;
-import java.io.IOException;
 import com.google.common.io.Files;
-import org.apache.log4j.Logger;
-import org.matsim.core.config.groups.StrategyConfigGroup;
-import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.matsim.core.config.groups.ReplanningConfigGroup;
+import org.matsim.core.config.groups.ReplanningConfigGroup.StrategySettings;
 import org.matsim.core.controler.events.ShutdownEvent;
 import org.matsim.core.controler.listener.ShutdownListener;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultSelector;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule.DefaultStrategy;
 import org.matsim.core.utils.io.IOUtils;
+
+import java.io.File;
+import java.io.IOException;
 //import playground.amit.opdyts.patna.networkModesOnly.PatnaNetworkModesOpdytsCalibrator;
 
 /**
@@ -37,13 +39,13 @@ import org.matsim.core.utils.io.IOUtils;
  */
 
 public class OpdytsModeChoiceUtils {
-    private static final Logger log = Logger.getLogger(OpdytsModeChoiceUtils.class);
+    private static final Logger log = LogManager.getLogger(OpdytsModeChoiceUtils.class);
 
     /*
      * random replanning probability is the probability that
      * a random mode variation is made given that one has chosen a mode-changing strategy
      */
-    public static double getProabilityOfRandomReplanning(StrategyConfigGroup strategy){
+    public static double getProabilityOfRandomReplanning(ReplanningConfigGroup strategy){
         double pure_modeChoice_strategy = 0.;
         /*
          * replanning rate is the probability that any strategy is selected that can change the mode
@@ -82,8 +84,8 @@ public class OpdytsModeChoiceUtils {
                 String outDir = event.getServices().getControlerIO().getOutputPath()+"/vectorElementSizeFiles/";
                 new File(outDir).mkdirs();
 
-                int firstIt = event.getServices().getConfig().controler().getFirstIteration();
-                int lastIt = event.getServices().getConfig().controler().getLastIteration();
+                int firstIt = event.getServices().getConfig().controller().getFirstIteration();
+                int lastIt = event.getServices().getConfig().controller().getLastIteration();
 
                 for (int itr = firstIt+1; itr <=lastIt; itr++) {
                     if ( (itr == firstIt+1 ) && new File(event.getServices().getControlerIO().getIterationPath(itr)).exists() ) {
@@ -94,7 +96,7 @@ public class OpdytsModeChoiceUtils {
                             try {
                                 Files.copy(new File(sourceFile), new File(sinkFile));
                             } catch (IOException e) {
-//                                Logger.getLogger(PatnaNetworkModesOpdytsCalibrator.class).warn("Data is not copied. Reason : " + e);
+//                                LogManager.getLogger(PatnaNetworkModesOpdytsCalibrator.class).warn("Data is not copied. Reason : " + e);
                             }
                         }
                         {

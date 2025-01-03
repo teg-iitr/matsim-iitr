@@ -18,44 +18,33 @@
  * *********************************************************************** */
 package playground.amit.mixedTraffic.patnaIndia.input.extDemand;
 
-import java.io.BufferedReader;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.locationtech.jts.geom.Point;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.Plan;
-import org.matsim.api.core.v01.population.Population;
-import org.matsim.api.core.v01.population.PopulationFactory;
-import org.matsim.api.core.v01.population.PopulationWriter;
+import org.matsim.api.core.v01.population.*;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.IOUtils;
 import org.opengis.feature.simple.SimpleFeature;
-
 import playground.amit.mixedTraffic.patnaIndia.utils.OuterCordonUtils;
 import playground.amit.mixedTraffic.patnaIndia.utils.OuterCordonUtils.PatnaNetworkType;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.amit.utils.LoadMyScenarios;
 import playground.amit.utils.geometry.GeometryUtils;
 
+import java.io.BufferedReader;
+import java.util.*;
+
 /**
  * @author amit
  */
 
 public class OuterCordonDemandGenerator {
-	private static final Logger LOG = Logger.getLogger(OuterCordonDemandGenerator.class);
+	private static final Logger LOG = LogManager.getLogger(OuterCordonDemandGenerator.class);
 	private Scenario scenario;
 	private final String inputFilesDir = PatnaUtils.INPUT_FILES_DIR+"/raw/counts/externalDemandCountsFile/";
 	private final Random random = MatsimRandom.getRandom();

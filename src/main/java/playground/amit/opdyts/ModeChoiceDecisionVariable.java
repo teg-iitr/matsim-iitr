@@ -25,9 +25,9 @@
 //
 //import org.matsim.api.core.v01.Scenario;
 //import org.matsim.api.core.v01.TransportMode;
-//import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
-//import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
-//import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ScoringParameterSet;
+//import org.matsim.core.config.groups.ScoringConfigGroup;
+//import org.matsim.core.config.groups.ScoringConfigGroup.ModeParams;
+//import org.matsim.core.config.groups.ScoringConfigGroup.ScoringParameterSet;
 //
 //import floetteroed.opdyts.DecisionVariable;
 //
@@ -41,11 +41,11 @@
 //
 //    private final OpdytsScenario opdytsScenario;
 //    private final String subPopulation;
-//    private final PlanCalcScoreConfigGroup newScoreConfig;
+//    private final ScoringConfigGroup newScoreConfig;
 //
 //    private final Collection<String> considerdModes ;
 //
-//    public ModeChoiceDecisionVariable(final PlanCalcScoreConfigGroup newScoreConfig, final Scenario scenario,
+//    public ModeChoiceDecisionVariable(final ScoringConfigGroup newScoreConfig, final Scenario scenario,
 //                                      final OpdytsScenario opdytsScenario, final Collection<String> considerdModes, final String subPopulatioun){
 //        this.scenario = scenario;
 //    	this.newScoreConfig = newScoreConfig;
@@ -54,7 +54,7 @@
 //        this.considerdModes = considerdModes;
 //    }
 //
-//    public ModeChoiceDecisionVariable(final PlanCalcScoreConfigGroup newScoreConfig, final Scenario scenario, final Collection<String> considerdModes,
+//    public ModeChoiceDecisionVariable(final ScoringConfigGroup newScoreConfig, final Scenario scenario, final Collection<String> considerdModes,
 //                               final OpdytsScenario opdytsScenario){
 //        this (newScoreConfig, scenario, opdytsScenario, considerdModes, null);
 //    }
@@ -65,14 +65,14 @@
 //			String subPopName = entry.getKey() ;
 //			ScoringParameterSet newParameterSet = entry.getValue() ;
 //			for ( ModeParams newModeParams : newParameterSet.getModes().values() ) {
-//				scenario.getConfig().planCalcScore().getScoringParameters( subPopName ).addModeParams( newModeParams ) ;
+//				scenario.getConfig().scoring().getScoringParameters( subPopName ).addModeParams( newModeParams ) ;
 //			}
 //		}
 //    }
 //
 //    @Override
 //    public String toString() {
-//        final Map<String, PlanCalcScoreConfigGroup.ModeParams> allModes = this.newScoreConfig.getScoringParameters(this.subPopulation).getModes();
+//        final Map<String, ScoringConfigGroup.ModeParams> allModes = this.newScoreConfig.getScoringParameters(this.subPopulation).getModes();
 //        switch (this.opdytsScenario){
 //            case EQUIL:
 //            case EQUIL_MIXEDTRAFFIC:
@@ -80,7 +80,7 @@
 //            case PATNA_10Pct:
 //            StringBuilder str = new StringBuilder();
 //                for(String mode : considerdModes) {
-//                    PlanCalcScoreConfigGroup.ModeParams mp = allModes.get(mode);
+//                    ScoringConfigGroup.ModeParams mp = allModes.get(mode);
 //                    if(mp.getMode().equals(TransportMode.other)) continue;
 //                    str.append(mp.getMode())
 //                       .append(": ")
@@ -103,7 +103,7 @@
 //            }
 //        }
 //
-//    public PlanCalcScoreConfigGroup getScoreConfig() {
+//    public ScoringConfigGroup getScoreConfig() {
 //        return this.newScoreConfig;
 //    }
 //}

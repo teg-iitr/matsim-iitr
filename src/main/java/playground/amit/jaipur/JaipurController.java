@@ -5,9 +5,9 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
 import org.matsim.core.config.groups.QSimConfigGroup;
-import org.matsim.core.config.groups.StrategyConfigGroup;
+import org.matsim.core.config.groups.ReplanningConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
@@ -50,55 +50,55 @@ public class JaipurController {
         config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
         config.qsim().setEndTime(30*3600.); //
 
-        config.plansCalcRoute().setNetworkModes(mainModes);
+        config.routing().setNetworkModes(mainModes);
 
-        PlanCalcScoreConfigGroup.ActivityParams homeAct = new PlanCalcScoreConfigGroup.ActivityParams(ODMatrixGenerator.ORIGIN_ACTIVITY);
+        ScoringConfigGroup.ActivityParams homeAct = new ScoringConfigGroup.ActivityParams(ODMatrixGenerator.ORIGIN_ACTIVITY);
         homeAct.setTypicalDuration(11*3600.);
         homeAct.setScoringThisActivityAtAll(false);
-        config.planCalcScore().addActivityParams(homeAct);
+        config.scoring().addActivityParams(homeAct);
 
-        PlanCalcScoreConfigGroup.ActivityParams destinationAct = new PlanCalcScoreConfigGroup.ActivityParams(ODMatrixGenerator.DESTINATION_ACTIVITY);;
+        ScoringConfigGroup.ActivityParams destinationAct = new ScoringConfigGroup.ActivityParams(ODMatrixGenerator.DESTINATION_ACTIVITY);;
         destinationAct.setTypicalDuration(10*3600.);
         destinationAct.setScoringThisActivityAtAll(false);
-        config.planCalcScore().addActivityParams(destinationAct);
+        config.scoring().addActivityParams(destinationAct);
 
-        config.planCalcScore().setPerforming_utils_hr(0.);
+        config.scoring().setPerforming_utils_hr(0.);
 
-        PlanCalcScoreConfigGroup.ModeParams carParams = new PlanCalcScoreConfigGroup.ModeParams("car");
+        ScoringConfigGroup.ModeParams carParams = new ScoringConfigGroup.ModeParams("car");
         carParams.setMarginalUtilityOfTraveling(-6.0);
         carParams.setConstant(-0.5);
-        config.planCalcScore().addModeParams(carParams);
+        config.scoring().addModeParams(carParams);
 
-        PlanCalcScoreConfigGroup.ModeParams motorbikeParams = new PlanCalcScoreConfigGroup.ModeParams("motorbike");
+        ScoringConfigGroup.ModeParams motorbikeParams = new ScoringConfigGroup.ModeParams("motorbike");
         motorbikeParams.setConstant(0.0);
         motorbikeParams.setMarginalUtilityOfTraveling(-5.0);
-        config.planCalcScore().addModeParams(motorbikeParams);
+        config.scoring().addModeParams(motorbikeParams);
 
-        PlanCalcScoreConfigGroup.ModeParams truckParams = new PlanCalcScoreConfigGroup.ModeParams("truck");
+        ScoringConfigGroup.ModeParams truckParams = new ScoringConfigGroup.ModeParams("truck");
         truckParams.setConstant(-1.0);
         truckParams.setMarginalUtilityOfTraveling(-7.0);
-        config.planCalcScore().addModeParams(truckParams);
+        config.scoring().addModeParams(truckParams);
 
-        config.controler().setOutputDirectory(outputDir);
-        config.controler().setFirstIteration(0);
-        config.controler().setLastIteration(100);
-        config.controler().setDumpDataAtEnd(true);
-        config.controler().setCreateGraphs(true);
-        config.controler().setWriteEventsInterval(50);
-        config.controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.failIfDirectoryExists);
-//        config.controler().setRunId();
+        config.controller().setOutputDirectory(outputDir);
+        config.controller().setFirstIteration(0);
+        config.controller().setLastIteration(100);
+        config.controller().setDumpDataAtEnd(true);
+        config.controller().setCreateGraphs(true);
+        config.controller().setWriteEventsInterval(50);
+        config.controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.failIfDirectoryExists);
+//        config.controller().setRunId();
 
-        StrategyConfigGroup.StrategySettings reRoute = new StrategyConfigGroup.StrategySettings();
+        ReplanningConfigGroup.StrategySettings reRoute = new ReplanningConfigGroup.StrategySettings();
         reRoute.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ReRoute);
         reRoute.setWeight(0.30);
-        config.strategy().addStrategySettings(reRoute);
+        config.replanning().addStrategySettings(reRoute);
 
-        StrategyConfigGroup.StrategySettings planSelector = new StrategyConfigGroup.StrategySettings();
+        ReplanningConfigGroup.StrategySettings planSelector = new ReplanningConfigGroup.StrategySettings();
         planSelector.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.SelectExpBeta);
         planSelector.setWeight(0.7);
-        config.strategy().addStrategySettings(planSelector);
+        config.replanning().addStrategySettings(planSelector);
 
-        config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
+        config.replanning().setFractionOfIterationsToDisableInnovation(0.8);
 
         new ConfigWriter(config).write("config.xml");
 

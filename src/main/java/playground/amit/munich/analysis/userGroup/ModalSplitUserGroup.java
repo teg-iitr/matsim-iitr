@@ -18,22 +18,24 @@
  * *********************************************************************** */
 package playground.amit.munich.analysis.userGroup;
 
-import java.io.BufferedWriter;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.core.utils.io.IOUtils;
 import playground.amit.analysis.modalShare.ModalShareFromEvents;
 import playground.amit.munich.utils.MunichPersonFilter;
 import playground.amit.munich.utils.MunichPersonFilter.MunichUserGroup;
 import playground.amit.utils.FileUtils;
 
+import java.io.BufferedWriter;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 /**
  * @author amit
  */
 public class ModalSplitUserGroup {
 	
-	private final static Logger LOG = Logger.getLogger(ModalSplitUserGroup.class);
+	private final static Logger LOG = LogManager.getLogger(ModalSplitUserGroup.class);
 
 	private final SortedMap<MunichUserGroup, SortedMap<String, Integer>> userGrp2Mode2Legs = new TreeMap<>();
 	private final SortedMap<MunichUserGroup, SortedMap<String, Double>> userGrp2ModalSplit = new TreeMap<>();

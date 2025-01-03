@@ -19,21 +19,10 @@
 
 package playground.amit.opdyts.analysis;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
 import com.google.inject.Inject;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.controler.events.AfterMobsimEvent;
 import org.matsim.core.controler.events.BeforeMobsimEvent;
 import org.matsim.core.controler.events.ShutdownEvent;
@@ -50,6 +39,12 @@ import playground.amit.opdyts.ObjectiveFunctionEvaluator;
 import playground.amit.opdyts.equil.EquilMixedTrafficObjectiveFunctionPenalty;
 import playground.amit.opdyts.plots.BestSolutionVsDecisionVariableChart;
 import playground.amit.opdyts.plots.OpdytsConvergenceChart;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by amit on 20/09/16.
@@ -107,7 +102,7 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
         stringBuilder.append("penaltyForObjectiveFunction"+"\t");
         stringBuilder.append("totalObjectiveFunctionValue");
 
-        String outFile = event.getServices().getConfig().controler().getOutputDirectory() + "/"+OPDYTS_STATS_FILE_NAME+".txt";
+        String outFile = event.getServices().getConfig().controller().getOutputDirectory() + "/"+OPDYTS_STATS_FILE_NAME+".txt";
         writer = IOUtils.getBufferedWriter(outFile);
         try {
             writer.write(stringBuilder.toString());
@@ -126,7 +121,7 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
        LegModeBeelineDistanceDistributionFromPlansAnalyzer beelineDistanceDistributionFromPlansAnalyzer = getBeelineDistanceDistributionHandler();
 
         // initializing it here so that scenario can be accessed.
-        if (iteration == config.controler().getFirstIteration()) {
+        if (iteration == config.controller().getFirstIteration()) {
             this.initialMode2DistanceClass2LegCount.putAll(beelineDistanceDistributionFromPlansAnalyzer.getMode2DistanceClass2LegCount());
         } else {
             ModalShareFromPlans modalShareFromPlans = new ModalShareFromPlans(scenario.getPopulation());
@@ -141,14 +136,14 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
                 case PATNA_10Pct:
                     break;
                 case EQUIL_MIXEDTRAFFIC:
-                    double ascBicycle = config.planCalcScore().getModes().get("bicycle").getConstant();
+                    double ascBicycle = config.scoring().getModes().get("bicycle").getConstant();
                     double bicycleShare = beelineDistanceDistributionFromPlansAnalyzer.getModeToShare().get("bicycle");
                     penalty = EquilMixedTrafficObjectiveFunctionPenalty.getPenalty(bicycleShare, ascBicycle);
             }
 
             try {
                 // write modalParams
-                Map<String, PlanCalcScoreConfigGroup.ModeParams> mode2Params = config.planCalcScore().getModes();
+                Map<String, ScoringConfigGroup.ModeParams> mode2Params = config.scoring().getModes();
 
                 StringBuilder stringBuilder = new StringBuilder(iteration + "\t");
                 stringBuilder.append(String.valueOf(fromStateObjFunValue)).append("\t"); // useful only to check if all decision variables start at the same point.
@@ -175,9 +170,9 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Shutd
             }
         }
 
-        if( iteration % writeDistanceDistributionEveryIteration == 0 || iteration == config.controler().getLastIteration() ) {
+        if( iteration % writeDistanceDistributionEveryIteration == 0 || iteration == config.controller().getLastIteration() ) {
             // dist-distribution file
-            String distriDir = config.controler().getOutputDirectory() + "/distanceDistri/";
+            String distriDir = config.controller().getOutputDirectory() + "/distanceDistri/";
             new File(distriDir).mkdir();
             String outFile = distriDir + "/" + iteration + ".distanceDistri.txt";
             writeDistanceDistribution(outFile, beelineDistanceDistributionFromPlansAnalyzer.getMode2DistanceClass2LegCount());

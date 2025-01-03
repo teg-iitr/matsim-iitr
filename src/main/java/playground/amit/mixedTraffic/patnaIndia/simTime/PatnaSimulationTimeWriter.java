@@ -18,18 +18,19 @@
  * *********************************************************************** */
 package playground.amit.mixedTraffic.patnaIndia.simTime;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ActivityParams;
-import org.matsim.core.config.groups.PlanCalcScoreConfigGroup.ModeParams;
-import org.matsim.core.config.groups.PlansCalcRouteConfigGroup.ModeRoutingParams;
 import org.matsim.core.config.groups.QSimConfigGroup.LinkDynamics;
 import org.matsim.core.config.groups.QSimConfigGroup.TrafficDynamics;
 import org.matsim.core.config.groups.QSimConfigGroup.VehiclesSource;
-import org.matsim.core.config.groups.StrategyConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.ReplanningConfigGroup.StrategySettings;
+import org.matsim.core.config.groups.RoutingConfigGroup.ModeRoutingParams;
+import org.matsim.core.config.groups.ScoringConfigGroup.ActivityParams;
+import org.matsim.core.config.groups.ScoringConfigGroup.ModeParams;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
@@ -51,7 +52,7 @@ import java.util.List;
 
 public class PatnaSimulationTimeWriter {
 
-	private static final Logger LOG = Logger.getLogger(PatnaSimulationTimeWriter.class);
+	private static final Logger LOG = LogManager.getLogger(PatnaSimulationTimeWriter.class);
 	private static final int [] randomSeeds = {4711, 6835, 1847, 4144, 4628, 2632, 5982, 3218, 5736, 7573,4389, 1344} ;
 	private static String runDir = FileUtils.RUNS_SVN+"/patnaIndia/run110/";
 	private static String inputFilesDir = runDir+"/inputs/";
@@ -108,8 +109,8 @@ public class PatnaSimulationTimeWriter {
 			controler.run();
 
 			// delete unnecessary iterations folder here.
-			int firstIt = controler.getConfig().controler().getFirstIteration();
-			int lastIt = controler.getConfig().controler().getLastIteration();
+			int firstIt = controler.getConfig().controller().getFirstIteration();
+			int lastIt = controler.getConfig().controller().getLastIteration();
 			FileUtils.deleteIntermediateIterations(runSpecificOutputDir,firstIt,lastIt);
 		}
 
@@ -150,7 +151,7 @@ public class PatnaSimulationTimeWriter {
 			config.qsim().setRestrictingSeepage(true);
 		}
 
-		config.controler().setCreateGraphs(false);
+		config.controller().setCreateGraphs(false);
 		config.qsim().setVehiclesSource(VehiclesSource.modeVehicleTypesFromVehiclesData);
 		Scenario sc = ScenarioUtils.loadScenario(config);
 
@@ -161,8 +162,8 @@ public class PatnaSimulationTimeWriter {
 		PatnaVehiclesGenerator.createAndAddVehiclesToScenario(sc, PatnaUtils.URBAN_MAIN_MODES);
 
 		final Controler controler = new Controler(sc);
-		controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
-		controler.getConfig().controler().setDumpDataAtEnd(true);
+		controler.getConfig().controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+		controler.getConfig().controller().setDumpDataAtEnd(true);
 
 		final RandomizingTimeDistanceTravelDisutilityFactory builder = new RandomizingTimeDistanceTravelDisutilityFactory("bike", config);
 		
@@ -174,7 +175,7 @@ public class PatnaSimulationTimeWriter {
 				addTravelDisutilityFactoryBinding("bike").toInstance(builder);
 			}
 		});
-		controler.getScenario().getConfig().controler().setOutputDirectory(runSpecificOutputDir);
+		controler.getScenario().getConfig().controller().setOutputDirectory(runSpecificOutputDir);
 		return controler;
 	}
 
@@ -185,11 +186,11 @@ public class PatnaSimulationTimeWriter {
 		config.counts().setWriteCountsInterval(200);
 		config.counts().setCountsScaleFactor(100/cloningFactor); 
 
-		config.controler().setFirstIteration(0);
-		config.controler().setLastIteration(200);
+		config.controller().setFirstIteration(0);
+		config.controller().setLastIteration(200);
 		//disable writing of the following data
-		config.controler().setWriteEventsInterval(200);
-		config.controler().setWritePlansInterval(200);
+		config.controller().setWriteEventsInterval(200);
+		config.controller().setWritePlansInterval(200);
 
 		config.qsim().setFlowCapFactor(0.01*cloningFactor);		
 		config.qsim().setStorageCapFactor(storageCapacityFactor);
@@ -211,11 +212,11 @@ public class PatnaSimulationTimeWriter {
 		timeAllocationMutator.setStrategyName("TimeAllocationMutator");
 		timeAllocationMutator.setWeight(0.05);
 
-		config.strategy().addStrategySettings(expChangeBeta);
-		config.strategy().addStrategySettings(reRoute);
-		config.strategy().addStrategySettings(timeAllocationMutator);
+		config.replanning().addStrategySettings(expChangeBeta);
+		config.replanning().addStrategySettings(reRoute);
+		config.replanning().addStrategySettings(timeAllocationMutator);
 
-		config.strategy().setFractionOfIterationsToDisableInnovation(0.8);
+		config.replanning().setFractionOfIterationsToDisableInnovation(0.8);
 
 		config.plans().setRemovingUnneccessaryPlanAttributes(true);
 		config.vspExperimental().addParam("vspDefaultsCheckingLevel", "abort");
@@ -223,70 +224,70 @@ public class PatnaSimulationTimeWriter {
 		{//activities --> urban
 			ActivityParams workAct = new ActivityParams("work");
 			workAct.setTypicalDuration(8*3600);
-			config.planCalcScore().addActivityParams(workAct);
+			config.scoring().addActivityParams(workAct);
 
 			ActivityParams homeAct = new ActivityParams("home");
 			homeAct.setTypicalDuration(12*3600);
-			config.planCalcScore().addActivityParams(homeAct);
+			config.scoring().addActivityParams(homeAct);
 
 			ActivityParams edu = new ActivityParams("educational");
 			edu.setTypicalDuration(7*3600);
-			config.planCalcScore().addActivityParams(edu);
+			config.scoring().addActivityParams(edu);
 
 			ActivityParams soc = new ActivityParams("social");
 			soc.setTypicalDuration(5*3600);
-			config.planCalcScore().addActivityParams(soc);
+			config.scoring().addActivityParams(soc);
 
 			ActivityParams oth = new ActivityParams("other");
 			oth.setTypicalDuration(5*3600);
-			config.planCalcScore().addActivityParams(oth);
+			config.scoring().addActivityParams(oth);
 
 			ActivityParams unk = new ActivityParams("unknown");
 			unk.setTypicalDuration(7*3600);
-			config.planCalcScore().addActivityParams(unk);
+			config.scoring().addActivityParams(unk);
 		}
 
-		config.planCalcScore().setMarginalUtlOfWaiting_utils_hr(0);
-		config.planCalcScore().setPerforming_utils_hr(6.0);
+		config.scoring().setMarginalUtlOfWaiting_utils_hr(0);
+		config.scoring().setPerforming_utils_hr(6.0);
 
 		// since demand is not calibrated for 10% or 100%, using all zeros, instead.
 		ModeParams car = new ModeParams("car");
 		car.setConstant(-0.0);
 		car.setMarginalUtilityOfTraveling(0.0);
-		config.planCalcScore().addModeParams(car);
+		config.scoring().addModeParams(car);
 
 		ModeParams bike = new ModeParams("bike");
 		bike.setConstant(0.0);
 		bike.setMarginalUtilityOfTraveling(0.0);
-		config.planCalcScore().addModeParams(bike);
+		config.scoring().addModeParams(bike);
 
 		ModeParams motorbike = new ModeParams("motorbike");
 		motorbike.setConstant(-0.0);
 		motorbike.setMarginalUtilityOfTraveling(0.0);
-		config.planCalcScore().addModeParams(motorbike);
+		config.scoring().addModeParams(motorbike);
 
 		ModeParams pt = new ModeParams("pt");
 		pt.setConstant(-0.0);
 		pt.setMarginalUtilityOfTraveling(0.0);
-		config.planCalcScore().addModeParams(pt);
+		config.scoring().addModeParams(pt);
 
 		ModeParams walk = new ModeParams("walk");
 		walk.setConstant(0.0);
 		walk.setMarginalUtilityOfTraveling(0.0);
-		config.planCalcScore().addModeParams(walk);
+		config.scoring().addModeParams(walk);
 
-		config.plansCalcRoute().setNetworkModes(PatnaUtils.URBAN_MAIN_MODES);
+		config.routing().setNetworkModes(PatnaUtils.URBAN_MAIN_MODES);
 
 		{
 			ModeRoutingParams mrp = new ModeRoutingParams("walk");
 			mrp.setTeleportedModeSpeed(4./3.6);
-			config.plansCalcRoute().addModeRoutingParams(mrp);
+			config.routing().addModeRoutingParams(mrp);
 		}
 
 		{
 			ModeRoutingParams mrp = new ModeRoutingParams("pt");
 			mrp.setTeleportedModeSpeed(20./3.6);
-			config.plansCalcRoute().addModeRoutingParams(mrp);
+			config.routing().addModeRoutingParams(mrp);
 		}
 
 		config.travelTimeCalculator().setAnalyzedModesAsString(String.join(",", PatnaUtils.URBAN_MAIN_MODES));

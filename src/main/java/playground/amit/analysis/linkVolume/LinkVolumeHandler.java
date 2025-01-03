@@ -18,12 +18,8 @@
  * *********************************************************************** */
 package playground.amit.analysis.linkVolume;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.LinkLeaveEvent;
 import org.matsim.api.core.v01.events.VehicleEntersTrafficEvent;
@@ -41,12 +37,17 @@ import org.matsim.vehicles.Vehicles;
 import playground.amit.mixedTraffic.MixedTrafficVehiclesUtils;
 import playground.amit.utils.PersonFilter;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author amit
  */
 public class LinkVolumeHandler implements LinkLeaveEventHandler, VehicleEntersTrafficEventHandler, VehicleLeavesTrafficEventHandler {
 
-	private static final Logger LOG = Logger.getLogger(LinkVolumeHandler.class);
+	private static final Logger LOG = LogManager.getLogger(LinkVolumeHandler.class);
 	private final Map<Id<Link>, Map<Integer,Double>> linkId2Time2Count = new HashMap<>();
 	private final Map<Id<Link>, Map<Integer,Double>> linkId2Time2PCUVol = new HashMap<>();
 	private final Map<Id<Link>, Map<Integer,List<Id<Vehicle>>>> linkId2Time2Persons = new HashMap<>();
