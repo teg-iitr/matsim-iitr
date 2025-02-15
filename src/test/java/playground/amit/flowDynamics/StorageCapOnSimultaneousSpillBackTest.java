@@ -19,15 +19,10 @@
 package playground.amit.flowDynamics;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.matsim.api.core.v01.Coord;
@@ -74,22 +69,10 @@ import org.matsim.vehicles.Vehicle;
 
 
 public class StorageCapOnSimultaneousSpillBackTest {
-	private final boolean isUsingFastCapacityUpdate;
-
-	public StorageCapOnSimultaneousSpillBackTest(boolean isUsingFastCapacityUpdate) {
-		this.isUsingFastCapacityUpdate = isUsingFastCapacityUpdate;
-	}
 
 	@ParameterizedTest
-//			(name = "{index}: isUsingfastCapacityUpdate == {0}")
-	@ValueSource(booleans = {true,false})
-	public static Collection<Object> parameterObjects () {
-		Object [] capacityUpdates = new Object [] { false, true };
-		return Arrays.asList(capacityUpdates);
-	}
-
-	@Test
-	public void storageCapTest4BottleneckLink (){
+	@ValueSource(booleans = {true, false})
+	public void storageCapTest4BottleneckLink (boolean isUsingFastCapacityUpdate){
 		/*
 		 * agent 1 and 3 are departing on link 4 and agent 2 and 4 are departing on link 1. Agent 1, 2, 3, 4 are departing at an interval of 1 sec.
 		 * The bottleneck link is 5 m long and thus can accomodate only one vehicle, flow cap allow one car/ 10 sec
@@ -100,7 +83,7 @@ public class StorageCapOnSimultaneousSpillBackTest {
 		 */
 
 		Tuple<Id<Link>, Id<Link>> startLinkIds = new Tuple<>(Id.createLinkId(1), Id.createLinkId(4)); // agent 2,4 depart on link 1
-		Map<Id<Vehicle>, Tuple<Double,Double>> vehicle2EnterTime = getVehicle2LinkEnterTime(startLinkIds);
+		Map<Id<Vehicle>, Tuple<Double,Double>> vehicle2EnterTime = getVehicle2LinkEnterTime(startLinkIds, isUsingFastCapacityUpdate);
 
 //		if (this.isUsingFastCapacityUpdate ) {
 			Assertions.assertEquals( 13.0, vehicle2EnterTime.get(Id.createVehicleId(3)).getFirst().doubleValue(),MatsimTestUtils.EPSILON,"Person 3 is entering on link 2 at wrong time.");
@@ -124,7 +107,7 @@ public class StorageCapOnSimultaneousSpillBackTest {
 
 		//changing the links order such that agent 2,4 depart on link 4
 		startLinkIds = new Tuple<>(Id.createLinkId(4), Id.createLinkId(1));
-		vehicle2EnterTime = getVehicle2LinkEnterTime(startLinkIds);
+		vehicle2EnterTime = getVehicle2LinkEnterTime(startLinkIds, isUsingFastCapacityUpdate);
 
 //		if(this.isUsingFastCapacityUpdate) { 
 			Assertions.assertEquals( 23.0, vehicle2EnterTime.get(Id.createVehicleId(3)).getFirst(),MatsimTestUtils.EPSILON,"Person 3 is entering on link 2 at wrong time.");
@@ -142,11 +125,11 @@ public class StorageCapOnSimultaneousSpillBackTest {
 
 	}
 
-	private Map<Id<Vehicle>, Tuple<Double,Double>> getVehicle2LinkEnterTime(final Tuple<Id<Link>, Id<Link>> startLinkIds){
+	private Map<Id<Vehicle>, Tuple<Double,Double>> getVehicle2LinkEnterTime(final Tuple<Id<Link>, Id<Link>> startLinkIds, boolean isUsingFastCapacityUpdate){
 
 		MatsimRandom.reset(); // resetting the random nos with default seed.
 
-		MergingNetworkAndPlans pseudoInputs = new MergingNetworkAndPlans(this.isUsingFastCapacityUpdate);
+		MergingNetworkAndPlans pseudoInputs = new MergingNetworkAndPlans(isUsingFastCapacityUpdate);
 		pseudoInputs.createNetwork();
 		pseudoInputs.createPopulation(startLinkIds );
 		Scenario sc = pseudoInputs.scenario;

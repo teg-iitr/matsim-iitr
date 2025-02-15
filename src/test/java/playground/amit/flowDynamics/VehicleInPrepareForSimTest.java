@@ -21,11 +21,10 @@ package playground.amit.flowDynamics;
 
 import org.apache.commons.lang.StringUtils;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -55,6 +54,7 @@ import org.matsim.vehicles.VehicleUtils;
 import javax.inject.Inject;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by amit on 28.08.17.
@@ -63,43 +63,31 @@ import java.util.stream.Collectors;
 
 public class VehicleInPrepareForSimTest {
 
-    private final QSimConfigGroup.VehiclesSource vehicleSource;
-    private final boolean modeChoice;
-
     @RegisterExtension
     public MatsimTestUtils helper = new MatsimTestUtils();
 
     private final String transportModes [] = new String [] {"bike","car"};
 
-    public VehicleInPrepareForSimTest(QSimConfigGroup.VehiclesSource vehicleSource, boolean modeChoice) {
-        this.vehicleSource = vehicleSource;
-        this.modeChoice = modeChoice;
-    }
+   public static Stream<Arguments> arguments () {
 
-    @ParameterizedTest
-//            .Parameters(name = "{index}: vehicleSource == {0}; isUsingModeChoice == {1}")
-    @ValueSource(booleans = {true,false})
-    @EnumSource(QSimConfigGroup.VehiclesSource.class)
-    public static Collection<Object[]> parameterObjects () {
-        int nrow = QSimConfigGroup.VehiclesSource.values().length * 2;
-        Object [] [] vehicleSources = new Object [nrow][2];
-        int index = 0;
+        List<Arguments> args = new ArrayList<>();
         for (QSimConfigGroup.VehiclesSource vs : QSimConfigGroup.VehiclesSource.values()) {
-            vehicleSources[index++] = new Object [] {vs, true};
-            vehicleSources[index++] = new Object [] {vs, false};
+            args.add(Arguments.of(vs, true));
+            args.add(Arguments.of(vs, false));
         }
-        return Arrays.asList(vehicleSources);
+        return args.stream() ;
     }
 
     /**
      * test if same vehicle is used over the iterations if mode choice is used or not.
      */
-    @Test
-    public void vehicleTest() {
+    @ParameterizedTest
+    @MethodSource("arguments")
+    public void vehicleTest(QSimConfigGroup.VehiclesSource vehicleSource, boolean modeChoice) {
         Scenario scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 
         createNetwork(scenario);
-        createPlans(scenario);
+        createPlans(scenario, vehicleSource);
 
         Config config = scenario.getConfig();
 
@@ -114,13 +102,13 @@ public class VehicleInPrepareForSimTest {
 
         config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
 
-        config.qsim().setVehiclesSource(this.vehicleSource);
+        config.qsim().setVehiclesSource(vehicleSource);
 
         // reset all mode routing params.
 //        config.routing().getOrCreateModeRoutingParams("xxx").setTeleportedModeFreespeedFactor(1.);
 
         ReplanningConfigGroup.StrategySettings strategySettings = new ReplanningConfigGroup.StrategySettings();
-        if (this.modeChoice) {
+        if (modeChoice) {
             strategySettings.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode);
             config.changeMode().setModes(transportModes);
         } else {
@@ -185,7 +173,7 @@ public class VehicleInPrepareForSimTest {
             List<Vehicle> firstIterationVehicles = vehiclesListIterator.next();
 
             // if using mode choice, different vehicles are created on the first place based on the network modes
-            if (this.vehicleSource.equals(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData) && this.modeChoice ) {
+            if (vehicleSource.equals(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData) && modeChoice ) {
                 Assertions.assertEquals( 2, firstIterationVehicles.size(), MatsimTestUtils.EPSILON, " Number of vehicles for person must be two.");
 
                 Assertions.assertTrue(
@@ -238,7 +226,7 @@ public class VehicleInPrepareForSimTest {
         link3.setAllowedModes(new HashSet<>(Arrays.asList(transportModes)));
     }
 
-    private void createPlans(Scenario scenario){
+    private void createPlans(Scenario scenario, QSimConfigGroup.VehiclesSource vehicleSource){
 
         Population population = scenario.getPopulation();
 
@@ -275,7 +263,7 @@ public class VehicleInPrepareForSimTest {
 
             //adding vehicle type and vehicle to scenario if vehicleSource is not modeVehicleTypesFromVehiclesData
 
-            switch (this.vehicleSource) {
+            switch (vehicleSource) {
                 case defaultVehicle:
                     break;
                 case modeVehicleTypesFromVehiclesData:
