@@ -19,13 +19,15 @@
 
 package playground.amit.emissions.onRoadExposure;
 
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -56,10 +58,10 @@ import java.util.stream.Collectors;
 /**
  * Created by amit on 14.11.17.
  */
-@RunWith(Parameterized.class)
+
 public class OnRoadExposureForMixedTrafficTest {
 
-    @Rule
+    @RegisterExtension
     public final MatsimTestUtils helper = new MatsimTestUtils();
     private static final Logger logger = LogManager.getLogger(OnRoadExposureForMixedTrafficTest.class);
 
@@ -72,7 +74,9 @@ public class OnRoadExposureForMixedTrafficTest {
         logger.info("Each parameter will be used in all the tests i.e. all tests will be run while inclusing and excluding CO2 costs.");
     }
 
-    @Parameterized.Parameters(name = "{index}: vehicleSource == {0};")
+    @ParameterizedTest
+//            .Parameters(name = "{index}: vehicleSource == {0};")
+   @EnumSource(QSimConfigGroup.VehiclesSource.class)
     public static List<Object[]> considerCO2 () {
         Object[] [] considerCO2 = new Object [] [] {
                 //fro 'frommVEhiclesData' vehicle Ids must be provided with person attributes, this vehicle source is not imp. here. Amit Oct'19
@@ -87,7 +91,7 @@ public class OnRoadExposureForMixedTrafficTest {
      *
      * TODO : should include following situation: (a) cold emissions except departure link is thrown at later time but on the departure link until distance travelled is more than 1km.
      */
-    @Ignore
+    @Disabled
     @Test
     public void excludeAgentsLeavingInSameTimeStepTest() {
         EquilTestSetUp equilTestSetUp = new EquilTestSetUp();
@@ -140,7 +144,7 @@ public class OnRoadExposureForMixedTrafficTest {
         	if (totalInhaledMass_manual.get(str) == null) {
         		logger.warn("Skip test for " + str);
         	} else {
-                Assert.assertEquals("Calculation of inhaled mass of "+str+" is wrong.", totalInhaledMass_manual.get(str), totalInhaledMass_sim.get(str), Math.pow(10,-5));
+                Assertions.assertEquals( totalInhaledMass_manual.get(str), totalInhaledMass_sim.get(str), Math.pow(10,-5), "Calculation of inhaled mass of "+str+" is wrong.");
         	}
         }
         totalInhaledMass_sim.entrySet().stream().forEach(e-> System.out.println(e.getKey() + " \t" + e.getValue() ));
@@ -204,7 +208,7 @@ public class OnRoadExposureForMixedTrafficTest {
         sc.getConfig().qsim().setUsePersonIdForMissingVehicleId(true);
 
         sc.getConfig()
-          .plansCalcRoute()
+          .routing()
           .getOrCreateModeRoutingParams(TransportMode.pt)
           .setTeleportedModeFreespeedFactor(1.5);
         sc.getConfig().routing().setNetworkModes(mainModes);
@@ -225,8 +229,8 @@ public class OnRoadExposureForMixedTrafficTest {
                                                                               .getModules()
                                                                               .get(EmissionsConfigGroup.GROUP_NAME));
 //        emissionsConfigGroup.setEmissionEfficiencyFactor(1.0);
-        emissionsConfigGroup.setConsideringCO2Costs(isConsideringCO2Costs);
-        emissionsConfigGroup.setEmissionCostMultiplicationFactor(1.);
+//        emissionsConfigGroup.setConsideringCO2Costs(isConsideringCO2Costs);
+//        emissionsConfigGroup.setEmissionCostMultiplicationFactor(1.);
 
         controler.addOverridingModule(new AbstractModule() {
             @Override
@@ -252,7 +256,7 @@ public class OnRoadExposureForMixedTrafficTest {
 
         Config config = scenario.getConfig();
         EmissionsConfigGroup ecg = new EmissionsConfigGroup();
-        ecg.setEmissionRoadTypeMappingFile(roadTypeMappingFile);
+//        ecg.setEmissionRoadTypeMappingFile(roadTypeMappingFile);
 
         scenario.getConfig().vehicles().setVehiclesFile(emissionVehicleFile);
 

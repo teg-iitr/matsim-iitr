@@ -20,8 +20,9 @@ package playground.amit.flowDynamics;
 
 import java.util.Arrays;
 
-import org.junit.Assert;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -59,11 +60,11 @@ public class MatsimFreeSpeedTravelTimeTest {
 	public void testFreeSpeedTime(){
 		// pass whole (or natural) number as link speed (in m/s), this will return travelTime + 1(matsim sec).
 		double travelTime = runAndGetTravelTime(20); // --> 1000/20 + 1 = 51
-		Assert.assertEquals("Wrong free speed travel time.", 51, travelTime, MatsimTestUtils.EPSILON);
+		Assertions.assertEquals( 51, travelTime, MatsimTestUtils.EPSILON, "Wrong free speed travel time.");
 
 		// now, pass the speed (rational number) in kph 
 		travelTime = runAndGetTravelTime(60/3.6); //--> 1000*3.6/60 = 60
-		Assert.assertEquals("Wrong free speed travel time.", 60, travelTime, MatsimTestUtils.EPSILON);
+		Assertions.assertEquals( 60, travelTime, MatsimTestUtils.EPSILON, "Wrong free speed travel time.");
 		
 		/*
 		 * previously (before Jan'16), the later was returning 61.0 due to java double precision.

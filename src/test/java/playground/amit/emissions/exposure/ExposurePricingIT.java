@@ -19,14 +19,14 @@
  * *********************************************************************** */
 package playground.amit.emissions.exposure;
 
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -42,6 +42,7 @@ import org.matsim.contrib.emissions.EmissionModule;
 import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.groups.ControllerConfigGroup;
+import org.matsim.core.config.groups.ReplanningConfigGroup;
 import org.matsim.core.config.groups.ReplanningConfigGroup.StrategySettings;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
@@ -66,7 +67,7 @@ import java.util.List;
  * @author julia, benjamin, amit
  *
  */
-@RunWith(Parameterized.class)
+
 public class ExposurePricingIT {
 	private Logger logger = LogManager.getLogger(ExposurePricingIT.class);
 
@@ -82,7 +83,7 @@ public class ExposurePricingIT {
 
 	private Integer noOfYCells = 20;
 
-	@Rule
+	@RegisterExtension
 	public MatsimTestUtils helper = new MatsimTestUtils(); 
 
 	private DecimalFormat df = new DecimalFormat("#.###");
@@ -96,7 +97,9 @@ public class ExposurePricingIT {
 		this.noOfTimeBins = noOfTimeBins;
 	}
 
-	@Parameters(name = "{index}: considerCO2 == {0}; noOfTimeBins == {1}")
+	@ParameterizedTest
+//			(name = "{index}: considerCO2 == {0}; noOfTimeBins == {1}")
+	@ValueSource(booleans = {false, true})
 	public static Collection<Object[]> considerCO2 () {
 		Object[][] object = new Object [][] { 
 				{true, 24},
@@ -107,7 +110,7 @@ public class ExposurePricingIT {
 		return Arrays.asList(object);
 	}
 
-	@Ignore
+	@Disabled
 	@Test
 	public void noPricingTest () {
 		logger.info("isConsideringCO2Costs = "+ this.isConsideringCO2Costs);
@@ -136,10 +139,10 @@ public class ExposurePricingIT {
 		// check with the first leg
 		NetworkRoute route = (NetworkRoute) ( (Leg) selectedPlan.getPlanElements().get(3) ).getRoute() ;
 		// Agent should take longer route to avoid exposure toll
-		Assert.assertTrue("Wrong route is selected. Agent should have used route with shorter link (i.e. 39) instead.", route.getLinkIds().contains(Id.create("39", Link.class)));
+		Assertions.assertTrue(route.getLinkIds().contains(Id.create("39", Link.class)),"Wrong route is selected. Agent should have used route with shorter link (i.e. 39) instead.");
 	}
 
-	@Ignore
+	@Disabled
 	@Test
 	public void pricingExposure_ReRouteTest() {
 		logger.info("isConsideringCO2Costs = "+ this.isConsideringCO2Costs);
@@ -201,10 +204,10 @@ public class ExposurePricingIT {
 		// check with the first leg
 		NetworkRoute route = (NetworkRoute) ( (Leg) selectedPlan.getPlanElements().get(3) ).getRoute() ;
 		// Agent should take longer route to avoid exposure toll
-		Assert.assertTrue("Wrong route is selected. Agent should have used route with link 38 (longer) instead.", route.getLinkIds().contains(Id.create("38", Link.class)));
+		Assertions.assertTrue(route.getLinkIds().contains(Id.create("38", Link.class)),"Wrong route is selected. Agent should have used route with link 38 (longer) instead.");
 	}
 	
-	@Ignore
+	@Disabled
 	@Test
 	public void pricingExposure_TollTest() {
 		logger.info("isConsideringCO2Costs = "+ this.isConsideringCO2Costs);
@@ -260,7 +263,7 @@ public class ExposurePricingIT {
 
 		controler.run();
 
-		Assert.assertTrue("Money events are not thrown,check if emission costs are internlized.", personMoneyEventHandler.events.size()>0);
+		Assertions.assertTrue(personMoneyEventHandler.events.size()>0, "Money events are not thrown,check if emission costs are internlized.");
 
 		if (noOfTimeBins == 1) {
 			/*
@@ -286,7 +289,7 @@ public class ExposurePricingIT {
 
 				for (PersonMoneyEvent e : personMoneyEventHandler.events){
 					if (e.getTime() == personMoneyEventHandler.link39LeaveTime) {
-						Assert.assertEquals( "Exposure toll on link 39 from Manual calculation does not match from money event.", df.format( -0.19278 ), df.format( e.getAmount() ) );
+						Assertions.assertEquals(  df.format( -0.19278 ), df.format( e.getAmount() ), "Exposure toll on link 39 from Manual calculation does not match from money event." );
 					}
 				}
 			} else {
@@ -294,7 +297,7 @@ public class ExposurePricingIT {
 				// exposure costs from other pollutants = 0.19278
 				for(PersonMoneyEvent e : personMoneyEventHandler.events) {
 					if(e.getTime() == personMoneyEventHandler.link39LeaveTime) {
-						Assert.assertEquals( "Exposure toll on link 39 from Manual calculation does not match from money event.", df.format( -0.19278 - 0.084623 ), df.format( e.getAmount() ) );
+						Assertions.assertEquals(  df.format( -0.19278 - 0.084623 ), df.format( e.getAmount() ), "Exposure toll on link 39 from Manual calculation does not match from money event." );
 					}
 				}
 			}
@@ -313,7 +316,7 @@ public class ExposurePricingIT {
 
 				for (PersonMoneyEvent e : personMoneyEventHandler.events){
 					if (e.getTime() == personMoneyEventHandler.link39LeaveTime) {
-						Assert.assertEquals( "Exposure toll on link 39 from manual calculation does not match from money event.", df.format( -0.194013 ), df.format( e.getAmount() ) );
+						Assertions.assertEquals(  df.format( -0.194013 ), df.format( e.getAmount() ), "Exposure toll on link 39 from manual calculation does not match from money event." );
 					}
 				}
 			} else {
@@ -321,7 +324,7 @@ public class ExposurePricingIT {
 				// exposure costs from other pollutants = 0.194013
 				for(PersonMoneyEvent e : personMoneyEventHandler.events) {
 					if(e.getTime() == personMoneyEventHandler.link39LeaveTime) {
-						Assert.assertEquals( "Exposure toll on link 39 from Manual calculation does not match from money event.", df.format( -0.194013 - 0.084623 ), df.format( e.getAmount() ) );
+						Assertions.assertEquals(  df.format( -0.194013 - 0.084623 ), df.format( e.getAmount() ), "Exposure toll on link 39 from Manual calculation does not match from money event." );
 					}
 				}
 			}
@@ -356,7 +359,7 @@ public class ExposurePricingIT {
 
 		Config config = sc.getConfig();
 		EmissionsConfigGroup ecg = new EmissionsConfigGroup() ;
-		ecg.setEmissionRoadTypeMappingFile(roadTypeMappingFile);
+//		ecg.setEmissionRoadTypeMappingFile(roadTypeMappingFile);
 		config.vehicles().setVehiclesFile(emissionVehicleFile);
 
 		ecg.setAverageWarmEmissionFactorsFile(averageFleetWarmEmissionFactorsFile);
@@ -366,11 +369,11 @@ public class ExposurePricingIT {
 		ecg.setDetailedVsAverageLookupBehavior(EmissionsConfigGroup.DetailedVsAverageLookupBehavior.onlyTryDetailedElseAbort);
 		ecg.setDetailedWarmEmissionFactorsFile(detailedWarmEmissionFactorsFile);
 		ecg.setDetailedColdEmissionFactorsFile(detailedColdEmissionFactorsFile);
-		ecg.setUsingVehicleTypeIdAsVehicleDescription(true);
+//		ecg.setUsingVehicleTypeIdAsVehicleDescription(true);
 
 //		ecg.setEmissionEfficiencyFactor(1.0);
-		ecg.setConsideringCO2Costs(isConsideringCO2Costs);
-		ecg.setEmissionCostMultiplicationFactor(1.0);
+//		ecg.setConsideringCO2Costs(isConsideringCO2Costs);
+//		ecg.setEmissionCostMultiplicationFactor(1.0);
 
 		config.addModule(ecg);
 
@@ -379,7 +382,7 @@ public class ExposurePricingIT {
 	}
 
 	private void addReRoutingStrategy(Scenario sc) {
-		StrategyConfigGroup scg = sc.getConfig().replanning();
+		ReplanningConfigGroup scg = sc.getConfig().replanning();
 		StrategySettings strategySettingsR = new StrategySettings();
 		strategySettingsR.setStrategyName("ReRoute");
 		strategySettingsR.setWeight(1000);

@@ -20,13 +20,15 @@
 package playground.amit.emissions.flatEmissions;
 
 import com.google.inject.name.Names;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -71,10 +73,10 @@ import java.util.*;
  * @author amit
  */
 
-@RunWith(Parameterized.class)
+
 public class EquilMixedTrafficEmissionIT {
 
-	@Rule
+	@RegisterExtension
 	public final MatsimTestUtils helper = new MatsimTestUtils();
 	private static final Logger logger = LogManager.getLogger(EquilMixedTrafficEmissionIT.class);
 
@@ -92,7 +94,10 @@ public class EquilMixedTrafficEmissionIT {
 		logger.info("Each parameter will be used in all the tests i.e. all tests will be run while inclusing and excluding CO2 costs.");
 	}
 
-	@Parameterized.Parameters(name = "{index}: considerCO2 == {0}; vehicleSource == {1}")
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	@EnumSource(QSimConfigGroup.VehiclesSource.class)
+//			.Parameters(name = "{index}: considerCO2 == {0}; vehicleSource == {1}")
 	public static List<Object[]> considerCO2 () {
 		Object[] [] considerCO2 = new Object [] [] {
 				//for 'fromVehiclesData, vehicle IDs must be added to person attributes Amit Oct'19
@@ -105,7 +110,7 @@ public class EquilMixedTrafficEmissionIT {
 		return Arrays.asList(considerCO2);
 	}
 
-	@Ignore
+	@Disabled
 	@Test
 	public void emissionTollTest() {
 		List<String> mainModes = Arrays.asList("car","bicycle");
@@ -187,8 +192,8 @@ public class EquilMixedTrafficEmissionIT {
 
 		EmissionsConfigGroup emissionsConfigGroup = ( (EmissionsConfigGroup) sc.getConfig().getModules().get(EmissionsConfigGroup.GROUP_NAME) );
 //		emissionsConfigGroup.setEmissionEfficiencyFactor(1.0);
-		emissionsConfigGroup.setConsideringCO2Costs(isConsideringCO2Costs);
-		emissionsConfigGroup.setEmissionCostMultiplicationFactor(1.);
+//		emissionsConfigGroup.setConsideringCO2Costs(isConsideringCO2Costs);
+//		emissionsConfigGroup.setEmissionCostMultiplicationFactor(1.);
 
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
@@ -295,11 +300,11 @@ public class EquilMixedTrafficEmissionIT {
 		}
 
 		if ( isConsideringCO2Costs ) {
-			Assert.assertEquals( "Warm emission toll from emission event and emission cost factors does not match from manual calculation.", df.format( 0.112236043 ), df.format( totalWarmEmissAmount ) );
-			Assert.assertEquals("Warm emission toll from emission event and emission cost factors does not match from money event.",tollFromMoneyEvent, - totalWarmEmissAmount, MatsimTestUtils.EPSILON);
+			Assertions.assertEquals(  df.format( 0.112236043 ), df.format( totalWarmEmissAmount ), "Warm emission toll from emission event and emission cost factors does not match from manual calculation." );
+			Assertions.assertEquals(tollFromMoneyEvent, - totalWarmEmissAmount, MatsimTestUtils.EPSILON, "Warm emission toll from emission event and emission cost factors does not match from money event.");
 		} else {
-			Assert.assertEquals("Warm emission toll from emission event and emission cost factors does not match from manual calculation.", df.format( 0.027613043 ), df.format( totalWarmEmissAmount ) );
-			Assert.assertEquals("Warm emission toll from emission event and emission cost factors does not match from money event.",tollFromMoneyEvent, - totalWarmEmissAmount, MatsimTestUtils.EPSILON);
+			Assertions.assertEquals( df.format( 0.027613043 ), df.format( totalWarmEmissAmount ) , "Warm emission toll from emission event and emission cost factors does not match from manual calculation.");
+			Assertions.assertEquals(tollFromMoneyEvent, - totalWarmEmissAmount, MatsimTestUtils.EPSILON, "Warm emission toll from emission event and emission cost factors does not match from money event.");
 		}
 
 		// now check if car is passing bike
@@ -307,8 +312,8 @@ public class EquilMixedTrafficEmissionIT {
 		Tuple<Double,Double> carEnterLeaveTime = enterLeaveTimeEventHandler.vehicle_link23_enterLeaveTimes.get(Id.createVehicleId(carPersonId));
 		Tuple<Double,Double> bikeEnterLeaveTime = enterLeaveTimeEventHandler.vehicle_link23_enterLeaveTimes.get(Id.createVehicleId(bikeVehicleId));
 
-		Assert.assertTrue("Car should enter after bicycle.",carEnterLeaveTime.getFirst() > bikeEnterLeaveTime.getFirst());
-		Assert.assertTrue("Car should leave before bicycle.",carEnterLeaveTime.getSecond() < bikeEnterLeaveTime.getSecond());
+		Assertions.assertTrue(carEnterLeaveTime.getFirst() > bikeEnterLeaveTime.getFirst(), "Car should enter after bicycle.");
+		Assertions.assertTrue(carEnterLeaveTime.getSecond() < bikeEnterLeaveTime.getSecond(), "Car should leave before bicycle.");
 
 	}
 
@@ -327,7 +332,7 @@ public class EquilMixedTrafficEmissionIT {
 
 		Config config = scenario.getConfig();
 		EmissionsConfigGroup ecg = new EmissionsConfigGroup() ;
-		ecg.setEmissionRoadTypeMappingFile(roadTypeMappingFile);
+//		ecg.setEmissionRoadTypeMappingFile(roadTypeMappingFile);
 
 		scenario.getConfig().vehicles().setVehiclesFile(emissionVehicleFile);
 

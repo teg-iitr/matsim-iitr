@@ -24,8 +24,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -98,21 +99,21 @@ public class CarPassingBusTest {
 		double busEnterTime = lelteh.vehicleEnterLeaveTimes.get(busId).get(linkId).getFirst();
 		double carEnterTime = lelteh.vehicleEnterLeaveTimes.get(carId).get(linkId).getFirst();
 		
-		Assert.assertEquals("Bus should enter before car.", busEnterTime < carEnterTime, true);
+		Assertions.assertEquals( busEnterTime < carEnterTime, true, "Bus should enter before car.");
 		
 		// now check car left before bus
 		
 		double busLeaveTime = lelteh.vehicleEnterLeaveTimes.get(busId).get(linkId).getSecond();
 		double carLeaveTime = lelteh.vehicleEnterLeaveTimes.get(carId).get(linkId).getSecond();
-		
-		Assert.assertEquals("Car should leave before bus.", busLeaveTime > carLeaveTime, true);
+
+		Assertions.assertEquals( busLeaveTime > carLeaveTime, true, "Car should leave before bus.");
 		
 		// now check for travel times
 		double busTravelTime = busLeaveTime - busEnterTime; // should be = 500/5+1 = 101
 		double carTravelTime = carLeaveTime - carEnterTime; // should be = 500/10+1 = 51
-		
-		Assert.assertEquals("Wrong bus travel time", busTravelTime, 101, MatsimTestUtils.EPSILON);
-		Assert.assertEquals("Wrong car travel time", carTravelTime, 51, MatsimTestUtils.EPSILON);
+
+		Assertions.assertEquals( busTravelTime, 101, MatsimTestUtils.EPSILON, "Wrong bus travel time");
+		Assertions.assertEquals( carTravelTime, 51, MatsimTestUtils.EPSILON, "Wrong car travel time");
 	}
 
 	private void prepareConfig() {

@@ -19,12 +19,13 @@
 
 package playground.amit.emissions.flatEmissions;
 
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
@@ -68,17 +69,19 @@ import java.util.List;
  * Created by amit on 22/03/2017.
  */
 
-@RunWith(Parameterized.class)
+
 public class EmissionEventsTest {
 
     private static Logger LOG = LogManager.getLogger(EmissionEventsTest.class);
 
-    @Rule
+    @RegisterExtension
     public MatsimTestUtils helper = new MatsimTestUtils();
 
     private final boolean isWritingEmissionsEvents;
 
-    @Parameterized.Parameters(name = "{index}: isWritingEmissionsEvents == {0}")
+    @ParameterizedTest
+//            .Parameters(name = "{index}: isWritingEmissionsEvents == {0}")
+    @ValueSource(booleans = {true, false})
     public static List<Object> considerCO2 () {
         Object[] isWritingEmissionsEvents = new Object [] {  false,
 //                TODO not sure, why case 'true' is not writing __ANY__ events.
@@ -91,7 +94,7 @@ public class EmissionEventsTest {
         this.isWritingEmissionsEvents = isWritingEmissionsEvents;
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void eventsOfflineTest(){
         String inputEventsFile = helper.getClassInputDirectory()+"/0.events.xml.gz";
@@ -184,7 +187,7 @@ public class EmissionEventsTest {
         }
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void eventsOnlineTest(){
         EquilTestSetUp equilTestSetUp = new EquilTestSetUp();
@@ -285,7 +288,7 @@ public class EmissionEventsTest {
 
         Config config = scenario.getConfig();
         EmissionsConfigGroup ecg = new EmissionsConfigGroup() ;
-        ecg.setEmissionRoadTypeMappingFile(inputFilesDir + "/roadTypeMapping.txt");
+//        ecg.setEmissionRoadTypeMappingFile(inputFilesDir + "/roadTypeMapping.txt");
 
         scenario.getConfig().vehicles().setVehiclesFile(inputFilesDir + "/equil_emissionVehicles_1pct.xml.gz");
 
@@ -299,8 +302,8 @@ public class EmissionEventsTest {
         ecg.setDetailedVsAverageLookupBehavior(EmissionsConfigGroup.DetailedVsAverageLookupBehavior.tryDetailedThenTechnologyAverageThenAverageTable);
         ecg.setDetailedVsAverageLookupBehavior(EmissionsConfigGroup.DetailedVsAverageLookupBehavior.onlyTryDetailedElseAbort);
 //        ecg.setEmissionEfficiencyFactor(1.0);
-        ecg.setConsideringCO2Costs(true);
-        ecg.setEmissionCostMultiplicationFactor(1.0);
+//        ecg.setConsideringCO2Costs(true);
+//        ecg.setEmissionCostMultiplicationFactor(1.0);
 
         ecg.setWritingEmissionsEvents(isWritingEmissionsEvents);
         config.addModule(ecg);

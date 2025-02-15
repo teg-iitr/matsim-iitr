@@ -20,9 +20,10 @@
 package playground.amit;
 
 import com.google.inject.Inject;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
@@ -71,7 +72,7 @@ public class EquilMixedTrafficIT {
 
     private static final URL EQUIL_DIR = ExamplesUtils.getTestScenarioURL("equil-mixedTraffic");
 
-    @Rule
+    @RegisterExtension
     public MatsimTestUtils helper = new MatsimTestUtils();
 
     @Test
@@ -110,8 +111,8 @@ public class EquilMixedTrafficIT {
         Id<Link> link5 = Id.createLinkId(5);
         Id<Link> link22 = Id.createLinkId(22);
 
-        Assert.assertEquals("Wrong travel time of agent 9 on link 5", Math.floor(10000 / 4.17) + 1.0, vehicle2link2leaveTime.get(bikeVeh).get(link5) - vehicle2link2enterTime.get(bikeVeh).get(link5), MatsimTestUtils.EPSILON);
-        Assert.assertEquals("Wrong travel time of agent 2 on link 5", Math.floor(10000 / 16.677) + 1.0, vehicle2link2leaveTime.get(carVeh).get(link5) - vehicle2link2enterTime.get(carVeh).get(link5), MatsimTestUtils.EPSILON);
+        Assertions.assertEquals( Math.floor(10000 / 4.17) + 1.0, vehicle2link2leaveTime.get(bikeVeh).get(link5) - vehicle2link2enterTime.get(bikeVeh).get(link5), MatsimTestUtils.EPSILON, "Wrong travel time of agent 9 on link 5");
+        Assertions.assertEquals( Math.floor(10000 / 16.677) + 1.0, vehicle2link2leaveTime.get(carVeh).get(link5) - vehicle2link2enterTime.get(carVeh).get(link5), MatsimTestUtils.EPSILON, "Wrong travel time of agent 2 on link 5");
 
         Tuple<Double,Double> bikeSpeed = speedEventHandler.mode2minmaxSpeed.get("bicycle");
         Tuple<Double,Double> carSpeed = speedEventHandler.mode2minmaxSpeed.get("car");
@@ -119,11 +120,11 @@ public class EquilMixedTrafficIT {
         VehicleType bicycle = vehs.getVehicleTypes().get(Id.create("bicycle",VehicleType.class));
         VehicleType car = vehs.getVehicleTypes().get(Id.create("car",VehicleType.class));
 
-        Assert.assertTrue("The spped of bike should not be larger than assigned speed. It is "+bikeSpeed.getSecond(), bikeSpeed.getSecond() < bicycle.getMaximumVelocity());
-        Assert.assertTrue("The spped of car should not be larger than assigned speed. It is "+carSpeed.getSecond(), carSpeed.getSecond() < car.getMaximumVelocity());
+        Assertions.assertTrue( bikeSpeed.getSecond() < bicycle.getMaximumVelocity(), "The spped of bike should not be larger than assigned speed. It is "+bikeSpeed.getSecond());
+        Assertions.assertTrue( carSpeed.getSecond() < car.getMaximumVelocity(), "The spped of car should not be larger than assigned speed. It is "+carSpeed.getSecond());
 
-        Assert.assertTrue("The spped of bike should not be less than assigned speed. It is "+bikeSpeed.getFirst(), bikeSpeed.getFirst() > Math.floor(bicycle.getMaximumVelocity()));
-        Assert.assertTrue("The spped of car should not be larger than assigned speed. It is "+carSpeed.getFirst(), carSpeed.getFirst() > Math.floor(car.getMaximumVelocity()));
+        Assertions.assertTrue( bikeSpeed.getFirst() > Math.floor(bicycle.getMaximumVelocity()), "The spped of bike should not be less than assigned speed. It is "+bikeSpeed.getFirst());
+        Assertions.assertTrue( carSpeed.getFirst() > Math.floor(car.getMaximumVelocity()), "The spped of car should not be larger than assigned speed. It is "+carSpeed.getFirst());
     }
 
     /*
@@ -176,11 +177,11 @@ public class EquilMixedTrafficIT {
                 }
             }
             // check
-            Assert.assertFalse("Assign different modes to the legs of person "+ p.getId(), ((Leg)pes.get(1)).getMode().equals(((Leg)pes.get(3)).getMode()));
+            Assertions.assertFalse( ((Leg)pes.get(1)).getMode().equals(((Leg)pes.get(3)).getMode()),"Assign different modes to the legs of person "+ p.getId());
         }
 
         //
-        StrategyConfigGroup.StrategySettings ss = new ReplanningConfigGroup.StrategySettings();
+        ReplanningConfigGroup.StrategySettings ss = new ReplanningConfigGroup.StrategySettings();
         ss.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeSingleTripMode);
         ss.setWeight(0.2);
 
@@ -209,11 +210,11 @@ public class EquilMixedTrafficIT {
         Tuple<Double,Double> bikeSpeed = speedEventHandler.mode2minmaxSpeed.get("bicycle");
         Tuple<Double,Double> carSpeed = speedEventHandler.mode2minmaxSpeed.get("car");
 
-        Assert.assertTrue("The spped of bike should not be larger than assigned speed. It is "+bikeSpeed.getSecond(), bikeSpeed.getSecond() < bicycle.getMaximumVelocity());
-        Assert.assertTrue("The spped of car should not be larger than assigned speed. It is "+carSpeed.getSecond(), carSpeed.getSecond() < car.getMaximumVelocity());
+        Assertions.assertTrue( bikeSpeed.getSecond() < bicycle.getMaximumVelocity(), "The spped of bike should not be larger than assigned speed. It is "+bikeSpeed.getSecond());
+        Assertions.assertTrue( carSpeed.getSecond() < car.getMaximumVelocity(), "The spped of car should not be larger than assigned speed. It is "+carSpeed.getSecond());
 
-        Assert.assertTrue("The spped of bike should not be less than assigned speed. It is "+bikeSpeed.getFirst(), bikeSpeed.getFirst() > Math.floor(bicycle.getMaximumVelocity()));
-        Assert.assertTrue("The spped of car should not be larger than assigned speed. It is "+carSpeed.getFirst(), carSpeed.getFirst() > Math.floor(car.getMaximumVelocity()));
+        Assertions.assertTrue( bikeSpeed.getFirst() > Math.floor(bicycle.getMaximumVelocity()), "The spped of bike should not be less than assigned speed. It is "+bikeSpeed.getFirst());
+        Assertions.assertTrue(carSpeed.getFirst() > Math.floor(car.getMaximumVelocity()), "The spped of car should not be larger than assigned speed. It is "+carSpeed.getFirst());
     }
 
     private static class ModalMaxSpeedEventHandler implements VehicleEntersTrafficEventHandler, LinkEnterEventHandler, LinkLeaveEventHandler, VehicleLeavesTrafficEventHandler {

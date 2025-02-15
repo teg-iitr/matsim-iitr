@@ -20,11 +20,12 @@
 package playground.amit.flowDynamics;
 
 import org.apache.commons.lang.StringUtils;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -59,13 +60,13 @@ import java.util.stream.Collectors;
  * Created by amit on 28.08.17.
  */
 
-@RunWith(Parameterized.class)
+
 public class VehicleInPrepareForSimTest {
 
     private final QSimConfigGroup.VehiclesSource vehicleSource;
     private final boolean modeChoice;
 
-    @Rule
+    @RegisterExtension
     public MatsimTestUtils helper = new MatsimTestUtils();
 
     private final String transportModes [] = new String [] {"bike","car"};
@@ -75,7 +76,10 @@ public class VehicleInPrepareForSimTest {
         this.modeChoice = modeChoice;
     }
 
-    @Parameterized.Parameters(name = "{index}: vehicleSource == {0}; isUsingModeChoice == {1}")
+    @ParameterizedTest
+//            .Parameters(name = "{index}: vehicleSource == {0}; isUsingModeChoice == {1}")
+    @ValueSource(booleans = {true,false})
+    @EnumSource(QSimConfigGroup.VehiclesSource.class)
     public static Collection<Object[]> parameterObjects () {
         int nrow = QSimConfigGroup.VehiclesSource.values().length * 2;
         Object [] [] vehicleSources = new Object [nrow][2];
@@ -115,7 +119,7 @@ public class VehicleInPrepareForSimTest {
         // reset all mode routing params.
 //        config.routing().getOrCreateModeRoutingParams("xxx").setTeleportedModeFreespeedFactor(1.);
 
-        StrategyConfigGroup.StrategySettings strategySettings = new ReplanningConfigGroup.StrategySettings();
+        ReplanningConfigGroup.StrategySettings strategySettings = new ReplanningConfigGroup.StrategySettings();
         if (this.modeChoice) {
             strategySettings.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode);
             config.changeMode().setModes(transportModes);
@@ -182,14 +186,14 @@ public class VehicleInPrepareForSimTest {
 
             // if using mode choice, different vehicles are created on the first place based on the network modes
             if (this.vehicleSource.equals(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData) && this.modeChoice ) {
-                Assert.assertEquals(" Number of vehicles for person must be two.", 2, firstIterationVehicles.size(), MatsimTestUtils.EPSILON);
+                Assertions.assertEquals( 2, firstIterationVehicles.size(), MatsimTestUtils.EPSILON, " Number of vehicles for person must be two.");
 
-                Assert.assertTrue("None of the vehicle id has suffix bike.",
+                Assertions.assertTrue(
                         firstIterationVehicles.stream()
                                               .filter(v -> v.getId().toString().split("_").length>1)
                                               .map(v -> v.getId().toString().split("_")[1])
                                               .collect(Collectors.toList())
-                                              .contains("bike"));
+                                              .contains("bike"), "None of the vehicle id has suffix bike.");
             }
 
             while (vehiclesListIterator.hasNext()) {

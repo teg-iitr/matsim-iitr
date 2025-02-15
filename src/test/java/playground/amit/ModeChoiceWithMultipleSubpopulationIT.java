@@ -17,8 +17,9 @@ package playground.amit;/* *****************************************************
  *                                                                         *
  * *********************************************************************** */
 
-import org.junit.Rule;
-import org.junit.Test;
+import jakarta.inject.Provider;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -44,7 +45,6 @@ import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vehicles.VehicleType;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
@@ -63,7 +63,7 @@ public class ModeChoiceWithMultipleSubpopulationIT {
 	private static final String SUBPOP1_NAME = "lower"; // half of the persons will fall under this group
 	private static final String SUBPOP2_NAME = "upper"; // rest half here.
 
-	@Rule
+	@RegisterExtension
 	public MatsimTestUtils helper = new MatsimTestUtils();
 
 	@Test
@@ -89,7 +89,7 @@ public class ModeChoiceWithMultipleSubpopulationIT {
 
 		// add innovative modules for SUBPOP1_NAME
 		{
-			StrategyConfigGroup.StrategySettings modeChoiceStrategySettings = new ReplanningConfigGroup.StrategySettings() ;
+			ReplanningConfigGroup.StrategySettings modeChoiceStrategySettings = new ReplanningConfigGroup.StrategySettings() ;
 			modeChoiceStrategySettings.setStrategyName(DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode.toString());
 			modeChoiceStrategySettings.setSubpopulation(SUBPOP1_NAME);
 			modeChoiceStrategySettings.setWeight(0.3);
@@ -98,7 +98,7 @@ public class ModeChoiceWithMultipleSubpopulationIT {
 			// a set of modes for first sub population
 			scenario.getConfig().changeMode().setModes(new String[] {"car", "bicycle"} );
 
-			StrategyConfigGroup.StrategySettings changeExpBetaStrategySettings = new ReplanningConfigGroup.StrategySettings();
+			ReplanningConfigGroup.StrategySettings changeExpBetaStrategySettings = new ReplanningConfigGroup.StrategySettings();
 			changeExpBetaStrategySettings.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta.toString());
 			changeExpBetaStrategySettings.setSubpopulation(SUBPOP1_NAME);
 			changeExpBetaStrategySettings.setWeight(0.7);
@@ -108,13 +108,13 @@ public class ModeChoiceWithMultipleSubpopulationIT {
 		// add innovative modules for SUBPOP2_NAME
 		final String CHANGE_TRIP_MODE_FOR_SUBPOP_2 = DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode.toString().concat(SUBPOP2_NAME);
 		{
-			StrategyConfigGroup.StrategySettings modeChoiceStrategySettings = new ReplanningConfigGroup.StrategySettings() ;
+			ReplanningConfigGroup.StrategySettings modeChoiceStrategySettings = new ReplanningConfigGroup.StrategySettings() ;
 			modeChoiceStrategySettings.setStrategyName(CHANGE_TRIP_MODE_FOR_SUBPOP_2); // a different name is must. Amit June'17
 			modeChoiceStrategySettings.setSubpopulation(SUBPOP2_NAME);
 			modeChoiceStrategySettings.setWeight(0.3);
 			scenario.getConfig().replanning().addStrategySettings(modeChoiceStrategySettings);
 
-			StrategyConfigGroup.StrategySettings changeExpBetaStrategySettings = new ReplanningConfigGroup.StrategySettings();
+			ReplanningConfigGroup.StrategySettings changeExpBetaStrategySettings = new ReplanningConfigGroup.StrategySettings();
 			changeExpBetaStrategySettings.setStrategyName(DefaultPlanStrategiesModule.DefaultSelector.ChangeExpBeta.toString());
 			changeExpBetaStrategySettings.setSubpopulation(SUBPOP2_NAME);
 			changeExpBetaStrategySettings.setWeight(0.7);
@@ -131,10 +131,11 @@ public class ModeChoiceWithMultipleSubpopulationIT {
 		controler.addOverridingModule(new AbstractModule() {
 			@Override
 			public void install() {
-				addPlanStrategyBinding(CHANGE_TRIP_MODE_FOR_SUBPOP_2).toProvider(new javax.inject.Provider<PlanStrategy>() {
+				addPlanStrategyBinding(CHANGE_TRIP_MODE_FOR_SUBPOP_2).toProvider(new Provider<PlanStrategy>() {
 					final String[] availableModes = {"car", "motorbike"};
 					@Inject Scenario sc;
-					@Inject Provider<TripRouter> tripRouterProvider ;
+					@jakarta.inject.Inject
+					jakarta.inject.Provider<TripRouter> tripRouterProvider ;
 					@Inject TimeInterpretation timeInterpretation;
 					@Override
 					public PlanStrategy get() {

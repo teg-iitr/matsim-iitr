@@ -29,13 +29,10 @@ import org.matsim.api.core.v01.network.Node;
 import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.ControllerConfigGroup;
+import org.matsim.core.config.groups.*;
 import org.matsim.core.config.groups.ControllerConfigGroup.EventsFileFormat;
-import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.config.groups.ReplanningConfigGroup.StrategySettings;
-import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.config.groups.ScoringConfigGroup.ActivityParams;
-import org.matsim.core.config.groups.VspExperimentalConfigGroup;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -89,7 +86,7 @@ class EquilTestSetUp {
 		pcs.setLateArrival_utils_hr(0.0);
 		pcs.setPerforming_utils_hr(0.96);
 		
-		StrategyConfigGroup scg  = config.replanning();
+		ReplanningConfigGroup scg  = config.replanning();
 
 		StrategySettings strategySettings = new StrategySettings();
 		strategySettings.setStrategyName("ChangeExpBeta");
