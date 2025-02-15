@@ -19,9 +19,9 @@
 
 package playground.amit;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -64,7 +64,7 @@ import java.util.Map;
  */
 public class ModalCountsCadytsIT {
 
-	@Rule
+	@RegisterExtension
 	public MatsimTestUtils utils = new MatsimTestUtils();
 
 	@Test
@@ -144,24 +144,24 @@ public class ModalCountsCadytsIT {
 		controler.run();
 
 		//scenario data  test
-		Assert.assertEquals("Different number of links in network.", scenario.getNetwork().getLinks().size() , 23 );
-		Assert.assertEquals("Different number of nodes in network.", scenario.getNetwork().getNodes().size() , 15 );
+		Assertions.assertEquals( scenario.getNetwork().getLinks().size() , 23, "Different number of links in network.");
+		Assertions.assertEquals( scenario.getNetwork().getNodes().size() , 15 , "Different number of nodes in network.");
 
-		Assert.assertNotNull("Population is null.", scenario.getPopulation());
+		Assertions.assertNotNull(scenario.getPopulation(), "Population is null.");
 
-		Assert.assertEquals("Num. of persons in population is wrong.", scenario.getPopulation().getPersons().size(), 9);
-		Assert.assertEquals("Scale factor is wrong.", scenario.getConfig().counts().getCountsScaleFactor(), 1.0, MatsimTestUtils.EPSILON);
+		Assertions.assertEquals( scenario.getPopulation().getPersons().size(), 9,"Num. of persons in population is wrong.");
+		Assertions.assertEquals( scenario.getConfig().counts().getCountsScaleFactor(), 1.0, MatsimTestUtils.EPSILON, "Scale factor is wrong.");
 
 		//counts
-		Assert.assertEquals("Count file is wrong.", scenario.getConfig().counts().getCountsFileName(), inputDir + "countsCarBike.xml");
+		Assertions.assertEquals( scenario.getConfig().counts().getCountsFileName(), inputDir + "countsCarBike.xml", "Count file is wrong.");
 
 		// check for car
 		String mode = mainModes.get(0);
 		Count<ModalCountsLinkIdentifier> count =  modalLinkCounts.getCount( Id.create( mode.concat(
 				ModalCountsLinkIdentifier.getModeLinkSplitter()).concat("19") , ModalCountsLinkIdentifier.class ) );
-		Assert.assertEquals("CsId is wrong.", count.getCsLabel() , "link_19");
-		Assert.assertEquals("Volume of hour 6 is wrong", count.getVolume(7).getValue(), 5.0 , MatsimTestUtils.EPSILON);
-		Assert.assertEquals("Max count volume is wrong.", count.getMaxVolume().getValue(), 5.0 , MatsimTestUtils.EPSILON);
+		Assertions.assertEquals("link_19", "CsId is wrong.", count.getCsLabel() );
+		Assertions.assertEquals(count.getVolume(7).getValue(), 5.0 , MatsimTestUtils.EPSILON, "Volume of hour 6 is wrong");
+		Assertions.assertEquals( count.getMaxVolume().getValue(), 5.0 , MatsimTestUtils.EPSILON, "Max count volume is wrong.");
 
 		String outCounts = outputDir + "ITERS/it." + lastIteration + "/" + lastIteration + ".multiMode_hourlyCounts.txt";
 		ModalCountsReader reader = new ModalCountsReader(outCounts);
@@ -171,34 +171,34 @@ public class ModalCountsCadytsIT {
 		Id<Link> locId11 = Id.create(11, Link.class);
 		simValues = reader.getSimulatedValues(locId11, mode);
 		realValue = getCountRealValue(modalLinkCounts, locId11, mode, 7); //6-7 am
-		Assert.assertEquals("Volume of hour 6 is wrong", 0.0, simValues[6], MatsimTestUtils.EPSILON);  
-		Assert.assertEquals("Volume of hour 6 is wrong", 0.0, realValue, MatsimTestUtils.EPSILON);
+		Assertions.assertEquals( 0.0, simValues[6], MatsimTestUtils.EPSILON, "Volume of hour 6 is wrong");
+		Assertions.assertEquals( 0.0, realValue, MatsimTestUtils.EPSILON, "Volume of hour 6 is wrong");
 
 		Id<Link> locId12 = Id.create("12", Link.class);
 		simValues = reader.getSimulatedValues(locId12, mode);
 		realValue = getCountRealValue(modalLinkCounts, locId12, mode, 7);
-		Assert.assertEquals("Volume of hour 6 is wrong", 0.0, simValues[6], MatsimTestUtils.EPSILON);
-		Assert.assertEquals("Volume of hour 6 is wrong", 0.0, realValue , MatsimTestUtils.EPSILON);
+		Assertions.assertEquals( 0.0, simValues[6], MatsimTestUtils.EPSILON, "Volume of hour 6 is wrong");
+		Assertions.assertEquals(0.0, realValue , MatsimTestUtils.EPSILON, "Volume of hour 6 is wrong");
 
 		Id<Link> locId19 = Id.create("19", Link.class);
 		simValues = reader.getSimulatedValues(locId19, mode);
-		realValue = getCountRealValue(modalLinkCounts, locId19, mode, 7); 
-		Assert.assertEquals("Volume of hour 6 is wrong", 5.0, simValues[6], MatsimTestUtils.EPSILON); 
-		Assert.assertEquals("Volume of hour 6 is wrong", 5.0, realValue, MatsimTestUtils.EPSILON);
+		realValue = getCountRealValue(modalLinkCounts, locId19, mode, 7);
+		Assertions.assertEquals( 5.0, simValues[6], MatsimTestUtils.EPSILON, "Volume of hour 6 is wrong");
+		Assertions.assertEquals( 5.0, realValue, MatsimTestUtils.EPSILON, "Volume of hour 6 is wrong");
 
 		Id<Link> locId21 = Id.create("21", Link.class);
 		simValues = reader.getSimulatedValues(locId21, mode);
 		realValue = getCountRealValue(modalLinkCounts, locId21, mode, 7);
-		Assert.assertEquals("Volume of hour 6 is wrong", 5.0, simValues[6], MatsimTestUtils.EPSILON);
-		Assert.assertEquals("Volume of hour 6 is wrong", 5.0, realValue, MatsimTestUtils.EPSILON);
+		Assertions.assertEquals( 5.0, simValues[6], MatsimTestUtils.EPSILON, "Volume of hour 6 is wrong");
+		Assertions.assertEquals( 5.0, realValue, MatsimTestUtils.EPSILON, "Volume of hour 6 is wrong");
 
 		// check for bike 
 		mode = mainModes.get(1);
 		count =  modalLinkCounts.getCount( Id.create( mode.concat(ModalCountsLinkIdentifier.getModeLinkSplitter()).concat("11") , ModalCountsLinkIdentifier.class ) );
 		//		Assert.assertEquals("Occupancy counts description is wrong", modalLinkCounts.getDescription(), "counts values for equil net");
-		Assert.assertEquals("CsId is wrong.", count.getCsLabel() , "link_11");
-		Assert.assertEquals("Volume of hour 6 is wrong", count.getVolume(7).getValue(), 4.0 , MatsimTestUtils.EPSILON);
-		Assert.assertEquals("Max count volume is wrong.", count.getMaxVolume().getValue(), 4.0 , MatsimTestUtils.EPSILON);
+		Assertions.assertEquals( count.getCsLabel() , "link_11", "CsId is wrong.");
+		Assertions.assertEquals( count.getVolume(7).getValue(), 4.0 , MatsimTestUtils.EPSILON, "Volume of hour 6 is wrong");
+		Assertions.assertEquals( count.getMaxVolume().getValue(), 4.0 , MatsimTestUtils.EPSILON, "Max count volume is wrong.");
 
 		outCounts = outputDir + "ITERS/it." + lastIteration + "/" + lastIteration + ".multiMode_hourlyCounts.txt";
 		reader = new ModalCountsReader(outCounts);
@@ -206,26 +206,26 @@ public class ModalCountsCadytsIT {
 		locId11 = Id.create(11, Link.class);
 		simValues = reader.getSimulatedValues(locId11, mode);
 		realValue = getCountRealValue(modalLinkCounts, locId11, mode, 7);
-		Assert.assertEquals("Volume of hour 6 is wrong", 4.0, simValues[6], MatsimTestUtils.EPSILON);  
-		Assert.assertEquals("Volume of hour 6 is wrong", 4.0, realValue, MatsimTestUtils.EPSILON);
+		Assertions.assertEquals( 4.0, simValues[6], MatsimTestUtils.EPSILON, "Volume of hour 6 is wrong");
+		Assertions.assertEquals( 4.0, realValue, MatsimTestUtils.EPSILON, "Volume of hour 6 is wrong");
 
 		locId12 = Id.create(12, Link.class);
 		simValues = reader.getSimulatedValues(locId12, mode);
 		realValue = getCountRealValue(modalLinkCounts, locId12, mode, 7);
-		Assert.assertEquals("Volume of hour 6 is wrong", 0.0, simValues[6], MatsimTestUtils.EPSILON);
-		Assert.assertEquals("Volume of hour 6 is wrong", 0.0, realValue , MatsimTestUtils.EPSILON);
+		Assertions.assertEquals(0.0, simValues[6], MatsimTestUtils.EPSILON, "Volume of hour 6 is wrong");
+		Assertions.assertEquals( 0.0, realValue , MatsimTestUtils.EPSILON, "Volume of hour 6 is wrong");
 
 		locId19 = Id.create(19, Link.class);
 		simValues = reader.getSimulatedValues(locId19, mode);
-		realValue = getCountRealValue(modalLinkCounts, locId19, mode, 7); 
-		Assert.assertEquals("Volume of hour 6 is wrong", 0.0, simValues[6], MatsimTestUtils.EPSILON); 
-		Assert.assertEquals("Volume of hour 6 is wrong", 0.0, realValue, MatsimTestUtils.EPSILON);
+		realValue = getCountRealValue(modalLinkCounts, locId19, mode, 7);
+		Assertions.assertEquals( 0.0, simValues[6], MatsimTestUtils.EPSILON, "Volume of hour 6 is wrong");
+		Assertions.assertEquals( 0.0, realValue, MatsimTestUtils.EPSILON, "Volume of hour 6 is wrong");
 
 		locId21 = Id.create(21, Link.class);
 		simValues = reader.getSimulatedValues(locId21, mode);
 		realValue = getCountRealValue(modalLinkCounts, locId21, mode, 8); // bike is slow; will enter link 21 after 7am
-		Assert.assertEquals("Volume of hour 7 is wrong", 4.0, simValues[7], MatsimTestUtils.EPSILON);
-		Assert.assertEquals("Volume of hour 7 is wrong", 4.0, realValue, MatsimTestUtils.EPSILON);
+		Assertions.assertEquals( 4.0, simValues[7], MatsimTestUtils.EPSILON, "Volume of hour 7 is wrong");
+		Assertions.assertEquals( 4.0, realValue, MatsimTestUtils.EPSILON, "Volume of hour 7 is wrong");
 	}
 
 	//--------------------------------------------------------------

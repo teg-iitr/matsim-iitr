@@ -18,9 +18,10 @@
  * *********************************************************************** */
 package playground.amit;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -51,7 +52,8 @@ import java.util.HashSet;
 
 public class NetworkRouteForUncongestedModeTest {
 
-	@Rule public MatsimTestUtils helper = new MatsimTestUtils();
+	@RegisterExtension
+	public MatsimTestUtils helper = new MatsimTestUtils();
 
 	private final static URL EQUIL_NETWORK = IOUtils.extendUrl(ExamplesUtils.getTestScenarioURL("equil"), "network.xml");
 
@@ -82,7 +84,7 @@ public class NetworkRouteForUncongestedModeTest {
 			}
 		});
 		controler.run();
-		Assert.assertTrue(true);
+		Assertions.assertTrue(true);
 	}
 
 	private Scenario createSceanrio () {
