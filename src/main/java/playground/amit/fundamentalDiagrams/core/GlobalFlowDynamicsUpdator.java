@@ -23,7 +23,7 @@ package playground.amit.fundamentalDiagrams.core;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.events.LinkEnterEvent;

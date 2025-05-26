@@ -29,7 +29,7 @@ import org.matsim.api.core.v01.population.*;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.IOUtils;
-import org.opengis.feature.simple.SimpleFeature;
+import org.geotools.api.feature.simple.SimpleFeature;
 import playground.amit.mixedTraffic.patnaIndia.utils.OuterCordonUtils;
 import playground.amit.mixedTraffic.patnaIndia.utils.OuterCordonUtils.PatnaNetworkType;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;

@@ -19,6 +19,7 @@
 
 package playground.amit;
 
+import com.google.inject.Inject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -53,7 +54,6 @@ import playground.vsp.cadyts.multiModeCadyts.ModalCountsLinkIdentifier;
 import playground.vsp.cadyts.multiModeCadyts.ModalCountsReader;
 import playground.vsp.cadyts.multiModeCadyts.MultiModalCountsCadytsModule;
 
-import javax.inject.Inject;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -117,7 +117,8 @@ public class ModalCountsCadytsIT {
 			@Override
 			public void install() {
 				bindScoringFunctionFactory().toInstance(new ScoringFunctionFactory() {
-					@Inject private ScoringParametersForPerson parameters;
+					@Inject
+					private ScoringParametersForPerson parameters;
 					@Inject private Network network;
 					@Inject
 					ModalCountsCadytsContext cadytsContext;

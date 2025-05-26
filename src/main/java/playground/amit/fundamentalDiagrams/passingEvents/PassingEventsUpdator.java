@@ -18,6 +18,7 @@
  * *********************************************************************** */
 package playground.amit.fundamentalDiagrams.passingEvents;
 
+import com.google.inject.Inject;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.events.*;
@@ -32,7 +33,6 @@ import org.matsim.core.utils.io.IOUtils;
 import org.matsim.vehicles.Vehicle;
 import playground.amit.fundamentalDiagrams.core.*;
 
-import javax.inject.Inject;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;

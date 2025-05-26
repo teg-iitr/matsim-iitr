@@ -21,7 +21,8 @@ package playground.amit.utils.networkProcessing;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import org.geotools.feature.simple.SimpleFeatureTypeImpl;
+
+import org.geotools.api.feature.simple.SimpleFeatureType;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -37,7 +38,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
-import org.opengis.feature.simple.SimpleFeature;
+import org.geotools.api.feature.simple.SimpleFeature;
 
 /**
  * @author amit
@@ -60,7 +61,7 @@ public class ShapeFileToMATSimNetworkDelhi {
 
 		for(SimpleFeature sf : features){
 			// reads every feature here (corresponding to every line in attribute table)
-			if(sf.getFeatureType() instanceof SimpleFeatureTypeImpl){
+			if(sf.getFeatureType() instanceof SimpleFeatureType){
 				// create from Node
 				Double fromNodeX=	(Double) sf.getAttribute("fromX");
 				Double fromNodeY = (Double) sf.getAttribute("fromY");

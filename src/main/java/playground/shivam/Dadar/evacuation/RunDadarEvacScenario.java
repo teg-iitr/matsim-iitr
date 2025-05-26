@@ -22,7 +22,7 @@ import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.ShapeFileReader;
-import org.opengis.feature.simple.SimpleFeature;
+import org.geotools.api.feature.simple.SimpleFeature;
 import playground.amit.Dehradun.OD;
 import playground.amit.jaipur.plans.ODMatrixGenerator;
 import playground.amit.utils.geometry.GeometryUtils;

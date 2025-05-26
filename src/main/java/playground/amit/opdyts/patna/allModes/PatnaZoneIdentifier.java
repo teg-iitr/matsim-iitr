@@ -37,7 +37,7 @@ import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
-import org.opengis.feature.simple.SimpleFeature;
+import org.geotools.api.feature.simple.SimpleFeature;
 import playground.amit.analysis.spatial.GeneralGrid;
 import playground.amit.clustering.BoundingBox;
 import playground.amit.clustering.Cluster;

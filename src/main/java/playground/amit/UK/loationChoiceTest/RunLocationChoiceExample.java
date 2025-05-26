@@ -5,7 +5,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.locationchoice.DestinationChoiceConfigGroup;
-import org.matsim.contrib.locationchoice.frozenepsilons.FrozenTastes;
+//import org.matsim.contrib.locationchoice.frozenepsilons.FrozenTastes;
 import org.matsim.contrib.locationchoice.frozenepsilons.FrozenTastesConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -82,7 +82,8 @@ public class RunLocationChoiceExample {
 
 
         ReplanningConfigGroup.StrategySettings stratDest = new ReplanningConfigGroup.StrategySettings();
-        stratDest.setStrategyName(FrozenTastes.LOCATION_CHOICE_PLAN_STRATEGY);
+//        stratDest.setStrategyName(FrozenTastes.LOCATION_CHOICE_PLAN_STRATEGY);
+        stratDest.setStrategyName(FrozenTastesConfigGroup.GROUP_NAME);
         stratDest.setWeight(0.5);
         config.replanning().addStrategySettings(stratDest);
 
@@ -121,10 +122,11 @@ public class RunLocationChoiceExample {
 //            }
 //        });
 
-        FrozenTastes.configure(controler);
-
-        controler.run();
+//        FrozenTastes.configure(controler);
+//        controler.run();
+        throw new RuntimeException("FrozenTastes.configure(controler) is not available in matsim 2025.0");
     }
+
 
 
     private static void addNetworkChangeEvents(Scenario scenario, List<String> linkIds) {

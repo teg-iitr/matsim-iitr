@@ -20,6 +20,7 @@
 package org.matsim.core.mobsim.qsim.qnetsimengine;
 
 
+import jakarta.inject.Inject;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
@@ -31,7 +32,6 @@ import org.matsim.core.mobsim.qsim.interfaces.AgentCounter;
 import org.matsim.core.mobsim.qsim.qnetsimengine.linkspeedcalculator.LinkSpeedCalculator;
 import org.matsim.vis.snapshotwriters.SnapshotLinkWidthCalculator;
 
-import javax.inject.Inject;
 
 import static org.matsim.core.mobsim.qsim.qnetsimengine.AbstractQNetsimEngine.createAgentSnapshotInfoBuilder;
 

@@ -25,7 +25,7 @@ import org.matsim.core.controler.events.ShutdownEvent;
 import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.controler.listener.ShutdownListener;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.Arrays;

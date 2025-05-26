@@ -20,7 +20,7 @@ package playground.amit.utils.networkProcessing;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.geotools.feature.simple.SimpleFeatureTypeImpl;
+import org.geotools.api.feature.simple.SimpleFeatureType;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -36,7 +36,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
-import org.opengis.feature.simple.SimpleFeature;
+import org.geotools.api.feature.simple.SimpleFeature;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -63,7 +63,7 @@ public class EdgeNodeShapesToNetworkIndia {
 		String identifier = "osmid";
 
 		for (SimpleFeature node: features_nodes){
-			if(node.getFeatureType() instanceof SimpleFeatureTypeImpl){
+			if(node.getFeatureType() instanceof SimpleFeatureType){
 				Double fromNodeX=	(Double) node.getAttribute("lon");
 				Double fromNodeY = (Double) node.getAttribute("lat");
 				Coord fromCoord = new Coord(fromNodeX, fromNodeY);
@@ -91,7 +91,7 @@ public class EdgeNodeShapesToNetworkIndia {
 
 		for(SimpleFeature sf : features_links){
 			// reads every feature here (corresponding to every line in attribute table)
-			if(sf.getFeatureType() instanceof SimpleFeatureTypeImpl){
+			if(sf.getFeatureType() instanceof SimpleFeatureType){
 				// get from Node
 				String fromNode= String.valueOf(sf.getAttribute("from"));
 				Id<Node> fNode = osmId2NodeId.get(fromNode);

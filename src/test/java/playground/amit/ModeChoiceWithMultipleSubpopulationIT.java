@@ -17,7 +17,8 @@ package playground.amit;/* *****************************************************
  *                                                                         *
  * *********************************************************************** */
 
-import jakarta.inject.Provider;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.matsim.api.core.v01.Id;
@@ -44,7 +45,6 @@ import org.matsim.examples.ExamplesUtils;
 import org.matsim.testcases.MatsimTestUtils;
 import org.matsim.vehicles.VehicleType;
 
-import javax.inject.Inject;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
@@ -133,7 +133,8 @@ public class ModeChoiceWithMultipleSubpopulationIT {
 			public void install() {
 				addPlanStrategyBinding(CHANGE_TRIP_MODE_FOR_SUBPOP_2).toProvider(new Provider<PlanStrategy>() {
 					final String[] availableModes = {"car", "motorbike"};
-					@Inject Scenario sc;
+					@Inject
+					Scenario sc;
 					@jakarta.inject.Inject
 					jakarta.inject.Provider<TripRouter> tripRouterProvider ;
 					@Inject TimeInterpretation timeInterpretation;

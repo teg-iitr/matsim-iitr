@@ -98,7 +98,7 @@ public class WFHPricing implements ActivityStartEventHandler, ActivityEndEventHa
                 }
                 penatlySum += ps;
             }
-            Event moneyEvent = new PersonMoneyEvent(24.0*3600., personActInfo.personId, penatlySum, TYPE, PARTNER);
+            Event moneyEvent = new PersonMoneyEvent(24.0*3600., personActInfo.personId, penatlySum, TYPE, PARTNER, null);
             events.processEvent(moneyEvent);
         }
     }

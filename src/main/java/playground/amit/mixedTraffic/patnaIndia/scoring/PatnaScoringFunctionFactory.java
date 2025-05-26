@@ -19,6 +19,7 @@
 
 package playground.amit.mixedTraffic.patnaIndia.scoring;
 
+import com.google.inject.Inject;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
@@ -34,7 +35,6 @@ import org.matsim.core.scoring.functions.*;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaPersonFilter;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 
-import javax.inject.Inject;
 
 /**
  * @author amit
@@ -47,7 +47,8 @@ public class PatnaScoringFunctionFactory implements ScoringFunctionFactory{
 	}
 	
 	final ScoringParametersForPerson parameters ;
-	@Inject Network network;
+	@Inject
+	Network network;
 	@Inject Population population;
 	@Inject ScoringConfigGroup planCalcScoreConfigGroup; // to modify the util parameters
 	@Inject ScenarioConfigGroup scenarioConfig;

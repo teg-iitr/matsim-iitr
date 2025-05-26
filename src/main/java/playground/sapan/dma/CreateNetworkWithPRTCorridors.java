@@ -41,9 +41,9 @@ public class CreateNetworkWithPRTCorridors {
     }
 
     public static void main(String[] args) throws IOException {
-        String inputNetworkFile = "scenario/DehradunMetropolitanArea_matsim_network_fromPBF_cleaned_14052025.xml.gz"; // Load the corrected network with bicycle on link
-        String excelFilePath = "scenario/proposed_stops.csv";
-        String outputNetworkFile = "scenario/network_combined.xml";
+        String inputNetworkFile = "./input/haridwarPRT/DehradunMetropolitanArea_matsim_network_fromPBF_cleaned_20092021.xml"; // Load the corrected network with bicycle on link
+        String excelFilePath = "./input/haridwarPRT/proposed_stops.csv";
+        String outputNetworkFile = "./input/haridwarPRT/network_combined.xml";
 
         // Load base network
         Config config = ConfigUtils.createConfig();

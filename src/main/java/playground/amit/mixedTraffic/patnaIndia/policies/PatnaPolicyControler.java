@@ -19,6 +19,7 @@
 
 package playground.amit.mixedTraffic.patnaIndia.policies;
 
+import com.google.inject.Inject;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
@@ -58,7 +59,6 @@ import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTi
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
 import playground.vsp.cadyts.multiModeCadyts.MultiModeCountsControlerListener;
 
-import javax.inject.Inject;
 import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;

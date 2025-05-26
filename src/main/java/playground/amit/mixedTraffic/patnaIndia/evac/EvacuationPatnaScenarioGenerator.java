@@ -51,7 +51,7 @@ import org.matsim.evacuationgui.scenariogenerator.EvacuationNetworkGenerator;
 import org.matsim.evacuationgui.utils.ScenarioCRSTransformation;
 import org.matsim.facilities.FacilitiesUtils;
 import org.matsim.utils.objectattributes.attributable.AttributesImpl;
-import org.opengis.feature.simple.SimpleFeature;
+import org.geotools.api.feature.simple.SimpleFeature;
 import playground.amit.analysis.modalShare.ModalShareFromEvents;
 import playground.amit.analysis.tripTime.ModalTravelTimeAnalyzer;
 import playground.amit.mixedTraffic.patnaIndia.input.others.PatnaVehiclesGenerator;

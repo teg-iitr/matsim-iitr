@@ -34,7 +34,7 @@ import org.matsim.core.events.handler.EventHandler;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.io.IOUtils;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import playground.amit.analysis.congestion.ExperiencedDelayAnalyzer;
 import playground.amit.analysis.emission.EmissionLinkAnalyzer;
 import playground.amit.analysis.spatial.GeneralGrid.GridType;

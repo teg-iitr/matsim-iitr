@@ -19,6 +19,7 @@
 
 package playground.amit.mixedTraffic.snapshot;
 
+import com.google.inject.Inject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
@@ -33,7 +34,6 @@ import org.matsim.vis.snapshotwriters.AgentSnapshotInfo;
 import org.matsim.vis.snapshotwriters.SnapshotWriter;
 import playground.amit.utils.NumberUtils;
 
-import javax.inject.Inject;
 import java.awt.geom.Point2D;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -56,7 +56,7 @@ public class MyPositionSnapShotWriter implements SnapshotWriter {
 
 	public enum Labels { TIME, VEHICLE, LINK_ID, DISTANCE_FROM_FROMNODE, SPEED }
 
-	@Inject 
+	@Inject
 	public MyPositionSnapShotWriter(Scenario scenario) {
 		this.scenario = scenario;
 		String filename = scenario.getConfig().controller().getOutputDirectory()+"/agentPositions.txt";

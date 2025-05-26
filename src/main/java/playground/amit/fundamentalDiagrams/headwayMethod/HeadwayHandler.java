@@ -19,6 +19,7 @@
 
 package playground.amit.fundamentalDiagrams.headwayMethod;
 
+import com.google.inject.Inject;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.LinkEnterEvent;
 import org.matsim.api.core.v01.events.LinkLeaveEvent;
@@ -33,7 +34,6 @@ import org.matsim.vehicles.Vehicles;
 import playground.amit.fundamentalDiagrams.core.*;
 import playground.amit.utils.ListUtils;
 
-import javax.inject.Inject;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;

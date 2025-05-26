@@ -30,7 +30,7 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.events.algorithms.Vehicle2DriverEventHandler;
 import org.matsim.core.utils.gis.ShapeFileReader;
-import org.opengis.feature.simple.SimpleFeature;
+import org.geotools.api.feature.simple.SimpleFeature;
 import playground.amit.munich.utils.MunichPersonFilter;
 import playground.amit.utils.geometry.GeometryUtils;
 import playground.vsp.congestion.events.CongestionEvent;

@@ -32,7 +32,7 @@ import org.matsim.core.mobsim.qsim.qnetsimengine.linkspeedcalculator.LinkSpeedCa
 import org.matsim.vis.snapshotwriters.SnapshotLinkWidthCalculator;
 import playground.shivam.trafficChar.core.TrafficCharConfigGroup;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 

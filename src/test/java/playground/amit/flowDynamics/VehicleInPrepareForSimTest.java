@@ -19,6 +19,7 @@
 
 package playground.amit.flowDynamics;
 
+import com.google.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -51,7 +52,6 @@ import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 
-import javax.inject.Inject;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -137,7 +137,8 @@ public class VehicleInPrepareForSimTest {
         final Map<Id<Person>, Map<Integer, List<Vehicle>>> personId2Iteration2Vehicles = new HashMap<>();
 
         cont.addControlerListener(new BeforeMobsimListener() {
-            @Inject private Scenario injectedScenario;
+            @Inject
+            private Scenario injectedScenario;
             @Override
             public void notifyBeforeMobsim(BeforeMobsimEvent event) {
                 // at this step, vehicles must be available for all persons irrespective of vehicleSource

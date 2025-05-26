@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 import org.apache.commons.dbcp.DelegatingResultSet;
 import org.matsim.api.core.v01.Id;

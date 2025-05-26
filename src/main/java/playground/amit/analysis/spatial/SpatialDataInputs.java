@@ -20,7 +20,7 @@ package playground.amit.analysis.spatial;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
 import playground.amit.analysis.spatial.GeneralGrid.GridType;
 import playground.amit.utils.LoadMyScenarios;
 

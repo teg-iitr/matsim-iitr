@@ -89,7 +89,7 @@ public class DiscountedPTFareHandler implements PersonDepartureEventHandler, Tel
             amount2pay = amount2pay* (1 - 2*discount );
         }
 
-        Event moneyEvent = new PersonMoneyEvent(event.getTime(), event.getPersonId(), amount2pay, "ptFare","operator");
+        Event moneyEvent = new PersonMoneyEvent(event.getTime(), event.getPersonId(), amount2pay, "ptFare","operator",null);
         events.processEvent(moneyEvent);
     }
 

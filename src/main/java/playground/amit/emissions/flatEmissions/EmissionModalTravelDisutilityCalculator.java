@@ -95,7 +95,7 @@ class EmissionModalTravelDisutilityCalculator implements TravelDisutility {
         } else if (v == null){
             switch (this.qSimConfigGroup.getVehiclesSource()){
                 case defaultVehicle:
-                    emissionVehicle = VehicleUtils.getFactory().createVehicle(Id.createVehicleId("defaultVehicle"), VehicleUtils.getDefaultVehicleType());
+                    emissionVehicle = VehicleUtils.getFactory().createVehicle(Id.createVehicleId("defaultVehicle"), VehicleUtils.createDefaultVehicleType());
                     break;
                 case modeVehicleTypesFromVehiclesData:
                     //TODO : this should be fixed in near future when vehicle id generation is moved to PersonPerpareForSim rather than in PopulationAgentSource. Amit May'17

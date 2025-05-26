@@ -31,7 +31,7 @@ import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.IOUtils;
-import org.opengis.feature.simple.SimpleFeature;
+import org.geotools.api.feature.simple.SimpleFeature;
 import playground.amit.mixedTraffic.patnaIndia.input.urban.scenarioSetup.PatnaCalibrationUtils.PatnaDemandLabels;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils.PatnaUrbanActivityTypes;

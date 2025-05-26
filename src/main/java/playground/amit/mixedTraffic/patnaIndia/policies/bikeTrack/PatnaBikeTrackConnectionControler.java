@@ -19,6 +19,7 @@
 
 package playground.amit.mixedTraffic.patnaIndia.policies.bikeTrack;
 
+import com.google.inject.Inject;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Network;
@@ -56,7 +57,6 @@ import playground.vsp.analysis.modules.modalAnalyses.modalShare.ModalShareEventH
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTravelTimeControlerListener;
 import playground.vsp.analysis.modules.modalAnalyses.modalTripTime.ModalTripTravelTimeHandler;
 
-import javax.inject.Inject;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;

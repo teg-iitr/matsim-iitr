@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.geotools.feature.simple.SimpleFeatureTypeImpl;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.MultiLineString;
 import org.matsim.api.core.v01.Coord;
@@ -40,8 +39,7 @@ import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.gis.ShapeFileReader;
-import org.opengis.feature.simple.SimpleFeature;
-
+import org.geotools.api.feature.simple.SimpleFeature;
 import playground.amit.mixedTraffic.patnaIndia.utils.PatnaUtils;
 
 /**
@@ -71,7 +69,7 @@ public class PatnaBikeTrackGenerator {
 		for(SimpleFeature sf : features){
 			// reads every feature here (corresponding to every line in attribute table)
 
-			if(sf.getFeatureType() instanceof SimpleFeatureTypeImpl){
+			if(sf.getFeatureType() != null){
 
 				if( sf.getAttribute("type").equals("platform")) continue;
 

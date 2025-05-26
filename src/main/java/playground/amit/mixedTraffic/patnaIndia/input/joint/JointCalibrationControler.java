@@ -18,6 +18,7 @@
  * *********************************************************************** */
 package playground.amit.mixedTraffic.patnaIndia.input.joint;
 
+import com.google.inject.Inject;
 import org.apache.logging.log4j.LogManager;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
@@ -60,7 +61,6 @@ import playground.vsp.cadyts.multiModeCadyts.ModalCountsCadytsContext;
 import playground.vsp.cadyts.multiModeCadyts.ModalCountsLinkIdentifier;
 import playground.vsp.cadyts.multiModeCadyts.MultiModalCountsCadytsModule;
 
-import javax.inject.Inject;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Map;
