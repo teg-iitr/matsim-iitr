@@ -40,6 +40,16 @@ public class CreateNetworkWithPRTCorridors {
         }
     }
 
+    static class PRTCorridor{
+        String id;
+        List<PRTStop> stopList = new ArrayList<>();
+
+        PRTCorridor(String id){
+            this.id = id;
+        }
+
+    }
+
     public static void main(String[] args) throws IOException {
         String inputNetworkFile = "./input/haridwarPRT/DehradunMetropolitanArea_matsim_network_fromPBF_cleaned_20092021.xml"; // Load the corrected network with bicycle on link
         String excelFilePath = "./input/haridwarPRT/proposed_stops.csv";
