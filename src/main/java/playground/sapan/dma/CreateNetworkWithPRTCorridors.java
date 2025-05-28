@@ -48,6 +48,10 @@ public class CreateNetworkWithPRTCorridors {
             this.id = id;
         }
 
+        Id<Link> startLink;
+        Id<Link> endLink;
+
+        List<Id<Link>> links = new ArrayList<>();
     }
 
     public static void main(String[] args) throws IOException {
