@@ -10,7 +10,9 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
+import org.matsim.vehicles.VehicleCapacity;
 import org.matsim.vehicles.VehicleType;
+import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
 import playground.amit.Dehradun.DehradunUtils;
 
@@ -40,28 +42,10 @@ public class CharDhamInitialPlans {
         Scenario scenario = ScenarioUtils.createScenario(config);
         Population population = scenario.getPopulation();
         PopulationFactory populationFactory = population.getFactory();
-        Vehicles vehicles = scenario.getVehicles();
 
         final String CAR_MODE = "car";
         final String MOTORBIKE_MODE = "motorbike";
 
-        VehicleType car = vehicles.getFactory().createVehicleType(Id.create(DehradunUtils.TravelModesBaseCase2017.car.name(),VehicleType.class));
-        car.setPcuEquivalents(1.0);
-        car.setMaximumVelocity(80/3.6);
-        vehicles.addVehicleType(car);
-
-        VehicleType motorbike = vehicles.getFactory().createVehicleType(Id.create(DehradunUtils.TravelModesBaseCase2017.motorbike.name(),VehicleType.class));
-        motorbike.setPcuEquivalents(0.25);
-        motorbike.setMaximumVelocity(80/3.6);
-        vehicles.addVehicleType(motorbike);
-
-//        VehicleType bus = vehicles.getFactory().createVehicleType(Id.create(DehradunUtils.TravelModesBaseCase2017.bus.name(), VehicleType.class));
-//        bus.setPcuEquivalents(3.0);
-//        bus.setMaximumVelocity(50/3.6);
-//        vehicles.addVehicleType(bus);
-//        VehicleCapacity capacity = bus.getCapacity();
-//        capacity.setSeats(40);
-//        capacity.setStandingRoom(0);
 
         for (int i = 0; i < 10; i++) {
             List<String> dhamSequence;
@@ -80,20 +64,20 @@ public class CharDhamInitialPlans {
                 dhamSequence = List.of("Yamunotri", "Gangotri", "Kedarnath", "Badrinath");
                 primaryMode = MOTORBIKE_MODE;
             } else if (i <= 7) { // Persons 7 and 8
-                personIdString = "DoubleCarDoDham_" + i;
+                personIdString = "DoubleMotorbikeDoDham_" + i;
                 startActivityEndTime = 13.0 * 3600.0; // 1:00 PM
                 dhamSequence = List.of("Kedarnath", "Badrinath");
-                primaryMode = CAR_MODE;
+                primaryMode = MOTORBIKE_MODE;
             } else if (i == 8) { // Person 9
                 personIdString = "SingleMotorbikeEkDham_" + i;
                 startActivityEndTime = 19.0 * 3600.0; // 7:00 PM
                 dhamSequence = List.of("Kedarnath");
                 primaryMode = MOTORBIKE_MODE;
             } else { // Person 10
-                personIdString = "SingleMotorbikeTeenDham_" + i;
+                personIdString = "SingleCarTeenDham_" + i;
                 startActivityEndTime = 22.0 * 3600.0; // 10:00 PM
                 dhamSequence = List.of("Gangotri", "Kedarnath", "Badrinath");
-                primaryMode = MOTORBIKE_MODE;
+                primaryMode = CAR_MODE;
             }
             // Start activity in Haridwar
             Person person = populationFactory.createPerson(Id.createPersonId(personIdString));

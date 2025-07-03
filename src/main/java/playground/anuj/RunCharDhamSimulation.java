@@ -12,6 +12,11 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.misc.Time;
+import org.matsim.vehicles.VehicleCapacity;
+import org.matsim.vehicles.VehicleType;
+import org.matsim.vehicles.VehicleUtils;
+import org.matsim.vehicles.Vehicles;
+import playground.amit.Dehradun.DehradunUtils;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -63,6 +68,27 @@ public class RunCharDhamSimulation {
 
         // Load the scenario first, as we need its network to create the scheme
         Scenario scenario = ScenarioUtils.loadScenario(config);
+        Vehicles vehicles = scenario.getVehicles();
+
+        VehicleType car = VehicleUtils.createVehicleType(Id.create(DehradunUtils.TravelModesBaseCase2017.car.name(),VehicleType.class));
+        car.setPcuEquivalents(1.0);
+        car.setMaximumVelocity(80/3.6);
+        vehicles.addVehicleType(car);
+
+        VehicleType motorbike = VehicleUtils.createVehicleType(Id.create(DehradunUtils.TravelModesBaseCase2017.motorbike.name(),VehicleType.class));
+        motorbike.setPcuEquivalents(0.25);
+        motorbike.setMaximumVelocity(80/3.6);
+        VehicleCapacity capacity = motorbike.getCapacity();
+        capacity.setSeats(2);
+        vehicles.addVehicleType(motorbike);
+
+//        VehicleType bus = vehicles.getFactory().createVehicleType(Id.create(DehradunUtils.TravelModesBaseCase2017.bus.name(), VehicleType.class));
+//        bus.setPcuEquivalents(3.0);
+//        bus.setMaximumVelocity(50/3.6);
+//        vehicles.addVehicleType(bus);
+//        VehicleCapacity capacity = bus.getCapacity();
+//        capacity.setSeats(40);
+//        capacity.setStandingRoom(0);
 
         // Create the road pricing scheme programmatically
         RoadPricingScheme scheme = createNightTimePricingScheme(scenario);
@@ -122,6 +148,7 @@ public class RunCharDhamSimulation {
         Set<String> modes = new HashSet<>(Arrays.asList("car", "motorbike"));
         config.qsim().setMainModes(modes);
         config.routing().setNetworkModes(modes);
+        config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
     }
 
     private static void configureNetworkAndPlans(Config config) {
