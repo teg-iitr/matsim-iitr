@@ -1,5 +1,6 @@
 package playground.anuj;
 
+import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.roadpricing.*;
@@ -31,19 +32,18 @@ public class RunCharDhamSimulation {
     private static final String CONFIG_OUTPUT_FILE = OUTPUT_DIRECTORY + "/config_charDham.xml";
 
     // --- SIMULATION & TOLL PARAMETERS ---
-    private static final int LAST_ITERATION = 15;
+    private static final int LAST_ITERATION = 50;
     private static final double FLOW_CAPACITY_FACTOR = 0.01;
     private static final double STORAGE_CAPACITY_FACTOR = 0.01;
     private static final double SIMULATION_START_TIME_H = 4.0;
-    private static final double NIGHT_START_TIME_H = 22.0; // 10 PM
+    private static final double NIGHT_START_TIME_H = 20; // 10 PM
     private static final double NIGHT_END_TIME_H = 28.0;   // 4 AM (next day, 24 + 4)
     private static final double PROHIBITIVE_TOLL_AMOUNT = 1.0E9; // A very large number
 
     // --- MODE & SCORING PARAMETERS ---
     private static final String CAR_MODE = "car";
     private static final String MOTORBIKE_MODE = "motorbike";
-    private static final double MARGINAL_UTILITY_OF_TRAVELING = -10.0;
-    private static final double LATE_ARRIVAL_UTIL_PER_HOUR = 18.0;
+//    private static final double LATE_ARRIVAL_UTIL_PER_HOUR = -1;
     private static final double TOLL_DISUTILITY_PER_UNIT = -1.0;
 
     public static void main(String[] args) {
@@ -88,7 +88,13 @@ public class RunCharDhamSimulation {
         RoadPricingUtils.setName( scheme, "NightTravelRestriction");
         RoadPricingUtils.setType(scheme, RoadPricingScheme.TOLL_TYPE_LINK);
         RoadPricingUtils.setDescription(scheme, "A prohibitive toll on all links from 10 PM to 4 AM.");
-
+        for (int i = 1; i < 4; i++) {
+            for (Id<Link> linkId : scenario.getNetwork().getLinks().keySet()) {
+                RoadPricingUtils.addLinkSpecificCost(scheme, linkId, Time.parseTime(String.valueOf((NIGHT_START_TIME_H + 24*i) * 3600)),
+                        Time.parseTime(String.valueOf((NIGHT_END_TIME_H + 24*i) * 3600)),
+                        PROHIBITIVE_TOLL_AMOUNT);
+            }
+        }
         // As seen in the decompiled code, create a general cost for a time window.
         // This will apply to all links that are part of the scheme.
         RoadPricingUtils.createAndAddGeneralCost(scheme,
@@ -132,17 +138,18 @@ public class RunCharDhamSimulation {
     }
 
     private static void configureScoring(Config config) {
-        config.scoring().setLateArrival_utils_hr(LATE_ARRIVAL_UTIL_PER_HOUR);
+//        config.scoring().setLateArrival_utils_hr(LATE_ARRIVAL_UTIL_PER_HOUR);
         config.scoring().setWriteExperiencedPlans(true);
 
         ScoringConfigGroup.ModeParams carParams = new ScoringConfigGroup.ModeParams(CAR_MODE);
-        carParams.setMarginalUtilityOfTraveling(MARGINAL_UTILITY_OF_TRAVELING);
-        carParams.setMonetaryDistanceRate(TOLL_DISUTILITY_PER_UNIT);
+        carParams.setConstant(0.);
+        carParams.setMarginalUtilityOfTraveling(-0.64);
+        carParams.setMonetaryDistanceRate(-3.7*Math.pow(10, -5));
         config.scoring().addModeParams(carParams);
 
         ScoringConfigGroup.ModeParams motorbikeParams = new ScoringConfigGroup.ModeParams(MOTORBIKE_MODE);
-        motorbikeParams.setMarginalUtilityOfTraveling(MARGINAL_UTILITY_OF_TRAVELING);
-        motorbikeParams.setMonetaryDistanceRate(TOLL_DISUTILITY_PER_UNIT);
+        motorbikeParams.setMarginalUtilityOfTraveling(-0.18);
+        motorbikeParams.setMonetaryDistanceRate(-1.6*Math.pow(10, -5));
         config.scoring().addModeParams(motorbikeParams);
 
         addActivityParams(config, "Haridwar", 12 * 3600.0, 0, 0); // Open 24h
@@ -161,8 +168,8 @@ public class RunCharDhamSimulation {
 
     private static void configureReplanning(Config config) {
         addStrategy(config, "ReRoute", 0.15);
-        addStrategy(config, "ChangeExpBeta", 0.7);
-        addStrategy(config, "TimeAllocationMutator", 0.15);
+        addStrategy(config, "ChangeExpBeta", 0.15);
+        addStrategy(config, "TimeAllocationMutator", 0.7);
         config.timeAllocationMutator().setMutationRange(7200.0);
         config.timeAllocationMutator().setAffectingDuration(true);
         config.replanning().setFractionOfIterationsToDisableInnovation(0.9);

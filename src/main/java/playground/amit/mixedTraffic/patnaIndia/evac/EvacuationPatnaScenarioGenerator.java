@@ -47,8 +47,8 @@ import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
-import org.matsim.evacuationgui.scenariogenerator.EvacuationNetworkGenerator;
-import org.matsim.evacuationgui.utils.ScenarioCRSTransformation;
+//import org.matsim.evacuationgui.scenariogenerator.EvacuationNetworkGenerator;
+//import org.matsim.evacuationgui.utils.ScenarioCRSTransformation;
 import org.matsim.facilities.FacilitiesUtils;
 import org.matsim.utils.objectattributes.attributable.AttributesImpl;
 import org.geotools.api.feature.simple.SimpleFeature;
@@ -114,7 +114,7 @@ public class EvacuationPatnaScenarioGenerator {
 
 
         config.global().setCoordinateSystem("EPSG:7759");
-        ScenarioCRSTransformation.transform(this.scenario, "EPSG:7759");
+//        ScenarioCRSTransformation.transform(this.scenario, "EPSG:7759");
         config.travelTimeCalculator().setTraveltimeBinSize(900);
 
         config.qsim().setSnapshotPeriod(5 * 60);
@@ -230,8 +230,8 @@ public class EvacuationPatnaScenarioGenerator {
         // will create a network connecting with safe node.
         // Amit, I added this cast to prevent compilation errors.
         // Preferably, evacuationgui needs to be adapted to the more recent version of geotools. michal mar'19
-        EvacuationNetworkGenerator net = new EvacuationNetworkGenerator(sc, evavcuationArea, safeLinkId);
-        net.run();
+//        EvacuationNetworkGenerator net = new EvacuationNetworkGenerator(sc, evavcuationArea, safeLinkId);
+//        net.run();
 
         //since the original network is multi-mode, the new links should also allow all modes
         for (Link l : sc.getNetwork().getLinks().values()) {

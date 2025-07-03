@@ -127,7 +127,6 @@ public class CharDhamInitialPlans {
                     addLeg(populationFactory, plan, primaryMode); // Sonprayag to Gaurikund by local taxi
                     addActivityWithDuration(populationFactory, plan, "visit-Gaurikund", location2Coord.get("Gaurikund"), SHORT_REST_STOP_DURATION); // Short stop to start trek
                     addLeg(populationFactory, plan, TransportMode.walk);
-
                     addActivityWithDuration(populationFactory, plan, "visit-Kedarnath", location2Coord.get("Kedarnath"), DHAM_VISIT_DURATION);
                 } else if (dham.equals("Badrinath")) {
                     addLeg(populationFactory, plan, primaryMode);
