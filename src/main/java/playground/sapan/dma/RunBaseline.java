@@ -26,12 +26,12 @@ public class RunBaseline {
         config.addCoreModules();
 
         config.controller().setOverwriteFileSetting( OverwriteFileSetting.deleteDirectoryIfExists );
-        config.controller().setOutputDirectory("./output/haridwarPRT/output/");
+        config.controller().setOutputDirectory("output/haridwarPRT/output/");
         config.controller().setLastIteration(10);
-        config.network().setInputFile("./input/haridwarPRT/Haridwar-PRT-Network.xml.gz");
+        config.network().setInputFile("scenario/haridwarPRT/Haridwar-PRT-Network.xml.gz");
         config.transit().setUseTransit(true);
-        config.transit().setTransitScheduleFile("./input/haridwarPRT/Haridwar-PRT-TransitSchedule.xml.gz");
-        config.transit().setVehiclesFile("./input/haridwarPRT/Haridwar-PRT-TransitVehicles.xml.gz");
+        config.transit().setTransitScheduleFile("scenario/haridwarPRT/Haridwar-PRT-TransitSchedule.xml.gz");
+        config.transit().setVehiclesFile("scenario/haridwarPRT/Haridwar-PRT-TransitVehicles.xml.gz");
         config.qsim().setMainModes(Set.of(PRTScheduleGenerator.mode));
         config.qsim().setEndTime(24*3600.);
         config.routing().setNetworkModes(Set.of(PRTScheduleGenerator.mode));

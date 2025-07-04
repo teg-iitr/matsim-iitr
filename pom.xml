@@ -256,6 +256,11 @@
 			<version>18.0</version>
 		</dependency>-->
 		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>1.10.0</version>
+		</dependency>
+		<dependency>
 			<groupId>se.walkercrou</groupId>
 			<artifactId>google-places-api-java</artifactId>
 			<version>2.1.2</version>
@@ -428,6 +433,16 @@
 				<version>2.2</version>
 				<type>jar</type>
 				<scope>compile</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>2.13.0</version> <!-- or 2.12.0 or above -->
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-csv</artifactId>
+				<version>1.11.0</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-io</groupId>

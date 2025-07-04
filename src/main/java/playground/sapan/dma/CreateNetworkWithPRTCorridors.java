@@ -51,7 +51,11 @@ public class CreateNetworkWithPRTCorridors {
         Id<Link> startLink;
         Id<Link> endLink;
 
+        Id<Link> reverseStartLink;
+        Id<Link> reverseEndLink;
+
         List<Id<Link>> links = new ArrayList<>();
+        List<Id<Link>> reverseLinks = new ArrayList<>();
     }
 
     public static void main(String[] args) throws IOException {
