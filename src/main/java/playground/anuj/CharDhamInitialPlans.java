@@ -25,9 +25,9 @@ public class CharDhamInitialPlans {
     public static final String importantLocationsFile = "input/anuj/UKCharDhamPrimeLocations.txt";
     public static final String outputPlansFile = "output/plan_charDham.xml";
     private final Map<String, Coord> location2Coord = new HashMap<>();
-    private static final double SHORT_REST_STOP_DURATION = 1.5 * 3600.0; // 1.5 hours for a meal/rest
-    private static final double DHAM_VISIT_DURATION = 3.0 * 3600.0;       // 3 hours for darshan/visit
-    private static final double OVERNIGHT_STAY_DURATION = 12.0 * 3600.0;  // 12 hours for an overnight halt
+    private static final double REST_STOP_DURATION = 2.0 * 3600.0;     // 2 hours for a chosen rest stop
+    private static final double DHAM_VISIT_DURATION = 6.0 * 3600.0;      // 3 hours for darshan/visit
+    private static final double OVERNIGHT_STAY_DURATION = 12.0 * 3600.0; // 12 hours for an overnight halt
 
     public static void main(String[] args) {
         new CharDhamInitialPlans().run();
@@ -88,33 +88,35 @@ public class CharDhamInitialPlans {
 
             // Add dham visits based on sequence
             for (String dham : dhamSequence) {
+                addLeg(populationFactory, plan, primaryMode);
+                addLocationChoiceActivity(populationFactory, plan, "rest", location2Coord.get("Haridwar"), REST_STOP_DURATION);
                 if (dham.equals("Yamunotri")) {
                     addLeg(populationFactory, plan, primaryMode);
                     // Stop at Barkot for a meal before proceeding.
-                    addActivityWithDuration(populationFactory, plan, "visit-Barkot", location2Coord.get("Barkot"), SHORT_REST_STOP_DURATION);
+                    addActivityWithDuration(populationFactory, plan, "visit-Barkot", location2Coord.get("Barkot"), REST_STOP_DURATION);
                     addLeg(populationFactory, plan, primaryMode);
                     // Visit Yamunotri itself.
                     addActivityWithDuration(populationFactory, plan, "visit-Yamunotri", location2Coord.get("Yamunotri"), DHAM_VISIT_DURATION);
                 } else if (dham.equals("Gangotri")) {
                     addLeg(populationFactory, plan, primaryMode);
                     // Stop at Uttarkashi for a rest.
-                    addActivityWithDuration(populationFactory, plan, "visit-Uttarkashi", location2Coord.get("Uttarkashi"), SHORT_REST_STOP_DURATION);
+                    addActivityWithDuration(populationFactory, plan, "visit-Uttarkashi", location2Coord.get("Uttarkashi"), REST_STOP_DURATION);
                     addLeg(populationFactory, plan, primaryMode);
                     // Visit Gangotri.
                     addActivityWithDuration(populationFactory, plan, "visit-Gangotri", location2Coord.get("Gangotri"), DHAM_VISIT_DURATION);
                 } else if (dham.equals("Kedarnath")) {
                     addLeg(populationFactory, plan, primaryMode);
-                    addActivityWithDuration(populationFactory, plan, "visit-Srinagar", location2Coord.get("Srinagar"), SHORT_REST_STOP_DURATION);
+                    addActivityWithDuration(populationFactory, plan, "visit-Srinagar", location2Coord.get("Srinagar"), REST_STOP_DURATION);
                     addLeg(populationFactory, plan, primaryMode);
                     // Overnight halt at Sonprayag before the trek.
                     addActivityWithDuration(populationFactory, plan, "visit-Sonprayag", location2Coord.get("Sonprayag"), OVERNIGHT_STAY_DURATION);
                     addLeg(populationFactory, plan, primaryMode); // Sonprayag to Gaurikund by local taxi
-                    addActivityWithDuration(populationFactory, plan, "visit-Gaurikund", location2Coord.get("Gaurikund"), SHORT_REST_STOP_DURATION); // Short stop to start trek
+                    addActivityWithDuration(populationFactory, plan, "visit-Gaurikund", location2Coord.get("Gaurikund"), REST_STOP_DURATION); // Short stop to start trek
                     addLeg(populationFactory, plan, TransportMode.walk);
                     addActivityWithDuration(populationFactory, plan, "visit-Kedarnath", location2Coord.get("Kedarnath"), DHAM_VISIT_DURATION);
                 } else if (dham.equals("Badrinath")) {
                     addLeg(populationFactory, plan, primaryMode);
-                    addActivityWithDuration(populationFactory, plan, "visit-Joshimath", location2Coord.get("Joshimath"), SHORT_REST_STOP_DURATION);
+                    addActivityWithDuration(populationFactory, plan, "visit-Joshimath", location2Coord.get("Joshimath"), REST_STOP_DURATION);
                     addLeg(populationFactory, plan, primaryMode);
                     // Visit Badrinath.
                     addActivityWithDuration(populationFactory, plan, "visit-Badrinath", location2Coord.get("Badrinath"), DHAM_VISIT_DURATION);
@@ -131,6 +133,13 @@ public class CharDhamInitialPlans {
 
         // Write population to output file
         new PopulationWriter(population).write(outputPlansFile);
+    }
+
+    private void addLocationChoiceActivity(PopulationFactory factory, Plan plan, String type, Coord coord, double durationInSeconds) {
+        // null coordinate signals to MATSim that a location needs to be chosen
+        Activity activity = factory.createActivityFromCoord(type, coord);
+        activity.setMaximumDuration(durationInSeconds);
+        plan.addActivity(activity);
     }
 
     private void storeLocations() {

@@ -1,18 +1,27 @@
 package playground.anuj;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.locationchoice.DestinationChoiceConfigGroup;
+import org.matsim.contrib.locationchoice.frozenepsilons.FrozenTastesConfigGroup;
+import org.matsim.contrib.locationchoice.timegeography.LocationChoicePlanStrategy;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
 import org.matsim.core.config.groups.*;
+import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.NetworkChangeEvent;
+import org.matsim.core.replanning.PlanStrategy;
+import org.matsim.core.router.TripRouter;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.timing.TimeInterpretation;
 import org.matsim.vehicles.VehicleCapacity;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
@@ -36,17 +45,19 @@ public class RunCharDhamSimulation {
     // --- FILE PATHS (using the original network file) ---
     private static final String NETWORK_FILE = "output/network_charDham.xml.gz";
     private static final String PLANS_FILE = "output/plan_charDham.xml";
+    private static final String FACILITIES_FILE = "output/facilities_charDham.xml";
     private static final String OUTPUT_DIRECTORY = "output/charDham/";
     private static final String CONFIG_OUTPUT_FILE = OUTPUT_DIRECTORY + "/config_charDham.xml";
     private static final String TIME_VARIANT_LINKS_FILE = "input/timeVariant_links.csv";
 
     // --- SIMULATION PARAMETERS ---
-    private static final int LAST_ITERATION = 10;
-    private static final double FLOW_CAPACITY_FACTOR = 1;
-    private static final double STORAGE_CAPACITY_FACTOR = 1;
+    private static final int LAST_ITERATION = 50;
+    private static final double FLOW_CAPACITY_FACTOR = 1.0;
+    private static final double STORAGE_CAPACITY_FACTOR = 1.0;
     private static final double SIMULATION_START_TIME_H = 4.0;
     private static final double TEMPLE_OPENING_TIME_H = 5.0;  // 5 AM
     private static final double TEMPLE_CLOSING_TIME_H = 16.0; // 4 PM
+    private static final double REST_STOP_TYPICAL_DURATION_S = 2.0 * 3600.0; // 2 hours
 
     // --- MODE & SCORING PARAMETERS ---
     private static final String CAR_MODE = "car";
@@ -57,6 +68,7 @@ public class RunCharDhamSimulation {
 
         configureController(config);
         configureNetworkAndPlans(config);
+        configureLocationChoice(config);
         configureQSim(config);
         configureScoring(config);
         configureReplanning(config);
@@ -84,7 +96,41 @@ public class RunCharDhamSimulation {
 
         // Set up and run the controller
         Controler controler = new Controler(scenario);
+        controler.addOverridingModule(new AbstractModule() {
+            @Override
+            public void install() {
+                final Provider<TripRouter> tripRouterProvider = binder().getProvider(TripRouter.class);
+                addPlanStrategyBinding(DestinationChoiceConfigGroup.GROUP_NAME).toProvider(new jakarta.inject.Provider<PlanStrategy>() {
+                    @Inject
+                    TimeInterpretation timeInterpretation;
+
+                    @Override
+                    public PlanStrategy get() {
+                        return new LocationChoicePlanStrategy(scenario, tripRouterProvider, timeInterpretation);
+                    }
+                });
+            }
+        });
+        // (thi
         controler.run();
+    }
+
+    /**
+     * Configures the LocationChoice module (FrozenTastes implementation).
+     */
+    private static void configureLocationChoice(Config config) {
+        // Enable the base destination choice module
+        DestinationChoiceConfigGroup dcConfig = ConfigUtils.addOrGetModule(config, DestinationChoiceConfigGroup.class);
+        dcConfig.setAlgorithm(DestinationChoiceConfigGroup.Algotype.random); // Use random choice from the choice set
+        // Set the activity type for which location choice should be performed
+        dcConfig.setFlexibleTypes("rest");
+        dcConfig.setPlanSelector("ChangeExpBeta");
+
+        // Configure the FrozenTastes extension
+        FrozenTastesConfigGroup ftConfig = ConfigUtils.addOrGetModule(config, FrozenTastesConfigGroup.class);
+        ftConfig.setFlexibleTypes("rest");
+        ftConfig.setEpsilonScaleFactors("100.0"); // Higher value encourages more exploration
+        ftConfig.setDestinationSamplePercent(100.0); // Consider all available facilities
     }
 
     private static Set<Id<Link>> readLinkIdsFromCsv(String filePath) {
@@ -191,6 +237,7 @@ public class RunCharDhamSimulation {
     private static void configureNetworkAndPlans(Config config) {
         config.network().setInputFile(NETWORK_FILE);
         config.plans().setInputFile(PLANS_FILE);
+        config.facilities().setInputFile(FACILITIES_FILE);
     }
 
     private static void configureQSim(Config config) {
@@ -206,6 +253,8 @@ public class RunCharDhamSimulation {
         config.scoring().setWriteExperiencedPlans(true);
         config.scoring().setLearningRate(1.0);
         config.scoring().setBrainExpBeta(2.0);
+
+        addActivityParams(config, "rest", REST_STOP_TYPICAL_DURATION_S, 0, 0);
 
         ScoringConfigGroup.ModeParams carParams = new ScoringConfigGroup.ModeParams(CAR_MODE);
 //        carParams.setConstant(0.);
@@ -237,14 +286,24 @@ public class RunCharDhamSimulation {
         addActivityParams(config, "visit-Badrinath", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s);
     }
 
+    /**
+     * Rewrites the replanning strategy to use the required Location Choice strategy.
+     */
     private static void configureReplanning(Config config) {
-        addStrategy(config, "ReRoute", 0.15);
-        addStrategy(config, "ChangeExpBeta", 0.15);
-        addStrategy(config, "TimeAllocationMutator", 0.7);
+        config.replanning().clearStrategySettings(); // Clear existing strategies first
+
+        // The main strategy for performing location choice
+        ReplanningConfigGroup.StrategySettings lcStrategy = new ReplanningConfigGroup.StrategySettings();
+        lcStrategy.setStrategyName(DestinationChoiceConfigGroup.GROUP_NAME);
+        lcStrategy.setWeight(0.8); // High weight to ensure location choice is explored
+        config.replanning().addStrategySettings(lcStrategy);
+
+        addStrategy(config, "TimeAllocationMutator", 0.5);
         config.timeAllocationMutator().setMutationRange(7200.0);
         config.timeAllocationMutator().setAffectingDuration(true);
         config.timeAllocationMutator().setMutationRangeStep(60 * 5);
-        config.replanning().setFractionOfIterationsToDisableInnovation(0.9);
+
+        config.replanning().setFractionOfIterationsToDisableInnovation(0.8);
     }
 
     private static void addActivityParams(Config config, String activityType, double typicalDuration, double openingTime, double closingTime) {
