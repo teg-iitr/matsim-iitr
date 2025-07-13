@@ -47,37 +47,27 @@ public class CharDhamInitialPlans {
         final String MOTORBIKE_MODE = "motorbike";
 
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 1; i <= 10; i++) {
             List<String> dhamSequence;
             String primaryMode;
             String personIdString;
             double startActivityEndTime;
 
-            if (i < 5) { // Persons 1 to 5
-                personIdString = "GroupOf5CarCharDham_" + i;
+            if (i <= 5) { // Persons 1 to 5
+                personIdString = "CarCharDham_" + i;
                 startActivityEndTime = 8.0 * 3600.0; // 8:00 AM
                 dhamSequence = List.of("Yamunotri", "Gangotri", "Kedarnath", "Badrinath");
                 primaryMode = CAR_MODE;
-            } else if (i == 5) { // Person 6
-                personIdString = "SingleMotorbikeCharDham_" + i;
-                startActivityEndTime = 10.0 * 3600.0; // 10:00 AM
-                dhamSequence = List.of("Yamunotri", "Gangotri", "Kedarnath", "Badrinath");
-                primaryMode = MOTORBIKE_MODE;
-            } else if (i <= 7) { // Persons 7 and 8
-                personIdString = "DoubleMotorbikeDoDham_" + i;
-                startActivityEndTime = 13.0 * 3600.0; // 1:00 PM
+            } else if (i <= 9) { // Person 6 to 9
+                personIdString = "CarDoDham_" + i;
+                startActivityEndTime = 16.0 * 3600.0; // 10:00 AM
                 dhamSequence = List.of("Kedarnath", "Badrinath");
-                primaryMode = MOTORBIKE_MODE;
-            } else if (i == 8) { // Person 9
-                personIdString = "SingleMotorbikeEkDham_" + i;
-                startActivityEndTime = 19.0 * 3600.0; // 7:00 PM
-                dhamSequence = List.of("Kedarnath");
-                primaryMode = MOTORBIKE_MODE;
+                primaryMode = CAR_MODE;
             } else { // Person 10
-                personIdString = "SingleCarTeenDham_" + i;
+                personIdString = "MotorbikeTeenDham_" + i;
                 startActivityEndTime = 22.0 * 3600.0; // 10:00 PM
                 dhamSequence = List.of("Gangotri", "Kedarnath", "Badrinath");
-                primaryMode = CAR_MODE;
+                primaryMode = MOTORBIKE_MODE;
             }
             // Start activity in Haridwar
             Person person = populationFactory.createPerson(Id.createPersonId(personIdString));

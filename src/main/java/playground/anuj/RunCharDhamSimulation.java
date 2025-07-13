@@ -19,6 +19,7 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.NetworkChangeEvent;
 import org.matsim.core.replanning.PlanStrategy;
+import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.timing.TimeInterpretation;
@@ -26,7 +27,6 @@ import org.matsim.vehicles.VehicleCapacity;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
-import playground.amit.Dehradun.DehradunUtils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -60,8 +60,8 @@ public class RunCharDhamSimulation {
     private static final double REST_STOP_TYPICAL_DURATION_S = 2.0 * 3600.0; // 2 hours
 
     // --- MODE & SCORING PARAMETERS ---
-    private static final String CAR_MODE = "car";
-    private static final String MOTORBIKE_MODE = "motorbike";
+    static final String CAR_MODE = "car";
+    static final String MOTORBIKE_MODE = "motorbike";
 
     public static void main(String[] args) {
         Config config = ConfigUtils.createConfig();
@@ -79,12 +79,16 @@ public class RunCharDhamSimulation {
         Scenario scenario = ScenarioUtils.loadScenario(config);
         Vehicles vehicles = scenario.getVehicles();
 
-        VehicleType car = VehicleUtils.createVehicleType(Id.create(DehradunUtils.TravelModesBaseCase2017.car.name(), VehicleType.class));
+        scenario.getPopulation().getPersons().values().forEach(p -> p.getAttributes().putAttribute("rest", 100.0));
+
+        VehicleType car = VehicleUtils.createVehicleType(Id.create(CAR_MODE, VehicleType.class));
         car.setPcuEquivalents(1.0);
         car.setMaximumVelocity(80 / 3.6);
+        VehicleCapacity bigCarCapacity = car.getCapacity();
+        bigCarCapacity.setSeats(5);
         vehicles.addVehicleType(car);
 
-        VehicleType motorbike = VehicleUtils.createVehicleType(Id.create(DehradunUtils.TravelModesBaseCase2017.motorbike.name(), VehicleType.class));
+        VehicleType motorbike = VehicleUtils.createVehicleType(Id.create(MOTORBIKE_MODE, VehicleType.class));
         motorbike.setPcuEquivalents(0.25);
         motorbike.setMaximumVelocity(80 / 3.6);
         VehicleCapacity motorbikeCapacity = motorbike.getCapacity();
@@ -111,7 +115,7 @@ public class RunCharDhamSimulation {
                 });
             }
         });
-        // (thi
+
         controler.run();
     }
 
@@ -129,8 +133,8 @@ public class RunCharDhamSimulation {
         // Configure the FrozenTastes extension
         FrozenTastesConfigGroup ftConfig = ConfigUtils.addOrGetModule(config, FrozenTastesConfigGroup.class);
         ftConfig.setFlexibleTypes("rest");
-        ftConfig.setEpsilonScaleFactors("100.0"); // Higher value encourages more exploration
-        ftConfig.setDestinationSamplePercent(100.0); // Consider all available facilities
+        ftConfig.setEpsilonScaleFactors("50.0"); // Higher value encourages more exploration
+        ftConfig.setDestinationSamplePercent(80); // Consider all available facilities
     }
 
     private static Set<Id<Link>> readLinkIdsFromCsv(String filePath) {
@@ -223,19 +227,12 @@ public class RunCharDhamSimulation {
         config.controller().setOutputDirectory(OUTPUT_DIRECTORY);
         config.controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
         config.vspExperimental().setWritingOutputEvents(true);
-        config.network().setTimeVariantNetwork(true);
-        config.scoring().setLateArrival_utils_hr(-10);
-        config.scoring().setPerforming_utils_hr(100);
-        config.qsim().setStuckTime(3600);
-//        config.qsim().setRemoveStuckVehicles(true);
-        Set<String> modes = new HashSet<>(Arrays.asList("car", "motorbike"));
-        config.qsim().setMainModes(modes);
-        config.routing().setNetworkModes(modes);
-        config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
+
     }
 
     private static void configureNetworkAndPlans(Config config) {
         config.network().setInputFile(NETWORK_FILE);
+        config.network().setTimeVariantNetwork(true);
         config.plans().setInputFile(PLANS_FILE);
         config.facilities().setInputFile(FACILITIES_FILE);
     }
@@ -243,18 +240,30 @@ public class RunCharDhamSimulation {
     private static void configureQSim(Config config) {
         config.qsim().setStartTime(SIMULATION_START_TIME_H * 3600.0);
 //        config.qsim().setEndTime(5 * 24 * 3600);
+        config.qsim().setUsePersonIdForMissingVehicleId(true);
         config.qsim().setFlowCapFactor(FLOW_CAPACITY_FACTOR);
         config.qsim().setStorageCapFactor(STORAGE_CAPACITY_FACTOR);
         config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
         config.qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.withHoles);
+        config.qsim().setStuckTime(10.);
+        config.qsim().setRemoveStuckVehicles(true);
+        config.qsim().setNotifyAboutStuckVehicles(true);
+        Set<String> modes = new HashSet<>(Arrays.asList(CAR_MODE, MOTORBIKE_MODE));
+        config.qsim().setMainModes(modes);
+        config.routing().setNetworkModes(modes);
+        config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
     }
 
     private static void configureScoring(Config config) {
         config.scoring().setWriteExperiencedPlans(true);
         config.scoring().setLearningRate(1.0);
         config.scoring().setBrainExpBeta(2.0);
+        config.scoring().setLateArrival_utils_hr(-100);
+        config.scoring().setPerforming_utils_hr(100);
+//        config.scoring().setMemorizingExperiencedPlans(true);
 
         addActivityParams(config, "rest", REST_STOP_TYPICAL_DURATION_S, 0, 0);
+
 
         ScoringConfigGroup.ModeParams carParams = new ScoringConfigGroup.ModeParams(CAR_MODE);
 //        carParams.setConstant(0.);
@@ -295,13 +304,14 @@ public class RunCharDhamSimulation {
         // The main strategy for performing location choice
         ReplanningConfigGroup.StrategySettings lcStrategy = new ReplanningConfigGroup.StrategySettings();
         lcStrategy.setStrategyName(DestinationChoiceConfigGroup.GROUP_NAME);
-        lcStrategy.setWeight(0.8); // High weight to ensure location choice is explored
+        lcStrategy.setWeight(0.5); // High weight to ensure location choice is explored
         config.replanning().addStrategySettings(lcStrategy);
 
-        addStrategy(config, "TimeAllocationMutator", 0.5);
-        config.timeAllocationMutator().setMutationRange(7200.0);
+        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator, 0.35);
+        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.ReRoute, 0.15);
+        config.timeAllocationMutator().setMutationRange(1800);
         config.timeAllocationMutator().setAffectingDuration(true);
-        config.timeAllocationMutator().setMutationRangeStep(60 * 5);
+//        config.timeAllocationMutator().setMutationRangeStep(60 * 5);
 
         config.replanning().setFractionOfIterationsToDisableInnovation(0.8);
     }

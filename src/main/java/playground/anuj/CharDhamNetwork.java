@@ -22,6 +22,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BiPredicate;
 
+import static playground.anuj.RunCharDhamSimulation.*;
+
 /**
  * This code generates the MATSim network file from a shapefile boundary and an OSM PBF file.
  * It now also embeds a 'nightToll' attribute into each link to facilitate night travel restrictions.
@@ -46,7 +48,7 @@ public class CharDhamNetwork {
             if (hierarchyLevel <= 4) return true;
             else return (hierarchyLevel <= 5 && geometry.contains(MGC.coord2Point(reverse_transformation.transform(cord))));
         };
-        Set<String> modes = new HashSet<>(Arrays.asList("car", "motorbike", "bus"));
+        Set<String> modes = new HashSet<>(Arrays.asList(CAR_MODE, MOTORBIKE_MODE));
 
         Network network = new SupersonicOsmNetworkReader.Builder()
                 .setCoordinateTransformation(DehradunUtils.transformation)
