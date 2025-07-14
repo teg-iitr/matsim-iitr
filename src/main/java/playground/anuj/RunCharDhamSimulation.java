@@ -20,6 +20,7 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.NetworkChangeEvent;
 import org.matsim.core.replanning.PlanStrategy;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
+import org.matsim.core.replanning.strategies.SelectExpBeta;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.timing.TimeInterpretation;
@@ -133,12 +134,13 @@ public class RunCharDhamSimulation {
         // Set the activity type for which location choice should be performed
         dcConfig.setFlexibleTypes("rest");
         dcConfig.setPlanSelector("ChangeExpBeta");
+        dcConfig.setEpsilonScaleFactors("1.0");
 
         // Configure the FrozenTastes extension
         FrozenTastesConfigGroup ftConfig = ConfigUtils.addOrGetModule(config, FrozenTastesConfigGroup.class);
         ftConfig.setFlexibleTypes("rest");
-        ftConfig.setEpsilonScaleFactors("10.0"); // Higher value encourages more exploration
-        ftConfig.setDestinationSamplePercent(80); // Consider all available facilities
+        ftConfig.setEpsilonScaleFactors("1.0"); // Higher value encourages more exploration
+        ftConfig.setDestinationSamplePercent(5); // Consider all available facilities
     }
 
     private static Set<Id<Link>> readLinkIdsFromCsv(String filePath) {
@@ -261,41 +263,43 @@ public class RunCharDhamSimulation {
         config.scoring().setWriteExperiencedPlans(true);
         config.scoring().setLearningRate(1.0);
         config.scoring().setBrainExpBeta(2.0);
-        config.scoring().setLateArrival_utils_hr(-10);
+//        config.scoring().setLateArrival_utils_hr(0);
         config.scoring().setPerforming_utils_hr(100);
-        config.scoring().setMemorizingExperiencedPlans(true);
+//        config.scoring().setMemorizingExperiencedPlans(true);
 
-        addActivityParams(config, "rest", REST_STOP_TYPICAL_DURATION_S, 0, 0);
+        addActivityParams(config, "rest", REST_STOP_TYPICAL_DURATION_S, 0, 0, 3600.0);
 
 
         ScoringConfigGroup.ModeParams carParams = new ScoringConfigGroup.ModeParams(CAR_MODE);
-//        carParams.setConstant(0.);
-        carParams.setMarginalUtilityOfTraveling(-10);
-//        carParams.setMonetaryDistanceRate(-3.7 * Math.pow(10, -5));
+        carParams.setConstant(0);
+        carParams.setMarginalUtilityOfTraveling(-1.5);
+//        carParams.setMonetaryDistanceRate(-0.005);
         config.scoring().addModeParams(carParams);
 
         ScoringConfigGroup.ModeParams motorbikeParams = new ScoringConfigGroup.ModeParams(MOTORBIKE_MODE);
-        motorbikeParams.setMarginalUtilityOfTraveling(-10);
-//        motorbikeParams.setMonetaryDistanceRate(-1.6 * Math.pow(10, -5));
+        motorbikeParams.setConstant(0);
+        motorbikeParams.setMarginalUtilityOfTraveling(-1.5);
+//        motorbikeParams.setMonetaryDistanceRate(-0.005);
         config.scoring().addModeParams(motorbikeParams);
 
-        addActivityParams(config, "Haridwar", 24 * 3600.0, 0, 0); // Open 24h
-        addActivityParams(config, "visit-Srinagar", 24 * 3600.0, 0, 0);
-        addActivityParams(config, "visit-Sonprayag", 24 * 3600.0, 0, 0);
-        addActivityParams(config, "visit-Gaurikund", 24 * 3600.0, 0, 0);
-        addActivityParams(config, "visit-Uttarkashi", 24 * 3600.0, 0, 0);
-        addActivityParams(config, "visit-Barkot", 24 * 3600.0, 0, 0);
-        addActivityParams(config, "visit-Joshimath", 24 * 3600.0, 0, 0);
+        addActivityParams(config, "Haridwar", 24 * 3600.0, 0, 0, 0); // Open 24h
+        addActivityParams(config, "visit-Srinagar", 24 * 3600.0, 0, 0, 0);
+        addActivityParams(config, "visit-Sonprayag", 24 * 3600.0, 0, 0, 0);
+        addActivityParams(config, "visit-Gaurikund", 24 * 3600.0, 0, 0, 0);
+        addActivityParams(config, "visit-Uttarkashi", 24 * 3600.0, 0, 0, 0);
+        addActivityParams(config, "visit-Barkot", 24 * 3600.0, 0, 0, 0);
+        addActivityParams(config, "visit-Joshimath", 24 * 3600.0, 0, 0, 0);
 
         // Main pilgrimage sites (Temples) with consistent opening/closing times
         double templeOpeningTime_s = TEMPLE_OPENING_TIME_H * 3600.0;
         double templeClosingTime_s = TEMPLE_CLOSING_TIME_H * 3600.0;
         double templeVisitDuration_s = 6 * 3600.0;
+        double minimalTempleDuration_s = 2 * 3600.0;
 
-        addActivityParams(config, "visit-Kedarnath", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s);
-        addActivityParams(config, "visit-Gangotri", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s);
-        addActivityParams(config, "visit-Yamunotri", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s);
-        addActivityParams(config, "visit-Badrinath", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s);
+        addActivityParams(config, "visit-Kedarnath", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s, minimalTempleDuration_s);
+        addActivityParams(config, "visit-Gangotri", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s, minimalTempleDuration_s);
+        addActivityParams(config, "visit-Yamunotri", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s, minimalTempleDuration_s);
+        addActivityParams(config, "visit-Badrinath", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s, minimalTempleDuration_s);
     }
 
     /**
@@ -307,25 +311,28 @@ public class RunCharDhamSimulation {
         // The main strategy for performing location choice
         ReplanningConfigGroup.StrategySettings lcStrategy = new ReplanningConfigGroup.StrategySettings();
         lcStrategy.setStrategyName(DestinationChoiceConfigGroup.GROUP_NAME);
-        lcStrategy.setWeight(0.5); // High weight to ensure location choice is explored
+        lcStrategy.setWeight(0.2); // High weight to ensure location choice is explored
         config.replanning().addStrategySettings(lcStrategy);
 
-        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator, 0.35);
-        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.ReRoute, 0.15);
-        config.timeAllocationMutator().setMutationRange(1800);
+        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator, 0.8);
+        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.ReRoute, 0.2);
+        config.timeAllocationMutator().setMutationRange(60 * 5);
         config.timeAllocationMutator().setAffectingDuration(true);
-//        config.timeAllocationMutator().setMutationRangeStep(60 * 5);
+//        config.timeAllocationMutator().setMutationRangeStep(60);
 
         config.replanning().setFractionOfIterationsToDisableInnovation(0.8);
+        config.replanningAnnealer().setActivateAnnealingModule(true);
     }
 
-    private static void addActivityParams(Config config, String activityType, double typicalDuration, double openingTime, double closingTime) {
+    private static void addActivityParams(Config config, String activityType, double typicalDuration, double openingTime, double closingTime, double minimalDuration) {
         ScoringConfigGroup.ActivityParams activityParams = new ScoringConfigGroup.ActivityParams(activityType);
         activityParams.setTypicalDuration(typicalDuration);
         if (openingTime > 0 && closingTime > openingTime) {
             activityParams.setOpeningTime(openingTime);
             activityParams.setClosingTime(closingTime);
         }
+        if (minimalDuration > 0)
+            activityParams.setMinimalDuration(minimalDuration);
         config.scoring().addActivityParams(activityParams);
     }
 
