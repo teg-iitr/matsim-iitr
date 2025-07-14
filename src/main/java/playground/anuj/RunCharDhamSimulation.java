@@ -32,8 +32,10 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
 
 /**
  * Main class to run the Char Dham Yatra MATSim simulation.
@@ -51,7 +53,7 @@ public class RunCharDhamSimulation {
     private static final String TIME_VARIANT_LINKS_FILE = "input/timeVariant_links.csv";
 
     // --- SIMULATION PARAMETERS ---
-    private static final int LAST_ITERATION = 50;
+    private static final int LAST_ITERATION = 30;
     private static final double FLOW_CAPACITY_FACTOR = 1.0;
     private static final double STORAGE_CAPACITY_FACTOR = 1.0;
     private static final double SIMULATION_START_TIME_H = 4.0;
@@ -83,7 +85,7 @@ public class RunCharDhamSimulation {
 
         VehicleType car = VehicleUtils.createVehicleType(Id.create(CAR_MODE, VehicleType.class));
         car.setPcuEquivalents(1.0);
-        car.setMaximumVelocity(80 / 3.6);
+        car.setMaximumVelocity(60 / 3.6);
         VehicleCapacity bigCarCapacity = car.getCapacity();
         bigCarCapacity.setSeats(5);
         vehicles.addVehicleType(car);
@@ -95,6 +97,8 @@ public class RunCharDhamSimulation {
         motorbikeCapacity.setSeats(2);
         vehicles.addVehicleType(motorbike);
 
+        Collection<String> modes = Arrays.asList(CAR_MODE,MOTORBIKE_MODE);
+        config.routing().setNetworkModes(modes);
         // Schedule the nightly road closures using NetworkChangeEvents
         scheduleNightlyLinkClosures(scenario, TIME_VARIANT_LINKS_FILE);
 
@@ -133,7 +137,7 @@ public class RunCharDhamSimulation {
         // Configure the FrozenTastes extension
         FrozenTastesConfigGroup ftConfig = ConfigUtils.addOrGetModule(config, FrozenTastesConfigGroup.class);
         ftConfig.setFlexibleTypes("rest");
-        ftConfig.setEpsilonScaleFactors("50.0"); // Higher value encourages more exploration
+        ftConfig.setEpsilonScaleFactors("10.0"); // Higher value encourages more exploration
         ftConfig.setDestinationSamplePercent(80); // Consider all available facilities
     }
 
@@ -203,16 +207,16 @@ public class RunCharDhamSimulation {
                 // --- Event to close the link at 10 PM ---
                 double closeEventTime = dayOffset_s + closeTimeOfDay_s;
                 NetworkChangeEvent closeEvent = new NetworkChangeEvent(closeEventTime);
-                closeEvent.setFlowCapacityChange(new NetworkChangeEvent.ChangeValue(
-                        NetworkChangeEvent.ChangeType.ABSOLUTE_IN_SI_UNITS, 0)); // Effectively closes the link
+                closeEvent.setFreespeedChange(new NetworkChangeEvent.ChangeValue(
+                        NetworkChangeEvent.ChangeType.ABSOLUTE_IN_SI_UNITS, 10/3.6)); // Effectively closes the link
                 closeEvent.addLink(link);
                 NetworkUtils.addNetworkChangeEvent(network, closeEvent);
 
                 // --- Event to reopen the link at 4 AM the NEXT day ---
                 double reopenEventTime = dayOffset_s + (24 * 3600) + reopenTimeOfDay_s;
                 NetworkChangeEvent reopenEvent = new NetworkChangeEvent(reopenEventTime);
-                reopenEvent.setFlowCapacityChange(new NetworkChangeEvent.ChangeValue(
-                        NetworkChangeEvent.ChangeType.ABSOLUTE_IN_SI_UNITS, link.getCapacity())); // Restores original cap
+                reopenEvent.setFreespeedChange(new NetworkChangeEvent.ChangeValue(
+                        NetworkChangeEvent.ChangeType.ABSOLUTE_IN_SI_UNITS, link.getFreespeed())); // Restores original cap
                 reopenEvent.addLink(link);
                 NetworkUtils.addNetworkChangeEvent(network, reopenEvent);
             }
@@ -246,11 +250,10 @@ public class RunCharDhamSimulation {
         config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
         config.qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.withHoles);
         config.qsim().setStuckTime(10.);
-        config.qsim().setRemoveStuckVehicles(true);
+        config.qsim().setRemoveStuckVehicles(false);
         config.qsim().setNotifyAboutStuckVehicles(true);
-        Set<String> modes = new HashSet<>(Arrays.asList(CAR_MODE, MOTORBIKE_MODE));
+        Collection<String> modes = Arrays.asList(CAR_MODE, MOTORBIKE_MODE);
         config.qsim().setMainModes(modes);
-        config.routing().setNetworkModes(modes);
         config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
     }
 
@@ -258,21 +261,21 @@ public class RunCharDhamSimulation {
         config.scoring().setWriteExperiencedPlans(true);
         config.scoring().setLearningRate(1.0);
         config.scoring().setBrainExpBeta(2.0);
-        config.scoring().setLateArrival_utils_hr(-100);
+        config.scoring().setLateArrival_utils_hr(-10);
         config.scoring().setPerforming_utils_hr(100);
-//        config.scoring().setMemorizingExperiencedPlans(true);
+        config.scoring().setMemorizingExperiencedPlans(true);
 
         addActivityParams(config, "rest", REST_STOP_TYPICAL_DURATION_S, 0, 0);
 
 
         ScoringConfigGroup.ModeParams carParams = new ScoringConfigGroup.ModeParams(CAR_MODE);
 //        carParams.setConstant(0.);
-//        carParams.setMarginalUtilityOfTraveling(-0.64);
+        carParams.setMarginalUtilityOfTraveling(-10);
 //        carParams.setMonetaryDistanceRate(-3.7 * Math.pow(10, -5));
         config.scoring().addModeParams(carParams);
 
         ScoringConfigGroup.ModeParams motorbikeParams = new ScoringConfigGroup.ModeParams(MOTORBIKE_MODE);
-//        motorbikeParams.setMarginalUtilityOfTraveling(-0.18);
+        motorbikeParams.setMarginalUtilityOfTraveling(-10);
 //        motorbikeParams.setMonetaryDistanceRate(-1.6 * Math.pow(10, -5));
         config.scoring().addModeParams(motorbikeParams);
 

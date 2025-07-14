@@ -28,6 +28,7 @@ public class CharDhamInitialPlans {
     private static final double REST_STOP_DURATION = 2.0 * 3600.0;     // 2 hours for a chosen rest stop
     private static final double DHAM_VISIT_DURATION = 6.0 * 3600.0;      // 3 hours for darshan/visit
     private static final double OVERNIGHT_STAY_DURATION = 12.0 * 3600.0; // 12 hours for an overnight halt
+    public static final String PASSENGER_ATTRIBUTE = "numberOfPassengers";
 
     public static void main(String[] args) {
         new CharDhamInitialPlans().run();
@@ -47,31 +48,36 @@ public class CharDhamInitialPlans {
         final String MOTORBIKE_MODE = "motorbike";
 
 
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= 3; i++) {
             List<String> dhamSequence;
             String primaryMode;
             String personIdString;
             double startActivityEndTime;
+            int numberOfPassengers;
 
-            if (i <= 5) { // Persons 1 to 5
+            if (i == 1) { // Persons 1 to 5
                 personIdString = "CarCharDham_" + i;
                 startActivityEndTime = 8.0 * 3600.0; // 8:00 AM
                 dhamSequence = List.of("Yamunotri", "Gangotri", "Kedarnath", "Badrinath");
                 primaryMode = CAR_MODE;
-            } else if (i <= 9) { // Person 6 to 9
+                numberOfPassengers = 5;
+            } else if (i == 2) { // Person 6 to 9
                 personIdString = "CarDoDham_" + i;
                 startActivityEndTime = 16.0 * 3600.0; // 10:00 AM
                 dhamSequence = List.of("Kedarnath", "Badrinath");
                 primaryMode = CAR_MODE;
+                numberOfPassengers = 4;
             } else { // Person 10
                 personIdString = "MotorbikeTeenDham_" + i;
                 startActivityEndTime = 22.0 * 3600.0; // 10:00 PM
                 dhamSequence = List.of("Gangotri", "Kedarnath", "Badrinath");
                 primaryMode = MOTORBIKE_MODE;
+                numberOfPassengers = 1;
             }
             // Start activity in Haridwar
             Person person = populationFactory.createPerson(Id.createPersonId(personIdString));
             Plan plan = populationFactory.createPlan();
+            plan.getAttributes().putAttribute(PASSENGER_ATTRIBUTE, numberOfPassengers);
 
             // Start activity in Haridwar with the assigned custom end time
             addActivityWithEndTime(populationFactory, plan, "Haridwar", location2Coord.get("Haridwar"), startActivityEndTime);
