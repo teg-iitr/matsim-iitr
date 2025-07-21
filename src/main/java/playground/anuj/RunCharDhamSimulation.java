@@ -47,14 +47,14 @@ public class RunCharDhamSimulation {
 
     // --- FILE PATHS (using the original network file) ---
     private static final String NETWORK_FILE = "output/network_charDham.xml.gz";
-    private static final String PLANS_FILE = "output/plan_charDham.xml";
+    private static final String PLANS_FILE = "output/plan_charDham_updated_v2.xml";
     private static final String FACILITIES_FILE = "output/facilities_charDham.xml";
     private static final String OUTPUT_DIRECTORY = "output/charDham/";
     private static final String CONFIG_OUTPUT_FILE = OUTPUT_DIRECTORY + "/config_charDham.xml";
     private static final String TIME_VARIANT_LINKS_FILE = "input/timeVariant_links.csv";
 
     // --- SIMULATION PARAMETERS ---
-    private static final int LAST_ITERATION = 30;
+    private static final int LAST_ITERATION = 20;
     private static final double FLOW_CAPACITY_FACTOR = 1.0;
     private static final double STORAGE_CAPACITY_FACTOR = 1.0;
     private static final double SIMULATION_START_TIME_H = 4.0;
@@ -133,14 +133,19 @@ public class RunCharDhamSimulation {
         dcConfig.setAlgorithm(DestinationChoiceConfigGroup.Algotype.random); // Use random choice from the choice set
         // Set the activity type for which location choice should be performed
         dcConfig.setFlexibleTypes("rest");
-        dcConfig.setPlanSelector("ChangeExpBeta");
-        dcConfig.setEpsilonScaleFactors("1.0");
+        dcConfig.setPlanSelector("BestScore");
+        dcConfig.setEpsilonScaleFactors("5.0");
+        dcConfig.setRadius(10.0);
+        dcConfig.setScaleFactor(1);
 
         // Configure the FrozenTastes extension
         FrozenTastesConfigGroup ftConfig = ConfigUtils.addOrGetModule(config, FrozenTastesConfigGroup.class);
+        ftConfig.setAlgorithm(FrozenTastesConfigGroup.Algotype.random);
         ftConfig.setFlexibleTypes("rest");
-        ftConfig.setEpsilonScaleFactors("1.0"); // Higher value encourages more exploration
-        ftConfig.setDestinationSamplePercent(5); // Consider all available facilities
+        ftConfig.setEpsilonScaleFactors("5.0"); // Higher value encourages more exploration
+        ftConfig.setDestinationSamplePercent(50); // Consider all available facilities
+        ftConfig.setTravelTimeApproximationLevel(FrozenTastesConfigGroup.ApproximationLevel.completeRouting);
+        ftConfig.setPlanSelector("BestScore");
     }
 
     private static Set<Id<Link>> readLinkIdsFromCsv(String filePath) {
@@ -264,7 +269,7 @@ public class RunCharDhamSimulation {
         config.scoring().setLearningRate(1.0);
         config.scoring().setBrainExpBeta(2.0);
 //        config.scoring().setLateArrival_utils_hr(0);
-        config.scoring().setPerforming_utils_hr(100);
+        config.scoring().setPerforming_utils_hr(6);
 //        config.scoring().setMemorizingExperiencedPlans(true);
 
         addActivityParams(config, "rest", REST_STOP_TYPICAL_DURATION_S, 0, 0, 3600.0);
@@ -272,13 +277,13 @@ public class RunCharDhamSimulation {
 
         ScoringConfigGroup.ModeParams carParams = new ScoringConfigGroup.ModeParams(CAR_MODE);
         carParams.setConstant(0);
-        carParams.setMarginalUtilityOfTraveling(-1.5);
+        carParams.setMarginalUtilityOfTraveling(-6);
 //        carParams.setMonetaryDistanceRate(-0.005);
         config.scoring().addModeParams(carParams);
 
         ScoringConfigGroup.ModeParams motorbikeParams = new ScoringConfigGroup.ModeParams(MOTORBIKE_MODE);
         motorbikeParams.setConstant(0);
-        motorbikeParams.setMarginalUtilityOfTraveling(-1.5);
+        motorbikeParams.setMarginalUtilityOfTraveling(-6);
 //        motorbikeParams.setMonetaryDistanceRate(-0.005);
         config.scoring().addModeParams(motorbikeParams);
 
@@ -311,11 +316,17 @@ public class RunCharDhamSimulation {
         // The main strategy for performing location choice
         ReplanningConfigGroup.StrategySettings lcStrategy = new ReplanningConfigGroup.StrategySettings();
         lcStrategy.setStrategyName(DestinationChoiceConfigGroup.GROUP_NAME);
-        lcStrategy.setWeight(0.2); // High weight to ensure location choice is explored
+        lcStrategy.setWeight(0.5); // High weight to ensure location choice is explored
         config.replanning().addStrategySettings(lcStrategy);
 
-        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator, 0.8);
+//        ReplanningConfigGroup.StrategySettings ftStrategy = new ReplanningConfigGroup.StrategySettings();
+//        ftStrategy.setStrategyName("BestReplyLocationChoicePlanStrategy");
+//        ftStrategy.setWeight(0.1); // High weight to ensure location choice is explored
+//        config.replanning().addStrategySettings(ftStrategy);
+
+        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator, 0.3);
         addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.ReRoute, 0.2);
+//        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator_ReRoute, 0.5);
         config.timeAllocationMutator().setMutationRange(60 * 5);
         config.timeAllocationMutator().setAffectingDuration(true);
 //        config.timeAllocationMutator().setMutationRangeStep(60);
