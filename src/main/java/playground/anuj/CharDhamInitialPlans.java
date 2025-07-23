@@ -106,9 +106,8 @@ public class CharDhamInitialPlans {
                 numberOfPassengers = random.nextInt(2) + 1; // 1 or 2 passengers
             }
             plan.getAttributes().putAttribute(PASSENGER_ATTRIBUTE, numberOfPassengers);
-            int currentDay = 1;
             // Start activity in Haridwar with a random end time between 4 AM and 8 AM on day 1
-            addActivityWithEndTime(populationFactory, plan, "Haridwar", location2Coord.get("Haridwar"), randomEndTime(4, 24, currentDay));
+            addActivityWithEndTime(populationFactory, plan, "Haridwar", location2Coord.get("Haridwar"), randomEndTime(4, 24, random.nextInt(4) + 1));
 
             // Get a random dham sequence based on weights
             List<String> dhamSequence = getRandomDhamSequence(allDhamCombinations, dhamWeights);
@@ -118,14 +117,14 @@ public class CharDhamInitialPlans {
                 // Add a leg before each new dham visit (using the primary mode)
                 addLeg(populationFactory, plan, primaryMode);
                 addLocationChoiceActivity(populationFactory, plan, "rest", location2Coord.get("Haridwar"), REST_STOP_DURATION);
+                addLeg(populationFactory, plan, primaryMode);
                 if (dham.equals("Kedarnath")) {
                     // Stop at Srinagar for rest
                     addActivityWithDuration(populationFactory, plan, "visit-Srinagar", location2Coord.get("Srinagar"), REST_STOP_DURATION);
                     addLeg(populationFactory, plan, primaryMode);
 
                     // Overnight halt at Sonprayag before the trek, departing next morning
-                    addActivityWithEndTime(populationFactory, plan, "visit-Sonprayag", location2Coord.get("Sonprayag"), randomEndTime(0, 24, currentDay + 1));
-                    currentDay++; // Increment day after overnight stay
+                    addActivityWithDuration(populationFactory, plan, "visit-Sonprayag", location2Coord.get("Sonprayag"), REST_STOP_DURATION);
 
                     addLeg(populationFactory, plan, primaryMode); // Sonprayag to Gaurikund by local taxi
 
@@ -139,8 +138,7 @@ public class CharDhamInitialPlans {
                     addLeg(populationFactory, plan, primaryMode); // Gaurikund to Sonprayag by local taxi/vehicle
 
                     // Another overnight halt at Sonprayag on return, departing next morning
-                    addActivityWithEndTime(populationFactory, plan, "visit-Sonprayag", location2Coord.get("Sonprayag"), randomEndTime(0, 24, currentDay + 1));
-                    currentDay++; // Increment day after overnight stay
+                    addActivityWithDuration(populationFactory, plan, "visit-Sonprayag", location2Coord.get("Sonprayag"), REST_STOP_DURATION);
 
                 } else if (dham.equals("Gangotri")) {
                     // Intermediate stop in Uttarkashi

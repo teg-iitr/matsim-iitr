@@ -133,7 +133,7 @@ public class RunCharDhamSimulation {
         dcConfig.setAlgorithm(DestinationChoiceConfigGroup.Algotype.random); // Use random choice from the choice set
         // Set the activity type for which location choice should be performed
         dcConfig.setFlexibleTypes("rest");
-        dcConfig.setPlanSelector("BestScore");
+        dcConfig.setPlanSelector("ChangeExpBeta");
         dcConfig.setEpsilonScaleFactors("5.0");
         dcConfig.setRadius(10.0);
         dcConfig.setScaleFactor(1);
@@ -198,7 +198,7 @@ public class RunCharDhamSimulation {
         double reopenTimeOfDay_s = 4 * 3600;  // 4:00 AM
 
         // Create closure events for the first 5 days of the simulation
-        int numberOfDaysToClose = 4;
+        int numberOfDaysToClose = 10;
 
         System.out.println("Scheduling nightly link closures for all links for " + numberOfDaysToClose + " days...");
 
@@ -256,7 +256,7 @@ public class RunCharDhamSimulation {
         config.qsim().setStorageCapFactor(STORAGE_CAPACITY_FACTOR);
         config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
         config.qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.withHoles);
-        config.qsim().setStuckTime(10.);
+        config.qsim().setStuckTime(3600.);
         config.qsim().setRemoveStuckVehicles(false);
         config.qsim().setNotifyAboutStuckVehicles(true);
         Collection<String> modes = Arrays.asList(CAR_MODE, MOTORBIKE_MODE);
@@ -316,7 +316,7 @@ public class RunCharDhamSimulation {
         // The main strategy for performing location choice
         ReplanningConfigGroup.StrategySettings lcStrategy = new ReplanningConfigGroup.StrategySettings();
         lcStrategy.setStrategyName(DestinationChoiceConfigGroup.GROUP_NAME);
-        lcStrategy.setWeight(0.5); // High weight to ensure location choice is explored
+        lcStrategy.setWeight(0.3); // High weight to ensure location choice is explored
         config.replanning().addStrategySettings(lcStrategy);
 
 //        ReplanningConfigGroup.StrategySettings ftStrategy = new ReplanningConfigGroup.StrategySettings();
@@ -324,15 +324,15 @@ public class RunCharDhamSimulation {
 //        ftStrategy.setWeight(0.1); // High weight to ensure location choice is explored
 //        config.replanning().addStrategySettings(ftStrategy);
 
-        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator, 0.3);
-        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.ReRoute, 0.2);
-//        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator_ReRoute, 0.5);
+//        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator, 0.6);
+//        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.ReRoute, 0.1);
+        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator_ReRoute, 0.5);
         config.timeAllocationMutator().setMutationRange(60 * 5);
         config.timeAllocationMutator().setAffectingDuration(true);
-//        config.timeAllocationMutator().setMutationRangeStep(60);
+        config.timeAllocationMutator().setMutationRangeStep(60);
 
         config.replanning().setFractionOfIterationsToDisableInnovation(0.8);
-        config.replanningAnnealer().setActivateAnnealingModule(true);
+//        config.replanningAnnealer().setActivateAnnealingModule(true);
     }
 
     private static void addActivityParams(Config config, String activityType, double typicalDuration, double openingTime, double closingTime, double minimalDuration) {
