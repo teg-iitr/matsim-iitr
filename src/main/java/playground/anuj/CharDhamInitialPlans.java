@@ -37,6 +37,7 @@ public class CharDhamInitialPlans {
     // Constants for modes
     public static final String CAR_MODE = "car";
     public static final String MOTORBIKE_MODE = "motorbike";
+    public static final String TRAVELLER_MODE = "traveller";
     public static final String WALK_MODE = TransportMode.walk; // For treks
 
     // Dham weights for generating sequences
@@ -97,13 +98,17 @@ public class CharDhamInitialPlans {
             String primaryMode;
             int numberOfPassengers;
 
-            // Randomly choose primary mode (e.g., 80% car, 20% motorbike)
-            if (random.nextDouble() < 0.8) {
+            // Randomly choose primary mode (e.g., 60% car, 20% motorbike, 20% traveller)
+            double modeChoice = random.nextDouble();
+            if (modeChoice < 0.60) { // 60% chance for CAR_MODE
                 primaryMode = CAR_MODE;
                 numberOfPassengers = random.nextInt(2) + 4; // 4 or 5 passengers
-            } else {
+            } else if (modeChoice < 0.60 + 0.25) { // 25% chance for MOTORBIKE_MODE (0.60 to 0.85)
                 primaryMode = MOTORBIKE_MODE;
                 numberOfPassengers = random.nextInt(2) + 1; // 1 or 2 passengers
+            } else { // 15% chance for TRAVELLER_MODE (0.85 to 1.0)
+                primaryMode = TRAVELLER_MODE;
+                numberOfPassengers = random.nextInt(17) + 10; // 10 to 26 passengers (26 - 10 + 1 = 17)
             }
             plan.getAttributes().putAttribute(PASSENGER_ATTRIBUTE, numberOfPassengers);
             // Start activity in Haridwar with a random end time between 4 AM and 8 AM on day 1

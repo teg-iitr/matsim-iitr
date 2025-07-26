@@ -65,7 +65,8 @@ public class RunCharDhamSimulation {
     // --- MODE & SCORING PARAMETERS ---
     static final String CAR_MODE = "car";
     static final String MOTORBIKE_MODE = "motorbike";
-
+    static final String TRAVELLER_MODE = "traveller";
+    static final Collection<String> modes = Arrays.asList(CAR_MODE, MOTORBIKE_MODE, TRAVELLER_MODE);
     public static void main(String[] args) {
         Config config = ConfigUtils.createConfig();
 
@@ -82,23 +83,27 @@ public class RunCharDhamSimulation {
         Scenario scenario = ScenarioUtils.loadScenario(config);
         Vehicles vehicles = scenario.getVehicles();
 
-        scenario.getPopulation().getPersons().values().forEach(p -> p.getAttributes().putAttribute("rest", 100.0));
+//        scenario.getPopulation().getPersons().values().forEach(p -> p.getAttributes().putAttribute("rest", 100.0));
 
         VehicleType car = VehicleUtils.createVehicleType(Id.create(CAR_MODE, VehicleType.class));
         car.setPcuEquivalents(1.0);
-        car.setMaximumVelocity(60 / 3.6);
-        VehicleCapacity bigCarCapacity = car.getCapacity();
-        bigCarCapacity.setSeats(5);
+        car.setMaximumVelocity(70 / 3.6);
+        car.getCapacity().setSeats(5);
         vehicles.addVehicleType(car);
 
         VehicleType motorbike = VehicleUtils.createVehicleType(Id.create(MOTORBIKE_MODE, VehicleType.class));
         motorbike.setPcuEquivalents(0.25);
         motorbike.setMaximumVelocity(80 / 3.6);
-        VehicleCapacity motorbikeCapacity = motorbike.getCapacity();
-        motorbikeCapacity.setSeats(2);
+        motorbike.getCapacity().setSeats(2);
         vehicles.addVehicleType(motorbike);
 
-        Collection<String> modes = Arrays.asList(CAR_MODE,MOTORBIKE_MODE);
+        VehicleType traveller = VehicleUtils.createVehicleType(Id.create(TRAVELLER_MODE, VehicleType.class));
+        traveller.setPcuEquivalents(1.5);
+        traveller.setMaximumVelocity(50 / 3.6);
+        traveller.getCapacity().setSeats(22);
+        traveller.getCapacity().setStandingRoom(5);
+        vehicles.addVehicleType(traveller);
+
         config.routing().setNetworkModes(modes);
         // Schedule the nightly road closures using NetworkChangeEvents
         scheduleNightlyLinkClosures(scenario, TIME_VARIANT_LINKS_FILE);
@@ -120,7 +125,13 @@ public class RunCharDhamSimulation {
                 });
             }
         });
-
+        controler.addOverridingModule(new AbstractModule() {
+            @Override
+            public void install() {
+                addTravelTimeBinding(TRAVELLER_MODE).to(carTravelTime());
+                addTravelDisutilityFactoryBinding(TRAVELLER_MODE).to(carTravelDisutilityFactoryKey());
+            }
+        });
         controler.run();
     }
 
@@ -259,7 +270,6 @@ public class RunCharDhamSimulation {
         config.qsim().setStuckTime(3600.);
         config.qsim().setRemoveStuckVehicles(false);
         config.qsim().setNotifyAboutStuckVehicles(true);
-        Collection<String> modes = Arrays.asList(CAR_MODE, MOTORBIKE_MODE);
         config.qsim().setMainModes(modes);
         config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
     }
@@ -268,7 +278,7 @@ public class RunCharDhamSimulation {
         config.scoring().setWriteExperiencedPlans(true);
         config.scoring().setLearningRate(1.0);
         config.scoring().setBrainExpBeta(2.0);
-//        config.scoring().setLateArrival_utils_hr(0);
+        config.scoring().setLateArrival_utils_hr(-1);
         config.scoring().setPerforming_utils_hr(6);
 //        config.scoring().setMemorizingExperiencedPlans(true);
 
@@ -286,6 +296,11 @@ public class RunCharDhamSimulation {
         motorbikeParams.setMarginalUtilityOfTraveling(-6);
 //        motorbikeParams.setMonetaryDistanceRate(-0.005);
         config.scoring().addModeParams(motorbikeParams);
+
+        ScoringConfigGroup.ModeParams travellerParams = new ScoringConfigGroup.ModeParams(TRAVELLER_MODE);
+        travellerParams.setConstant(0);
+        travellerParams.setMarginalUtilityOfTraveling(-6);
+        config.scoring().addModeParams(travellerParams);
 
         addActivityParams(config, "Haridwar", 24 * 3600.0, 0, 0, 0); // Open 24h
         addActivityParams(config, "visit-Srinagar", 24 * 3600.0, 0, 0, 0);
@@ -319,17 +334,13 @@ public class RunCharDhamSimulation {
         lcStrategy.setWeight(0.3); // High weight to ensure location choice is explored
         config.replanning().addStrategySettings(lcStrategy);
 
-//        ReplanningConfigGroup.StrategySettings ftStrategy = new ReplanningConfigGroup.StrategySettings();
-//        ftStrategy.setStrategyName("BestReplyLocationChoicePlanStrategy");
-//        ftStrategy.setWeight(0.1); // High weight to ensure location choice is explored
-//        config.replanning().addStrategySettings(ftStrategy);
-
-//        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator, 0.6);
-//        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.ReRoute, 0.1);
-        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator_ReRoute, 0.5);
-        config.timeAllocationMutator().setMutationRange(60 * 5);
-        config.timeAllocationMutator().setAffectingDuration(true);
-        config.timeAllocationMutator().setMutationRangeStep(60);
+        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator, 0.6);
+        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.ReRoute, 0.1);
+//        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator_ReRoute, 0.5);
+        config.timeAllocationMutator().setMutationRange(7200);
+        config.timeAllocationMutator().setMutateAroundInitialEndTimeOnly(true);
+        config.timeAllocationMutator().setAffectingDuration(false);
+        config.timeAllocationMutator().setMutationRangeStep(60 * 10);
 
         config.replanning().setFractionOfIterationsToDisableInnovation(0.8);
 //        config.replanningAnnealer().setActivateAnnealingModule(true);
