@@ -52,7 +52,7 @@ public class RunCharDhamSingleSimulation {
     private static final String TIME_VARIANT_LINKS_FILE = "input/timeVariant_links.csv";
 
     // --- SIMULATION PARAMETERS ---
-    private static final int LAST_ITERATION = 20;
+    private static final int LAST_ITERATION = 2;
     private static final double FLOW_CAPACITY_FACTOR = 1.0;
     private static final double STORAGE_CAPACITY_FACTOR = 1.0;
     private static final double SIMULATION_START_TIME_H = 4.0;
@@ -84,19 +84,19 @@ public class RunCharDhamSingleSimulation {
 
 //        scenario.getPopulation().getPersons().values().forEach(p -> p.getAttributes().putAttribute("rest", 100.0));
 
-        VehicleType car = VehicleUtils.createVehicleType(Id.create(CAR_MODE, VehicleType.class));
+        VehicleType car = VehicleUtils.createVehicleType(Id.create(CAR_MODE, VehicleType.class), CAR_MODE);
         car.setPcuEquivalents(1.0);
         car.setMaximumVelocity(70 / 3.6);
         car.getCapacity().setSeats(5);
         vehicles.addVehicleType(car);
 
-        VehicleType motorbike = VehicleUtils.createVehicleType(Id.create(MOTORBIKE_MODE, VehicleType.class));
+        VehicleType motorbike = VehicleUtils.createVehicleType(Id.create(MOTORBIKE_MODE, VehicleType.class), MOTORBIKE_MODE);
         motorbike.setPcuEquivalents(0.25);
         motorbike.setMaximumVelocity(80 / 3.6);
         motorbike.getCapacity().setSeats(2);
         vehicles.addVehicleType(motorbike);
 
-        VehicleType traveller = VehicleUtils.createVehicleType(Id.create(TRAVELLER_MODE, VehicleType.class));
+        VehicleType traveller = VehicleUtils.createVehicleType(Id.create(TRAVELLER_MODE, VehicleType.class), TRAVELLER_MODE);
         traveller.setPcuEquivalents(2);
         traveller.setMaximumVelocity(50 / 3.6);
         traveller.getCapacity().setSeats(22);
