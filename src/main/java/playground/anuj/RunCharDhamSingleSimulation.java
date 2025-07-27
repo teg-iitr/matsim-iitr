@@ -20,14 +20,13 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.NetworkChangeEvent;
 import org.matsim.core.replanning.PlanStrategy;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
-import org.matsim.core.replanning.strategies.SelectExpBeta;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.timing.TimeInterpretation;
-import org.matsim.vehicles.VehicleCapacity;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
+import playground.shivam.trafficChar.core.TrafficCharConfigGroup;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -37,16 +36,15 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-
 /**
  * Main class to run the Char Dham Yatra MATSim simulation.
  * This version uses NetworkChangeEvents to programmatically close all roads
  * at night, preventing travel. This is a direct way to manage network state over time.
  */
-public class RunCharDhamSimulation {
+public class RunCharDhamSingleSimulation {
 
     // --- FILE PATHS (using the original network file) ---
-    private static final String NETWORK_FILE = "output/network_charDham.xml.gz";
+    private static final String NETWORK_FILE = "output/network_charDham_modified.xml.gz";
     private static final String PLANS_FILE = "output/plan_charDham_updated_v2.xml";
     private static final String FACILITIES_FILE = "output/facilities_charDham.xml";
     private static final String OUTPUT_DIRECTORY = "output/charDham/";
@@ -73,6 +71,7 @@ public class RunCharDhamSimulation {
         configureController(config);
         configureNetworkAndPlans(config);
         configureLocationChoice(config);
+        configureTrafficCharScenario(config);
         configureQSim(config);
         configureScoring(config);
         configureReplanning(config);
@@ -98,7 +97,7 @@ public class RunCharDhamSimulation {
         vehicles.addVehicleType(motorbike);
 
         VehicleType traveller = VehicleUtils.createVehicleType(Id.create(TRAVELLER_MODE, VehicleType.class));
-        traveller.setPcuEquivalents(1.5);
+        traveller.setPcuEquivalents(2);
         traveller.setMaximumVelocity(50 / 3.6);
         traveller.getCapacity().setSeats(22);
         traveller.getCapacity().setStandingRoom(5);
@@ -130,13 +129,26 @@ public class RunCharDhamSimulation {
             public void install() {
                 addTravelTimeBinding(TRAVELLER_MODE).to(carTravelTime());
                 addTravelDisutilityFactoryBinding(TRAVELLER_MODE).to(carTravelDisutilityFactoryKey());
+                addTravelTimeBinding(MOTORBIKE_MODE).to(carTravelTime());
+                addTravelDisutilityFactoryBinding(MOTORBIKE_MODE).to(carTravelDisutilityFactoryKey());
             }
         });
         controler.run();
     }
-
     /**
-     * Configures the LocationChoice module (FrozenTastes implementation).
+     * Configures the TrafficCharScenario custom module.
+     */
+    private static void configureTrafficCharScenario(Config config) {
+        TrafficCharConfigGroup trafficCharConfigGroup = new TrafficCharConfigGroup();
+
+        QSimConfigGroup qSimConfigGroupFIFO = new QSimConfigGroup();
+        qSimConfigGroupFIFO.setLinkDynamics(QSimConfigGroup.LinkDynamics.FIFO);
+        trafficCharConfigGroup.addQSimConfigGroup(TrafficCharConfigGroup.ROAD_TYPE, qSimConfigGroupFIFO);
+        trafficCharConfigGroup.addQSimConfigGroup(TrafficCharConfigGroup.ROAD_TYPE_DEFAULT, config.qsim());
+        config.getModules().put(TrafficCharConfigGroup.GROUP_NAME, trafficCharConfigGroup);
+    }
+    /**
+     * Configures the LocationChoice module.
      */
     private static void configureLocationChoice(Config config) {
         // Enable the base destination choice module
@@ -148,15 +160,6 @@ public class RunCharDhamSimulation {
         dcConfig.setEpsilonScaleFactors("5.0");
         dcConfig.setRadius(10.0);
         dcConfig.setScaleFactor(1);
-
-        // Configure the FrozenTastes extension
-        FrozenTastesConfigGroup ftConfig = ConfigUtils.addOrGetModule(config, FrozenTastesConfigGroup.class);
-        ftConfig.setAlgorithm(FrozenTastesConfigGroup.Algotype.random);
-        ftConfig.setFlexibleTypes("rest");
-        ftConfig.setEpsilonScaleFactors("5.0"); // Higher value encourages more exploration
-        ftConfig.setDestinationSamplePercent(50); // Consider all available facilities
-        ftConfig.setTravelTimeApproximationLevel(FrozenTastesConfigGroup.ApproximationLevel.completeRouting);
-        ftConfig.setPlanSelector("BestScore");
     }
 
     private static Set<Id<Link>> readLinkIdsFromCsv(String filePath) {

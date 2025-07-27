@@ -1,24 +1,12 @@
 package playground.anuj;
 
-import org.geotools.api.feature.simple.SimpleFeature;
-import org.locationtech.jts.geom.Geometry;
-import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkWriter;
-import org.matsim.contrib.osm.networkReader.LinkProperties;
-import org.matsim.contrib.osm.networkReader.OsmTags;
-import org.matsim.contrib.osm.networkReader.SupersonicOsmNetworkReader;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.network.algorithms.NetworkCleaner;
 import org.matsim.core.network.io.MatsimNetworkReader;
-import org.matsim.core.utils.geometry.CoordinateTransformation;
-import org.matsim.core.utils.geometry.geotools.MGC;
-import org.matsim.core.utils.geometry.transformations.TransformationFactory;
-import org.matsim.core.utils.gis.ShapeFileReader;
-import playground.amit.Dehradun.DehradunUtils;
 import playground.shivam.trafficChar.core.TrafficCharConfigGroup;
 
 import java.io.BufferedReader;
@@ -26,9 +14,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.function.BiPredicate;
-
-import static playground.anuj.RunCharDhamSimulation.*;
 
 /**
  * This code generates the MATSim network file from a shapefile boundary and an OSM PBF file.
@@ -91,7 +76,7 @@ public class CharDhamModifyNetwork {
                 fifoUpdatedCount++;
             }
             else
-                link.getAttributes().putAttribute(TrafficCharConfigGroup.ROAD_TYPE, TrafficCharConfigGroup.ROAD_TYPE_DEFAULT);
+                link.getAttributes().putAttribute(TrafficCharConfigGroup.ROAD_TYPE_DEFAULT, QSimConfigGroup.LinkDynamics.PassingQ);
         }
         System.out.println("Set 'roadType' to 'FIFO' for " + fifoUpdatedCount + " links from " + FIFO_LINKS_CSV);
 

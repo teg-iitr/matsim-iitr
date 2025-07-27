@@ -24,7 +24,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.BiPredicate;
 
-import static playground.anuj.RunCharDhamSimulation.*;
+import static playground.anuj.RunCharDhamSingleSimulation.*;
 
 /**
  * This code generates the MATSim network file from a shapefile boundary and an OSM PBF file.

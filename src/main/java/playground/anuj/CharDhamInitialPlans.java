@@ -52,7 +52,6 @@ public class CharDhamInitialPlans {
         dhamWeights.put(List.of("Gangotri"), 0.01);
         dhamWeights.put(List.of("Kedarnath"), 0.19);
         dhamWeights.put(List.of("Badrinath"), 0.12);
-        dhamWeights.put(List.of("Hemkund"), 0.06);
 
         // Size 2 combinations
         dhamWeights.put(List.of("Yamunotri", "Gangotri"), 0.5);
