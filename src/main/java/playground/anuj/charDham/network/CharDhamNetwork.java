@@ -1,4 +1,4 @@
-package playground.anuj;
+package playground.anuj.charDham.network;
 
 import org.geotools.api.feature.simple.SimpleFeature;
 import org.locationtech.jts.geom.Geometry;
@@ -24,7 +24,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.BiPredicate;
 
-import static playground.anuj.RunCharDhamSingleSimulation.*;
+import static playground.anuj.charDham.runner.RunCharDhamSingleSimulation.*;
 
 /**
  * This code generates the MATSim network file from a shapefile boundary and an OSM PBF file.

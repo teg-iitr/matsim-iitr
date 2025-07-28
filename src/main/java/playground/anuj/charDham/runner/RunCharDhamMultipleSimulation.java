@@ -1,4 +1,4 @@
-package playground.anuj;
+package playground.anuj.charDham.runner;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -6,22 +6,24 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.core.network.NetworkChangeEvent;
+import org.matsim.core.network.NetworkUtils;
 import org.matsim.contrib.locationchoice.DestinationChoiceConfigGroup;
-import org.matsim.contrib.locationchoice.frozenepsilons.FrozenTastesConfigGroup;
 import org.matsim.contrib.locationchoice.timegeography.LocationChoicePlanStrategy;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
-import org.matsim.core.config.groups.*;
+import org.matsim.core.config.groups.QSimConfigGroup;
+import org.matsim.core.config.groups.ReplanningConfigGroup;
+import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
-import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.network.NetworkChangeEvent;
 import org.matsim.core.replanning.PlanStrategy;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.router.TripRouter;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.utils.io.IOUtils;
 import org.matsim.core.utils.timing.TimeInterpretation;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
@@ -31,59 +33,172 @@ import playground.shivam.trafficChar.core.TrafficCharConfigGroup;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 
 /**
- * Main class to run the Char Dham Yatra MATSim simulation.
- * This version uses NetworkChangeEvents to programmatically close all roads
- * at night, preventing travel. This is a direct way to manage network state over time.
+ * Main class to run multiple Char Dham Yatra MATSim simulations based on parameters
+ * read from a CSV file. Each row in the CSV triggers a new simulation run with
+ * its own output directory.
  */
-public class RunCharDhamSingleSimulation {
+public class RunCharDhamMultipleSimulation {
 
     // --- FILE PATHS (using the original network file) ---
     private static final String NETWORK_FILE = "output/network_charDham_modified.xml.gz";
     private static final String PLANS_FILE = "output/plan_charDham_updated_v2.xml";
     private static final String FACILITIES_FILE = "output/facilities_charDham.xml";
-    private static final String OUTPUT_DIRECTORY = "output/charDham/";
-    private static final String CONFIG_OUTPUT_FILE = OUTPUT_DIRECTORY + "/config_charDham.xml";
+    private static final String BASE_OUTPUT_DIRECTORY = "output/charDham_runs/"; // Base directory for all runs
     private static final String TIME_VARIANT_LINKS_FILE = "input/timeVariant_links.csv";
+    private static final String PARAMETER_RUNS_CSV = "input/parameter_runs.csv"; // New: CSV for run parameters
 
-    // --- SIMULATION PARAMETERS ---
-    private static final int LAST_ITERATION = 2;
-    private static final double FLOW_CAPACITY_FACTOR = 1.0;
-    private static final double STORAGE_CAPACITY_FACTOR = 1.0;
+    // --- SIMULATION PARAMETERS (Defaults, can be overridden by CSV) ---
     private static final double SIMULATION_START_TIME_H = 4.0;
     private static final double TEMPLE_OPENING_TIME_H = 5.0;  // 5 AM
     private static final double TEMPLE_CLOSING_TIME_H = 16.0; // 4 PM
     private static final double REST_STOP_TYPICAL_DURATION_S = 2.0 * 3600.0; // 2 hours
+    private static final double MINIMUM_REST_DURATION_S = 3600.0;
 
     // --- MODE & SCORING PARAMETERS ---
     static final String CAR_MODE = "car";
     static final String MOTORBIKE_MODE = "motorbike";
     static final String TRAVELLER_MODE = "traveller";
     static final Collection<String> modes = Arrays.asList(CAR_MODE, MOTORBIKE_MODE, TRAVELLER_MODE);
+
+    /**
+     * Helper class to hold parameters for a single simulation run.
+     */
+    private static class RunParameters {
+        String runId;
+        int lastIteration;
+        double flowCapacityFactor;
+        double storageCapacityFactor;
+        double lateArrivalUtilsHr;
+        double performingUtilsHr;
+        double carMarginalUtilityOfTraveling;
+        double bikeMarginalUtilityOfTraveling;
+        double travellerMarginalUtilityOfTraveling;
+        double locationChoiceWeight;
+        double timeAllocationMutatorWeight;
+        double reRouteWeight;
+
+        // Constructor to parse a CSV line
+        RunParameters(String[] parts, String[] headers) {
+            Map<String, String> dataMap = new HashMap<>();
+            for (int i = 0; i < headers.length; i++) {
+                if (i < parts.length) {
+                    dataMap.put(headers[i].trim(), parts[i].trim());
+                }
+            }
+
+            this.runId = dataMap.getOrDefault("run_id", "default_run");
+            this.lastIteration = Integer.parseInt(dataMap.getOrDefault("last_iteration", "20"));
+            this.flowCapacityFactor = Double.parseDouble(dataMap.getOrDefault("flow_capacity_factor", "1.0"));
+            this.storageCapacityFactor = Double.parseDouble(dataMap.getOrDefault("storage_capacity_factor", "1.0"));
+            this.lateArrivalUtilsHr = Double.parseDouble(dataMap.getOrDefault("lateArrival_utils_hr", "-1.0"));
+            this.performingUtilsHr = Double.parseDouble(dataMap.getOrDefault("performing_utils_hr", "6.0"));
+            this.carMarginalUtilityOfTraveling = Double.parseDouble(dataMap.getOrDefault("car_marginalUtilityOfTraveling", "-6.0"));
+            this.bikeMarginalUtilityOfTraveling = Double.parseDouble(dataMap.getOrDefault("bike_marginalUtilityOfTraveling", "-6.0"));
+            this.travellerMarginalUtilityOfTraveling = Double.parseDouble(dataMap.getOrDefault("traveller_marginalUtilityOfTraveling", "-6.0"));
+            this.locationChoiceWeight = Double.parseDouble(dataMap.getOrDefault("locationChoice_weight", "0.3"));
+            this.timeAllocationMutatorWeight = Double.parseDouble(dataMap.getOrDefault("timeAllocationMutator_weight", "0.6"));
+            this.reRouteWeight = Double.parseDouble(dataMap.getOrDefault("reRoute_weight", "0.1"));
+        }
+    }
+
     public static void main(String[] args) {
+        List<RunParameters> runs = readRunParameters();
+
+        if (runs.isEmpty()) {
+            System.err.println("No simulation parameters found in " + PARAMETER_RUNS_CSV + ". Exiting.");
+            return;
+        }
+
+        System.out.println("Starting multiple MATSim simulations based on " + PARAMETER_RUNS_CSV);
+        for (int i = 0; i < runs.size(); i++) {
+            RunParameters params = runs.get(i);
+            String currentOutputDir = BASE_OUTPUT_DIRECTORY + params.runId + "/";
+            System.out.println("\n--- Running Simulation: " + params.runId + " (Run " + (i + 1) + " of " + runs.size() + ") ---");
+            System.out.println("Output will be saved to: " + currentOutputDir);
+
+            try {
+                // Ensure the output directory exists
+                Files.createDirectories(Paths.get(currentOutputDir));
+                runSingleSimulation(params, currentOutputDir);
+                System.out.println("--- Simulation " + params.runId + " COMPLETED ---");
+            } catch (Exception e) {
+                System.err.println("!!! Error running simulation " + params.runId + ": " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+        System.out.println("\nAll simulations finished.");
+    }
+
+    /**
+     * Reads simulation parameters from a CSV file.
+     *
+     * @return A list of RunParameters objects, one for each row.
+     */
+    private static List<RunParameters> readRunParameters() {
+        List<RunParameters> runs = new ArrayList<>();
+        try (BufferedReader br = IOUtils.getBufferedReader(RunCharDhamMultipleSimulation.PARAMETER_RUNS_CSV)) {
+            String headerLine = br.readLine();
+            if (headerLine == null) {
+                System.err.println("CSV file is empty: " + RunCharDhamMultipleSimulation.PARAMETER_RUNS_CSV);
+                return runs;
+            }
+            String[] headers = headerLine.split(",");
+
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue; // Skip empty lines
+                String[] parts = line.split(",");
+                if (parts.length != headers.length) {
+                    System.err.println("Warning: Skipping malformed line (column count mismatch) in " + RunCharDhamMultipleSimulation.PARAMETER_RUNS_CSV + ": " + line);
+                    continue;
+                }
+                try {
+                    runs.add(new RunParameters(parts, headers));
+                } catch (NumberFormatException e) {
+                    System.err.println("Warning: Skipping line due to number format error in " + RunCharDhamMultipleSimulation.PARAMETER_RUNS_CSV + ": " + line + " - " + e.getMessage());
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading parameter runs CSV file: " + RunCharDhamMultipleSimulation.PARAMETER_RUNS_CSV);
+            e.printStackTrace();
+        }
+        return runs;
+    }
+
+    /**
+     * Configures and runs a single MATSim simulation.
+     *
+     * @param params The parameters for this specific run.
+     * @param outputDirectory The unique output directory for this run.
+     */
+    private static void runSingleSimulation(RunParameters params, String outputDirectory) {
         Config config = ConfigUtils.createConfig();
 
-        configureController(config);
+        // Configure controller with run-specific output directory and iterations
+        configureController(config, params, outputDirectory);
         configureNetworkAndPlans(config);
         configureLocationChoice(config);
         configureTrafficCharScenario(config);
-        configureQSim(config);
-        configureScoring(config);
-        configureReplanning(config);
+        // Configure QSim with run-specific flow/storage factors
+        configureQSim(config, params);
+        // Configure scoring with run-specific utility values
+        configureScoring(config, params);
+        // Configure replanning with run-specific strategy weights
+        configureReplanning(config, params);
 
-        new ConfigWriter(config).write(CONFIG_OUTPUT_FILE);
+        // Write the config file for this specific run
+        new ConfigWriter(config).write(outputDirectory + "config_charDham.xml");
 
         // Load the scenario first, as we need its network to schedule the closures
         Scenario scenario = ScenarioUtils.loadScenario(config);
         Vehicles vehicles = scenario.getVehicles();
 
-//        scenario.getPopulation().getPersons().values().forEach(p -> p.getAttributes().putAttribute("rest", 100.0));
-
+        // Add vehicle types (these are fixed, not from CSV)
         VehicleType car = VehicleUtils.createVehicleType(Id.create(CAR_MODE, VehicleType.class), CAR_MODE);
         car.setPcuEquivalents(1.0);
         car.setMaximumVelocity(70 / 3.6);
@@ -104,8 +219,9 @@ public class RunCharDhamSingleSimulation {
         vehicles.addVehicleType(traveller);
 
         config.routing().setNetworkModes(modes);
-        // Schedule the nightly road closures using NetworkChangeEvents
-        scheduleNightlyLinkClosures(scenario, TIME_VARIANT_LINKS_FILE);
+
+        // Schedule the nightly road closures using NetworkChangeEvents (fixed logic)
+        scheduleNightlyLinkClosures(scenario);
 
         // Set up and run the controller
         Controler controler = new Controler(scenario);
@@ -135,6 +251,7 @@ public class RunCharDhamSingleSimulation {
         });
         controler.run();
     }
+
     /**
      * Configures the TrafficCharScenario custom module.
      */
@@ -147,14 +264,13 @@ public class RunCharDhamSingleSimulation {
         trafficCharConfigGroup.addQSimConfigGroup(TrafficCharConfigGroup.ROAD_TYPE_DEFAULT, config.qsim());
         config.getModules().put(TrafficCharConfigGroup.GROUP_NAME, trafficCharConfigGroup);
     }
+
     /**
      * Configures the LocationChoice module.
      */
     private static void configureLocationChoice(Config config) {
-        // Enable the base destination choice module
         DestinationChoiceConfigGroup dcConfig = ConfigUtils.addOrGetModule(config, DestinationChoiceConfigGroup.class);
-        dcConfig.setAlgorithm(DestinationChoiceConfigGroup.Algotype.random); // Use random choice from the choice set
-        // Set the activity type for which location choice should be performed
+        dcConfig.setAlgorithm(DestinationChoiceConfigGroup.Algotype.random);
         dcConfig.setFlexibleTypes("rest");
         dcConfig.setPlanSelector("ChangeExpBeta");
         dcConfig.setEpsilonScaleFactors("5.0");
@@ -162,59 +278,48 @@ public class RunCharDhamSingleSimulation {
         dcConfig.setScaleFactor(1);
     }
 
-    private static Set<Id<Link>> readLinkIdsFromCsv(String filePath) {
+    private static Set<Id<Link>> readLinkIdsFromCsv() {
         Set<Id<Link>> linkIds = new HashSet<>();
-        // Use a try-with-resources block for automatic file closing
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(RunCharDhamMultipleSimulation.TIME_VARIANT_LINKS_FILE))) {
             String line = br.readLine();
-            // 1. Check for an empty file
             if (line == null) {
-                throw new RuntimeException("CSV file is empty: " + filePath);
+                throw new RuntimeException("CSV file is empty: " + RunCharDhamMultipleSimulation.TIME_VARIANT_LINKS_FILE);
             }
-
-            // 2. Validate the header
             if (!line.trim().equalsIgnoreCase("id")) {
-                throw new RuntimeException("CSV file's first line must be the header 'id'. Found: '" + line + "' in file: " + filePath);
+                throw new RuntimeException("CSV file's first line must be the header 'id'. Found: '" + line + "' in file: " + RunCharDhamMultipleSimulation.TIME_VARIANT_LINKS_FILE);
             }
-
-            // 3. Read the rest of the lines containing the link IDs
             while ((line = br.readLine()) != null) {
                 String linkIdString = line.trim();
-                // 4. Skip any blank lines in the file
                 if (!linkIdString.isEmpty()) {
                     linkIds.add(Id.createLinkId(linkIdString));
                 }
             }
         } catch (IOException e) {
-            // Catches file-not-found or other read errors
-            throw new RuntimeException("Error reading link ID file: " + filePath, e);
+            throw new RuntimeException("Error reading link ID file: " + RunCharDhamMultipleSimulation.TIME_VARIANT_LINKS_FILE, e);
         }
-
-        System.out.println("Read " + linkIds.size() + " link IDs from " + filePath);
-        // Add a warning if the file was read but no IDs were found
+        System.out.println("Read " + linkIds.size() + " link IDs from " + RunCharDhamMultipleSimulation.TIME_VARIANT_LINKS_FILE);
         if (linkIds.isEmpty()) {
-            System.err.println("Warning: No link IDs were found in " + filePath + ". Please check the file content.");
+            System.err.println("Warning: No link IDs were found in " + RunCharDhamMultipleSimulation.TIME_VARIANT_LINKS_FILE + ". Please check the file content.");
         }
         return linkIds;
     }
+
     /**
      * Schedules nightly network change events to close all links from 10 PM to 4 AM.
      * This is achieved by drastically reducing the free speed on the links, making them impassable.
      *
      * @param scenario The MATSim scenario containing the network.
      */
-    private static void scheduleNightlyLinkClosures(Scenario scenario, String linksFilePath) {
+    private static void scheduleNightlyLinkClosures(Scenario scenario) {
         Network network = scenario.getNetwork();
-        Set<Id<Link>> linksToClose = readLinkIdsFromCsv(linksFilePath);
+        Set<Id<Link>> linksToClose = readLinkIdsFromCsv();
 
-        // Define the closure and reopening times in seconds from midnight
         double closeTimeOfDay_s = 22 * 3600; // 10:00 PM
         double reopenTimeOfDay_s = 4 * 3600;  // 4:00 AM
 
-        // Create closure events for the first 5 days of the simulation
-        int numberOfDaysToClose = 10;
+        int numberOfDaysToClose = 10; // Fixed for now
 
-        System.out.println("Scheduling nightly link closures for all links for " + numberOfDaysToClose + " days...");
+        System.out.println("Scheduling nightly link closures for " + linksToClose.size() + " links for " + numberOfDaysToClose + " days...");
 
         for (Id<Link> linkId : linksToClose) {
             Link link = network.getLinks().get(linkId);
@@ -237,7 +342,7 @@ public class RunCharDhamSingleSimulation {
                 double reopenEventTime = dayOffset_s + (24 * 3600) + reopenTimeOfDay_s;
                 NetworkChangeEvent reopenEvent = new NetworkChangeEvent(reopenEventTime);
                 reopenEvent.setFreespeedChange(new NetworkChangeEvent.ChangeValue(
-                        NetworkChangeEvent.ChangeType.ABSOLUTE_IN_SI_UNITS, link.getFreespeed())); // Restores original cap
+                        NetworkChangeEvent.ChangeType.ABSOLUTE_IN_SI_UNITS, link.getFreespeed())); // Restores original freespeed
                 reopenEvent.addLink(link);
                 NetworkUtils.addNetworkChangeEvent(network, reopenEvent);
             }
@@ -245,14 +350,12 @@ public class RunCharDhamSingleSimulation {
         System.out.println("✔ Nightly link closure events have been successfully added to the network.");
     }
 
-
-    private static void configureController(Config config) {
+    private static void configureController(Config config, RunParameters params, String outputDirectory) {
         config.controller().setFirstIteration(0);
-        config.controller().setLastIteration(LAST_ITERATION);
-        config.controller().setOutputDirectory(OUTPUT_DIRECTORY);
+        config.controller().setLastIteration(params.lastIteration); // From CSV
+        config.controller().setOutputDirectory(outputDirectory); // Unique for each run
         config.controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
         config.vspExperimental().setWritingOutputEvents(true);
-
     }
 
     private static void configureNetworkAndPlans(Config config) {
@@ -262,12 +365,11 @@ public class RunCharDhamSingleSimulation {
         config.facilities().setInputFile(FACILITIES_FILE);
     }
 
-    private static void configureQSim(Config config) {
+    private static void configureQSim(Config config, RunParameters params) {
         config.qsim().setStartTime(SIMULATION_START_TIME_H * 3600.0);
-//        config.qsim().setEndTime(5 * 24 * 3600);
         config.qsim().setUsePersonIdForMissingVehicleId(true);
-        config.qsim().setFlowCapFactor(FLOW_CAPACITY_FACTOR);
-        config.qsim().setStorageCapFactor(STORAGE_CAPACITY_FACTOR);
+        config.qsim().setFlowCapFactor(params.flowCapacityFactor); // From CSV
+        config.qsim().setStorageCapFactor(params.storageCapacityFactor); // From CSV
         config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
         config.qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.withHoles);
         config.qsim().setStuckTime(3600.);
@@ -277,76 +379,70 @@ public class RunCharDhamSingleSimulation {
         config.qsim().setVehiclesSource(QSimConfigGroup.VehiclesSource.modeVehicleTypesFromVehiclesData);
     }
 
-    private static void configureScoring(Config config) {
+    private static void configureScoring(Config config, RunParameters params) {
         config.scoring().setWriteExperiencedPlans(true);
         config.scoring().setLearningRate(1.0);
         config.scoring().setBrainExpBeta(2.0);
-        config.scoring().setLateArrival_utils_hr(-1);
-        config.scoring().setPerforming_utils_hr(6);
-//        config.scoring().setMemorizingExperiencedPlans(true);
+        config.scoring().setLateArrival_utils_hr(params.lateArrivalUtilsHr); // From CSV
+        config.scoring().setPerforming_utils_hr(params.performingUtilsHr); // From CSV
 
-        addActivityParams(config, "rest", REST_STOP_TYPICAL_DURATION_S, 0, 0, 3600.0);
-
+        addActivityParams(config, "rest", REST_STOP_TYPICAL_DURATION_S, 0, 0, MINIMUM_REST_DURATION_S);
 
         ScoringConfigGroup.ModeParams carParams = new ScoringConfigGroup.ModeParams(CAR_MODE);
         carParams.setConstant(0);
-        carParams.setMarginalUtilityOfTraveling(-6);
-//        carParams.setMonetaryDistanceRate(-0.005);
+        carParams.setMarginalUtilityOfTraveling(params.carMarginalUtilityOfTraveling); // From CSV
         config.scoring().addModeParams(carParams);
 
         ScoringConfigGroup.ModeParams motorbikeParams = new ScoringConfigGroup.ModeParams(MOTORBIKE_MODE);
         motorbikeParams.setConstant(0);
-        motorbikeParams.setMarginalUtilityOfTraveling(-6);
-//        motorbikeParams.setMonetaryDistanceRate(-0.005);
+        motorbikeParams.setMarginalUtilityOfTraveling(params.bikeMarginalUtilityOfTraveling); // From CSV
         config.scoring().addModeParams(motorbikeParams);
 
         ScoringConfigGroup.ModeParams travellerParams = new ScoringConfigGroup.ModeParams(TRAVELLER_MODE);
         travellerParams.setConstant(0);
-        travellerParams.setMarginalUtilityOfTraveling(-6);
+        travellerParams.setMarginalUtilityOfTraveling(params.travellerMarginalUtilityOfTraveling); // From CSV
         config.scoring().addModeParams(travellerParams);
 
-        addActivityParams(config, "Haridwar", 24 * 3600.0, 0, 0, 0); // Open 24h
-        addActivityParams(config, "visit-Srinagar", 24 * 3600.0, 0, 0, 0);
-        addActivityParams(config, "visit-Sonprayag", 24 * 3600.0, 0, 0, 0);
-        addActivityParams(config, "visit-Gaurikund", 24 * 3600.0, 0, 0, 0);
-        addActivityParams(config, "visit-Uttarkashi", 24 * 3600.0, 0, 0, 0);
-        addActivityParams(config, "visit-Barkot", 24 * 3600.0, 0, 0, 0);
-        addActivityParams(config, "visit-Joshimath", 24 * 3600.0, 0, 0, 0);
+        addActivityParams(config, "Haridwar", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S); // Open 24h
+        addActivityParams(config, "Srinagar", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Sonprayag", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Gaurikund", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Uttarkashi", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Barkot", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Joshimath", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
 
         // Main pilgrimage sites (Temples) with consistent opening/closing times
         double templeOpeningTime_s = TEMPLE_OPENING_TIME_H * 3600.0;
         double templeClosingTime_s = TEMPLE_CLOSING_TIME_H * 3600.0;
         double templeVisitDuration_s = 6 * 3600.0;
-        double minimalTempleDuration_s = 2 * 3600.0;
+        double minimalTempleDuration_s = 3 * 3600.0;
 
-        addActivityParams(config, "visit-Kedarnath", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s, minimalTempleDuration_s);
-        addActivityParams(config, "visit-Gangotri", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s, minimalTempleDuration_s);
-        addActivityParams(config, "visit-Yamunotri", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s, minimalTempleDuration_s);
-        addActivityParams(config, "visit-Badrinath", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s, minimalTempleDuration_s);
+        addActivityParams(config, "Kedarnath", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s, minimalTempleDuration_s);
+        addActivityParams(config, "Gangotri", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s, minimalTempleDuration_s);
+        addActivityParams(config, "Yamunotri", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s, minimalTempleDuration_s);
+        addActivityParams(config, "Badrinath", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s, minimalTempleDuration_s);
     }
 
     /**
-     * Rewrites the replanning strategy to use the required Location Choice strategy.
+     * Configures the replanning strategy with weights from CSV.
      */
-    private static void configureReplanning(Config config) {
-        config.replanning().clearStrategySettings(); // Clear existing strategies first
+    private static void configureReplanning(Config config, RunParameters params) {
+        config.replanning().clearStrategySettings();
 
-        // The main strategy for performing location choice
         ReplanningConfigGroup.StrategySettings lcStrategy = new ReplanningConfigGroup.StrategySettings();
         lcStrategy.setStrategyName(DestinationChoiceConfigGroup.GROUP_NAME);
-        lcStrategy.setWeight(0.3); // High weight to ensure location choice is explored
+        lcStrategy.setWeight(params.locationChoiceWeight); // From CSV
         config.replanning().addStrategySettings(lcStrategy);
 
-        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator, 0.6);
-        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.ReRoute, 0.1);
-//        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator_ReRoute, 0.5);
-        config.timeAllocationMutator().setMutationRange(7200);
+        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator, params.timeAllocationMutatorWeight); // From CSV
+        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.ReRoute, params.reRouteWeight); // From CSV
+
+        config.timeAllocationMutator().setMutationRange(12.0 * 3600.0);
         config.timeAllocationMutator().setMutateAroundInitialEndTimeOnly(true);
-        config.timeAllocationMutator().setAffectingDuration(false);
-        config.timeAllocationMutator().setMutationRangeStep(60 * 10);
+        config.timeAllocationMutator().setAffectingDuration(true);
+        config.timeAllocationMutator().setMutationRangeStep(30.0 * 60.0);
 
         config.replanning().setFractionOfIterationsToDisableInnovation(0.8);
-//        config.replanningAnnealer().setActivateAnnealingModule(true);
     }
 
     private static void addActivityParams(Config config, String activityType, double typicalDuration, double openingTime, double closingTime, double minimalDuration) {

@@ -1,4 +1,4 @@
-package playground.anuj;
+package playground.anuj.charDham.population;
 
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
@@ -7,13 +7,8 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.*;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
-import org.matsim.vehicles.VehicleCapacity;
-import org.matsim.vehicles.VehicleType;
-import org.matsim.vehicles.VehicleUtils;
-import org.matsim.vehicles.Vehicles;
 import playground.amit.Dehradun.DehradunUtils;
 
 import java.io.BufferedReader;
@@ -28,7 +23,7 @@ public class CharDhamInitialPlans {
     public static final String PASSENGER_ATTRIBUTE = "numberOfPassengers";
 
     // Reintroduced duration constants as requested
-    private static final double REST_STOP_DURATION = 2.0 * 3600.0;     // 2 hours for a chosen rest stop
+    private static final double REST_STOP_DURATION = 3.0 * 3600.0;     // 2 hours for a chosen rest stop
     private static final double DHAM_VISIT_DURATION = 6.0 * 3600.0;      // 6 hours for darshan/visit
     private static final double OVERNIGHT_STAY_DURATION = 12.0 * 3600.0; // 12 hours for an overnight halt
 
@@ -124,44 +119,53 @@ public class CharDhamInitialPlans {
                 addLeg(populationFactory, plan, primaryMode);
                 if (dham.equals("Kedarnath")) {
                     // Stop at Srinagar for rest
-                    addActivityWithDuration(populationFactory, plan, "visit-Srinagar", location2Coord.get("Srinagar"), REST_STOP_DURATION);
+                    addActivityWithDuration(populationFactory, plan, "Srinagar", location2Coord.get("Srinagar"), REST_STOP_DURATION);
                     addLeg(populationFactory, plan, primaryMode);
 
                     // Overnight halt at Sonprayag before the trek, departing next morning
-                    addActivityWithDuration(populationFactory, plan, "visit-Sonprayag", location2Coord.get("Sonprayag"), REST_STOP_DURATION);
+                    addActivityWithDuration(populationFactory, plan, "Sonprayag", location2Coord.get("Sonprayag"), REST_STOP_DURATION);
 
                     addLeg(populationFactory, plan, primaryMode); // Sonprayag to Gaurikund by local taxi
 
-                    addActivityWithDuration(populationFactory, plan, "visit-Gaurikund", location2Coord.get("Gaurikund"), REST_STOP_DURATION); // Short stop to start trek
+                    addActivityWithDuration(populationFactory, plan, "Gaurikund", location2Coord.get("Gaurikund"), REST_STOP_DURATION); // Short stop to start trek
                     addLeg(populationFactory, plan, WALK_MODE); // Gaurikund to Kedarnath trek
 
-                    addActivityWithDuration(populationFactory, plan, "visit-Kedarnath", location2Coord.get("Kedarnath"), DHAM_VISIT_DURATION); // Visit duration
+                    addActivityWithDuration(populationFactory, plan, "Kedarnath", location2Coord.get("Kedarnath"), DHAM_VISIT_DURATION); // Visit duration
                     addLeg(populationFactory, plan, WALK_MODE); // Kedarnath to Gaurikund trek
 
-                    addActivityWithDuration(populationFactory, plan, "visit-Gaurikund", location2Coord.get("Gaurikund"), REST_STOP_DURATION); // Short stop after trek
+                    addActivityWithDuration(populationFactory, plan, "Gaurikund", location2Coord.get("Gaurikund"), REST_STOP_DURATION); // Short stop after trek
                     addLeg(populationFactory, plan, primaryMode); // Gaurikund to Sonprayag by local taxi/vehicle
 
                     // Another overnight halt at Sonprayag on return, departing next morning
-                    addActivityWithDuration(populationFactory, plan, "visit-Sonprayag", location2Coord.get("Sonprayag"), REST_STOP_DURATION);
+                    addActivityWithDuration(populationFactory, plan, "Sonprayag", location2Coord.get("Sonprayag"), REST_STOP_DURATION);
 
                 } else if (dham.equals("Gangotri")) {
                     // Intermediate stop in Uttarkashi
-                    addActivityWithDuration(populationFactory, plan, "visit-Uttarkashi", location2Coord.get("Uttarkashi"), REST_STOP_DURATION);
+                    addActivityWithDuration(populationFactory, plan, "Uttarkashi", location2Coord.get("Uttarkashi"), REST_STOP_DURATION);
                     addLeg(populationFactory, plan, primaryMode);
 
-                    addActivityWithDuration(populationFactory, plan, "visit-Gangotri", location2Coord.get("Gangotri"), DHAM_VISIT_DURATION);
+                    addActivityWithDuration(populationFactory, plan, "Gangotri", location2Coord.get("Gangotri"), DHAM_VISIT_DURATION);
+                    addLeg(populationFactory, plan, primaryMode);
+                    
+                    addActivityWithDuration(populationFactory, plan, "Uttarkashi", location2Coord.get("Uttarkashi"), REST_STOP_DURATION);
                 } else if (dham.equals("Yamunotri")) {
                     // Intermediate stop in Barkot
-                    addActivityWithDuration(populationFactory, plan, "visit-Barkot", location2Coord.get("Barkot"), REST_STOP_DURATION);
+                    addActivityWithDuration(populationFactory, plan, "Barkot", location2Coord.get("Barkot"), REST_STOP_DURATION);
                     addLeg(populationFactory, plan, primaryMode);
 
-                    addActivityWithDuration(populationFactory, plan, "visit-Yamunotri", location2Coord.get("Yamunotri"), DHAM_VISIT_DURATION);
+                    addActivityWithDuration(populationFactory, plan, "Yamunotri", location2Coord.get("Yamunotri"), DHAM_VISIT_DURATION);
+                    addLeg(populationFactory, plan, primaryMode);
+                    
+                    addActivityWithDuration(populationFactory, plan, "Barkot", location2Coord.get("Barkot"), REST_STOP_DURATION);
                 } else if (dham.equals("Badrinath")) {
                     // Intermediate stop in Joshimath
-                    addActivityWithDuration(populationFactory, plan, "visit-Joshimath", location2Coord.get("Joshimath"), REST_STOP_DURATION);
+                    addActivityWithDuration(populationFactory, plan, "Joshimath", location2Coord.get("Joshimath"), REST_STOP_DURATION);
                     addLeg(populationFactory, plan, primaryMode);
 
-                    addActivityWithDuration(populationFactory, plan, "visit-Badrinath", location2Coord.get("Badrinath"), DHAM_VISIT_DURATION);
+                    addActivityWithDuration(populationFactory, plan, "Badrinath", location2Coord.get("Badrinath"), DHAM_VISIT_DURATION);
+                    addLeg(populationFactory, plan, primaryMode);
+
+                    addActivityWithDuration(populationFactory, plan, "Joshimath", location2Coord.get("Joshimath"), REST_STOP_DURATION);
                 }
             }
             // Return to Haridwar
