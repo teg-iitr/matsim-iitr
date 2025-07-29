@@ -15,6 +15,7 @@ import java.util.Set;
 public class SimulationAnalysisResult {
     public String runId;
     public int iteration;
+    public String day;
 
     // --- Rest Activity Metrics (per activityFacility/link) ---
     // Key: ActivityFacilityId of the activityFacility where the rest activity occurred
@@ -54,13 +55,15 @@ public class SimulationAnalysisResult {
     public Set<Id<Person>> agentsTravelingAtNight = new HashSet<>();
 
     // Constructor to initialize with run details
-    public SimulationAnalysisResult(String runId, int iteration) {
+    public SimulationAnalysisResult(String runId, String day, int iteration) {
         this.runId = runId;
+        this.day = day;
         this.iteration = iteration;
     }
 
+
     /**
-     * Calculates derived metrics after all raw data has been collected by the event handler.
+     * Calculates derived metrics after all raw data has been collected/aggregated.
      */
     public void calculateDerivedMetrics() {
         // Calculate average rest duration per activityFacility
@@ -71,10 +74,11 @@ public class SimulationAnalysisResult {
             if (totalUses != null && totalUses > 0) {
                 avgRestDurationPerActivityFacility.put(activityFacilityId, totalDuration / totalUses);
             } else {
-                avgRestDurationPerActivityFacility.put(activityFacilityId, 0.0); // Should not happen if data is consistent
+                avgRestDurationPerActivityFacility.put(activityFacilityId, 0.0);
             }
         }
 
+        // Calculate average Dham activity duration per type
         for (Map.Entry<String, Double> entry : totalDhamDuration.entrySet()) {
             String dhamType = entry.getKey();
             Double totalDuration = entry.getValue();
@@ -87,7 +91,6 @@ public class SimulationAnalysisResult {
         }
 
         // Calculate overall travel metrics
-        // Filter for agents who actually traveled (total travel time > 0)
         this.totalAgentsSimulated = (int) totalTravelTimePerPerson.keySet().stream()
                 .filter(p -> totalTravelTimePerPerson.get(p) != null && totalTravelTimePerPerson.get(p) > 0)
                 .count();
@@ -124,5 +127,36 @@ public class SimulationAnalysisResult {
 
         // Calculate number of unique agents traveling at night
         this.numAgentsNightTravel = this.agentsTravelingAtNight.size();
+    }
+
+    /**
+     * Aggregates data from another SimulationAnalysisResult into this one.
+     * Useful for summing up day-wise results into an "all_days" result.
+     * @param other The other SimulationAnalysisResult to aggregate.
+     */
+    public void aggregate(SimulationAnalysisResult other) {
+        // Aggregate rest activity metrics
+        other.totalRestActivityUsesPerFacility.forEach((facilityId, count) ->
+                this.totalRestActivityUsesPerFacility.merge(facilityId, count, Integer::sum));
+        other.totalRestDurationPerActivityFacility.forEach((facilityId, duration) ->
+                this.totalRestDurationPerActivityFacility.merge(facilityId, duration, Double::sum));
+
+        // Aggregate Dham activity metrics
+        other.totalDhamActivityUses.forEach((dhamType, count) ->
+                this.totalDhamActivityUses.merge(dhamType, count, Integer::sum));
+        other.totalDhamDuration.forEach((dhamType, duration) ->
+                this.totalDhamDuration.merge(dhamType, duration, Double::sum));
+
+        // Aggregate travel time metrics (raw data for recalculation)
+        other.totalTravelTimePerPerson.forEach((personId, time) ->
+                this.totalTravelTimePerPerson.merge(personId, time, Double::sum));
+        other.totalLegsPerMode.forEach((mode, count) ->
+                this.totalLegsPerMode.merge(mode, count, Integer::sum));
+        other.totalTravelTimePerMode.forEach((mode, time) ->
+                this.totalTravelTimePerMode.merge(mode, time, Double::sum));
+
+        // Aggregate nighttime travel
+        this.totalNightTravelTime_s += other.totalNightTravelTime_s;
+        this.agentsTravelingAtNight.addAll(other.agentsTravelingAtNight); // Add all unique agents
     }
 }

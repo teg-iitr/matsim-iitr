@@ -24,9 +24,9 @@ public class CharDhamOutputAnalyzer {
 
     private static final String BASE_OUTPUT_DIRECTORY = "output/charDham_runs/"; // Must match RunCharDhamMultipleSimulation
     private static final String PARAMETER_RUNS_CSV = "input/parameter_runs.csv"; // Must match RunCharDhamMultipleSimulation
-    private static final String ANALYSIS_SUMMARY_CSV = BASE_OUTPUT_DIRECTORY + "analysis_summary.csv";
-    private static final String FACILITY_REST_ANALYSIS_CSV = BASE_OUTPUT_DIRECTORY + "facility_rest_analysis.csv";
-    private static final String DHAM_ACTIVITY_ANALYSIS_CSV = BASE_OUTPUT_DIRECTORY + "dham_activity_analysis.csv";
+    private static final String ANALYSIS_SUMMARY_BASE_NAME = "analysis_summary";
+    private static final String FACILITY_REST_ANALYSIS_BASE_NAME = "facility_rest_analysis";
+    private static final String DHAM_ACTIVITY_ANALYSIS_BASE_NAME = "dham_activity_analysis";
 
     // Modes are needed for consistent header generation in the summary CSV
     static final String CAR_MODE = "car";
@@ -38,11 +38,6 @@ public class CharDhamOutputAnalyzer {
             "Kedarnath", "Gangotri", "Yamunotri", "Badrinath"
     ));
 
-    /**
-     * Helper class to hold parameters for a single simulation run.
-     * Only 'runId' and 'lastIteration' are strictly needed for analysis,
-     * but keeping the full structure for consistency and potential future use.
-     */
     private static class RunParameters {
         String runId;
         int lastIteration;
@@ -72,16 +67,17 @@ public class CharDhamOutputAnalyzer {
         System.out.println("Starting analysis of MATSim simulation outputs...");
 
         try {
-            // Ensure the base output directory exists for the summary file
+            // Ensure the base output directory exists for the summary files
             Files.createDirectories(Paths.get(BASE_OUTPUT_DIRECTORY));
-            writeAnalysisSummaryHeader();
-            writeFacilityRestAnalysisHeader();
-            writeDhamActivityAnalysisHeader();
+            // Headers will be written for each day (dayX and all_days) dynamically
         } catch (IOException e) {
             System.err.println("Error preparing analysis summary file: " + e.getMessage());
             e.printStackTrace();
             return;
         }
+
+        // Keep track of which days (day0, day1, all_days) have had their headers written
+        Set<String> writtenHeaders = new HashSet<>();
 
         for (int i = 0; i < runs.size(); i++) {
             RunParameters params = runs.get(i);
@@ -98,29 +94,203 @@ public class CharDhamOutputAnalyzer {
             }
 
             try {
-                SimulationAnalysisResult result = processSingleRunEvents(params.runId, params.lastIteration, eventsFilePath);
-                writeAnalysisResultToSummary(result);
-                writeFacilityRestAnalysisData(result);
-                writeDhamActivityAnalysisData(result);
+                // Process events and get results for all days (day-wise + all_days)
+                Map<String, SimulationAnalysisResult> resultsByPeriod = processSingleRunEvents(params.runId, params.lastIteration, eventsFilePath);
+
+                for (Map.Entry<String, SimulationAnalysisResult> entry : resultsByPeriod.entrySet()) {
+                    String day = entry.getKey();
+                    SimulationAnalysisResult result = entry.getValue();
+
+                    // Write headers if not already written for this day
+                    if (!writtenHeaders.contains(day)) {
+                        writeAnalysisSummaryHeader(day);
+                        writeFacilityRestAnalysisHeader(day);
+                        writeDhamActivityAnalysisHeader(day);
+                        writtenHeaders.add(day);
+                    }
+
+                    // Append data for this day
+                    writeAnalysisResultToSummary(result);
+                    writeFacilityRestAnalysisData(result);
+                    writeDhamActivityAnalysisData(result);
+                }
                 System.out.println("--- Analysis for " + params.runId + " COMPLETED ---");
             } catch (Exception e) {
                 System.err.println("!!! Error analyzing events for run " + params.runId + ": " + e.getMessage());
                 e.printStackTrace();
             }
         }
-        System.out.println("\nAll analyses finished. Summary available at: " + ANALYSIS_SUMMARY_CSV);
+        System.out.println("\nAll analyses finished. Summaries available in: " + BASE_OUTPUT_DIRECTORY);
     }
+
     /**
-     * Writes the header for the per-facility rest activity analysis CSV file.
+     * Reads simulation parameters from a CSV file.
      *
+     * @return A list of RunParameters objects, one for each row.
+     */
+    private static List<RunParameters> readRunParameters() {
+        List<RunParameters> runs = new ArrayList<>();
+        try (BufferedReader br = IOUtils.getBufferedReader(PARAMETER_RUNS_CSV)) {
+            String headerLine = br.readLine();
+            if (headerLine == null) {
+                System.err.println("CSV file is empty: " + PARAMETER_RUNS_CSV);
+                return runs;
+            }
+            String[] headers = headerLine.split(",");
+
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue; // Skip empty lines
+                String[] parts = line.split(",");
+                if (parts.length != headers.length) {
+                    System.err.println("Warning: Skipping malformed line (column count mismatch) in " + PARAMETER_RUNS_CSV + ": " + line + ". Expected " + headers.length + " columns, found " + parts.length + ".");
+                    continue;
+                }
+                try {
+                    runs.add(new RunParameters(parts, headers));
+                } catch (NumberFormatException e) {
+                    System.err.println("Warning: Skipping line due to number format error in " + PARAMETER_RUNS_CSV + ": " + line + " - " + e.getMessage());
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading parameter runs CSV file: " + PARAMETER_RUNS_CSV);
+            e.printStackTrace();
+        }
+        return runs;
+    }
+
+    /**
+     * Processes the events file for a single simulation run and returns the aggregated results.
+     *
+     * @param runId The ID of the simulation run.
+     * @param iteration The last iteration of the simulation run.
+     * @param eventsFilePath The path to the output_events.xml.gz file.
+     * @return A Map where keys are "dayX" or "all_days", and values are SimulationAnalysisResult objects.
+     */
+    private static Map<String, SimulationAnalysisResult> processSingleRunEvents(String runId, int iteration, String eventsFilePath) {
+        EventsManager eventsManager = EventsUtils.createEventsManager();
+        CharDhamAnalysisEventHandler analysisHandler = new CharDhamAnalysisEventHandler(runId, iteration);
+        eventsManager.addHandler(analysisHandler);
+
+        MatsimEventsReader eventsReader = new MatsimEventsReader(eventsManager);
+        eventsReader.readFile(eventsFilePath); // This will throw IOException if file is not found/readable
+
+        return analysisHandler.getAnalysisResults();
+    }
+
+    /**
+     * Generates the full file path for a given base name and day.
+     * @param baseName The base name of the CSV file (e.g., "analysis_summary").
+     * @param day The day (e.g., "day0", "all_days").
+     * @return The full file path.
+     */
+    private static String getFilePath(String baseName, String day) {
+        return BASE_OUTPUT_DIRECTORY + baseName + "_" + day + ".csv";
+    }
+
+    /**
+     * Writes the header for the main analysis summary CSV file for a specific day.
+     * @param day The day (e.g., "day0", "all_days").
      * @throws IOException If an I/O error occurs.
      */
-    private static void writeFacilityRestAnalysisHeader() throws IOException {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(CharDhamOutputAnalyzer.FACILITY_REST_ANALYSIS_CSV, false))) { // false to overwrite
+    private static void writeAnalysisSummaryHeader(String day) throws IOException {
+        String filePath = getFilePath(ANALYSIS_SUMMARY_BASE_NAME, day);
+        try (PrintWriter writer = new PrintWriter(new FileWriter(filePath, false))) { // false to overwrite
             List<String> headers = new ArrayList<>();
             headers.add("run_id");
             headers.add("iteration");
-            headers.add("facility_link_id");
+            headers.add("total_agents_simulated");
+            headers.add("total_travel_time_s");
+            headers.add("average_travel_time_s");
+            headers.add("min_travel_time_s");
+            headers.add("max_travel_time_s");
+            headers.add("total_legs");
+            headers.add("average_leg_travel_time_s");
+
+            headers.add("total_rest_activity_uses_all_facilities");
+            headers.add("total_rest_duration_all_facilities_s");
+            headers.add("avg_rest_duration_all_facilities_s");
+
+            headers.add("total_dham_activity_uses_all");
+            headers.add("total_dham_duration_all_s");
+            headers.add("avg_dham_duration_all_s");
+
+            headers.add("total_night_travel_time_s");
+            headers.add("num_agents_night_travel");
+
+            for (String mode : modes) {
+                headers.add("legs_" + mode);
+                headers.add("travel_time_" + mode + "_s");
+                headers.add("avg_travel_time_" + mode + "_s");
+            }
+
+            writer.println(String.join(",", headers));
+        }
+    }
+
+    /**
+     * Appends a row of overall analysis results to the main summary CSV file.
+     * @param result The SimulationAnalysisResult object.
+     * @throws IOException If an I/O error occurs.
+     */
+    private static void writeAnalysisResultToSummary(SimulationAnalysisResult result) throws IOException {
+        String filePath = getFilePath(ANALYSIS_SUMMARY_BASE_NAME, result.day);
+        try (PrintWriter writer = new PrintWriter(new FileWriter(filePath, true))) { // true to append
+            List<String> row = new ArrayList<>();
+            row.add(result.runId);
+            row.add(String.valueOf(result.iteration));
+            row.add(String.valueOf(result.totalAgentsSimulated));
+            row.add(String.valueOf(result.totalTravelTime_s));
+            row.add(String.valueOf(result.averageTravelTime_s));
+            row.add(String.valueOf(result.minTravelTime_s));
+            row.add(String.valueOf(result.maxTravelTime_s));
+            row.add(String.valueOf(result.totalLegs));
+            row.add(String.valueOf(result.averageLegTravelTime_s));
+
+            int totalRestActivityUsesAllFacilities = result.totalRestActivityUsesPerFacility.values().stream().mapToInt(Integer::intValue).sum();
+            double totalRestDurationAllFacilities = result.totalRestDurationPerActivityFacility.values().stream().mapToDouble(Double::doubleValue).sum();
+            double avgRestDurationAllFacilities = totalRestActivityUsesAllFacilities > 0 ?
+                    totalRestDurationAllFacilities / totalRestActivityUsesAllFacilities : 0.0;
+
+            row.add(String.valueOf(totalRestActivityUsesAllFacilities));
+            row.add(String.valueOf(totalRestDurationAllFacilities));
+            row.add(String.valueOf(avgRestDurationAllFacilities));
+
+
+            int totalDhamActivityUsesAll = result.totalDhamActivityUses.values().stream().mapToInt(Integer::intValue).sum();
+            double totalDhamDurationAll = result.totalDhamDuration.values().stream().mapToDouble(Double::doubleValue).sum();
+            double avgDhamDurationAll = totalDhamActivityUsesAll > 0 ?
+                    totalDhamDurationAll / totalDhamActivityUsesAll : 0.0;
+
+            row.add(String.valueOf(totalDhamActivityUsesAll));
+            row.add(String.valueOf(totalDhamDurationAll));
+            row.add(String.valueOf(avgDhamDurationAll));
+
+            row.add(String.valueOf(result.totalNightTravelTime_s));
+            row.add(String.valueOf(result.numAgentsNightTravel));
+
+            for (String mode : modes) {
+                row.add(String.valueOf(result.totalLegsPerMode.getOrDefault(mode, 0)));
+                row.add(String.valueOf(result.totalTravelTimePerMode.getOrDefault(mode, 0.0)));
+                row.add(String.valueOf(result.avgTravelTimePerMode.getOrDefault(mode, 0.0)));
+            }
+
+            writer.println(String.join(",", row));
+        }
+    }
+
+    /**
+     * Writes the header for the per-facility rest activity analysis CSV file for a specific day.
+     * @param day The day (e.g., "day0", "all_days").
+     * @throws IOException If an I/O error occurs.
+     */
+    private static void writeFacilityRestAnalysisHeader(String day) throws IOException {
+        String filePath = getFilePath(FACILITY_REST_ANALYSIS_BASE_NAME, day);
+        try (PrintWriter writer = new PrintWriter(new FileWriter(filePath, false))) { // false to overwrite
+            List<String> headers = new ArrayList<>();
+            headers.add("run_id");
+            headers.add("iteration");
+            headers.add("facility_id");
             headers.add("total_rest_uses");
             headers.add("total_rest_duration_s");
             headers.add("average_rest_duration_s");
@@ -129,13 +299,13 @@ public class CharDhamOutputAnalyzer {
     }
 
     /**
-     * ppends per-facility rest activity data to the facility analysis CSV file.
-     *
+     * Appends per-facility rest activity data to the facility analysis CSV file.
      * @param result The SimulationAnalysisResult object containing per-facility data.
      * @throws IOException If an I/O error occurs.
      */
     private static void writeFacilityRestAnalysisData(SimulationAnalysisResult result) throws IOException {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(CharDhamOutputAnalyzer.FACILITY_REST_ANALYSIS_CSV, true))) { // true to append
+        String filePath = getFilePath(FACILITY_REST_ANALYSIS_BASE_NAME, result.day);
+        try (PrintWriter writer = new PrintWriter(new FileWriter(filePath, true))) { // true to append
             for (Map.Entry<Id<ActivityFacility>, Integer> entry : result.totalRestActivityUsesPerFacility.entrySet()) {
                 Id<ActivityFacility> activityFacilityId = entry.getKey();
                 int totalUses = entry.getValue();
@@ -153,161 +323,15 @@ public class CharDhamOutputAnalyzer {
             }
         }
     }
-    /**
-     * Reads simulation parameters from a CSV file.
-     *
-     * @return A list of RunParameters objects, one for each row.
-     */
-    private static List<RunParameters> readRunParameters() {
-        List<RunParameters> runs = new ArrayList<>();
-        try (BufferedReader br = IOUtils.getBufferedReader(CharDhamOutputAnalyzer.PARAMETER_RUNS_CSV)) {
-            String headerLine = br.readLine();
-            if (headerLine == null) {
-                System.err.println("CSV file is empty: " + CharDhamOutputAnalyzer.PARAMETER_RUNS_CSV);
-                return runs;
-            }
-            String[] headers = headerLine.split(",");
-
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (line.trim().isEmpty()) continue; // Skip empty lines
-                String[] parts = line.split(",");
-                if (parts.length != headers.length) {
-                    System.err.println("Warning: Skipping malformed line (column count mismatch) in " + CharDhamOutputAnalyzer.PARAMETER_RUNS_CSV + ": " + line + ". Expected " + headers.length + " columns, found " + parts.length + ".");
-                    continue;
-                }
-                try {
-                    runs.add(new RunParameters(parts, headers));
-                } catch (NumberFormatException e) {
-                    System.err.println("Warning: Skipping line due to number format error in " + CharDhamOutputAnalyzer.PARAMETER_RUNS_CSV + ": " + line + " - " + e.getMessage());
-                }
-            }
-        } catch (IOException e) {
-            System.err.println("Error reading parameter runs CSV file: " + CharDhamOutputAnalyzer.PARAMETER_RUNS_CSV);
-            e.printStackTrace();
-        }
-        return runs;
-    }
 
     /**
-     * Processes the events file for a single simulation run and returns the aggregated results.
-     *
-     * @param runId The ID of the simulation run.
-     * @param iteration The last iteration of the simulation run.
-     * @param eventsFilePath The path to the output_events.xml.gz file.
-     * @return A SimulationAnalysisResult object.
-     */
-    private static SimulationAnalysisResult processSingleRunEvents(String runId, int iteration, String eventsFilePath) {
-        EventsManager eventsManager = EventsUtils.createEventsManager();
-        CharDhamAnalysisEventHandler analysisHandler = new CharDhamAnalysisEventHandler(runId, iteration);
-        eventsManager.addHandler(analysisHandler);
-
-        MatsimEventsReader eventsReader = new MatsimEventsReader(eventsManager);
-        eventsReader.readFile(eventsFilePath); // This will throw IOException if file is not found/readable
-
-        return analysisHandler.getAnalysisResults();
-    }
-
-    /**
-     * Writes the header for the analysis summary CSV file.
-     *
+     * Writes the header for the per-Dham activity analysis CSV file for a specific day.
+     * @param day The day (e.g., "day0", "all_days").
      * @throws IOException If an I/O error occurs.
      */
-    private static void writeAnalysisSummaryHeader() throws IOException {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(CharDhamOutputAnalyzer.ANALYSIS_SUMMARY_CSV, false))) { // false to overwrite
-            List<String> headers = new ArrayList<>();
-            headers.add("run_id");
-            headers.add("iteration");
-            headers.add("total_agents_simulated");
-            headers.add("total_travel_time_s");
-            headers.add("average_travel_time_s");
-            headers.add("min_travel_time_s");
-            headers.add("max_travel_time_s");
-            headers.add("total_legs");
-            headers.add("average_leg_travel_time_s");
-
-            // Add headers for rest activity metrics (example for a few facilities, or dynamically if needed)
-            headers.add("num_rest_facilities_visited");
-            headers.add("total_rest_duration_all_facilities_s");
-            headers.add("avg_rest_duration_all_facilities_s"); // Average of averages or total/total agents
-
-            // Headers for Dham activity metrics
-            for (String dhamType : DHAM_ACTIVITY_TYPES) {
-                headers.add(dhamType + "_uses");
-                headers.add(dhamType + "_total_duration_s");
-                headers.add(dhamType + "_avg_duration_s");
-            }
-
-            // Header for nighttime travel
-            headers.add("total_night_travel_time_s");
-            headers.add("num_agents_night_travel");
-
-            // Add headers for mode-specific metrics
-            for (String mode : modes) {
-                headers.add("legs_" + mode);
-                headers.add("travel_time_" + mode + "_s");
-                headers.add("avg_travel_time_" + mode + "_s");
-            }
-
-            writer.println(String.join(",", headers));
-        }
-    }
-
-    /**
-     * Appends a row of analysis results to the summary CSV file.
-     *
-     * @param result The SimulationAnalysisResult object.
-     * @throws IOException If an I/O error occurs.
-     */
-    private static void writeAnalysisResultToSummary(SimulationAnalysisResult result) throws IOException {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(CharDhamOutputAnalyzer.ANALYSIS_SUMMARY_CSV, true))) { // true to append
-            List<String> row = new ArrayList<>();
-            row.add(result.runId);
-            row.add(String.valueOf(result.iteration));
-            row.add(String.valueOf(result.totalAgentsSimulated));
-            row.add(String.valueOf(result.totalTravelTime_s));
-            row.add(String.valueOf(result.averageTravelTime_s));
-            row.add(String.valueOf(result.minTravelTime_s));
-            row.add(String.valueOf(result.maxTravelTime_s));
-            row.add(String.valueOf(result.totalLegs));
-            row.add(String.valueOf(result.averageLegTravelTime_s));
-
-            // Aggregate rest activity metrics for summary
-            int totalRestActivityUsesAllFacilities = result.totalRestActivityUsesPerFacility.values().stream().mapToInt(Integer::intValue).sum();
-            double totalRestDurationAllFacilities = result.totalRestDurationPerActivityFacility.values().stream().mapToDouble(Double::doubleValue).sum();
-            double avgRestDurationAllFacilities = totalRestActivityUsesAllFacilities > 0 ?
-                    result.avgRestDurationPerActivityFacility.values().stream().mapToDouble(Double::doubleValue).average().orElse(0.0) : 0.0;
-
-            row.add(String.valueOf(totalRestActivityUsesAllFacilities));
-            row.add(String.valueOf(totalRestDurationAllFacilities));
-            row.add(String.valueOf(avgRestDurationAllFacilities));
-
-            for (String dhamType : DHAM_ACTIVITY_TYPES) {
-                row.add(String.valueOf(result.totalDhamActivityUses.getOrDefault(dhamType, 0)));
-                row.add(String.valueOf(result.totalDhamDuration.getOrDefault(dhamType, 0.0)));
-                row.add(String.valueOf(result.avgDhamDuration.getOrDefault(dhamType, 0.0)));
-            }
-            // dd nighttime travel metric
-            row.add(String.valueOf(result.totalNightTravelTime_s));
-            row.add(String.valueOf(result.numAgentsNightTravel));
-
-            // Add mode-specific metrics
-            for (String mode : modes) {
-                row.add(String.valueOf(result.totalLegsPerMode.getOrDefault(mode, 0)));
-                row.add(String.valueOf(result.totalTravelTimePerMode.getOrDefault(mode, 0.0)));
-                row.add(String.valueOf(result.avgTravelTimePerMode.getOrDefault(mode, 0.0)));
-            }
-
-            writer.println(String.join(",", row));
-        }
-    }
-    /**
-     * NEW: Writes the header for the per-Dham activity analysis CSV file.
-     *
-     * @throws IOException If an I/O error occurs.
-     */
-    private static void writeDhamActivityAnalysisHeader() throws IOException {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(CharDhamOutputAnalyzer.DHAM_ACTIVITY_ANALYSIS_CSV, false))) { // false to overwrite
+    private static void writeDhamActivityAnalysisHeader(String day) throws IOException {
+        String filePath = getFilePath(DHAM_ACTIVITY_ANALYSIS_BASE_NAME, day);
+        try (PrintWriter writer = new PrintWriter(new FileWriter(filePath, false))) { // false to overwrite
             List<String> headers = new ArrayList<>();
             headers.add("run_id");
             headers.add("iteration");
@@ -320,13 +344,13 @@ public class CharDhamOutputAnalyzer {
     }
 
     /**
-     * NEW: Appends per-Dham activity data to the Dham activity analysis CSV file.
-     *
+     * Appends per-Dham activity data to the Dham activity analysis CSV file.
      * @param result The SimulationAnalysisResult object containing per-Dham data.
      * @throws IOException If an I/O error occurs.
      */
     private static void writeDhamActivityAnalysisData(SimulationAnalysisResult result) throws IOException {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(CharDhamOutputAnalyzer.DHAM_ACTIVITY_ANALYSIS_CSV, true))) { // true to append
+        String filePath = getFilePath(DHAM_ACTIVITY_ANALYSIS_BASE_NAME, result.day);
+        try (PrintWriter writer = new PrintWriter(new FileWriter(filePath, true))) { // true to append
             for (String dhamType : DHAM_ACTIVITY_TYPES) { // Iterate through predefined Dham types
                 int totalUses = result.totalDhamActivityUses.getOrDefault(dhamType, 0);
                 double totalDuration = result.totalDhamDuration.getOrDefault(dhamType, 0.0);

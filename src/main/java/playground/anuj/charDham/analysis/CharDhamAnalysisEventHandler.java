@@ -30,37 +30,30 @@ public class CharDhamAnalysisEventHandler implements
     // --- Data for rest activities ---
     // Stores the start time of a "rest" activity for each person at a specific facility (ActivityFacility ID).
     // Used to calculate the duration of the activity.
-    private final Map<Id<ActivityFacility>, Map<Id<Person>, Double>> restActivityStartTimes = new HashMap<>();
+    private final Map<Integer, Map<Id<ActivityFacility>, Map<Id<Person>, Double>>> restActivityStartTimes = new HashMap<>();
     // Counts how many unique agents visited a "rest" activity at a given facility (ActivityFacility ID).
-    private final Map<Id<ActivityFacility>, Integer> totalRestActivityUsesPerFacility = new HashMap<>();
+    private final Map<Integer, Map<Id<ActivityFacility>, Integer>> totalRestActivityUsesPerFacility = new HashMap<>();
     // Accumulates the total time (duration) spent by all agents at "rest" activities at a given facility (ActivityFacility ID).
-    private final Map<Id<ActivityFacility>, Double> totalRestDurationPerFacility = new HashMap<>();
+    private final Map<Integer, Map<Id<ActivityFacility>, Double>> totalRestDurationPerFacility = new HashMap<>();
 
     // --- Data for Dham activities ---
-    // Stores the start time of a Dham activity for each person.
-    private final Map<String, Map<Id<Person>, Double>> dhamActivityStartTimes = new HashMap<>();
-    // Counts the total number of times a Dham activity was started.
-    private final Map<String, Integer> totalDhamActivityUses = new HashMap<>();
-    // Accumulates the total time (duration) spent on Dham activities.
-    private final Map<String, Double> totalDhamDuration = new HashMap<>();
-    // Set of Dham activity types to monitor
+    private final Map<Integer, Map<String, Map<Id<Person>, Double>>> dhamActivityStartTimes = new HashMap<>();
+    private final Map<Integer, Map<String, Integer>> totalDhamActivityUses = new HashMap<>();
+    private final Map<Integer, Map<String, Double>> totalDhamDuration = new HashMap<>();
     private final Set<String> DHAM_ACTIVITY_TYPES = new HashSet<>(Arrays.asList(
             "Kedarnath", "Gangotri", "Yamunotri", "Badrinath"
     ));
 
     // --- Data for travel time ---
-    // Stores the start time of the current leg for each person. Updated on DepartureEvent.
-    private final Map<Id<Person>, Double> personLegStartTimes = new HashMap<>();
-    // Accumulates the total travel time for each person across all their legs. Updated on ArrivalEvent.
-    private final Map<Id<Person>, Double> totalTravelTimePerPerson = new HashMap<>();
-    // Counts the number of legs per mode.
-    private final Map<String, Integer> totalLegsPerMode = new HashMap<>();
-    // Accumulates total travel time per mode.
-    private final Map<String, Double> totalTravelTimePerMode = new HashMap<>();
+    private final Map<Id<Person>, Double> personLegStartTimes = new HashMap<>(); // Not day-indexed, tracks current leg
+    private final Map<Id<Person>, Double> totalTravelTimePerPersonOverall = new HashMap<>(); // Overall for person
+    private final Map<Integer, Map<String, Integer>> totalLegsPerMode = new HashMap<>();
+    private final Map<Integer, Map<String, Double>> totalTravelTimePerMode = new HashMap<>();
 
     // --- Data for nighttime travel ---
-    private double totalNightTravelTime_s = 0.0;
-    private Set<Id<Person>> agentsTravelingAtNight = new HashSet<>();
+    private final Map<Integer, Double> totalNightTravelTime_s = new HashMap<>();
+    private final Map<Integer, Set<Id<Person>>> agentsTravelingAtNight = new HashMap<>();
+
     private static final double NIGHT_WINDOW_START_HOUR = 22.0; // 10 PM
     private static final double NIGHT_WINDOW_END_HOUR = 4.0;    // 4 AM (next day)
     private static final int MAX_SIM_DAYS_FOR_OVERLAP_CHECK = 10; // Consistent
@@ -70,47 +63,55 @@ public class CharDhamAnalysisEventHandler implements
         this.iteration = iteration;
     }
 
+    private int getCurrentDay(double time) {
+        return (int) Math.floor(time / (24 * 3600.0));
+    }
+
     @Override
     public void handleEvent(ActivityStartEvent event) {
+        int day = getCurrentDay(event.getTime());
+        Id<Person> personId = event.getPersonId();
+
         if ("rest".equals(event.getActType())) {
             Id<ActivityFacility> activityFacilityId = event.getFacilityId();
-            Id<Person> personId = event.getPersonId();
-
-            restActivityStartTimes.computeIfAbsent(activityFacilityId, k -> new HashMap<>()).put(personId, event.getTime());
-            totalRestActivityUsesPerFacility.merge(activityFacilityId, 1, Integer::sum);
-        } else if (DHAM_ACTIVITY_TYPES.contains(event.getActType())) { // Handle Dham activities
+            restActivityStartTimes.computeIfAbsent(day, k -> new HashMap<>())
+                    .computeIfAbsent(activityFacilityId, k -> new HashMap<>()).put(personId, event.getTime());
+            totalRestActivityUsesPerFacility.computeIfAbsent(day, k -> new HashMap<>())
+                    .merge(activityFacilityId, 1, Integer::sum);
+        } else if (DHAM_ACTIVITY_TYPES.contains(event.getActType())) {
             String actType = event.getActType();
-            Id<Person> personId = event.getPersonId();
-
-            dhamActivityStartTimes.computeIfAbsent(actType, k -> new HashMap<>()).put(personId, event.getTime());
-            totalDhamActivityUses.merge(actType, 1, Integer::sum);
+            dhamActivityStartTimes.computeIfAbsent(day, k -> new HashMap<>())
+                    .computeIfAbsent(actType, k -> new HashMap<>()).put(personId, event.getTime());
+            totalDhamActivityUses.computeIfAbsent(day, k -> new HashMap<>())
+                    .merge(actType, 1, Integer::sum);
         }
     }
 
     @Override
     public void handleEvent(ActivityEndEvent event) {
+        int day = getCurrentDay(event.getTime());
+        Id<Person> personId = event.getPersonId();
+
         if ("rest".equals(event.getActType())) {
             Id<ActivityFacility> activityFacilityId = event.getFacilityId();
-            Id<Person> personId = event.getPersonId();
-
-            Map<Id<Person>, Double> personStartTimes = restActivityStartTimes.get(activityFacilityId);
+            Map<Id<Person>, Double> personStartTimes = restActivityStartTimes.getOrDefault(day, Collections.emptyMap()).get(activityFacilityId);
             if (personStartTimes != null) {
                 Double startTime = personStartTimes.remove(personId);
                 if (startTime != null) {
                     double duration = event.getTime() - startTime;
-                    totalRestDurationPerFacility.merge(activityFacilityId, duration, Double::sum);
+                    totalRestDurationPerFacility.computeIfAbsent(day, k -> new HashMap<>())
+                            .merge(activityFacilityId, duration, Double::sum);
                 }
             }
-        } else if (DHAM_ACTIVITY_TYPES.contains(event.getActType())) { // Handle Dham activities
+        } else if (DHAM_ACTIVITY_TYPES.contains(event.getActType())) {
             String actType = event.getActType();
-            Id<Person> personId = event.getPersonId();
-
-            Map<Id<Person>, Double> personStartTimes = dhamActivityStartTimes.get(actType);
+            Map<Id<Person>, Double> personStartTimes = dhamActivityStartTimes.getOrDefault(day, Collections.emptyMap()).get(actType);
             if (personStartTimes != null) {
                 Double startTime = personStartTimes.remove(personId);
                 if (startTime != null) {
                     double duration = event.getTime() - startTime;
-                    totalDhamDuration.merge(actType, duration, Double::sum);
+                    totalDhamDuration.computeIfAbsent(day, k -> new HashMap<>())
+                            .merge(actType, duration, Double::sum);
                 }
             }
         }
@@ -119,7 +120,9 @@ public class CharDhamAnalysisEventHandler implements
     @Override
     public void handleEvent(PersonDepartureEvent event) {
         personLegStartTimes.put(event.getPersonId(), event.getTime());
-        totalLegsPerMode.merge(event.getLegMode(), 1, Integer::sum);
+        int day = getCurrentDay(event.getTime());
+        totalLegsPerMode.computeIfAbsent(day, k -> new HashMap<>())
+                .merge(event.getLegMode(), 1, Integer::sum);
     }
 
     @Override
@@ -127,12 +130,17 @@ public class CharDhamAnalysisEventHandler implements
         Double legStartTime = personLegStartTimes.remove(event.getPersonId());
         if (legStartTime != null) {
             double travelTime = event.getTime() - legStartTime;
-            totalTravelTimePerPerson.merge(event.getPersonId(), travelTime, Double::sum);
-            totalTravelTimePerMode.merge(event.getLegMode(), travelTime, Double::sum);
+            totalTravelTimePerPersonOverall.merge(event.getPersonId(), travelTime, Double::sum); // Overall sum for person
+
+            int day = getCurrentDay(event.getTime()); // Use arrival day for mode stats
+            totalTravelTimePerMode.computeIfAbsent(day, k -> new HashMap<>())
+                    .merge(event.getLegMode(), travelTime, Double::sum);
+
             double nightOverlap = calculateNightOverlap(legStartTime, event.getTime());
             if (nightOverlap > 0) {
-                totalNightTravelTime_s += nightOverlap;
-                agentsTravelingAtNight.add(event.getPersonId());
+                totalNightTravelTime_s.merge(day, nightOverlap, Double::sum);
+                agentsTravelingAtNight.computeIfAbsent(day, k -> new HashSet<>())
+                        .add(event.getPersonId());
             }
         }
     }
@@ -148,44 +156,68 @@ public class CharDhamAnalysisEventHandler implements
         totalDhamDuration.clear();
 
         personLegStartTimes.clear();
-        totalTravelTimePerPerson.clear();
+        totalTravelTimePerPersonOverall.clear(); // Clear overall person travel time
         totalLegsPerMode.clear();
         totalTravelTimePerMode.clear();
 
-        totalNightTravelTime_s = 0.0;
+        totalNightTravelTime_s.clear();
         agentsTravelingAtNight.clear();
     }
 
     /**
-     * Aggregates the collected data into a SimulationAnalysisResult object.
-     * This method should be called after all events for an iteration have been processed.
+     * Aggregates the collected data into a map of SimulationAnalysisResult objects,
+     * one for each day and one for "all_days".
      *
-     * @return A SimulationAnalysisResult object containing the aggregated metrics.
+     * @return A Map where keys are "dayX" or "all_days", and values are SimulationAnalysisResult objects.
      */
-    public SimulationAnalysisResult getAnalysisResults() {
-        SimulationAnalysisResult result = new SimulationAnalysisResult(this.runId, this.iteration);
+    public Map<String, SimulationAnalysisResult> getAnalysisResults() {
+        Map<String, SimulationAnalysisResult> results = new HashMap<>();
+        SimulationAnalysisResult allDaysResult = new SimulationAnalysisResult(this.runId, "all_days", this.iteration);
 
-        // Populate rest activity metrics
-        result.totalRestActivityUsesPerFacility.putAll(totalRestActivityUsesPerFacility);
-        result.totalRestDurationPerActivityFacility.putAll(totalRestDurationPerFacility);
+        // Get all unique days for which data was collected
+        Set<Integer> allDays = new HashSet<>();
+        allDays.addAll(totalRestActivityUsesPerFacility.keySet());
+        allDays.addAll(totalDhamActivityUses.keySet());
+        allDays.addAll(totalLegsPerMode.keySet());
+        allDays.addAll(totalNightTravelTime_s.keySet());
 
-        // Dham activity metrics
-        result.totalDhamActivityUses.putAll(totalDhamActivityUses);
-        result.totalDhamDuration.putAll(totalDhamDuration);
+        // Process each day
+        for (Integer day : allDays) {
+            SimulationAnalysisResult dailyResult = new SimulationAnalysisResult(this.runId, "day" + day, this.iteration);
 
-        // Populate travel time metrics (raw data)
-        result.totalTravelTimePerPerson.putAll(totalTravelTimePerPerson);
-        result.totalLegsPerMode.putAll(totalLegsPerMode);
-        result.totalTravelTimePerMode.putAll(totalTravelTimePerMode);
+            // Populate rest activity metrics for the day
+            dailyResult.totalRestActivityUsesPerFacility.putAll(totalRestActivityUsesPerFacility.getOrDefault(day, Collections.emptyMap()));
+            dailyResult.totalRestDurationPerActivityFacility.putAll(totalRestDurationPerFacility.getOrDefault(day, Collections.emptyMap()));
 
-        // Populate nighttime travel metric
-        result.totalNightTravelTime_s = totalNightTravelTime_s;
-        result.agentsTravelingAtNight.addAll(agentsTravelingAtNight);
+            // Populate Dham activity metrics for the day
+            dailyResult.totalDhamActivityUses.putAll(totalDhamActivityUses.getOrDefault(day, Collections.emptyMap()));
+            dailyResult.totalDhamDuration.putAll(totalDhamDuration.getOrDefault(day, Collections.emptyMap()));
 
-        // Calculate derived metrics
-        result.calculateDerivedMetrics();
+            // Populate travel time metrics for the day
+            // Note: totalTravelTimePerPerson is overall, so we need to filter/recalculate for daily if truly needed.
+            // For now, we'll just pass the overall map to each daily result, but it won't be accurate for daily unique agents.
+            // A more accurate daily agent count would require tracking person activity/leg starts/ends per day.
+            // For simplicity, totalAgentsSimulated will be overall in daily results too.
+            dailyResult.totalTravelTimePerPerson.putAll(totalTravelTimePerPersonOverall); // This is overall, not daily unique
+            dailyResult.totalLegsPerMode.putAll(totalLegsPerMode.getOrDefault(day, Collections.emptyMap()));
+            dailyResult.totalTravelTimePerMode.putAll(totalTravelTimePerMode.getOrDefault(day, Collections.emptyMap()));
 
-        return result;
+            // Populate nighttime travel metric for the day
+            dailyResult.totalNightTravelTime_s = totalNightTravelTime_s.getOrDefault(day, 0.0);
+            dailyResult.agentsTravelingAtNight.addAll(agentsTravelingAtNight.getOrDefault(day, Collections.emptySet()));
+
+            dailyResult.calculateDerivedMetrics();
+            results.put("day" + day, dailyResult);
+
+            // Aggregate into allDaysResult
+            allDaysResult.aggregate(dailyResult);
+        }
+
+        // Finalize allDaysResult's derived metrics (important for correct averages)
+        allDaysResult.calculateDerivedMetrics();
+        results.put("all_days", allDaysResult);
+
+        return results;
     }
 
     /**
