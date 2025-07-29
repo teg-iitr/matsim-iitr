@@ -6,6 +6,8 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.contrib.locationchoice.frozenepsilons.BestReplyLocationChoicePlanStrategy;
+import org.matsim.contrib.locationchoice.frozenepsilons.FrozenTastesConfigGroup;
 import org.matsim.core.network.NetworkChangeEvent;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.contrib.locationchoice.DestinationChoiceConfigGroup;
@@ -79,8 +81,12 @@ public class RunCharDhamMultipleSimulation {
         double bikeMarginalUtilityOfTraveling;
         double travellerMarginalUtilityOfTraveling;
         double locationChoiceWeight;
+        double locationChoiceSearchRadius;
         double timeAllocationMutatorWeight;
+        double mutationRange;
+        double mutationRangeStep;
         double reRouteWeight;
+        double nightTimeSpeed;
 
         // Constructor to parse a CSV line
         RunParameters(String[] parts, String[] headers) {
@@ -101,8 +107,12 @@ public class RunCharDhamMultipleSimulation {
             this.bikeMarginalUtilityOfTraveling = Double.parseDouble(dataMap.getOrDefault("bike_marginalUtilityOfTraveling", "-6.0"));
             this.travellerMarginalUtilityOfTraveling = Double.parseDouble(dataMap.getOrDefault("traveller_marginalUtilityOfTraveling", "-6.0"));
             this.locationChoiceWeight = Double.parseDouble(dataMap.getOrDefault("locationChoice_weight", "0.3"));
+            this.locationChoiceSearchRadius = Double.parseDouble(dataMap.getOrDefault("locationChoice_searchRadius", "50000.0"));
             this.timeAllocationMutatorWeight = Double.parseDouble(dataMap.getOrDefault("timeAllocationMutator_weight", "0.6"));
+            this.mutationRange = Double.parseDouble(dataMap.getOrDefault("mutationRange", "43200.0"));
+            this.mutationRangeStep = Double.parseDouble(dataMap.getOrDefault("mutationRangeStep", "600.0"));
             this.reRouteWeight = Double.parseDouble(dataMap.getOrDefault("reRoute_weight", "0.1"));
+            this.nightTimeSpeed = Double.parseDouble(dataMap.getOrDefault("nightTimeSpeed", "2.78"));
         }
     }
 
@@ -182,7 +192,7 @@ public class RunCharDhamMultipleSimulation {
         // Configure controller with run-specific output directory and iterations
         configureController(config, params, outputDirectory);
         configureNetworkAndPlans(config);
-        configureLocationChoice(config);
+        configureLocationChoice(config, params);
         configureTrafficCharScenario(config);
         // Configure QSim with run-specific flow/storage factors
         configureQSim(config, params);
@@ -221,7 +231,7 @@ public class RunCharDhamMultipleSimulation {
         config.routing().setNetworkModes(modes);
 
         // Schedule the nightly road closures using NetworkChangeEvents (fixed logic)
-        scheduleNightlyLinkClosures(scenario);
+        scheduleNightlyLinkClosures(scenario, params);
 
         // Set up and run the controller
         Controler controler = new Controler(scenario);
@@ -229,13 +239,12 @@ public class RunCharDhamMultipleSimulation {
             @Override
             public void install() {
                 final Provider<TripRouter> tripRouterProvider = binder().getProvider(TripRouter.class);
-                addPlanStrategyBinding(DestinationChoiceConfigGroup.GROUP_NAME).toProvider(new jakarta.inject.Provider<PlanStrategy>() {
-                    @Inject
-                    TimeInterpretation timeInterpretation;
-
+                addPlanStrategyBinding(FrozenTastesConfigGroup.GROUP_NAME).toProvider(new jakarta.inject.Provider<PlanStrategy>() {
+                    @Inject TimeInterpretation timeInterpretation;
                     @Override
                     public PlanStrategy get() {
-                        return new LocationChoicePlanStrategy(scenario, tripRouterProvider, timeInterpretation);
+                        // This strategy is designed to work with FrozenTastesConfigGroup
+                        return new BestReplyLocationChoicePlanStrategy();
                     }
                 });
             }
@@ -268,14 +277,16 @@ public class RunCharDhamMultipleSimulation {
     /**
      * Configures the LocationChoice module.
      */
-    private static void configureLocationChoice(Config config) {
-        DestinationChoiceConfigGroup dcConfig = ConfigUtils.addOrGetModule(config, DestinationChoiceConfigGroup.class);
-        dcConfig.setAlgorithm(DestinationChoiceConfigGroup.Algotype.random);
-        dcConfig.setFlexibleTypes("rest");
-        dcConfig.setPlanSelector("ChangeExpBeta");
-        dcConfig.setEpsilonScaleFactors("5.0");
-        dcConfig.setRadius(10.0);
-        dcConfig.setScaleFactor(1);
+    private static void configureLocationChoice(Config config, RunParameters params) {
+        FrozenTastesConfigGroup ftConfig = ConfigUtils.addOrGetModule(config, FrozenTastesConfigGroup.class);
+        ftConfig.setAlgorithm(FrozenTastesConfigGroup.Algotype.bestResponse); // Use bestResponse with FrozenTastes
+        ftConfig.setFlexibleTypes("rest");
+        ftConfig.setPlanSelector("ChangeExpBeta");
+        ftConfig.setEpsilonScaleFactors("10.0");
+        ftConfig.setScaleFactor(1);
+
+        // Set maxDistanceDCScore to control the search radius for facilities
+        ftConfig.setMaxDistanceDCScore(params.locationChoiceSearchRadius);
     }
 
     private static Set<Id<Link>> readLinkIdsFromCsv() {
@@ -310,7 +321,7 @@ public class RunCharDhamMultipleSimulation {
      *
      * @param scenario The MATSim scenario containing the network.
      */
-    private static void scheduleNightlyLinkClosures(Scenario scenario) {
+    private static void scheduleNightlyLinkClosures(Scenario scenario, RunParameters params) {
         Network network = scenario.getNetwork();
         Set<Id<Link>> linksToClose = readLinkIdsFromCsv();
 
@@ -334,7 +345,7 @@ public class RunCharDhamMultipleSimulation {
                 double closeEventTime = dayOffset_s + closeTimeOfDay_s;
                 NetworkChangeEvent closeEvent = new NetworkChangeEvent(closeEventTime);
                 closeEvent.setFreespeedChange(new NetworkChangeEvent.ChangeValue(
-                        NetworkChangeEvent.ChangeType.ABSOLUTE_IN_SI_UNITS, 10/3.6)); // Effectively closes the link
+                        NetworkChangeEvent.ChangeType.ABSOLUTE_IN_SI_UNITS, params.nightTimeSpeed)); // Effectively closes the link
                 closeEvent.addLink(link);
                 NetworkUtils.addNetworkChangeEvent(network, closeEvent);
 
@@ -430,17 +441,17 @@ public class RunCharDhamMultipleSimulation {
         config.replanning().clearStrategySettings();
 
         ReplanningConfigGroup.StrategySettings lcStrategy = new ReplanningConfigGroup.StrategySettings();
-        lcStrategy.setStrategyName(DestinationChoiceConfigGroup.GROUP_NAME);
+        lcStrategy.setStrategyName(FrozenTastesConfigGroup.GROUP_NAME);
         lcStrategy.setWeight(params.locationChoiceWeight); // From CSV
         config.replanning().addStrategySettings(lcStrategy);
 
         addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator, params.timeAllocationMutatorWeight); // From CSV
         addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.ReRoute, params.reRouteWeight); // From CSV
 
-        config.timeAllocationMutator().setMutationRange(12.0 * 3600.0);
+        config.timeAllocationMutator().setMutationRange(params.mutationRange);
         config.timeAllocationMutator().setMutateAroundInitialEndTimeOnly(true);
         config.timeAllocationMutator().setAffectingDuration(true);
-        config.timeAllocationMutator().setMutationRangeStep(30.0 * 60.0);
+        config.timeAllocationMutator().setMutationRangeStep(params.mutationRangeStep);
 
         config.replanning().setFractionOfIterationsToDisableInnovation(0.8);
     }

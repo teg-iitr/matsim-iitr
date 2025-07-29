@@ -7,6 +7,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.locationchoice.DestinationChoiceConfigGroup;
+import org.matsim.contrib.locationchoice.frozenepsilons.*;
 import org.matsim.contrib.locationchoice.timegeography.LocationChoicePlanStrategy;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
@@ -113,13 +114,12 @@ public class RunCharDhamSingleSimulation {
             @Override
             public void install() {
                 final Provider<TripRouter> tripRouterProvider = binder().getProvider(TripRouter.class);
-                addPlanStrategyBinding(DestinationChoiceConfigGroup.GROUP_NAME).toProvider(new jakarta.inject.Provider<PlanStrategy>() {
-                    @Inject
-                    TimeInterpretation timeInterpretation;
-
+                addPlanStrategyBinding(FrozenTastesConfigGroup.GROUP_NAME).toProvider(new jakarta.inject.Provider<PlanStrategy>() {
+                    @Inject TimeInterpretation timeInterpretation;
                     @Override
                     public PlanStrategy get() {
-                        return new LocationChoicePlanStrategy(scenario, tripRouterProvider, timeInterpretation);
+                        // This strategy is designed to work with FrozenTastesConfigGroup
+                        return new BestReplyLocationChoicePlanStrategy();
                     }
                 });
             }
@@ -152,14 +152,15 @@ public class RunCharDhamSingleSimulation {
      */
     private static void configureLocationChoice(Config config) {
         // Enable the base destination choice module
-        DestinationChoiceConfigGroup dcConfig = ConfigUtils.addOrGetModule(config, DestinationChoiceConfigGroup.class);
-        dcConfig.setAlgorithm(DestinationChoiceConfigGroup.Algotype.random); // Use random choice from the choice set
-        // Set the activity type for which location choice should be performed
-        dcConfig.setFlexibleTypes("rest");
-        dcConfig.setPlanSelector("ChangeExpBeta");
-        dcConfig.setEpsilonScaleFactors("5.0");
-        dcConfig.setRadius(10.0);
-        dcConfig.setScaleFactor(1);
+        FrozenTastesConfigGroup ftConfig = ConfigUtils.addOrGetModule(config, FrozenTastesConfigGroup.class);
+        ftConfig.setAlgorithm(FrozenTastesConfigGroup.Algotype.bestResponse); // Use bestResponse with FrozenTastes
+        ftConfig.setFlexibleTypes("rest");
+        ftConfig.setPlanSelector("ChangeExpBeta");
+        ftConfig.setEpsilonScaleFactors("10.0");
+        ftConfig.setScaleFactor(1);
+
+        // Set maxDistanceDCScore to control the search radius for facilities
+        ftConfig.setMaxDistanceDCScore(50000.0);
     }
 
     private static Set<Id<Link>> readLinkIdsFromCsv(String filePath) {
@@ -333,7 +334,7 @@ public class RunCharDhamSingleSimulation {
 
         // The main strategy for performing location choice
         ReplanningConfigGroup.StrategySettings lcStrategy = new ReplanningConfigGroup.StrategySettings();
-        lcStrategy.setStrategyName(DestinationChoiceConfigGroup.GROUP_NAME);
+        lcStrategy.setStrategyName(FrozenTastesConfigGroup.GROUP_NAME);
         lcStrategy.setWeight(0.3); // High weight to ensure location choice is explored
         config.replanning().addStrategySettings(lcStrategy);
 
