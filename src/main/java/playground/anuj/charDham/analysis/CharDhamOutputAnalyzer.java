@@ -41,8 +41,6 @@ public class CharDhamOutputAnalyzer {
     private static class RunParameters {
         String runId;
         int lastIteration;
-        // Other parameters from CSV are not directly used by the analyzer, but could be added to summary if desired.
-        // double flowCapacityFactor;
 
         RunParameters(String[] parts, String[] headers) {
             Map<String, String> dataMap = new HashMap<>();
@@ -76,7 +74,7 @@ public class CharDhamOutputAnalyzer {
             return;
         }
 
-        // Keep track of which days (day0, day1, all_days) have had their headers written
+        // Keep track of which days (dayX and all_days) have had their headers written
         Set<String> writtenHeaders = new HashSet<>();
 
         for (int i = 0; i < runs.size(); i++) {
@@ -162,8 +160,8 @@ public class CharDhamOutputAnalyzer {
     /**
      * Processes the events file for a single simulation run and returns the aggregated results.
      *
-     * @param runId The ID of the simulation run.
-     * @param iteration The last iteration of the simulation run.
+     * @param runId          The ID of the simulation run.
+     * @param iteration      The last iteration of the simulation run.
      * @param eventsFilePath The path to the output_events.xml.gz file.
      * @return A Map where keys are "dayX" or "all_days", and values are SimulationAnalysisResult objects.
      */
@@ -180,8 +178,9 @@ public class CharDhamOutputAnalyzer {
 
     /**
      * Generates the full file path for a given base name and day.
+     *
      * @param baseName The base name of the CSV file (e.g., "analysis_summary").
-     * @param day The day (e.g., "day0", "all_days").
+     * @param day      The day (e.g., "day1", "all_days").
      * @return The full file path.
      */
     private static String getFilePath(String baseName, String day) {
@@ -190,7 +189,8 @@ public class CharDhamOutputAnalyzer {
 
     /**
      * Writes the header for the main analysis summary CSV file for a specific day.
-     * @param day The day (e.g., "day0", "all_days").
+     *
+     * @param day The day (e.g., "day1", "all_days").
      * @throws IOException If an I/O error occurs.
      */
     private static void writeAnalysisSummaryHeader(String day) throws IOException {
@@ -207,13 +207,9 @@ public class CharDhamOutputAnalyzer {
             headers.add("total_legs");
             headers.add("average_leg_travel_time_s");
 
-            headers.add("total_rest_activity_uses_all_facilities");
-            headers.add("total_rest_duration_all_facilities_s");
-            headers.add("avg_rest_duration_all_facilities_s");
-
-            headers.add("total_dham_activity_uses_all");
-            headers.add("total_dham_duration_all_s");
-            headers.add("avg_dham_duration_all_s");
+            // Changed header names to reflect "unique persons" and removed duration headers
+            headers.add("unique_rest_activity_persons_all_facilities");
+            headers.add("unique_dham_activity_persons_all");
 
             headers.add("total_night_travel_time_s");
             headers.add("num_agents_night_travel");
@@ -230,6 +226,7 @@ public class CharDhamOutputAnalyzer {
 
     /**
      * Appends a row of overall analysis results to the main summary CSV file.
+     *
      * @param result The SimulationAnalysisResult object.
      * @throws IOException If an I/O error occurs.
      */
@@ -247,24 +244,12 @@ public class CharDhamOutputAnalyzer {
             row.add(String.valueOf(result.totalLegs));
             row.add(String.valueOf(result.averageLegTravelTime_s));
 
-            int totalRestActivityUsesAllFacilities = result.totalRestActivityUsesPerFacility.values().stream().mapToInt(Integer::intValue).sum();
-            double totalRestDurationAllFacilities = result.totalRestDurationPerActivityFacility.values().stream().mapToDouble(Double::doubleValue).sum();
-            double avgRestDurationAllFacilities = totalRestActivityUsesAllFacilities > 0 ?
-                    totalRestDurationAllFacilities / totalRestActivityUsesAllFacilities : 0.0;
+            // Use the derived counts from SimulationAnalysisResult and removed duration fields
+            int uniqueRestActivityPersonsAllFacilities = result.totalRestActivityUsesPerFacilityCount.values().stream().mapToInt(Integer::intValue).sum();
+            row.add(String.valueOf(uniqueRestActivityPersonsAllFacilities));
 
-            row.add(String.valueOf(totalRestActivityUsesAllFacilities));
-            row.add(String.valueOf(totalRestDurationAllFacilities));
-            row.add(String.valueOf(avgRestDurationAllFacilities));
-
-
-            int totalDhamActivityUsesAll = result.totalDhamActivityUses.values().stream().mapToInt(Integer::intValue).sum();
-            double totalDhamDurationAll = result.totalDhamDuration.values().stream().mapToDouble(Double::doubleValue).sum();
-            double avgDhamDurationAll = totalDhamActivityUsesAll > 0 ?
-                    totalDhamDurationAll / totalDhamActivityUsesAll : 0.0;
-
-            row.add(String.valueOf(totalDhamActivityUsesAll));
-            row.add(String.valueOf(totalDhamDurationAll));
-            row.add(String.valueOf(avgDhamDurationAll));
+            int uniqueDhamActivityPersonsAll = result.totalDhamActivityUsesCount.values().stream().mapToInt(Integer::intValue).sum();
+            row.add(String.valueOf(uniqueDhamActivityPersonsAll));
 
             row.add(String.valueOf(result.totalNightTravelTime_s));
             row.add(String.valueOf(result.numAgentsNightTravel));
@@ -281,7 +266,8 @@ public class CharDhamOutputAnalyzer {
 
     /**
      * Writes the header for the per-facility rest activity analysis CSV file for a specific day.
-     * @param day The day (e.g., "day0", "all_days").
+     *
+     * @param day The day (e.g., "day1", "all_days").
      * @throws IOException If an I/O error occurs.
      */
     private static void writeFacilityRestAnalysisHeader(String day) throws IOException {
@@ -291,34 +277,30 @@ public class CharDhamOutputAnalyzer {
             headers.add("run_id");
             headers.add("iteration");
             headers.add("facility_id");
-            headers.add("total_rest_uses");
-            headers.add("total_rest_duration_s");
-            headers.add("average_rest_duration_s");
+            headers.add("unique_rest_persons"); // Changed header, removed duration headers
             writer.println(String.join(",", headers));
         }
     }
 
     /**
      * Appends per-facility rest activity data to the facility analysis CSV file.
+     *
      * @param result The SimulationAnalysisResult object containing per-facility data.
      * @throws IOException If an I/O error occurs.
      */
     private static void writeFacilityRestAnalysisData(SimulationAnalysisResult result) throws IOException {
         String filePath = getFilePath(FACILITY_REST_ANALYSIS_BASE_NAME, result.day);
         try (PrintWriter writer = new PrintWriter(new FileWriter(filePath, true))) { // true to append
-            for (Map.Entry<Id<ActivityFacility>, Integer> entry : result.totalRestActivityUsesPerFacility.entrySet()) {
+            // Iterate through the derived counts
+            for (Map.Entry<Id<ActivityFacility>, Integer> entry : result.totalRestActivityUsesPerFacilityCount.entrySet()) {
                 Id<ActivityFacility> activityFacilityId = entry.getKey();
-                int totalUses = entry.getValue();
-                double totalDuration = result.totalRestDurationPerActivityFacility.getOrDefault(activityFacilityId, 0.0);
-                double averageDuration = result.avgRestDurationPerActivityFacility.getOrDefault(activityFacilityId, 0.0);
+                int uniquePersons = entry.getValue(); // Use unique persons count
 
                 List<String> row = new ArrayList<>();
                 row.add(result.runId);
                 row.add(String.valueOf(result.iteration));
                 row.add(String.valueOf(activityFacilityId));
-                row.add(String.valueOf(totalUses));
-                row.add(String.valueOf(totalDuration));
-                row.add(String.valueOf(averageDuration));
+                row.add(String.valueOf(uniquePersons));
                 writer.println(String.join(",", row));
             }
         }
@@ -326,7 +308,8 @@ public class CharDhamOutputAnalyzer {
 
     /**
      * Writes the header for the per-Dham activity analysis CSV file for a specific day.
-     * @param day The day (e.g., "day0", "all_days").
+     *
+     * @param day The day (e.g., "day1", "all_days").
      * @throws IOException If an I/O error occurs.
      */
     private static void writeDhamActivityAnalysisHeader(String day) throws IOException {
@@ -336,15 +319,14 @@ public class CharDhamOutputAnalyzer {
             headers.add("run_id");
             headers.add("iteration");
             headers.add("dham_activity_type");
-            headers.add("total_dham_uses");
-            headers.add("total_dham_duration_s");
-            headers.add("average_dham_duration_s");
+            headers.add("unique_dham_persons"); // Changed header, removed duration headers
             writer.println(String.join(",", headers));
         }
     }
 
     /**
      * Appends per-Dham activity data to the Dham activity analysis CSV file.
+     *
      * @param result The SimulationAnalysisResult object containing per-Dham data.
      * @throws IOException If an I/O error occurs.
      */
@@ -352,17 +334,14 @@ public class CharDhamOutputAnalyzer {
         String filePath = getFilePath(DHAM_ACTIVITY_ANALYSIS_BASE_NAME, result.day);
         try (PrintWriter writer = new PrintWriter(new FileWriter(filePath, true))) { // true to append
             for (String dhamType : DHAM_ACTIVITY_TYPES) { // Iterate through predefined Dham types
-                int totalUses = result.totalDhamActivityUses.getOrDefault(dhamType, 0);
-                double totalDuration = result.totalDhamDuration.getOrDefault(dhamType, 0.0);
-                double averageDuration = result.avgDhamDuration.getOrDefault(dhamType, 0.0);
+                // Use the derived counts from SimulationAnalysisResult
+                int uniquePersons = result.totalDhamActivityUsesCount.getOrDefault(dhamType, 0);
 
                 List<String> row = new ArrayList<>();
                 row.add(result.runId);
                 row.add(String.valueOf(result.iteration));
                 row.add(dhamType);
-                row.add(String.valueOf(totalUses));
-                row.add(String.valueOf(totalDuration));
-                row.add(String.valueOf(averageDuration));
+                row.add(String.valueOf(uniquePersons));
                 writer.println(String.join(",", row));
             }
         }

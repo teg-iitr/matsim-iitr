@@ -1,13 +1,13 @@
 package playground.anuj.charDham.runner;
 
-import com.google.inject.Inject;
+import com.google.inject.Module;
 import com.google.inject.Provider;
+import jakarta.inject.Inject;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.locationchoice.frozenepsilons.BestReplyLocationChoicePlanStrategy;
-import org.matsim.contrib.locationchoice.frozenepsilons.FrozenTastesConfigGroup;
+import org.matsim.contrib.locationchoice.frozenepsilons.*;
 import org.matsim.core.network.NetworkChangeEvent;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.contrib.locationchoice.DestinationChoiceConfigGroup;
@@ -24,17 +24,19 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.replanning.PlanStrategy;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.router.TripRouter;
+import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
+import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.core.scoring.ScoringFunctionFactory;
 import org.matsim.core.utils.io.IOUtils;
 import org.matsim.core.utils.timing.TimeInterpretation;
+import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
 import playground.shivam.trafficChar.core.TrafficCharConfigGroup;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -98,7 +100,7 @@ public class RunCharDhamMultipleSimulation {
             }
 
             this.runId = dataMap.getOrDefault("run_id", "default_run");
-            this.lastIteration = Integer.parseInt(dataMap.getOrDefault("last_iteration", "20"));
+            this.lastIteration = Integer.parseInt(dataMap.getOrDefault("last_iteration", "2"));
             this.flowCapacityFactor = Double.parseDouble(dataMap.getOrDefault("flow_capacity_factor", "1.0"));
             this.storageCapacityFactor = Double.parseDouble(dataMap.getOrDefault("storage_capacity_factor", "1.0"));
             this.lateArrivalUtilsHr = Double.parseDouble(dataMap.getOrDefault("lateArrival_utils_hr", "-1.0"));
@@ -107,21 +109,25 @@ public class RunCharDhamMultipleSimulation {
             this.bikeMarginalUtilityOfTraveling = Double.parseDouble(dataMap.getOrDefault("bike_marginalUtilityOfTraveling", "-6.0"));
             this.travellerMarginalUtilityOfTraveling = Double.parseDouble(dataMap.getOrDefault("traveller_marginalUtilityOfTraveling", "-6.0"));
             this.locationChoiceWeight = Double.parseDouble(dataMap.getOrDefault("locationChoice_weight", "0.3"));
-            this.locationChoiceSearchRadius = Double.parseDouble(dataMap.getOrDefault("locationChoice_searchRadius", "50000.0"));
+            this.locationChoiceSearchRadius = Double.parseDouble(dataMap.getOrDefault("locationChoice_searchRadius", "20000.0"));
             this.timeAllocationMutatorWeight = Double.parseDouble(dataMap.getOrDefault("timeAllocationMutator_weight", "0.6"));
             this.mutationRange = Double.parseDouble(dataMap.getOrDefault("mutationRange", "43200.0"));
             this.mutationRangeStep = Double.parseDouble(dataMap.getOrDefault("mutationRangeStep", "600.0"));
             this.reRouteWeight = Double.parseDouble(dataMap.getOrDefault("reRoute_weight", "0.1"));
-            this.nightTimeSpeed = Double.parseDouble(dataMap.getOrDefault("nightTimeSpeed", "2.78"));
+            this.nightTimeSpeed = Double.parseDouble(dataMap.getOrDefault("nightTimeSpeed", "1.78"));
+        }
+        RunParameters() {
+            this(new String[]{}, new String[]{});
         }
     }
 
     public static void main(String[] args) {
+        writeDefaultParametersCsv();
         List<RunParameters> runs = readRunParameters();
 
         if (runs.isEmpty()) {
-            System.err.println("No simulation parameters found in " + PARAMETER_RUNS_CSV + ". Exiting.");
-            return;
+            System.out.println("No valid parameters found in " + PARAMETER_RUNS_CSV + ". Running with default parameters.");
+            runs.add(new RunParameters()); // Add a default run
         }
 
         System.out.println("Starting multiple MATSim simulations based on " + PARAMETER_RUNS_CSV);
@@ -155,6 +161,7 @@ public class RunCharDhamMultipleSimulation {
             String headerLine = br.readLine();
             if (headerLine == null) {
                 System.err.println("CSV file is empty: " + RunCharDhamMultipleSimulation.PARAMETER_RUNS_CSV);
+                writeDefaultParametersCsv();
                 return runs;
             }
             String[] headers = headerLine.split(",");
@@ -179,7 +186,62 @@ public class RunCharDhamMultipleSimulation {
         }
         return runs;
     }
+    /**
+     * Writes a single row of default parameters to the PARAMETER_RUNS_CSV file.
+     * This method is called only if the file is initially empty or unreadable.
+     */
+    private static void writeDefaultParametersCsv() {
+        List<String> headers = Arrays.asList(
+                "run_id",
+                "last_iteration",
+                "flow_capacity_factor",
+                "storage_capacity_factor",
+                "lateArrival_utils_hr",
+                "performing_utils_hr",
+                "car_marginalUtilityOfTraveling",
+                "bike_marginalUtilityOfTraveling",
+                "traveller_marginalUtilityOfTraveling",
+                "locationChoice_weight",
+                "locationChoice_searchRadius",
+                "timeAllocationMutator_weight",
+                "mutationRange",
+                "mutationRangeStep",
+                "reRoute_weight",
+                "nightTimeSpeed"
+        );
 
+        // Create a default RunParameters instance to get its default values
+        RunParameters defaultParams = new RunParameters();
+
+        List<String> defaultValues = Arrays.asList(
+                defaultParams.runId,
+                String.valueOf(defaultParams.lastIteration),
+                String.valueOf(defaultParams.flowCapacityFactor),
+                String.valueOf(defaultParams.storageCapacityFactor),
+                String.valueOf(defaultParams.lateArrivalUtilsHr),
+                String.valueOf(defaultParams.performingUtilsHr),
+                String.valueOf(defaultParams.carMarginalUtilityOfTraveling),
+                String.valueOf(defaultParams.bikeMarginalUtilityOfTraveling),
+                String.valueOf(defaultParams.travellerMarginalUtilityOfTraveling),
+                String.valueOf(defaultParams.locationChoiceWeight),
+                String.valueOf(defaultParams.locationChoiceSearchRadius),
+                String.valueOf(defaultParams.timeAllocationMutatorWeight),
+                String.valueOf(defaultParams.mutationRange),
+                String.valueOf(defaultParams.mutationRangeStep),
+                String.valueOf(defaultParams.reRouteWeight),
+                String.valueOf(defaultParams.nightTimeSpeed)
+        );
+
+        try (PrintWriter writer = new PrintWriter(new FileWriter(PARAMETER_RUNS_CSV))) {
+            writer.println(String.join(",", headers));
+            writer.println(String.join(",", defaultValues));
+            System.out.println("Created default parameters CSV at: " + PARAMETER_RUNS_CSV);
+        } catch (IOException e) {
+            System.err.println("FATAL ERROR: Could not write default parameters CSV to " + PARAMETER_RUNS_CSV + ": " + e.getMessage());
+            // This is a critical error, as we can't even write the default config.
+            // The program might not be able to proceed meaningfully.
+        }
+    }
     /**
      * Configures and runs a single MATSim simulation.
      *
@@ -233,20 +295,14 @@ public class RunCharDhamMultipleSimulation {
         // Schedule the nightly road closures using NetworkChangeEvents (fixed logic)
         scheduleNightlyLinkClosures(scenario, params);
 
+        final DestinationChoiceContext lcContext = new DestinationChoiceContext(scenario) ;
+        scenario.addScenarioElement(DestinationChoiceContext.ELEMENT_NAME, lcContext);
         // Set up and run the controller
         Controler controler = new Controler(scenario);
         controler.addOverridingModule(new AbstractModule() {
             @Override
             public void install() {
-                final Provider<TripRouter> tripRouterProvider = binder().getProvider(TripRouter.class);
-                addPlanStrategyBinding(FrozenTastesConfigGroup.GROUP_NAME).toProvider(new jakarta.inject.Provider<PlanStrategy>() {
-                    @Inject TimeInterpretation timeInterpretation;
-                    @Override
-                    public PlanStrategy get() {
-                        // This strategy is designed to work with FrozenTastesConfigGroup
-                        return new BestReplyLocationChoicePlanStrategy();
-                    }
-                });
+                addPlanStrategyBinding(FrozenTastesConfigGroup.GROUP_NAME).to(BestReplyLocationChoicePlanStrategy.class);
             }
         });
         controler.addOverridingModule(new AbstractModule() {
@@ -282,7 +338,7 @@ public class RunCharDhamMultipleSimulation {
         ftConfig.setAlgorithm(FrozenTastesConfigGroup.Algotype.bestResponse); // Use bestResponse with FrozenTastes
         ftConfig.setFlexibleTypes("rest");
         ftConfig.setPlanSelector("ChangeExpBeta");
-        ftConfig.setEpsilonScaleFactors("10.0");
+        ftConfig.setEpsilonScaleFactors("100.0");
         ftConfig.setScaleFactor(1);
 
         // Set maxDistanceDCScore to control the search radius for facilities

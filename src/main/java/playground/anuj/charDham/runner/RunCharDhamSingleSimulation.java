@@ -109,19 +109,14 @@ public class RunCharDhamSingleSimulation {
         scheduleNightlyLinkClosures(scenario, TIME_VARIANT_LINKS_FILE);
 
         // Set up and run the controller
+        final DestinationChoiceContext lcContext = new DestinationChoiceContext(scenario) ;
+        scenario.addScenarioElement(DestinationChoiceContext.ELEMENT_NAME, lcContext);
+        // Set up and run the controller
         Controler controler = new Controler(scenario);
         controler.addOverridingModule(new AbstractModule() {
             @Override
             public void install() {
-                final Provider<TripRouter> tripRouterProvider = binder().getProvider(TripRouter.class);
-                addPlanStrategyBinding(FrozenTastesConfigGroup.GROUP_NAME).toProvider(new jakarta.inject.Provider<PlanStrategy>() {
-                    @Inject TimeInterpretation timeInterpretation;
-                    @Override
-                    public PlanStrategy get() {
-                        // This strategy is designed to work with FrozenTastesConfigGroup
-                        return new BestReplyLocationChoicePlanStrategy();
-                    }
-                });
+                addPlanStrategyBinding(FrozenTastesConfigGroup.GROUP_NAME).to(BestReplyLocationChoicePlanStrategy.class);
             }
         });
         controler.addOverridingModule(new AbstractModule() {
@@ -156,7 +151,7 @@ public class RunCharDhamSingleSimulation {
         ftConfig.setAlgorithm(FrozenTastesConfigGroup.Algotype.bestResponse); // Use bestResponse with FrozenTastes
         ftConfig.setFlexibleTypes("rest");
         ftConfig.setPlanSelector("ChangeExpBeta");
-        ftConfig.setEpsilonScaleFactors("10.0");
+        ftConfig.setEpsilonScaleFactors("100.0");
         ftConfig.setScaleFactor(1);
 
         // Set maxDistanceDCScore to control the search radius for facilities

@@ -19,35 +19,34 @@ public class SimulationAnalysisResult {
 
     // --- Rest Activity Metrics (per activityFacility/link) ---
     // Key: ActivityFacilityId of the activityFacility where the rest activity occurred
-    // Value: Number of unique agents who had a rest activity at this activityFacility
-    public Map<Id<ActivityFacility>, Integer> totalRestActivityUsesPerFacility = new HashMap<>();
-    // Value: Total accumulated duration of all rest activities at this activityFacility (in seconds)
-    public Map<Id<ActivityFacility>, Double> totalRestDurationPerActivityFacility = new HashMap<>();
-    // Value: Average duration of a rest activity at this activityFacility (in seconds)
-    public Map<Id<ActivityFacility>, Double> avgRestDurationPerActivityFacility = new HashMap<>();
+    // Value: Set of unique persons who had a rest activity at this activityFacility during this period.
+    public Map<Id<ActivityFacility>, Set<Id<Person>>> uniqueRestActivityPersonsPerFacility = new HashMap<>();
+    // Derived: Count of unique persons who had a rest activity at this facility
+    public Map<Id<ActivityFacility>, Integer> totalRestActivityUsesPerFacilityCount = new HashMap<>();
+
 
     // --- Dham Activity Metrics (per Dham type) ---
-    // Total number of times a Dham activity was used (e.g., visit-Kedarnath)
-    public Map<String, Integer> totalDhamActivityUses = new HashMap<>();
-    // Total accumulated duration of all Dham activities (e.g., visit-Kedarnath)
-    public Map<String, Double> totalDhamDuration = new HashMap<>();
-    // Average duration of a Dham activity (e.g., visit-Kedarnath)
-    public Map<String, Double> avgDhamDuration = new HashMap<>();
+    // Value: Set of unique persons who had a Dham activity of this type during this period.
+    public Map<String, Set<Id<Person>>> uniqueDhamActivityPersons = new HashMap<>();
+    // Derived: Count of unique persons who had a Dham activity of this type
+    public Map<String, Integer> totalDhamActivityUsesCount = new HashMap<>();
 
-    // --- Overall Travel Metrics ---
-    public int totalAgentsSimulated; // Total number of unique agents who completed at least one leg
-    public double totalTravelTime_s; // Sum of all leg travel times across all agents
-    public double averageTravelTime_s; // Average travel time per agent (totalTravelTime_s / totalAgentsSimulated)
-    public double minTravelTime_s = Double.MAX_VALUE; // Minimum total travel time for any agent
-    public double maxTravelTime_s = Double.MIN_VALUE; // Maximum total travel time for any agent
-    public int totalLegs; // Total number of legs completed by all agents
-    public double averageLegTravelTime_s; // Average travel time per leg (totalTravelTime_s / totalLegs)
+
+    // --- Overall Travel Metrics (now calculated per day/period of this result object) ---
+    public int totalAgentsSimulated; // Total number of unique agents who completed at least one leg in this period
+    public double totalTravelTime_s; // Sum of all leg travel times across all agents in this period
+    public double averageTravelTime_s; // Average travel time per agent (totalTravelTime_s / totalAgentsSimulated) in this period
+    public double minTravelTime_s = Double.MAX_VALUE; // Minimum total travel time for any agent in this period
+    public double maxTravelTime_s = Double.MIN_VALUE; // Maximum total travel time for any agent in this period
+    public int totalLegs; // Total number of legs completed by all agents in this period
+    public double averageLegTravelTime_s; // Average travel time per leg (totalTravelTime_s / totalLegs) in this period
 
     // --- Nighttime Travel Metrics ---
     public double totalNightTravelTime_s;
     public int numAgentsNightTravel;
 
     // --- Other potentially useful metrics ---
+    // This map now holds total travel time per person for the specific 'day' or 'all_days' this result object represents.
     public Map<Id<Person>, Double> totalTravelTimePerPerson = new HashMap<>();
     public Map<String, Integer> totalLegsPerMode = new HashMap<>();
     public Map<String, Double> totalTravelTimePerMode = new HashMap<>();
@@ -61,36 +60,21 @@ public class SimulationAnalysisResult {
         this.iteration = iteration;
     }
 
-
     /**
      * Calculates derived metrics after all raw data has been collected/aggregated.
      */
     public void calculateDerivedMetrics() {
-        // Calculate average rest duration per activityFacility
-        for (Map.Entry<Id<ActivityFacility>, Double> entry : totalRestDurationPerActivityFacility.entrySet()) {
-            Id<ActivityFacility> activityFacilityId = entry.getKey();
-            Double totalDuration = entry.getValue();
-            Integer totalUses = totalRestActivityUsesPerFacility.get(activityFacilityId);
-            if (totalUses != null && totalUses > 0) {
-                avgRestDurationPerActivityFacility.put(activityFacilityId, totalDuration / totalUses);
-            } else {
-                avgRestDurationPerActivityFacility.put(activityFacilityId, 0.0);
-            }
+        // Calculate unique person counts for rest activities
+        for (Map.Entry<Id<ActivityFacility>, Set<Id<Person>>> entry : uniqueRestActivityPersonsPerFacility.entrySet()) {
+            totalRestActivityUsesPerFacilityCount.put(entry.getKey(), entry.getValue().size());
         }
 
-        // Calculate average Dham activity duration per type
-        for (Map.Entry<String, Double> entry : totalDhamDuration.entrySet()) {
-            String dhamType = entry.getKey();
-            Double totalDuration = entry.getValue();
-            Integer totalUses = totalDhamActivityUses.get(dhamType);
-            if (totalUses != null && totalUses > 0) {
-                avgDhamDuration.put(dhamType, totalDuration / totalUses);
-            } else {
-                avgDhamDuration.put(dhamType, 0.0);
-            }
+        // Calculate unique person counts for Dham activities
+        for (Map.Entry<String, Set<Id<Person>>> entry : uniqueDhamActivityPersons.entrySet()) {
+            totalDhamActivityUsesCount.put(entry.getKey(), entry.getValue().size());
         }
 
-        // Calculate overall travel metrics
+        // Calculate overall travel metrics for THIS period (day or all_days)
         this.totalAgentsSimulated = (int) totalTravelTimePerPerson.keySet().stream()
                 .filter(p -> totalTravelTimePerPerson.get(p) != null && totalTravelTimePerPerson.get(p) > 0)
                 .count();
@@ -132,24 +116,23 @@ public class SimulationAnalysisResult {
     /**
      * Aggregates data from another SimulationAnalysisResult into this one.
      * Useful for summing up day-wise results into an "all_days" result.
+     *
      * @param other The other SimulationAnalysisResult to aggregate.
      */
     public void aggregate(SimulationAnalysisResult other) {
-        // Aggregate rest activity metrics
-        other.totalRestActivityUsesPerFacility.forEach((facilityId, count) ->
-                this.totalRestActivityUsesPerFacility.merge(facilityId, count, Integer::sum));
-        other.totalRestDurationPerActivityFacility.forEach((facilityId, duration) ->
-                this.totalRestDurationPerActivityFacility.merge(facilityId, duration, Double::sum));
+        // Aggregate unique rest activity persons (merge sets)
+        other.uniqueRestActivityPersonsPerFacility.forEach((facilityId, personsSet) ->
+                this.uniqueRestActivityPersonsPerFacility.computeIfAbsent(facilityId, k -> new HashSet<>()).addAll(personsSet));
 
-        // Aggregate Dham activity metrics
-        other.totalDhamActivityUses.forEach((dhamType, count) ->
-                this.totalDhamActivityUses.merge(dhamType, count, Integer::sum));
-        other.totalDhamDuration.forEach((dhamType, duration) ->
-                this.totalDhamDuration.merge(dhamType, duration, Double::sum));
+        // Aggregate unique Dham activity persons (merge sets)
+        other.uniqueDhamActivityPersons.forEach((dhamType, personsSet) ->
+                this.uniqueDhamActivityPersons.computeIfAbsent(dhamType, k -> new HashSet<>()).addAll(personsSet));
 
         // Aggregate travel time metrics (raw data for recalculation)
+        // This merges the total travel time per person from the 'other' daily result into 'this' (all_days) result.
         other.totalTravelTimePerPerson.forEach((personId, time) ->
                 this.totalTravelTimePerPerson.merge(personId, time, Double::sum));
+
         other.totalLegsPerMode.forEach((mode, count) ->
                 this.totalLegsPerMode.merge(mode, count, Integer::sum));
         other.totalTravelTimePerMode.forEach((mode, time) ->

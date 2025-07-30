@@ -38,7 +38,7 @@ public class CharDhamInitialPlans {
     // Dham weights for generating sequences
     private final Map<List<String>, Double> dhamWeights = new HashMap<>();
 
-    private static final int NUM_AGENTS = 1000; // Number of agents to generate
+    private static final int NUM_AGENTS = 20; // Number of agents to generate
 
     public CharDhamInitialPlans() {
         // Initialize dham weights based on typical pilgrimage patterns
