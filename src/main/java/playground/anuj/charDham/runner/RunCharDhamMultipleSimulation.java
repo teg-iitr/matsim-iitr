@@ -122,12 +122,16 @@ public class RunCharDhamMultipleSimulation {
     }
 
     public static void main(String[] args) {
-        writeDefaultParametersCsv();
+        // Check if the parameter CSV file exists. If not, create it with default values.
+        if (!Files.exists(Paths.get(PARAMETER_RUNS_CSV))) {
+            writeDefaultParametersCsv();
+        }
+
         List<RunParameters> runs = readRunParameters();
 
         if (runs.isEmpty()) {
-            System.out.println("No valid parameters found in " + PARAMETER_RUNS_CSV + ". Running with default parameters.");
-            runs.add(new RunParameters()); // Add a default run
+            System.out.println("No valid parameters found in " + PARAMETER_RUNS_CSV + ". Running with a single default parameter set.");
+            runs.add(new RunParameters()); // Add a default run if the file was empty or only had headers
         }
 
         System.out.println("Starting multiple MATSim simulations based on " + PARAMETER_RUNS_CSV);
@@ -161,7 +165,7 @@ public class RunCharDhamMultipleSimulation {
             String headerLine = br.readLine();
             if (headerLine == null) {
                 System.err.println("CSV file is empty: " + RunCharDhamMultipleSimulation.PARAMETER_RUNS_CSV);
-                writeDefaultParametersCsv();
+                // Do NOT call writeDefaultParametersCsv() here, as it's handled in main()
                 return runs;
             }
             String[] headers = headerLine.split(",");
