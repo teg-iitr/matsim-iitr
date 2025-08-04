@@ -51,7 +51,7 @@ public class CountsPrep {
                     // this is required since two directions traffic is coming on one link; refer to comments in the input file.
                     double additional_count = Double.parseDouble( parts[labels.indexOf("additional_count")]);
                     count.createVolume(time, actual_count+additional_count);
-                    for (var i=1; i <=24 ; i++) {
+                    for (int i=1; i <=24 ; i++) {
                         if (i==11) continue;
                         count.createVolume(i, 0.);
                     }
