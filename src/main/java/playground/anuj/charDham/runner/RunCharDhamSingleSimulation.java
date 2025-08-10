@@ -1,14 +1,10 @@
 package playground.anuj.charDham.runner;
 
-import com.google.inject.Inject;
-import com.google.inject.Provider;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.locationchoice.DestinationChoiceConfigGroup;
 import org.matsim.contrib.locationchoice.frozenepsilons.*;
-import org.matsim.contrib.locationchoice.timegeography.LocationChoicePlanStrategy;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
@@ -18,11 +14,8 @@ import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.NetworkChangeEvent;
-import org.matsim.core.replanning.PlanStrategy;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
-import org.matsim.core.router.TripRouter;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.utils.timing.TimeInterpretation;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
@@ -45,16 +38,16 @@ public class RunCharDhamSingleSimulation {
 
     // --- FILE PATHS (using the original network file) ---
     private static final String NETWORK_FILE = "output/network_charDham_modified.xml.gz";
-    private static final String PLANS_FILE = "output/plan_charDham_updated_v2.xml";
+    private static final String PLANS_FILE = "output/plan_charDham_updated_v3.xml";
     private static final String FACILITIES_FILE = "output/facilities_charDham.xml";
     private static final String OUTPUT_DIRECTORY = "output/charDham/";
     private static final String CONFIG_OUTPUT_FILE = OUTPUT_DIRECTORY + "/config_charDham.xml";
     private static final String TIME_VARIANT_LINKS_FILE = "input/timeVariant_links.csv";
 
     // --- SIMULATION PARAMETERS ---
-    private static final int LAST_ITERATION = 2;
-    private static final double FLOW_CAPACITY_FACTOR = 1.0;
-    private static final double STORAGE_CAPACITY_FACTOR = 1.0;
+    private static final int LAST_ITERATION = 20;
+    private static final double FLOW_CAPACITY_FACTOR = 0.1;
+    private static final double STORAGE_CAPACITY_FACTOR = 0.1;
     private static final double SIMULATION_START_TIME_H = 4.0;
     private static final double TEMPLE_OPENING_TIME_H = 5.0;  // 5 AM
     private static final double TEMPLE_CLOSING_TIME_H = 16.0; // 4 PM
@@ -63,9 +56,10 @@ public class RunCharDhamSingleSimulation {
     
     // --- MODE & SCORING PARAMETERS ---
     public static final String CAR_MODE = "car";
+    public static final String TAXI_MODE = "taxi";
     public static final String MOTORBIKE_MODE = "motorbike";
-    public static final String TRAVELLER_MODE = "traveller";
-    static final Collection<String> modes = Arrays.asList(CAR_MODE, MOTORBIKE_MODE, TRAVELLER_MODE);
+    public static final String BUS_MODE = "bus";
+    static final Collection<String> modes = Arrays.asList(CAR_MODE, TAXI_MODE, MOTORBIKE_MODE, BUS_MODE);
     public static void main(String[] args) {
         Config config = ConfigUtils.createConfig();
 
@@ -91,18 +85,24 @@ public class RunCharDhamSingleSimulation {
         car.getCapacity().setSeats(5);
         vehicles.addVehicleType(car);
 
+        VehicleType taxi = VehicleUtils.createVehicleType(Id.create(TAXI_MODE, VehicleType.class), TAXI_MODE);
+        taxi.setPcuEquivalents(1.0);
+        taxi.setMaximumVelocity(60 / 3.6);
+        taxi.getCapacity().setSeats(5);
+        vehicles.addVehicleType(taxi);
+
         VehicleType motorbike = VehicleUtils.createVehicleType(Id.create(MOTORBIKE_MODE, VehicleType.class), MOTORBIKE_MODE);
-        motorbike.setPcuEquivalents(0.25);
+        motorbike.setPcuEquivalents(0.5);
         motorbike.setMaximumVelocity(80 / 3.6);
         motorbike.getCapacity().setSeats(2);
         vehicles.addVehicleType(motorbike);
 
-        VehicleType traveller = VehicleUtils.createVehicleType(Id.create(TRAVELLER_MODE, VehicleType.class), TRAVELLER_MODE);
-        traveller.setPcuEquivalents(2);
-        traveller.setMaximumVelocity(50 / 3.6);
-        traveller.getCapacity().setSeats(22);
-        traveller.getCapacity().setStandingRoom(5);
-        vehicles.addVehicleType(traveller);
+        VehicleType bus = VehicleUtils.createVehicleType(Id.create(BUS_MODE, VehicleType.class), BUS_MODE);
+        bus.setPcuEquivalents(3);
+        bus.setMaximumVelocity(50 / 3.6);
+        bus.getCapacity().setSeats(35);
+        bus.getCapacity().setStandingRoom(5);
+        vehicles.addVehicleType(bus);
 
         config.routing().setNetworkModes(modes);
         // Schedule the nightly road closures using NetworkChangeEvents
@@ -122,10 +122,14 @@ public class RunCharDhamSingleSimulation {
         controler.addOverridingModule(new AbstractModule() {
             @Override
             public void install() {
-                addTravelTimeBinding(TRAVELLER_MODE).to(carTravelTime());
-                addTravelDisutilityFactoryBinding(TRAVELLER_MODE).to(carTravelDisutilityFactoryKey());
+                addTravelTimeBinding(TAXI_MODE).to(carTravelTime());
+                addTravelDisutilityFactoryBinding(TAXI_MODE).to(carTravelDisutilityFactoryKey());
+
                 addTravelTimeBinding(MOTORBIKE_MODE).to(carTravelTime());
                 addTravelDisutilityFactoryBinding(MOTORBIKE_MODE).to(carTravelDisutilityFactoryKey());
+
+                addTravelTimeBinding(BUS_MODE).to(carTravelTime());
+                addTravelDisutilityFactoryBinding(BUS_MODE).to(carTravelDisutilityFactoryKey());
             }
         });
         controler.run();
@@ -290,16 +294,22 @@ public class RunCharDhamSingleSimulation {
 //        carParams.setMonetaryDistanceRate(-0.005);
         config.scoring().addModeParams(carParams);
 
+        ScoringConfigGroup.ModeParams taxiParams = new ScoringConfigGroup.ModeParams(TAXI_MODE);
+        taxiParams.setConstant(0);
+        taxiParams.setMarginalUtilityOfTraveling(-6);
+//        carParams.setMonetaryDistanceRate(-0.005);
+        config.scoring().addModeParams(taxiParams);
+
         ScoringConfigGroup.ModeParams motorbikeParams = new ScoringConfigGroup.ModeParams(MOTORBIKE_MODE);
         motorbikeParams.setConstant(0);
         motorbikeParams.setMarginalUtilityOfTraveling(-6);
 //        motorbikeParams.setMonetaryDistanceRate(-0.005);
         config.scoring().addModeParams(motorbikeParams);
 
-        ScoringConfigGroup.ModeParams travellerParams = new ScoringConfigGroup.ModeParams(TRAVELLER_MODE);
-        travellerParams.setConstant(0);
-        travellerParams.setMarginalUtilityOfTraveling(-6);
-        config.scoring().addModeParams(travellerParams);
+        ScoringConfigGroup.ModeParams busParams = new ScoringConfigGroup.ModeParams(BUS_MODE);
+        busParams.setConstant(0);
+        busParams.setMarginalUtilityOfTraveling(-6);
+        config.scoring().addModeParams(busParams);
 
         addActivityParams(config, "Haridwar", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S); // Open 24h
         addActivityParams(config, "Srinagar", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
@@ -308,6 +318,8 @@ public class RunCharDhamSingleSimulation {
         addActivityParams(config, "Uttarkashi", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
         addActivityParams(config, "Barkot", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
         addActivityParams(config, "Joshimath", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "GovindGhat", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Ghangaria", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
 
         // Main pilgrimage sites (Temples) with consistent opening/closing times
         double templeOpeningTime_s = TEMPLE_OPENING_TIME_H * 3600.0;
@@ -319,6 +331,7 @@ public class RunCharDhamSingleSimulation {
         addActivityParams(config, "Gangotri", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s, minimalTempleDuration_s);
         addActivityParams(config, "Yamunotri", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s, minimalTempleDuration_s);
         addActivityParams(config, "Badrinath", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s, minimalTempleDuration_s);
+        addActivityParams(config, "Hemkund_Sahib", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s, minimalTempleDuration_s);
     }
 
     /**
@@ -326,6 +339,8 @@ public class RunCharDhamSingleSimulation {
      */
     private static void configureReplanning(Config config) {
         config.replanning().clearStrategySettings(); // Clear existing strategies first
+        ChangeModeConfigGroup changeTripMode = config.changeMode();
+        changeTripMode.setModes(new String [] {modes.toString()});
 
         // The main strategy for performing location choice
         ReplanningConfigGroup.StrategySettings lcStrategy = new ReplanningConfigGroup.StrategySettings();
@@ -335,7 +350,8 @@ public class RunCharDhamSingleSimulation {
 
         addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator, 0.6);
         addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.ReRoute, 0.1);
-//        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator_ReRoute, 0.5);
+        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode, 0.1);
+
         config.timeAllocationMutator().setMutationRange(12.0 * 3600.0);
         config.timeAllocationMutator().setMutateAroundInitialEndTimeOnly(true);
         config.timeAllocationMutator().setAffectingDuration(true);

@@ -1,17 +1,14 @@
 package playground.anuj.charDham.runner;
 
-import com.google.inject.Module;
-import com.google.inject.Provider;
-import jakarta.inject.Inject;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.locationchoice.frozenepsilons.*;
+import org.matsim.core.config.groups.ChangeModeConfigGroup;
 import org.matsim.core.network.NetworkChangeEvent;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.contrib.locationchoice.DestinationChoiceConfigGroup;
-import org.matsim.contrib.locationchoice.timegeography.LocationChoicePlanStrategy;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
@@ -21,16 +18,9 @@ import org.matsim.core.config.groups.ScoringConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
-import org.matsim.core.replanning.PlanStrategy;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
-import org.matsim.core.router.TripRouter;
-import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
-import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.core.scoring.ScoringFunctionFactory;
 import org.matsim.core.utils.io.IOUtils;
-import org.matsim.core.utils.timing.TimeInterpretation;
-import org.matsim.utils.objectattributes.ObjectAttributes;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
@@ -50,7 +40,7 @@ public class RunCharDhamMultipleSimulation {
 
     // --- FILE PATHS (using the original network file) ---
     private static final String NETWORK_FILE = "output/network_charDham_modified.xml.gz";
-    private static final String PLANS_FILE = "output/plan_charDham_updated_v2.xml";
+    private static final String PLANS_FILE = "output/plan_charDham_updated_v3.xml";
     private static final String FACILITIES_FILE = "output/facilities_charDham.xml";
     private static final String BASE_OUTPUT_DIRECTORY = "output/charDham_runs/"; // Base directory for all runs
     private static final String TIME_VARIANT_LINKS_FILE = "input/timeVariant_links.csv";
@@ -65,9 +55,10 @@ public class RunCharDhamMultipleSimulation {
 
     // --- MODE & SCORING PARAMETERS ---
     static final String CAR_MODE = "car";
+    static final String TAXI_MODE = "taxi";
     static final String MOTORBIKE_MODE = "motorbike";
-    static final String TRAVELLER_MODE = "traveller";
-    static final Collection<String> modes = Arrays.asList(CAR_MODE, MOTORBIKE_MODE, TRAVELLER_MODE);
+    static final String BUS_MODE = "bus";
+    static final Collection<String> modes = Arrays.asList(CAR_MODE, TAXI_MODE, MOTORBIKE_MODE, BUS_MODE);
 
     /**
      * Helper class to hold parameters for a single simulation run.
@@ -80,14 +71,16 @@ public class RunCharDhamMultipleSimulation {
         double lateArrivalUtilsHr;
         double performingUtilsHr;
         double carMarginalUtilityOfTraveling;
+        double taxiMarginalUtilityOfTraveling;
         double bikeMarginalUtilityOfTraveling;
-        double travellerMarginalUtilityOfTraveling;
+        double busMarginalUtilityOfTraveling;
         double locationChoiceWeight;
         double locationChoiceSearchRadius;
         double timeAllocationMutatorWeight;
         double mutationRange;
         double mutationRangeStep;
         double reRouteWeight;
+        double changeTripModeWeight;
         double nightTimeSpeed;
 
         // Constructor to parse a CSV line
@@ -101,19 +94,21 @@ public class RunCharDhamMultipleSimulation {
 
             this.runId = dataMap.getOrDefault("run_id", "default_run");
             this.lastIteration = Integer.parseInt(dataMap.getOrDefault("last_iteration", "2"));
-            this.flowCapacityFactor = Double.parseDouble(dataMap.getOrDefault("flow_capacity_factor", "1.0"));
-            this.storageCapacityFactor = Double.parseDouble(dataMap.getOrDefault("storage_capacity_factor", "1.0"));
+            this.flowCapacityFactor = Double.parseDouble(dataMap.getOrDefault("flow_capacity_factor", "0.1"));
+            this.storageCapacityFactor = Double.parseDouble(dataMap.getOrDefault("storage_capacity_factor", "0.1"));
             this.lateArrivalUtilsHr = Double.parseDouble(dataMap.getOrDefault("lateArrival_utils_hr", "-1.0"));
             this.performingUtilsHr = Double.parseDouble(dataMap.getOrDefault("performing_utils_hr", "6.0"));
             this.carMarginalUtilityOfTraveling = Double.parseDouble(dataMap.getOrDefault("car_marginalUtilityOfTraveling", "-6.0"));
+            this.taxiMarginalUtilityOfTraveling = Double.parseDouble(dataMap.getOrDefault("taxi_marginalUtilityOfTraveling", "-6.0"));
             this.bikeMarginalUtilityOfTraveling = Double.parseDouble(dataMap.getOrDefault("bike_marginalUtilityOfTraveling", "-6.0"));
-            this.travellerMarginalUtilityOfTraveling = Double.parseDouble(dataMap.getOrDefault("traveller_marginalUtilityOfTraveling", "-6.0"));
+            this.busMarginalUtilityOfTraveling = Double.parseDouble(dataMap.getOrDefault("bus_marginalUtilityOfTraveling", "-6.0"));
             this.locationChoiceWeight = Double.parseDouble(dataMap.getOrDefault("locationChoice_weight", "0.3"));
             this.locationChoiceSearchRadius = Double.parseDouble(dataMap.getOrDefault("locationChoice_searchRadius", "20000.0"));
             this.timeAllocationMutatorWeight = Double.parseDouble(dataMap.getOrDefault("timeAllocationMutator_weight", "0.6"));
             this.mutationRange = Double.parseDouble(dataMap.getOrDefault("mutationRange", "43200.0"));
             this.mutationRangeStep = Double.parseDouble(dataMap.getOrDefault("mutationRangeStep", "600.0"));
             this.reRouteWeight = Double.parseDouble(dataMap.getOrDefault("reRoute_weight", "0.1"));
+            this.changeTripModeWeight = Double.parseDouble(dataMap.getOrDefault("changeTripMode_weight", "0.1"));
             this.nightTimeSpeed = Double.parseDouble(dataMap.getOrDefault("nightTimeSpeed", "1.78"));
         }
         RunParameters() {
@@ -203,14 +198,16 @@ public class RunCharDhamMultipleSimulation {
                 "lateArrival_utils_hr",
                 "performing_utils_hr",
                 "car_marginalUtilityOfTraveling",
+                "taxi_marginalUtilityOfTraveling",
                 "bike_marginalUtilityOfTraveling",
-                "traveller_marginalUtilityOfTraveling",
+                "bus_marginalUtilityOfTraveling",
                 "locationChoice_weight",
                 "locationChoice_searchRadius",
                 "timeAllocationMutator_weight",
                 "mutationRange",
                 "mutationRangeStep",
                 "reRoute_weight",
+                "changeTripMode_weight",
                 "nightTimeSpeed"
         );
 
@@ -225,14 +222,16 @@ public class RunCharDhamMultipleSimulation {
                 String.valueOf(defaultParams.lateArrivalUtilsHr),
                 String.valueOf(defaultParams.performingUtilsHr),
                 String.valueOf(defaultParams.carMarginalUtilityOfTraveling),
+                String.valueOf(defaultParams.taxiMarginalUtilityOfTraveling),
                 String.valueOf(defaultParams.bikeMarginalUtilityOfTraveling),
-                String.valueOf(defaultParams.travellerMarginalUtilityOfTraveling),
+                String.valueOf(defaultParams.busMarginalUtilityOfTraveling),
                 String.valueOf(defaultParams.locationChoiceWeight),
                 String.valueOf(defaultParams.locationChoiceSearchRadius),
                 String.valueOf(defaultParams.timeAllocationMutatorWeight),
                 String.valueOf(defaultParams.mutationRange),
                 String.valueOf(defaultParams.mutationRangeStep),
                 String.valueOf(defaultParams.reRouteWeight),
+                String.valueOf(defaultParams.changeTripModeWeight),
                 String.valueOf(defaultParams.nightTimeSpeed)
         );
 
@@ -281,18 +280,24 @@ public class RunCharDhamMultipleSimulation {
         car.getCapacity().setSeats(5);
         vehicles.addVehicleType(car);
 
+        VehicleType taxi = VehicleUtils.createVehicleType(Id.create(TAXI_MODE, VehicleType.class), TAXI_MODE);
+        taxi.setPcuEquivalents(1.0);
+        taxi.setMaximumVelocity(60 / 3.6);
+        taxi.getCapacity().setSeats(5);
+        vehicles.addVehicleType(taxi);
+
         VehicleType motorbike = VehicleUtils.createVehicleType(Id.create(MOTORBIKE_MODE, VehicleType.class), MOTORBIKE_MODE);
-        motorbike.setPcuEquivalents(0.25);
+        motorbike.setPcuEquivalents(0.5);
         motorbike.setMaximumVelocity(80 / 3.6);
         motorbike.getCapacity().setSeats(2);
         vehicles.addVehicleType(motorbike);
 
-        VehicleType traveller = VehicleUtils.createVehicleType(Id.create(TRAVELLER_MODE, VehicleType.class), TRAVELLER_MODE);
-        traveller.setPcuEquivalents(2);
-        traveller.setMaximumVelocity(50 / 3.6);
-        traveller.getCapacity().setSeats(22);
-        traveller.getCapacity().setStandingRoom(5);
-        vehicles.addVehicleType(traveller);
+        VehicleType bus = VehicleUtils.createVehicleType(Id.create(BUS_MODE, VehicleType.class), BUS_MODE);
+        bus.setPcuEquivalents(3);
+        bus.setMaximumVelocity(50 / 3.6);
+        bus.getCapacity().setSeats(22);
+        bus.getCapacity().setStandingRoom(5);
+        vehicles.addVehicleType(bus);
 
         config.routing().setNetworkModes(modes);
 
@@ -312,10 +317,14 @@ public class RunCharDhamMultipleSimulation {
         controler.addOverridingModule(new AbstractModule() {
             @Override
             public void install() {
-                addTravelTimeBinding(TRAVELLER_MODE).to(carTravelTime());
-                addTravelDisutilityFactoryBinding(TRAVELLER_MODE).to(carTravelDisutilityFactoryKey());
+                addTravelTimeBinding(TAXI_MODE).to(carTravelTime());
+                addTravelDisutilityFactoryBinding(TAXI_MODE).to(carTravelDisutilityFactoryKey());
+
                 addTravelTimeBinding(MOTORBIKE_MODE).to(carTravelTime());
                 addTravelDisutilityFactoryBinding(MOTORBIKE_MODE).to(carTravelDisutilityFactoryKey());
+
+                addTravelTimeBinding(BUS_MODE).to(carTravelTime());
+                addTravelDisutilityFactoryBinding(BUS_MODE).to(carTravelDisutilityFactoryKey());
             }
         });
         controler.run();
@@ -464,15 +473,20 @@ public class RunCharDhamMultipleSimulation {
         carParams.setMarginalUtilityOfTraveling(params.carMarginalUtilityOfTraveling); // From CSV
         config.scoring().addModeParams(carParams);
 
+        ScoringConfigGroup.ModeParams taxiParams = new ScoringConfigGroup.ModeParams(TAXI_MODE);
+        taxiParams.setConstant(0);
+        taxiParams.setMarginalUtilityOfTraveling(params.taxiMarginalUtilityOfTraveling); // From CSV
+        config.scoring().addModeParams(taxiParams);
+
         ScoringConfigGroup.ModeParams motorbikeParams = new ScoringConfigGroup.ModeParams(MOTORBIKE_MODE);
         motorbikeParams.setConstant(0);
         motorbikeParams.setMarginalUtilityOfTraveling(params.bikeMarginalUtilityOfTraveling); // From CSV
         config.scoring().addModeParams(motorbikeParams);
 
-        ScoringConfigGroup.ModeParams travellerParams = new ScoringConfigGroup.ModeParams(TRAVELLER_MODE);
-        travellerParams.setConstant(0);
-        travellerParams.setMarginalUtilityOfTraveling(params.travellerMarginalUtilityOfTraveling); // From CSV
-        config.scoring().addModeParams(travellerParams);
+        ScoringConfigGroup.ModeParams busParams = new ScoringConfigGroup.ModeParams(BUS_MODE);
+        busParams.setConstant(0);
+        busParams.setMarginalUtilityOfTraveling(params.busMarginalUtilityOfTraveling); // From CSV
+        config.scoring().addModeParams(busParams);
 
         addActivityParams(config, "Haridwar", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S); // Open 24h
         addActivityParams(config, "Srinagar", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
@@ -481,6 +495,8 @@ public class RunCharDhamMultipleSimulation {
         addActivityParams(config, "Uttarkashi", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
         addActivityParams(config, "Barkot", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
         addActivityParams(config, "Joshimath", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "GovindGhat", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Ghangaria", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
 
         // Main pilgrimage sites (Temples) with consistent opening/closing times
         double templeOpeningTime_s = TEMPLE_OPENING_TIME_H * 3600.0;
@@ -492,6 +508,7 @@ public class RunCharDhamMultipleSimulation {
         addActivityParams(config, "Gangotri", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s, minimalTempleDuration_s);
         addActivityParams(config, "Yamunotri", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s, minimalTempleDuration_s);
         addActivityParams(config, "Badrinath", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s, minimalTempleDuration_s);
+        addActivityParams(config, "Hemkund_Sahib", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s, minimalTempleDuration_s);
     }
 
     /**
@@ -499,6 +516,8 @@ public class RunCharDhamMultipleSimulation {
      */
     private static void configureReplanning(Config config, RunParameters params) {
         config.replanning().clearStrategySettings();
+        ChangeModeConfigGroup changeTripMode = config.changeMode();
+        changeTripMode.setModes(new String [] {modes.toString()});
 
         ReplanningConfigGroup.StrategySettings lcStrategy = new ReplanningConfigGroup.StrategySettings();
         lcStrategy.setStrategyName(FrozenTastesConfigGroup.GROUP_NAME);
@@ -507,6 +526,7 @@ public class RunCharDhamMultipleSimulation {
 
         addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator, params.timeAllocationMutatorWeight); // From CSV
         addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.ReRoute, params.reRouteWeight); // From CSV
+        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode, params.changeTripModeWeight);
 
         config.timeAllocationMutator().setMutationRange(params.mutationRange);
         config.timeAllocationMutator().setMutateAroundInitialEndTimeOnly(true);

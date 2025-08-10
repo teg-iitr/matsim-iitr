@@ -5,6 +5,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.population.*;
+import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -14,11 +15,12 @@ import playground.amit.Dehradun.DehradunUtils;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CharDhamInitialPlans {
 
     public static final String importantLocationsFile = "input/anuj/UKCharDhamPrimeLocations.txt";
-    public static final String outputPlansFile = "output/plan_charDham_updated_v2.xml"; // Updated output file name
+    public static final String outputPlansFile = "output/plan_charDham_updated_v3.xml"; // Updated output file name
     private final Map<String, Coord> location2Coord = new HashMap<>();
     public static final String PASSENGER_ATTRIBUTE = "numberOfPassengers";
 
@@ -31,39 +33,40 @@ public class CharDhamInitialPlans {
 
     // Constants for modes
     public static final String CAR_MODE = "car";
+    public static final String TAXI_MODE = "taxi";
     public static final String MOTORBIKE_MODE = "motorbike";
-    public static final String TRAVELLER_MODE = "traveller";
+    public static final String BUS_MODE = "bus";
     public static final String WALK_MODE = TransportMode.walk; // For treks
 
-    // Dham weights for generating sequences
-    private final Map<List<String>, Double> dhamWeights = new HashMap<>();
+    // New: CSV file for dham activity chains and weights
+    private static final String DHAM_CHAIN_FREQUENCIES_FILE = "input/anuj/dham_activity_chain_frequencies.csv";
+    private List<DhamChainData> dhamChainDataList; // To store parsed CSV data
+    private int NUM_AGENTS; // Will be calculated from CSV counts
+    private static final int DEFAULT_TOP_ROWS_TO_READ = 25; // Default number of top rows to consider
 
-    private static final int NUM_AGENTS = 20; // Number of agents to generate
+    /**
+     * Inner class to hold data from each row of the dham_activity_chain_frequencies.csv.
+     * Implements Comparable to allow sorting by count in descending order.
+     */
+    private static class DhamChainData implements Comparable<DhamChainData> {
+        List<String> activityChain;
+        int count;
+        double weight;
+
+        DhamChainData(List<String> activityChain, int count, double weight) {
+            this.activityChain = activityChain;
+            this.count = count;
+            this.weight = weight;
+        }
+
+        @Override
+        public int compareTo(DhamChainData other) {
+            // Sort in descending order of count
+            return Integer.compare(other.count, this.count);
+        }
+    }
 
     public CharDhamInitialPlans() {
-        // Initialize dham weights based on typical pilgrimage patterns
-        // Size 1 combinations
-        dhamWeights.put(List.of("Yamunotri"), 0.006);
-        dhamWeights.put(List.of("Gangotri"), 0.01);
-        dhamWeights.put(List.of("Kedarnath"), 0.19);
-        dhamWeights.put(List.of("Badrinath"), 0.12);
-
-        // Size 2 combinations
-        dhamWeights.put(List.of("Yamunotri", "Gangotri"), 0.5);
-        dhamWeights.put(List.of("Yamunotri", "Kedarnath"), 0.2);
-        dhamWeights.put(List.of("Yamunotri", "Badrinath"), 0.2);
-        dhamWeights.put(List.of("Gangotri", "Kedarnath"), 0.1);
-        dhamWeights.put(List.of("Gangotri", "Badrinath"), 0.2);
-        dhamWeights.put(List.of("Kedarnath", "Badrinath"), 0.6);
-
-        // Size 3 combinations
-        dhamWeights.put(List.of("Yamunotri", "Gangotri", "Kedarnath"), 0.5);
-        dhamWeights.put(List.of("Yamunotri", "Gangotri", "Badrinath"), 0.2);
-        dhamWeights.put(List.of("Yamunotri", "Kedarnath", "Badrinath"), 0.1);
-        dhamWeights.put(List.of("Gangotri", "Kedarnath", "Badrinath"), 0.5);
-
-        // Size 4 combinations
-        dhamWeights.put(List.of("Yamunotri", "Gangotri", "Kedarnath", "Badrinath"), 0.8);
     }
 
     public static void main(String[] args) {
@@ -74,15 +77,19 @@ public class CharDhamInitialPlans {
         // Load coordinates for important locations
         storeLocations();
 
+        // Read Dham activity chains and calculate NUM_AGENTS
+        readDhamActivityChains(DEFAULT_TOP_ROWS_TO_READ);
+
+        if (NUM_AGENTS == 0) {
+            System.err.println("No agents to generate. Check " + DHAM_CHAIN_FREQUENCIES_FILE + " for valid data or adjust DEFAULT_TOP_ROWS_TO_READ.");
+            return;
+        }
+
         // Initialize MATSim scenario
         Config config = ConfigUtils.createConfig();
         Scenario scenario = ScenarioUtils.createScenario(config);
         Population population = scenario.getPopulation();
         PopulationFactory populationFactory = population.getFactory();
-
-        // Generate all possible dham combinations (including Hemkund Sahib)
-        List<List<String>> allDhamCombinations = generateDhamCombinations(
-                Arrays.asList("Yamunotri", "Gangotri", "Kedarnath", "Badrinath"));
 
         for (int i = 0; i < NUM_AGENTS; i++) {
             String personIdString = "CharDhamPilgrim_" + i;
@@ -92,24 +99,27 @@ public class CharDhamInitialPlans {
             String primaryMode;
             int numberOfPassengers;
 
-            // Randomly choose primary mode (e.g., 60% car, 20% motorbike, 20% traveller)
+            // Randomly choose primary mode
             double modeChoice = random.nextDouble();
-            if (modeChoice < 0.60) { // 60% chance for CAR_MODE
+            if (modeChoice < 0.15) { // 15% chance for CAR_MODE
                 primaryMode = CAR_MODE;
                 numberOfPassengers = random.nextInt(2) + 4; // 4 or 5 passengers
-            } else if (modeChoice < 0.60 + 0.25) { // 25% chance for MOTORBIKE_MODE (0.60 to 0.85)
+            } else if (modeChoice < 0.15 + 0.40) { // 40% chance for TAXI_MODE
+                primaryMode = TAXI_MODE;
+                numberOfPassengers = random.nextInt(2) + 4; // 4 or 5 passengers
+            } else if (modeChoice < 0.55 + 0.05) { // 5% chance for MOTORBIKE_MODE
                 primaryMode = MOTORBIKE_MODE;
                 numberOfPassengers = random.nextInt(2) + 1; // 1 or 2 passengers
-            } else { // 15% chance for TRAVELLER_MODE (0.85 to 1.0)
-                primaryMode = TRAVELLER_MODE;
-                numberOfPassengers = random.nextInt(17) + 10; // 10 to 26 passengers (26 - 10 + 1 = 17)
+            } else { // 40% chance for BUS_MODE (0.60 to 1.0)
+                primaryMode = BUS_MODE;
+                numberOfPassengers = random.nextInt(21) + 20; // 20 to 40 passengers (40 - 20 + 1 = 21)
             }
             plan.getAttributes().putAttribute(PASSENGER_ATTRIBUTE, numberOfPassengers);
             // Start activity in Haridwar with a random end time between 4 AM and 8 AM on day 1
-            addActivityWithEndTime(populationFactory, plan, "Haridwar", location2Coord.get("Haridwar"), randomEndTime(4, 24, random.nextInt(4) + 1));
+            addActivityWithEndTime(populationFactory, plan, "Haridwar", location2Coord.get("Haridwar"), randomEndTime(4, 24, random.nextInt(9) + 1));
 
-            // Get a random dham sequence based on weights
-            List<String> dhamSequence = getRandomDhamSequence(allDhamCombinations, dhamWeights);
+            // Get a random dham sequence based on weights from CSV
+            List<String> dhamSequence = getRandomDhamSequence();
 
             // Add dham visits based on sequence
             for (String dham : dhamSequence) {
@@ -146,7 +156,7 @@ public class CharDhamInitialPlans {
 
                     addActivityWithDuration(populationFactory, plan, "Gangotri", location2Coord.get("Gangotri"), DHAM_VISIT_DURATION);
                     addLeg(populationFactory, plan, primaryMode);
-                    
+
                     addActivityWithDuration(populationFactory, plan, "Uttarkashi", location2Coord.get("Uttarkashi"), REST_STOP_DURATION);
                 } else if (dham.equals("Yamunotri")) {
                     // Intermediate stop in Barkot
@@ -155,7 +165,7 @@ public class CharDhamInitialPlans {
 
                     addActivityWithDuration(populationFactory, plan, "Yamunotri", location2Coord.get("Yamunotri"), DHAM_VISIT_DURATION);
                     addLeg(populationFactory, plan, primaryMode);
-                    
+
                     addActivityWithDuration(populationFactory, plan, "Barkot", location2Coord.get("Barkot"), REST_STOP_DURATION);
                 } else if (dham.equals("Badrinath")) {
                     // Intermediate stop in Joshimath
@@ -166,6 +176,22 @@ public class CharDhamInitialPlans {
                     addLeg(populationFactory, plan, primaryMode);
 
                     addActivityWithDuration(populationFactory, plan, "Joshimath", location2Coord.get("Joshimath"), REST_STOP_DURATION);
+                } else if (dham.equals("Hemkund_Sahib")) {
+                    // Intermediate stop in Joshimath
+                    addActivityWithDuration(populationFactory, plan, "GovindGhat", location2Coord.get("GovindGhat"), REST_STOP_DURATION);
+                    addLeg(populationFactory, plan, primaryMode);
+
+                    addActivityWithDuration(populationFactory, plan, "Ghangaria", location2Coord.get("Ghangaria"), REST_STOP_DURATION);
+                    addLeg(populationFactory, plan, WALK_MODE);
+
+                    addActivityWithDuration(populationFactory, plan, "Hemkund_Sahib", location2Coord.get("Hemkund_Sahib"), REST_STOP_DURATION);
+                    addLeg(populationFactory, plan, WALK_MODE);
+
+                    addActivityWithDuration(populationFactory, plan, "Ghangaria", location2Coord.get("Ghangaria"), REST_STOP_DURATION);
+                    addLeg(populationFactory, plan, primaryMode);
+
+                    addActivityWithDuration(populationFactory, plan, "GovindGhat", location2Coord.get("GovindGhat"), REST_STOP_DURATION);
+                    addLeg(populationFactory, plan, primaryMode);
                 }
             }
             // Return to Haridwar
@@ -180,6 +206,119 @@ public class CharDhamInitialPlans {
 
         // Write population to output file
         new PopulationWriter(population).write(outputPlansFile);
+        System.out.println("Generated " + NUM_AGENTS + " agents and saved to " + outputPlansFile);
+    }
+
+    /**
+     * Reads Dham activity chain frequencies and weights from a CSV file.
+     * Populates `dhamChainDataList` with the top `numRowsToRead` entries by count
+     * and calculates `NUM_AGENTS` based on these selected entries.
+     * @param numRowsToRead The number of top rows (by count) to read from the CSV.
+     */
+    private void readDhamActivityChains(int numRowsToRead) {
+        List<DhamChainData> allDhamChainData = new ArrayList<>();
+        try (BufferedReader br = IOUtils.getBufferedReader(DHAM_CHAIN_FREQUENCIES_FILE)) {
+            String headerLine = br.readLine(); // Read and skip header
+            if (headerLine == null) {
+                throw new IOException("CSV file is empty: " + DHAM_CHAIN_FREQUENCIES_FILE);
+            }
+            String[] headers = headerLine.split(",");
+            int activityChainCol = -1;
+            int countCol = -1;
+            int weightCol = -1;
+
+            // Find column indices
+            for (int i = 0; i < headers.length; i++) {
+                String header = headers[i].trim();
+                if ("activity_chain".equalsIgnoreCase(header)) {
+                    activityChainCol = i;
+                } else if ("count".equalsIgnoreCase(header)) {
+                    countCol = i;
+                } else if ("weight".equalsIgnoreCase(header)) {
+                    weightCol = i;
+                }
+            }
+
+            if (activityChainCol == -1 || countCol == -1 || weightCol == -1) {
+                throw new IOException("Missing one or more required columns (activity_chain, count, weight) in CSV: " + DHAM_CHAIN_FREQUENCIES_FILE);
+            }
+
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue; // Skip empty lines
+                String[] parts = line.split(",");
+
+                // Basic check for sufficient columns
+                if (parts.length <= Math.max(activityChainCol, Math.max(countCol, weightCol))) {
+                    System.err.println("Skipping malformed line (not enough columns): " + line);
+                    continue;
+                }
+
+                try {
+                    // Parse activity chain string into a List<String>
+                    List<String> activityChain = Arrays.stream(parts[activityChainCol].trim().split(" - "))
+                            .map(String::trim)
+                            .collect(Collectors.toList());
+                    int count = Integer.parseInt(parts[countCol].trim());
+                    double weight = Double.parseDouble(parts[weightCol].trim());
+
+                    if (count < 0 || weight < 0) {
+                        System.err.println("Skipping line with negative count or weight: " + line);
+                        continue;
+                    }
+
+                    allDhamChainData.add(new DhamChainData(activityChain, count, weight));
+
+                } catch (NumberFormatException e) {
+                    System.err.println("Skipping line due to number format error in " + DHAM_CHAIN_FREQUENCIES_FILE + ": " + line + " - " + e.getMessage());
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Error reading Dham activity chain frequencies file: " + DHAM_CHAIN_FREQUENCIES_FILE, e);
+        }
+
+        // Sort all data by count in descending order
+        Collections.sort(allDhamChainData);
+
+        // Take only the top N rows
+        this.dhamChainDataList = allDhamChainData.stream()
+                .limit(numRowsToRead)
+                .collect(Collectors.toList());
+
+        // Calculate NUM_AGENTS from the counts of the selected top N rows
+        this.NUM_AGENTS = this.dhamChainDataList.stream().mapToInt(d -> d.count).sum();
+
+        System.out.println("Read " + allDhamChainData.size() + " activity chains from " + DHAM_CHAIN_FREQUENCIES_FILE + ".");
+        System.out.println("Considering top " + this.dhamChainDataList.size() + " chains (requested: " + numRowsToRead + "). Total agents to generate: " + NUM_AGENTS);
+    }
+
+    /**
+     * Selects a random Dham sequence from the loaded `dhamChainDataList` based on their weights.
+     * @return A List of Dham names representing the chosen sequence.
+     */
+    private List<String> getRandomDhamSequence() {
+        if (dhamChainDataList.isEmpty()) {
+            return Collections.emptyList(); // Should be caught earlier by NUM_AGENTS check
+        }
+
+        double totalWeight = dhamChainDataList.stream().mapToDouble(d -> d.weight).sum();
+        if (totalWeight <= 0) {
+            // Fallback if all weights are zero or negative, pick randomly without weighting
+            System.err.println("Warning: Total weight for Dham sequences is zero or negative. Picking a random sequence without weighting.");
+            return dhamChainDataList.get(random.nextInt(dhamChainDataList.size())).activityChain;
+        }
+
+        double rand = random.nextDouble() * totalWeight;
+        double cumulativeWeight = 0.0;
+
+        for (DhamChainData data : dhamChainDataList) {
+            cumulativeWeight += data.weight;
+            if (rand <= cumulativeWeight) {
+                return data.activityChain;
+            }
+        }
+        // Fallback in case of floating point inaccuracies, return a random one
+        return dhamChainDataList.get(random.nextInt(dhamChainDataList.size())).activityChain;
     }
 
     private void addLocationChoiceActivity(PopulationFactory factory, Plan plan, String type, Coord coord, double durationInSeconds) {
@@ -203,61 +342,6 @@ public class CharDhamInitialPlans {
         return startSeconds + random.nextDouble() * (endSeconds - startSeconds);
     }
 
-
-    private List<String> getRandomDhamSequence(List<List<String>> combinations, Map<List<String>, Double> weights) {
-        double totalWeight = weights.values().stream().mapToDouble(Double::doubleValue).sum();
-        double rand = random.nextDouble() * totalWeight;
-        double cumulativeWeight = 0.0;
-
-        for (List<String> combination : combinations) {
-            // Use getOrDefault to assign a small default weight to combinations not explicitly listed
-            double weight = weights.getOrDefault(combination, 0.0001);
-            cumulativeWeight += weight;
-            if (rand <= cumulativeWeight) {
-                return combination;
-            }
-        }
-        // Fallback in case of floating point inaccuracies or if no combination is selected
-        return combinations.get(random.nextInt(combinations.size()));
-    }
-
-    private List<List<String>> generateDhamCombinations(List<String> dhams) {
-        List<List<String>> combinations = new ArrayList<>();
-        for (int i = 1; i <= dhams.size(); i++) {
-            combinations.addAll(getCombinations(dhams, i));
-        }
-        return combinations;
-    }
-
-//    private void addActivity(PopulationFactory factory, Plan plan, String type, Coord coord, double endTime) {
-//        Activity activity = factory.createActivityFromCoord(type, coord);
-//        if (endTime > 0) {
-//            activity.setEndTime(endTime);
-//        }
-//        plan.addActivity(activity);
-//    }
-
-    private List<List<String>> getCombinations(List<String> dhams, int size) {
-        if (size == 0) return List.of(Collections.emptyList());
-        if (dhams.isEmpty()) return List.of();
-
-        List<List<String>> combinations = new ArrayList<>();
-        String first = dhams.get(0);
-        List<String> rest = dhams.subList(1, dhams.size());
-
-        // Include first element
-        for (List<String> smaller : getCombinations(rest, size - 1)) {
-            List<String> combination = new ArrayList<>();
-            combination.add(first);
-            combination.addAll(smaller);
-            combinations.add(combination);
-        }
-
-        // Exclude first element
-        combinations.addAll(getCombinations(rest, size));
-
-        return combinations;
-    }
 
     private void storeLocations() {
         // Load coordinates from file with transformation
@@ -295,6 +379,4 @@ public class CharDhamInitialPlans {
         Leg leg = factory.createLeg(mode);
         plan.addLeg(leg);
     }
-
-
 }

@@ -1,5 +1,6 @@
 package playground.anuj.charDham.analysis;
 
+import org.matsim.analysis.LegTimesModule;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.events.ActivityEndEvent;
 import org.matsim.api.core.v01.events.ActivityStartEvent;
@@ -14,6 +15,8 @@ import org.matsim.core.events.handler.EventHandler;
 import org.matsim.facilities.ActivityFacility;
 
 import java.util.*;
+
+import static playground.anuj.charDham.analysis.CharDhamOutputAnalyzer.DHAM_ACTIVITY_TYPES;
 
 /**
  * An event handler to collect various statistics from MATSim simulation events,
@@ -43,9 +46,6 @@ public class CharDhamAnalysisEventHandler implements
     // Accumulates the total time (duration) spent by all agents at "Dham" activities.
     // Kept for internal calculation, but not passed to SimulationAnalysisResult as per request.
     private final Map<Integer, Map<String, Double>> totalDhamDuration = new HashMap<>();
-    private final Set<String> DHAM_ACTIVITY_TYPES = new HashSet<>(Arrays.asList(
-            "Kedarnath", "Gangotri", "Yamunotri", "Badrinath"
-    ));
 
     // --- Data for travel time ---
     private final Map<Id<Person>, Double> personLegStartTimes = new HashMap<>(); // Not day-indexed, tracks current leg
