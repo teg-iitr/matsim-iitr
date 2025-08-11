@@ -30,7 +30,7 @@ public class CharDhamInitialPlans {
     private static final double DHAM_VISIT_DURATION = 6.0 * 3600.0;      // 6 hours for darshan/visit
     private static final double OVERNIGHT_STAY_DURATION = 12.0 * 3600.0; // 12 hours for an overnight halt
 
-    public static final double SAMPLE_SIZE = 0.5;
+    public static final double SAMPLE_SIZE = 0.25;
 
     private final Random random = new Random(); // For random choices
 
@@ -144,7 +144,7 @@ public class CharDhamInitialPlans {
             numberOfPlansGenerated++; // Increment count of generated plans/vehicles
 
             // Start activity in Haridwar with a random end time between 4 AM and 8 AM on day 1
-            addActivityWithEndTime(populationFactory, plan, "Haridwar", location2Coord.get("Haridwar"), randomEndTime(4, 24, random.nextInt(9) + 1));
+            addActivityWithEndTime(populationFactory, plan, "Haridwar", location2Coord.get("Haridwar"), randomEndTime(4, 24, random.nextInt(4) + 1));
 
             // Get a random dham sequence based on weights from CSV
             List<String> dhamSequence = getRandomDhamSequence();
