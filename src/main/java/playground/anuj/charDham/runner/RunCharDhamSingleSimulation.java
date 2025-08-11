@@ -100,7 +100,7 @@ public class RunCharDhamSingleSimulation {
         VehicleType bus = VehicleUtils.createVehicleType(Id.create(BUS_MODE, VehicleType.class), BUS_MODE);
         bus.setPcuEquivalents(3);
         bus.setMaximumVelocity(50 / 3.6);
-        bus.getCapacity().setSeats(35);
+        bus.getCapacity().setSeats(55);
         bus.getCapacity().setStandingRoom(5);
         vehicles.addVehicleType(bus);
 

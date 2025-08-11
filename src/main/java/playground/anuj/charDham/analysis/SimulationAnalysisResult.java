@@ -100,16 +100,33 @@ public class SimulationAnalysisResult {
             this.averageLegTravelTime_s = 0.0;
         }
 
-        // Calculate average travel time per mode
+        // Calculate total non-walk legs for percentage calculation
+        int totalNonWalkLegs = 0;
+        for (Map.Entry<String, Integer> entry : totalLegsPerMode.entrySet()) {
+            if (!"walk".equalsIgnoreCase(entry.getKey())) {
+                totalNonWalkLegs += entry.getValue();
+            }
+        }
+
+        // Calculate average travel time per mode and percentage of legs per mode
         for (String mode : totalLegsPerMode.keySet()) {
             int numLegs = totalLegsPerMode.getOrDefault(mode, 0);
             double totalTime = totalTravelTimePerMode.getOrDefault(mode, 0.0);
             if (numLegs > 0) {
                 avgTravelTimePerMode.put(mode, totalTime / numLegs);
-                percentageLegsPerMode.put(mode, (double) numLegs / this.totalLegs * 100.0);
             } else {
                 avgTravelTimePerMode.put(mode, 0.0);
-                percentageLegsPerMode.put(mode, 0.0);
+            }
+
+            // NEW: Calculate percentage of legs per mode, excluding 'walk' from the total base
+            if ("walk".equalsIgnoreCase(mode)) {
+                percentageLegsPerMode.put(mode, 0.0); // Walk mode explicitly gets 0% for this metric
+            } else {
+                if (totalNonWalkLegs > 0) {
+                    percentageLegsPerMode.put(mode, (double) numLegs / totalNonWalkLegs * 100.0);
+                } else {
+                    percentageLegsPerMode.put(mode, 0.0);
+                }
             }
         }
 
