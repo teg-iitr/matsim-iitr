@@ -8,6 +8,7 @@ import org.matsim.api.core.v01.population.*;
 import org.matsim.api.core.v01.population.PopulationWriter;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
 import playground.amit.Dehradun.DehradunUtils;
@@ -28,6 +29,8 @@ public class CharDhamInitialPlans {
     private static final double REST_STOP_DURATION = 3.0 * 3600.0;     // 2 hours for a chosen rest stop
     private static final double DHAM_VISIT_DURATION = 6.0 * 3600.0;      // 6 hours for darshan/visit
     private static final double OVERNIGHT_STAY_DURATION = 12.0 * 3600.0; // 12 hours for an overnight halt
+
+    public static final double SAMPLE_SIZE = 0.5;
 
     private final Random random = new Random(); // For random choices
 
@@ -237,6 +240,7 @@ public class CharDhamInitialPlans {
         }
 
         // Write population to output file
+        PopulationUtils.sampleDown(population, SAMPLE_SIZE);
         new PopulationWriter(population).write(outputPlansFile);
         System.out.println("Generated " + numberOfPlansGenerated + " plans (vehicles) for a total of " + totalPassengersGenerated + " passengers, saved to " + outputPlansFile);
     }

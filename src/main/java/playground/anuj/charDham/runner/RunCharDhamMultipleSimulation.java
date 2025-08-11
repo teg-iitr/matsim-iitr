@@ -94,8 +94,8 @@ public class RunCharDhamMultipleSimulation {
 
             this.runId = dataMap.getOrDefault("run_id", "default_run");
             this.lastIteration = Integer.parseInt(dataMap.getOrDefault("last_iteration", "2"));
-            this.flowCapacityFactor = Double.parseDouble(dataMap.getOrDefault("flow_capacity_factor", "0.1"));
-            this.storageCapacityFactor = Double.parseDouble(dataMap.getOrDefault("storage_capacity_factor", "0.1"));
+            this.flowCapacityFactor = Double.parseDouble(dataMap.getOrDefault("flow_capacity_factor", "0.5"));
+            this.storageCapacityFactor = Double.parseDouble(dataMap.getOrDefault("storage_capacity_factor", "0.5")) * 3.0;
             this.lateArrivalUtilsHr = Double.parseDouble(dataMap.getOrDefault("lateArrival_utils_hr", "-1.0"));
             this.performingUtilsHr = Double.parseDouble(dataMap.getOrDefault("performing_utils_hr", "6.0"));
             this.carMarginalUtilityOfTraveling = Double.parseDouble(dataMap.getOrDefault("car_marginalUtilityOfTraveling", "-6.0"));

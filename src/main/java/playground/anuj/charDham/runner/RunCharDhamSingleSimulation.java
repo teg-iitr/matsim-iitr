@@ -29,6 +29,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import static playground.anuj.charDham.population.CharDhamInitialPlans.SAMPLE_SIZE;
+
 /**
  * Main class to run the Char Dham Yatra MATSim simulation.
  * This version uses NetworkChangeEvents to programmatically close all roads
@@ -46,8 +48,8 @@ public class RunCharDhamSingleSimulation {
 
     // --- SIMULATION PARAMETERS ---
     private static final int LAST_ITERATION = 20;
-    private static final double FLOW_CAPACITY_FACTOR = 0.1;
-    private static final double STORAGE_CAPACITY_FACTOR = 0.1;
+    private static final double FLOW_CAPACITY_FACTOR = SAMPLE_SIZE;
+    private static final double STORAGE_CAPACITY_FACTOR = SAMPLE_SIZE * 3;
     private static final double SIMULATION_START_TIME_H = 4.0;
     private static final double TEMPLE_OPENING_TIME_H = 5.0;  // 5 AM
     private static final double TEMPLE_CLOSING_TIME_H = 16.0; // 4 PM
@@ -229,7 +231,7 @@ public class RunCharDhamSingleSimulation {
                 double closeEventTime = dayOffset_s + closeTimeOfDay_s;
                 NetworkChangeEvent closeEvent = new NetworkChangeEvent(closeEventTime);
                 closeEvent.setFreespeedChange(new NetworkChangeEvent.ChangeValue(
-                        NetworkChangeEvent.ChangeType.ABSOLUTE_IN_SI_UNITS, 10/3.6)); // Effectively closes the link
+                        NetworkChangeEvent.ChangeType.ABSOLUTE_IN_SI_UNITS, 20/3.6)); // Effectively closes the link
                 closeEvent.addLink(link);
                 NetworkUtils.addNetworkChangeEvent(network, closeEvent);
 
@@ -352,10 +354,10 @@ public class RunCharDhamSingleSimulation {
         addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.ReRoute, 0.1);
         addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode, 0.1);
 
-        config.timeAllocationMutator().setMutationRange(12.0 * 3600.0);
+        config.timeAllocationMutator().setMutationRange(2.0 * 3600.0);
         config.timeAllocationMutator().setMutateAroundInitialEndTimeOnly(true);
-        config.timeAllocationMutator().setAffectingDuration(true);
-        config.timeAllocationMutator().setMutationRangeStep(30.0 * 60.0);
+        config.timeAllocationMutator().setAffectingDuration(false);
+        config.timeAllocationMutator().setMutationRangeStep(10.0 * 60.0);
 
         config.replanning().setFractionOfIterationsToDisableInnovation(0.8);
 //        config.replanningAnnealer().setActivateAnnealingModule(true);
