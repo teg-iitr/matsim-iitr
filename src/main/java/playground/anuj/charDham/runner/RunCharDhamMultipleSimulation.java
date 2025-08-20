@@ -105,7 +105,7 @@ public class RunCharDhamMultipleSimulation {
             this.locationChoiceWeight = Double.parseDouble(dataMap.getOrDefault("locationChoice_weight", "0.3"));
             this.locationChoiceSearchRadius = Double.parseDouble(dataMap.getOrDefault("locationChoice_searchRadius", "20000.0"));
             this.timeAllocationMutatorWeight = Double.parseDouble(dataMap.getOrDefault("timeAllocationMutator_weight", "0.6"));
-            this.mutationRange = Double.parseDouble(dataMap.getOrDefault("mutationRange", "43200.0"));
+            this.mutationRange = Double.parseDouble(dataMap.getOrDefault("mutationRange", "7200.0"));
             this.mutationRangeStep = Double.parseDouble(dataMap.getOrDefault("mutationRangeStep", "600.0"));
             this.reRouteWeight = Double.parseDouble(dataMap.getOrDefault("reRoute_weight", "0.1"));
             this.changeTripModeWeight = Double.parseDouble(dataMap.getOrDefault("changeTripMode_weight", "0.1"));
@@ -295,7 +295,7 @@ public class RunCharDhamMultipleSimulation {
         VehicleType bus = VehicleUtils.createVehicleType(Id.create(BUS_MODE, VehicleType.class), BUS_MODE);
         bus.setPcuEquivalents(3);
         bus.setMaximumVelocity(50 / 3.6);
-        bus.getCapacity().setSeats(55);
+        bus.getCapacity().setSeats(30);
         bus.getCapacity().setStandingRoom(5);
         vehicles.addVehicleType(bus);
 
@@ -350,7 +350,7 @@ public class RunCharDhamMultipleSimulation {
         FrozenTastesConfigGroup ftConfig = ConfigUtils.addOrGetModule(config, FrozenTastesConfigGroup.class);
         ftConfig.setAlgorithm(FrozenTastesConfigGroup.Algotype.bestResponse); // Use bestResponse with FrozenTastes
         ftConfig.setFlexibleTypes("rest");
-        ftConfig.setPlanSelector("ChangeExpBeta");
+        ftConfig.setPlanSelector("BestScore");
         ftConfig.setEpsilonScaleFactors("100.0");
         ftConfig.setScaleFactor(1);
 
@@ -395,9 +395,9 @@ public class RunCharDhamMultipleSimulation {
         Set<Id<Link>> linksToClose = readLinkIdsFromCsv();
 
         double closeTimeOfDay_s = 22 * 3600; // 10:00 PM
-        double reopenTimeOfDay_s = 4 * 3600;  // 4:00 AM
+        double reopenTimeOfDay_s = 24 * 3600;  // 12:00 AM
 
-        int numberOfDaysToClose = 10; // Fixed for now
+        int numberOfDaysToClose = 100; // Fixed for now
 
         System.out.println("Scheduling nightly link closures for " + linksToClose.size() + " links for " + numberOfDaysToClose + " days...");
 
@@ -526,11 +526,11 @@ public class RunCharDhamMultipleSimulation {
 
         addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator, params.timeAllocationMutatorWeight); // From CSV
         addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.ReRoute, params.reRouteWeight); // From CSV
-        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode, params.changeTripModeWeight);
+//        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode, params.changeTripModeWeight);
 
         config.timeAllocationMutator().setMutationRange(params.mutationRange);
         config.timeAllocationMutator().setMutateAroundInitialEndTimeOnly(true);
-        config.timeAllocationMutator().setAffectingDuration(true);
+        config.timeAllocationMutator().setAffectingDuration(false);
         config.timeAllocationMutator().setMutationRangeStep(params.mutationRangeStep);
 
         config.replanning().setFractionOfIterationsToDisableInnovation(0.8);

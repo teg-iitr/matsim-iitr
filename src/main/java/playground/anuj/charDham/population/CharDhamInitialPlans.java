@@ -110,22 +110,22 @@ public class CharDhamInitialPlans {
 
             // Randomly choose primary mode based on fixed percentages
             double modeChoice = random.nextDouble();
-            if (modeChoice < 0.15) { // 15% chance for CAR_MODE
+            if (modeChoice < 0.37) { // 15% chance for CAR_MODE
                 primaryMode = CAR_MODE;
-                minPassengers = 4;
+                minPassengers = 1;
                 maxPassengers = 5;
-            } else if (modeChoice < 0.15 + 0.25) { // 25% chance for TAXI_MODE (cumulative 40%)
+            } else if (modeChoice < 0.37 + 0.39) { // 25% chance for TAXI_MODE (cumulative 40%)
                 primaryMode = TAXI_MODE;
-                minPassengers = 4;
+                minPassengers = 2;
                 maxPassengers = 5;
-            } else if (modeChoice < 0.40 + 0.02) { // 2% chance for MOTORBIKE_MODE (cumulative 42%)
+            } else if (modeChoice < 0.76 + 0.12) { // 2% chance for MOTORBIKE_MODE (cumulative 42%)
                 primaryMode = MOTORBIKE_MODE;
                 minPassengers = 1;
                 maxPassengers = 2;
             } else { // 58% chance for BUS_MODE (cumulative 100%)
                 primaryMode = BUS_MODE;
-                minPassengers = 40;
-                maxPassengers = 60;
+                minPassengers = 20;
+                maxPassengers = 30;
             }
 
             // Determine actual number of passengers for this vehicle/plan
@@ -143,8 +143,8 @@ public class CharDhamInitialPlans {
             totalPassengersGenerated += passengersForThisVehicle;
             numberOfPlansGenerated++; // Increment count of generated plans/vehicles
 
-            // Start activity in Haridwar with a random end time between 4 AM and 8 AM on day 1
-            addActivityWithEndTime(populationFactory, plan, "Haridwar", location2Coord.get("Haridwar"), randomEndTime(4, 24, random.nextInt(4) + 1));
+            // Start activity in Haridwar with a random end time between 12 AM and 12 AM on day 1
+            addActivityWithEndTime(populationFactory, plan, "Haridwar", location2Coord.get("Haridwar"), randomEndTime(0, 24, random.nextInt(1) + 1));
 
             // Get a random dham sequence based on weights from CSV
             List<String> dhamSequence = getRandomDhamSequence();

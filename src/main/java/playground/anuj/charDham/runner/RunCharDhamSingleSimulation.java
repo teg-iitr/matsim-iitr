@@ -102,7 +102,7 @@ public class RunCharDhamSingleSimulation {
         VehicleType bus = VehicleUtils.createVehicleType(Id.create(BUS_MODE, VehicleType.class), BUS_MODE);
         bus.setPcuEquivalents(3);
         bus.setMaximumVelocity(50 / 3.6);
-        bus.getCapacity().setSeats(55);
+        bus.getCapacity().setSeats(30);
         bus.getCapacity().setStandingRoom(5);
         vehicles.addVehicleType(bus);
 
@@ -156,7 +156,7 @@ public class RunCharDhamSingleSimulation {
         FrozenTastesConfigGroup ftConfig = ConfigUtils.addOrGetModule(config, FrozenTastesConfigGroup.class);
         ftConfig.setAlgorithm(FrozenTastesConfigGroup.Algotype.bestResponse); // Use bestResponse with FrozenTastes
         ftConfig.setFlexibleTypes("rest");
-        ftConfig.setPlanSelector("ChangeExpBeta");
+        ftConfig.setPlanSelector("BestScore");
         ftConfig.setEpsilonScaleFactors("100.0");
         ftConfig.setScaleFactor(1);
 
@@ -211,7 +211,7 @@ public class RunCharDhamSingleSimulation {
 
         // Define the closure and reopening times in seconds from midnight
         double closeTimeOfDay_s = 22 * 3600; // 10:00 PM
-        double reopenTimeOfDay_s = 4 * 3600;  // 4:00 AM
+        double reopenTimeOfDay_s = 24 * 3600;  // 12:00 AM
 
         // Create closure events for the first 5 days of the simulation
         int numberOfDaysToClose = 10;
@@ -352,7 +352,7 @@ public class RunCharDhamSingleSimulation {
 
         addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.TimeAllocationMutator, 0.6);
         addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.ReRoute, 0.1);
-        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode, 0.1);
+//        addStrategy(config, DefaultPlanStrategiesModule.DefaultStrategy.ChangeTripMode, 0.1);
 
         config.timeAllocationMutator().setMutationRange(2.0 * 3600.0);
         config.timeAllocationMutator().setMutateAroundInitialEndTimeOnly(true);
