@@ -15,6 +15,8 @@ import org.matsim.core.utils.geometry.CoordinateTransformation;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 import org.matsim.core.utils.gis.ShapeFileReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import playground.amit.Dehradun.DehradunUtils;
 
 import java.io.BufferedReader;
@@ -38,6 +40,7 @@ public class CharDhamNetwork {
     public static final String linkAttributesCsvFile = "input/uk_link_attributes.csv";
     // --- NEW: Define the attribute name for the toll ---
     public static final String NIGHT_TOLL_ATTRIBUTE = "nightToll";
+    private static final Logger log = LoggerFactory.getLogger(CharDhamNetwork.class);
 
     public static void main(String[] args) {
         CoordinateTransformation reverse_transformation = TransformationFactory
@@ -66,10 +69,9 @@ public class CharDhamNetwork {
                 .addOverridingLinkProperties(OsmTags.TERTIARY_LINK, new LinkProperties(LinkProperties.LEVEL_TERTIARY, 1, 80.0 / 3.6, 1200, false))
                 .setIncludeLinkAtCoordWithHierarchy(includeLinkAtCoordWithHierarchy)
                 .setAfterLinkCreated((link, osmTags, isReversed) -> {
-                    link.setFreespeed(80.00 / 3.6);
+                    link.setFreespeed(40.00 / 3.6);
+                    link.setCapacity(2000);
                     link.setAllowedModes(modes);
-                    // --- NEW: Add the toll attribute to every link created ---
-                    link.getAttributes().putAttribute(NIGHT_TOLL_ATTRIBUTE, true);
                 })
                 .build()
                 .read(inputOSMFile);

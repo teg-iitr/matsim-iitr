@@ -161,7 +161,7 @@ public class RunCharDhamSingleSimulation {
         ftConfig.setScaleFactor(1);
 
         // Set maxDistanceDCScore to control the search radius for facilities
-        ftConfig.setMaxDistanceDCScore(50000.0);
+        ftConfig.setMaxDistanceDCScore(10000);
     }
 
     private static Set<Id<Link>> readLinkIdsFromCsv(String filePath) {
@@ -214,7 +214,7 @@ public class RunCharDhamSingleSimulation {
         double reopenTimeOfDay_s = 24 * 3600;  // 12:00 AM
 
         // Create closure events for the first 5 days of the simulation
-        int numberOfDaysToClose = 10;
+        int numberOfDaysToClose = 100;
 
         System.out.println("Scheduling nightly link closures for all links for " + numberOfDaysToClose + " days...");
 
@@ -231,7 +231,7 @@ public class RunCharDhamSingleSimulation {
                 double closeEventTime = dayOffset_s + closeTimeOfDay_s;
                 NetworkChangeEvent closeEvent = new NetworkChangeEvent(closeEventTime);
                 closeEvent.setFreespeedChange(new NetworkChangeEvent.ChangeValue(
-                        NetworkChangeEvent.ChangeType.ABSOLUTE_IN_SI_UNITS, 20/3.6)); // Effectively closes the link
+                        NetworkChangeEvent.ChangeType.ABSOLUTE_IN_SI_UNITS, 5/3.6)); // Effectively closes the link
                 closeEvent.addLink(link);
                 NetworkUtils.addNetworkChangeEvent(network, closeEvent);
 

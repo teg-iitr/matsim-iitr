@@ -30,7 +30,7 @@ public class CharDhamModifyNetwork {
     // CSV files for network updates
     public static final String DHAM_2_DHAM_CSV = "input/uk_network_updates/dham_2_dham.csv";
     public static final String FIFO_LINKS_CSV = "input/uk_network_updates/fifo_links.csv";
-    public static final String MAJOR_ROUTES_CSV = "input/uk_network_updates/major_routes.csv";
+    public static final String MAJOR_ROUTES_CSV = "input/uk_network_updates/major_routes_final.csv";
 
 
     // Helper class to store data read from CSV for a link
@@ -61,10 +61,10 @@ public class CharDhamModifyNetwork {
         Network network = readNetwork(matsimNetworkFile);
 
         // --- 1. Update links from dham_2_dham.csv ---
-        System.out.println("\nUpdating links from " + DHAM_2_DHAM_CSV);
-        Map<Id<Link>, LinkUpdateData> dham2DhamData = readLinkAttributesFromCsv(DHAM_2_DHAM_CSV);
-        applyLinkAttributes(network, dham2DhamData, 1.5, 2);
-        System.out.println("Finished updating " + dham2DhamData.size() + " links from " + DHAM_2_DHAM_CSV);
+//        System.out.println("\nUpdating links from " + DHAM_2_DHAM_CSV);
+//        Map<Id<Link>, LinkUpdateData> dham2DhamData = readLinkAttributesFromCsv(DHAM_2_DHAM_CSV);
+//        applyLinkAttributes(network, dham2DhamData);
+//        System.out.println("Finished updating " + dham2DhamData.size() + " links from " + DHAM_2_DHAM_CSV);
 
         // --- 2. Update links from fifo_links.csv for FIFO dynamics ---
         System.out.println("\nSetting FIFO dynamics for links from " + FIFO_LINKS_CSV);
@@ -83,7 +83,7 @@ public class CharDhamModifyNetwork {
         // --- 3. Update links from major_routes.csv ---
         System.out.println("\nUpdating major routes from " + MAJOR_ROUTES_CSV);
         Map<Id<Link>, LinkUpdateData> majorRoutesData = readLinkAttributesFromCsv(MAJOR_ROUTES_CSV);
-        applyLinkAttributes(network, majorRoutesData, 2.5, 3);
+        applyLinkAttributes(network, majorRoutesData);
         System.out.println("Finished updating " + majorRoutesData.size() + " links from " + MAJOR_ROUTES_CSV);
 
         // Ensure none of the link lengths are smaller than Euclidean distance
@@ -121,8 +121,8 @@ public class CharDhamModifyNetwork {
                         double dist = Double.parseDouble(parts[3]);
                         double cap = Double.parseDouble(parts[4]);
                         double lanes = Double.parseDouble(parts[5]);
-                        double freespeedKmH = Double.parseDouble(parts[6]); // freespeed is in km/h
-                        linkData.put(linkId, new LinkUpdateData(dist, cap, lanes, freespeedKmH / 3.6)); // Convert km/h to m/s
+                        double freespeed = Double.parseDouble(parts[6]); // freespeed is in km/h
+                        linkData.put(linkId, new LinkUpdateData(dist, cap, lanes, freespeed)); // Convert km/h to m/s
                     } catch (NumberFormatException e) {
                         System.err.println("Warning: Could not parse numeric value in line: " + line + " from " + filePath + ". Skipping. Error: " + e.getMessage());
                     }
@@ -143,7 +143,7 @@ public class CharDhamModifyNetwork {
      * @param network The MATSim network to modify.
      * @param dataMap A map of Link IDs to LinkUpdateData containing the new attributes.
      */
-    private static void applyLinkAttributes(Network network, Map<Id<Link>, LinkUpdateData> dataMap, double capacityFactor, double freespeedFactor) {
+    private static void applyLinkAttributes(Network network, Map<Id<Link>, LinkUpdateData> dataMap) {
         int updatedCount = 0;
         for (Map.Entry<Id<Link>, LinkUpdateData> entry : dataMap.entrySet()) {
             Id<Link> linkId = entry.getKey();
@@ -151,9 +151,9 @@ public class CharDhamModifyNetwork {
             Link link = network.getLinks().get(linkId);
             if (link != null) {
                 link.setLength(csvData.getDist());
-                link.setCapacity(csvData.getCap() * capacityFactor);
+                link.setCapacity(csvData.getCap());
                 link.setNumberOfLanes(csvData.getLanes());
-                link.setFreespeed(csvData.getFreespeed() * freespeedFactor);
+                link.setFreespeed(csvData.getFreespeed());
                 updatedCount++;
             } else {
                 System.err.println("Warning: Link with ID " + linkId + " found in CSV but not in network. Skipping update.");
