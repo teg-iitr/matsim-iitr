@@ -54,12 +54,13 @@ public class RunCharDhamMultipleSimulation {
     private static final double MINIMUM_REST_DURATION_S = 3600.0;
 
     // --- MODE & SCORING PARAMETERS ---
-    static final String CAR_MODE = "car";
-    static final String TAXI_MODE = "taxi";
-    static final String MOTORBIKE_MODE = "motorbike";
-    static final String BUS_MODE = "bus";
-    static final Collection<String> modes = Arrays.asList(CAR_MODE, TAXI_MODE, MOTORBIKE_MODE, BUS_MODE);
-
+    public static final String CAR_MODE = "car";
+    public static final String TAXI_MODE = "taxi";
+    public static final String MOTORBIKE_MODE = "motorbike";
+    public static final String BUS_MODE = "bus";
+    public static final String MINI_BUS_MODE = "miniBus";
+    public static final String WALK_MODE = TransportMode.walk;
+    static final Collection<String> modes = Arrays.asList(CAR_MODE, TAXI_MODE, MOTORBIKE_MODE, BUS_MODE, MINI_BUS_MODE);
     /**
      * Helper class to hold parameters for a single simulation run.
      */
@@ -73,6 +74,7 @@ public class RunCharDhamMultipleSimulation {
         double carMarginalUtilityOfTraveling;
         double taxiMarginalUtilityOfTraveling;
         double bikeMarginalUtilityOfTraveling;
+        double miniBusMarginalUtilityOfTraveling;
         double busMarginalUtilityOfTraveling;
         double locationChoiceWeight;
         double locationChoiceSearchRadius;
@@ -102,6 +104,7 @@ public class RunCharDhamMultipleSimulation {
             this.taxiMarginalUtilityOfTraveling = Double.parseDouble(dataMap.getOrDefault("taxi_marginalUtilityOfTraveling", "-6.0"));
             this.bikeMarginalUtilityOfTraveling = Double.parseDouble(dataMap.getOrDefault("bike_marginalUtilityOfTraveling", "-6.0"));
             this.busMarginalUtilityOfTraveling = Double.parseDouble(dataMap.getOrDefault("bus_marginalUtilityOfTraveling", "-6.0"));
+            this.miniBusMarginalUtilityOfTraveling = Double.parseDouble(dataMap.getOrDefault("miniBus_marginalUtilityOfTraveling", "-6.0"));
             this.locationChoiceWeight = Double.parseDouble(dataMap.getOrDefault("locationChoice_weight", "0.3"));
             this.locationChoiceSearchRadius = Double.parseDouble(dataMap.getOrDefault("locationChoice_searchRadius", "20000.0"));
             this.timeAllocationMutatorWeight = Double.parseDouble(dataMap.getOrDefault("timeAllocationMutator_weight", "0.6"));
@@ -201,6 +204,7 @@ public class RunCharDhamMultipleSimulation {
                 "taxi_marginalUtilityOfTraveling",
                 "bike_marginalUtilityOfTraveling",
                 "bus_marginalUtilityOfTraveling",
+                "miniBus_marginalUtilityOfTraveling",
                 "locationChoice_weight",
                 "locationChoice_searchRadius",
                 "timeAllocationMutator_weight",
@@ -224,6 +228,7 @@ public class RunCharDhamMultipleSimulation {
                 String.valueOf(defaultParams.carMarginalUtilityOfTraveling),
                 String.valueOf(defaultParams.taxiMarginalUtilityOfTraveling),
                 String.valueOf(defaultParams.bikeMarginalUtilityOfTraveling),
+                String.valueOf(defaultParams.miniBusMarginalUtilityOfTraveling),
                 String.valueOf(defaultParams.busMarginalUtilityOfTraveling),
                 String.valueOf(defaultParams.locationChoiceWeight),
                 String.valueOf(defaultParams.locationChoiceSearchRadius),
@@ -281,9 +286,9 @@ public class RunCharDhamMultipleSimulation {
         vehicles.addVehicleType(car);
 
         VehicleType taxi = VehicleUtils.createVehicleType(Id.create(TAXI_MODE, VehicleType.class), TAXI_MODE);
-        taxi.setPcuEquivalents(1.0);
+        taxi.setPcuEquivalents(1.5);
         taxi.setMaximumVelocity(60 / 3.6);
-        taxi.getCapacity().setSeats(5);
+        taxi.getCapacity().setSeats(10);
         vehicles.addVehicleType(taxi);
 
         VehicleType motorbike = VehicleUtils.createVehicleType(Id.create(MOTORBIKE_MODE, VehicleType.class), MOTORBIKE_MODE);
@@ -291,6 +296,13 @@ public class RunCharDhamMultipleSimulation {
         motorbike.setMaximumVelocity(80 / 3.6);
         motorbike.getCapacity().setSeats(2);
         vehicles.addVehicleType(motorbike);
+
+        VehicleType minibus = VehicleUtils.createVehicleType(Id.create(MINI_BUS_MODE, VehicleType.class), MINI_BUS_MODE);
+        minibus.setPcuEquivalents(2.5);
+        minibus.setMaximumVelocity(50 / 3.6);
+        minibus.getCapacity().setSeats(15);
+        minibus.getCapacity().setStandingRoom(5);
+        vehicles.addVehicleType(minibus);
 
         VehicleType bus = VehicleUtils.createVehicleType(Id.create(BUS_MODE, VehicleType.class), BUS_MODE);
         bus.setPcuEquivalents(3);
@@ -322,6 +334,9 @@ public class RunCharDhamMultipleSimulation {
 
                 addTravelTimeBinding(MOTORBIKE_MODE).to(carTravelTime());
                 addTravelDisutilityFactoryBinding(MOTORBIKE_MODE).to(carTravelDisutilityFactoryKey());
+
+                addTravelTimeBinding(MINI_BUS_MODE).to(carTravelTime());
+                addTravelDisutilityFactoryBinding(MINI_BUS_MODE).to(carTravelDisutilityFactoryKey());
 
                 addTravelTimeBinding(BUS_MODE).to(carTravelTime());
                 addTravelDisutilityFactoryBinding(BUS_MODE).to(carTravelDisutilityFactoryKey());
@@ -482,6 +497,11 @@ public class RunCharDhamMultipleSimulation {
         motorbikeParams.setConstant(0);
         motorbikeParams.setMarginalUtilityOfTraveling(params.bikeMarginalUtilityOfTraveling); // From CSV
         config.scoring().addModeParams(motorbikeParams);
+
+        ScoringConfigGroup.ModeParams minibusParams = new ScoringConfigGroup.ModeParams(MINI_BUS_MODE);
+        minibusParams.setConstant(0);
+        minibusParams.setMarginalUtilityOfTraveling(params.miniBusMarginalUtilityOfTraveling);
+        config.scoring().addModeParams(minibusParams);
 
         ScoringConfigGroup.ModeParams busParams = new ScoringConfigGroup.ModeParams(BUS_MODE);
         busParams.setConstant(0);

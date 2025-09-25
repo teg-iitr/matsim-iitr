@@ -2,6 +2,7 @@ package playground.anuj.charDham.runner;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.locationchoice.frozenepsilons.*;
@@ -61,7 +62,9 @@ public class RunCharDhamSingleSimulation {
     public static final String TAXI_MODE = "taxi";
     public static final String MOTORBIKE_MODE = "motorbike";
     public static final String BUS_MODE = "bus";
-    static final Collection<String> modes = Arrays.asList(CAR_MODE, TAXI_MODE, MOTORBIKE_MODE, BUS_MODE);
+    public static final String MINI_BUS_MODE = "miniBus";
+    public static final String WALK_MODE = TransportMode.walk;
+    static final Collection<String> modes = Arrays.asList(CAR_MODE, TAXI_MODE, MOTORBIKE_MODE, BUS_MODE, MINI_BUS_MODE);
     public static void main(String[] args) {
         Config config = ConfigUtils.createConfig();
 
@@ -88,9 +91,9 @@ public class RunCharDhamSingleSimulation {
         vehicles.addVehicleType(car);
 
         VehicleType taxi = VehicleUtils.createVehicleType(Id.create(TAXI_MODE, VehicleType.class), TAXI_MODE);
-        taxi.setPcuEquivalents(1.0);
+        taxi.setPcuEquivalents(1.5);
         taxi.setMaximumVelocity(60 / 3.6);
-        taxi.getCapacity().setSeats(5);
+        taxi.getCapacity().setSeats(10);
         vehicles.addVehicleType(taxi);
 
         VehicleType motorbike = VehicleUtils.createVehicleType(Id.create(MOTORBIKE_MODE, VehicleType.class), MOTORBIKE_MODE);
@@ -98,6 +101,13 @@ public class RunCharDhamSingleSimulation {
         motorbike.setMaximumVelocity(80 / 3.6);
         motorbike.getCapacity().setSeats(2);
         vehicles.addVehicleType(motorbike);
+
+        VehicleType minibus = VehicleUtils.createVehicleType(Id.create(MINI_BUS_MODE, VehicleType.class), MINI_BUS_MODE);
+        minibus.setPcuEquivalents(2.5);
+        minibus.setMaximumVelocity(50 / 3.6);
+        minibus.getCapacity().setSeats(15);
+        minibus.getCapacity().setStandingRoom(5);
+        vehicles.addVehicleType(minibus);
 
         VehicleType bus = VehicleUtils.createVehicleType(Id.create(BUS_MODE, VehicleType.class), BUS_MODE);
         bus.setPcuEquivalents(3);
@@ -129,6 +139,9 @@ public class RunCharDhamSingleSimulation {
 
                 addTravelTimeBinding(MOTORBIKE_MODE).to(carTravelTime());
                 addTravelDisutilityFactoryBinding(MOTORBIKE_MODE).to(carTravelDisutilityFactoryKey());
+
+                addTravelTimeBinding(MINI_BUS_MODE).to(carTravelTime());
+                addTravelDisutilityFactoryBinding(MINI_BUS_MODE).to(carTravelDisutilityFactoryKey());
 
                 addTravelTimeBinding(BUS_MODE).to(carTravelTime());
                 addTravelDisutilityFactoryBinding(BUS_MODE).to(carTravelDisutilityFactoryKey());
@@ -308,9 +321,14 @@ public class RunCharDhamSingleSimulation {
 //        motorbikeParams.setMonetaryDistanceRate(-0.005);
         config.scoring().addModeParams(motorbikeParams);
 
+        ScoringConfigGroup.ModeParams minibusParams = new ScoringConfigGroup.ModeParams(MINI_BUS_MODE);
+        minibusParams.setConstant(0);
+        minibusParams.setMarginalUtilityOfTraveling(-3);
+        config.scoring().addModeParams(minibusParams);
+
         ScoringConfigGroup.ModeParams busParams = new ScoringConfigGroup.ModeParams(BUS_MODE);
         busParams.setConstant(0);
-        busParams.setMarginalUtilityOfTraveling(-6);
+        busParams.setMarginalUtilityOfTraveling(-3);
         config.scoring().addModeParams(busParams);
 
         addActivityParams(config, "Haridwar", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S); // Open 24h

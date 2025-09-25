@@ -17,6 +17,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 import static playground.anuj.charDham.population.CharDhamInitialPlans.*;
+import static playground.anuj.charDham.runner.RunCharDhamSingleSimulation.*;
 
 /**
  * A standalone class to analyze the output events from multiple MATSim simulation runs
@@ -31,7 +32,7 @@ public class CharDhamOutputAnalyzer {
     private static final String DHAM_ACTIVITY_ANALYSIS_BASE_NAME = "dham_activity_analysis";
 
     // Modes are needed for consistent header generation in the summary CSV
-    static final Collection<String> modes = Arrays.asList(CAR_MODE, TAXI_MODE, MOTORBIKE_MODE, BUS_MODE, WALK_MODE);
+    static final Collection<String> modes = Arrays.asList(CAR_MODE, TAXI_MODE, MOTORBIKE_MODE, BUS_MODE, MINI_BUS_MODE, WALK_MODE);
 
     static final Set<String> DHAM_ACTIVITY_TYPES = new HashSet<>(Arrays.asList(
             "Kedarnath", "Gangotri", "Yamunotri", "Badrinath", "Hemkund_Sahib"

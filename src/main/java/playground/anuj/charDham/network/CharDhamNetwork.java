@@ -53,7 +53,7 @@ public class CharDhamNetwork {
             if (hierarchyLevel <= 4) return true;
             else return (hierarchyLevel <= 5 && geometry.contains(MGC.coord2Point(reverse_transformation.transform(cord))));
         };
-        Set<String> modes = new HashSet<>(Arrays.asList(CAR_MODE, TAXI_MODE, MOTORBIKE_MODE, BUS_MODE));
+        Set<String> modes = new HashSet<>(Arrays.asList(CAR_MODE, TAXI_MODE, MOTORBIKE_MODE, BUS_MODE, MINI_BUS_MODE));
 
         Network network = new SupersonicOsmNetworkReader.Builder()
                 .setCoordinateTransformation(DehradunUtils.transformation)

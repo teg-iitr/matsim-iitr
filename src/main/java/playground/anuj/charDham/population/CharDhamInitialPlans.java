@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static playground.anuj.charDham.runner.RunCharDhamSingleSimulation.*;
+
 public class CharDhamInitialPlans {
 
     public static final String importantLocationsFile = "input/anuj/UKCharDhamPrimeLocations.txt";
@@ -33,13 +35,6 @@ public class CharDhamInitialPlans {
     public static final double SAMPLE_SIZE = 0.001;
 
     private final Random random = new Random(); // For random choices
-
-    // Constants for modes
-    public static final String CAR_MODE = "car";
-    public static final String TAXI_MODE = "taxi";
-    public static final String MOTORBIKE_MODE = "motorbike";
-    public static final String BUS_MODE = "bus";
-    public static final String WALK_MODE = TransportMode.walk; // For treks
 
     // New: CSV file for dham activity chains and weights
     private static final String DHAM_CHAIN_FREQUENCIES_FILE = "input/anuj/dham_activity_chain_frequencies.csv";
@@ -110,22 +105,26 @@ public class CharDhamInitialPlans {
 
             // Randomly choose primary mode based on fixed percentages
             double modeChoice = random.nextDouble();
-            if (modeChoice < 0.37) { // 15% chance for CAR_MODE
+            if (modeChoice < 0.30) {
                 primaryMode = CAR_MODE;
                 minPassengers = 1;
                 maxPassengers = 5;
-            } else if (modeChoice < 0.37 + 0.39) { // 25% chance for TAXI_MODE (cumulative 40%)
+            } else if (modeChoice < 0.55) {
                 primaryMode = TAXI_MODE;
-                minPassengers = 2;
-                maxPassengers = 5;
-            } else if (modeChoice < 0.76 + 0.12) { // 2% chance for MOTORBIKE_MODE (cumulative 42%)
+                minPassengers = 3;
+                maxPassengers = 8;
+            } else if (modeChoice < 0.65) {
                 primaryMode = MOTORBIKE_MODE;
                 minPassengers = 1;
                 maxPassengers = 2;
-            } else { // 58% chance for BUS_MODE (cumulative 100%)
+            } else if (modeChoice < 0.80) {
+                primaryMode = MINI_BUS_MODE;
+                minPassengers = 15;
+                maxPassengers = 25;
+            } else { // 20% chance for BUS_MODE
                 primaryMode = BUS_MODE;
                 minPassengers = 20;
-                maxPassengers = 30;
+                maxPassengers = 35;
             }
 
             // Determine actual number of passengers for this vehicle/plan
