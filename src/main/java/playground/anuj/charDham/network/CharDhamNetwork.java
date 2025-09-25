@@ -69,8 +69,8 @@ public class CharDhamNetwork {
                 .addOverridingLinkProperties(OsmTags.TERTIARY_LINK, new LinkProperties(LinkProperties.LEVEL_TERTIARY, 1, 80.0 / 3.6, 1200, false))
                 .setIncludeLinkAtCoordWithHierarchy(includeLinkAtCoordWithHierarchy)
                 .setAfterLinkCreated((link, osmTags, isReversed) -> {
-                    link.setFreespeed(40.00 / 3.6);
-                    link.setCapacity(2000);
+//                    link.setFreespeed(80.00 / 3.6);
+//                    link.setCapacity(2000);
                     link.setAllowedModes(modes);
                 })
                 .build()
