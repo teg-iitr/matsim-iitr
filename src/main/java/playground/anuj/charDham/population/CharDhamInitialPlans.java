@@ -95,10 +95,6 @@ public class CharDhamInitialPlans {
 
         // Loop until all target passengers (NUM_AGENTS) have been assigned to a plan
         while (totalPassengersGenerated < NUM_AGENTS) {
-            String personIdString = "CharDhamPilgrim_" + currentPersonIdCounter++;
-            Person person = populationFactory.createPerson(Id.createPersonId(personIdString));
-            Plan plan = populationFactory.createPlan();
-
             String primaryMode;
             int minPassengers;
             int maxPassengers;
@@ -137,6 +133,9 @@ public class CharDhamInitialPlans {
                 // Break the loop if no more passengers can be assigned.
                 break;
             }
+            String personIdString = "Pilgrim_" + primaryMode  + "_" + currentPersonIdCounter++ ;
+            Person person = populationFactory.createPerson(Id.createPersonId(personIdString));
+            Plan plan = populationFactory.createPlan();
 
             plan.getAttributes().putAttribute(PASSENGER_ATTRIBUTE, passengersForThisVehicle);
             totalPassengersGenerated += passengersForThisVehicle;
