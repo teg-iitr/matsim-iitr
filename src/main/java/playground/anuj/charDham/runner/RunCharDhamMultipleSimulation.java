@@ -410,7 +410,7 @@ public class RunCharDhamMultipleSimulation {
         Set<Id<Link>> linksToClose = readLinkIdsFromCsv();
 
         double closeTimeOfDay_s = 22 * 3600; // 10:00 PM
-        double reopenTimeOfDay_s = 24 * 3600;  // 12:00 AM
+        double reopenTimeOfDay_s = 0;  // 12:00 AM
 
         int numberOfDaysToClose = 100; // Fixed for now
 
@@ -466,7 +466,7 @@ public class RunCharDhamMultipleSimulation {
         config.qsim().setFlowCapFactor(params.flowCapacityFactor); // From CSV
         config.qsim().setStorageCapFactor(params.storageCapacityFactor); // From CSV
         config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
-        config.qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.withHoles);
+        config.qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.kinematicWaves);
         config.qsim().setStuckTime(3600.);
         config.qsim().setRemoveStuckVehicles(false);
         config.qsim().setNotifyAboutStuckVehicles(true);

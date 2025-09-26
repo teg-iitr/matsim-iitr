@@ -224,7 +224,7 @@ public class RunCharDhamSingleSimulation {
 
         // Define the closure and reopening times in seconds from midnight
         double closeTimeOfDay_s = 22 * 3600; // 10:00 PM
-        double reopenTimeOfDay_s = 24 * 3600;  // 12:00 AM
+        double reopenTimeOfDay_s = 0;  // 12:00 AM
 
         // Create closure events for the first 5 days of the simulation
         int numberOfDaysToClose = 100;
@@ -284,7 +284,7 @@ public class RunCharDhamSingleSimulation {
         config.qsim().setFlowCapFactor(FLOW_CAPACITY_FACTOR);
         config.qsim().setStorageCapFactor(STORAGE_CAPACITY_FACTOR);
         config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
-        config.qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.withHoles);
+        config.qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.kinematicWaves);
         config.qsim().setStuckTime(3600.);
         config.qsim().setRemoveStuckVehicles(false);
         config.qsim().setNotifyAboutStuckVehicles(true);
