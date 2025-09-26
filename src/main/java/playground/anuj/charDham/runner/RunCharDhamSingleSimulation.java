@@ -48,7 +48,7 @@ public class RunCharDhamSingleSimulation {
     private static final String TIME_VARIANT_LINKS_FILE = "input/timeVariant_links.csv";
 
     // --- SIMULATION PARAMETERS ---
-    private static final int LAST_ITERATION = 20;
+    private static final int LAST_ITERATION = 15;
     private static final double FLOW_CAPACITY_FACTOR = SAMPLE_SIZE;
     private static final double STORAGE_CAPACITY_FACTOR = SAMPLE_SIZE * 3;
     private static final double SIMULATION_START_TIME_H = 4.0;
@@ -171,7 +171,7 @@ public class RunCharDhamSingleSimulation {
         ftConfig.setFlexibleTypes("rest");
         ftConfig.setPlanSelector("BestScore");
         ftConfig.setEpsilonScaleFactors("100.0");
-        ftConfig.setScaleFactor(1);
+        ftConfig.setScaleFactor(10);
 
         // Set maxDistanceDCScore to control the search radius for facilities
         ftConfig.setMaxDistanceDCScore(10000);
@@ -244,7 +244,7 @@ public class RunCharDhamSingleSimulation {
                 double closeEventTime = dayOffset_s + closeTimeOfDay_s;
                 NetworkChangeEvent closeEvent = new NetworkChangeEvent(closeEventTime);
                 closeEvent.setFreespeedChange(new NetworkChangeEvent.ChangeValue(
-                        NetworkChangeEvent.ChangeType.ABSOLUTE_IN_SI_UNITS, 5/3.6)); // Effectively closes the link
+                        NetworkChangeEvent.ChangeType.ABSOLUTE_IN_SI_UNITS, 10/3.6)); // Effectively closes the link
                 closeEvent.addLink(link);
                 NetworkUtils.addNetworkChangeEvent(network, closeEvent);
 

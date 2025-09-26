@@ -3,7 +3,6 @@ package playground.anuj.charDham.network;
 import org.geotools.api.feature.simple.SimpleFeature;
 import org.locationtech.jts.geom.Geometry;
 import org.matsim.api.core.v01.Coord;
-import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkWriter;
@@ -19,10 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import playground.amit.Dehradun.DehradunUtils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.BiPredicate;
 
@@ -69,8 +64,8 @@ public class CharDhamNetwork {
                 .addOverridingLinkProperties(OsmTags.TERTIARY_LINK, new LinkProperties(LinkProperties.LEVEL_TERTIARY, 1, 80.0 / 3.6, 1200, false))
                 .setIncludeLinkAtCoordWithHierarchy(includeLinkAtCoordWithHierarchy)
                 .setAfterLinkCreated((link, osmTags, isReversed) -> {
-//                    link.setFreespeed(80.00 / 3.6);
-//                    link.setCapacity(2000);
+                    link.setFreespeed(60.00 / 3.6);
+                    link.setCapacity(2500);
                     link.setAllowedModes(modes);
                 })
                 .build()
@@ -78,49 +73,6 @@ public class CharDhamNetwork {
 
         new NetworkCleaner().run(network);
 
-        System.out.println("Reading link attributes from " + linkAttributesCsvFile);
-        Map<Id<Link>, LinkCsvData> linkDataFromCsv = new HashMap<>();
-        try (BufferedReader reader = Files.newBufferedReader(Paths.get(linkAttributesCsvFile))) {
-            String line;
-            // Skip header line
-            reader.readLine();
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length >= 8) { // Ensure enough columns (id,from,to,dist,cap,lanes,min_speed,max_speed)
-                    try {
-                        Id<Link> linkId = Id.create(parts[0], Link.class);
-                        double dist = Double.parseDouble(parts[3]);
-                        double cap = Double.parseDouble(parts[4]);
-                        double lanes = Double.parseDouble(parts[5]);
-                        double maxSpeed = Double.parseDouble(parts[7]); // max_speed is in km/h
-                        linkDataFromCsv.put(linkId, new LinkCsvData(dist, cap, lanes, maxSpeed / 3.6)); // Convert km/h to m/s
-                    } catch (NumberFormatException e) {
-                        System.err.println("Warning: Could not parse numeric value in line: " + line + ". Skipping. Error: " + e.getMessage());
-                    }
-                } else {
-                    System.err.println("Warning: Skipping malformed line in CSV (not enough columns): " + line);
-                }
-            }
-        } catch (IOException e) {
-            System.err.println("Error reading link attributes CSV file: " + linkAttributesCsvFile);
-            e.printStackTrace();
-            // Depending on criticality, you might want to exit here or continue with only OSM data
-        }
-        System.out.println("Finished reading " + linkDataFromCsv.size() + " link attributes from CSV.");
-
-        System.out.println("Applying link attributes from CSV to network links...");
-        int updatedLinksCount = 0;
-        for (Link link : network.getLinks().values()) {
-            LinkCsvData csvData = linkDataFromCsv.get(link.getId());
-            if (csvData != null) {
-                link.setLength(csvData.getDist()); // Use getter
-                link.setCapacity(csvData.getCap()); // Use getter
-                link.setNumberOfLanes(csvData.getLanes()); // Use getter
-                link.setFreespeed(csvData.getMaxSpeed()); // Use getter
-                updatedLinksCount++;
-            }
-        }
-        System.out.println("Successfully updated attributes for " + updatedLinksCount + " links from CSV.");
         //none of the link length should be smaller than Euclidean distance
         for (Link l : network.getLinks().values()) {
             double beelineDist = org.matsim.core.network.NetworkUtils.getEuclideanDistance(l.getFromNode().getCoord(), l.getToNode().getCoord());
@@ -132,35 +84,5 @@ public class CharDhamNetwork {
         System.out.println("Writing network with toll attributes to " + matsimNetworkFile);
         new NetworkWriter(network).write(matsimNetworkFile);
         System.out.println("Done.");
-    }
-    private static class LinkCsvData {
-        final double dist;
-        final double cap;
-        final double lanes;
-        final double maxSpeed; // Stored in m/s
-
-        LinkCsvData(double dist, double cap, double lanes, double maxSpeed) {
-            this.dist = dist;
-            this.cap = cap;
-            this.lanes = lanes;
-            this.maxSpeed = maxSpeed;
-        }
-
-        // Getter methods
-        public double getDist() {
-            return dist;
-        }
-
-        public double getCap() {
-            return cap;
-        }
-
-        public double getLanes() {
-            return lanes;
-        }
-
-        public double getMaxSpeed() {
-            return maxSpeed;
-        }
     }
 }

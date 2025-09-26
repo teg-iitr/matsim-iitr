@@ -13,7 +13,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 
 public class CharDhamFacilities {
-    private static final String FACILITIES_INPUT_CSV = "input/facilities_uk_final.csv";
+    private static final String FACILITIES_INPUT_CSV = "input/facilities_uk.csv";
     private static final String FACILITIES_OUTPUT_XML = "output/facilities_charDham.xml";
 
     public static void main(String[] args) {
