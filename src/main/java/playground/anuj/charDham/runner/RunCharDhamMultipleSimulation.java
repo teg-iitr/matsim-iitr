@@ -69,7 +69,7 @@ public class RunCharDhamMultipleSimulation {
         int lastIteration;
         double flowCapacityFactor;
         double storageCapacityFactor;
-        double lateArrivalUtilsHr;
+//        double lateArrivalUtilsHr;
         double performingUtilsHr;
         double carMarginalUtilityOfTraveling;
         double taxiMarginalUtilityOfTraveling;
@@ -82,7 +82,7 @@ public class RunCharDhamMultipleSimulation {
         double mutationRange;
         double mutationRangeStep;
         double reRouteWeight;
-        double changeTripModeWeight;
+//        double changeTripModeWeight;
         double nightTimeSpeed;
 
         // Constructor to parse a CSV line
@@ -98,7 +98,7 @@ public class RunCharDhamMultipleSimulation {
             this.lastIteration = Integer.parseInt(dataMap.getOrDefault("last_iteration", "2"));
             this.flowCapacityFactor = Double.parseDouble(dataMap.getOrDefault("flow_capacity_factor", "0.5"));
             this.storageCapacityFactor = Double.parseDouble(dataMap.getOrDefault("storage_capacity_factor", "0.5")) * 3.0;
-            this.lateArrivalUtilsHr = Double.parseDouble(dataMap.getOrDefault("lateArrival_utils_hr", "-1.0"));
+//            this.lateArrivalUtilsHr = Double.parseDouble(dataMap.getOrDefault("lateArrival_utils_hr", "-1.0"));
             this.performingUtilsHr = Double.parseDouble(dataMap.getOrDefault("performing_utils_hr", "6.0"));
             this.carMarginalUtilityOfTraveling = Double.parseDouble(dataMap.getOrDefault("car_marginalUtilityOfTraveling", "-6.0"));
             this.taxiMarginalUtilityOfTraveling = Double.parseDouble(dataMap.getOrDefault("taxi_marginalUtilityOfTraveling", "-6.0"));
@@ -111,7 +111,7 @@ public class RunCharDhamMultipleSimulation {
             this.mutationRange = Double.parseDouble(dataMap.getOrDefault("mutationRange", "7200.0"));
             this.mutationRangeStep = Double.parseDouble(dataMap.getOrDefault("mutationRangeStep", "600.0"));
             this.reRouteWeight = Double.parseDouble(dataMap.getOrDefault("reRoute_weight", "0.1"));
-            this.changeTripModeWeight = Double.parseDouble(dataMap.getOrDefault("changeTripMode_weight", "0.1"));
+//            this.changeTripModeWeight = Double.parseDouble(dataMap.getOrDefault("changeTripMode_weight", "0.1"));
             this.nightTimeSpeed = Double.parseDouble(dataMap.getOrDefault("nightTimeSpeed", "1.78"));
         }
         RunParameters() {
@@ -198,7 +198,7 @@ public class RunCharDhamMultipleSimulation {
                 "last_iteration",
                 "flow_capacity_factor",
                 "storage_capacity_factor",
-                "lateArrival_utils_hr",
+//                "lateArrival_utils_hr",
                 "performing_utils_hr",
                 "car_marginalUtilityOfTraveling",
                 "taxi_marginalUtilityOfTraveling",
@@ -211,7 +211,7 @@ public class RunCharDhamMultipleSimulation {
                 "mutationRange",
                 "mutationRangeStep",
                 "reRoute_weight",
-                "changeTripMode_weight",
+//                "changeTripMode_weight",
                 "nightTimeSpeed"
         );
 
@@ -223,7 +223,7 @@ public class RunCharDhamMultipleSimulation {
                 String.valueOf(defaultParams.lastIteration),
                 String.valueOf(defaultParams.flowCapacityFactor),
                 String.valueOf(defaultParams.storageCapacityFactor),
-                String.valueOf(defaultParams.lateArrivalUtilsHr),
+//                String.valueOf(defaultParams.lateArrivalUtilsHr),
                 String.valueOf(defaultParams.performingUtilsHr),
                 String.valueOf(defaultParams.carMarginalUtilityOfTraveling),
                 String.valueOf(defaultParams.taxiMarginalUtilityOfTraveling),
@@ -236,7 +236,7 @@ public class RunCharDhamMultipleSimulation {
                 String.valueOf(defaultParams.mutationRange),
                 String.valueOf(defaultParams.mutationRangeStep),
                 String.valueOf(defaultParams.reRouteWeight),
-                String.valueOf(defaultParams.changeTripModeWeight),
+//                String.valueOf(defaultParams.changeTripModeWeight),
                 String.valueOf(defaultParams.nightTimeSpeed)
         );
 
@@ -410,7 +410,7 @@ public class RunCharDhamMultipleSimulation {
         Set<Id<Link>> linksToClose = readLinkIdsFromCsv();
 
         double closeTimeOfDay_s = 22 * 3600; // 10:00 PM
-        double reopenTimeOfDay_s = 0;  // 12:00 AM
+        double reopenTimeOfDay_s = 28 * 2600;  // 4:00 AM
 
         int numberOfDaysToClose = 100; // Fixed for now
 
@@ -478,7 +478,7 @@ public class RunCharDhamMultipleSimulation {
         config.scoring().setWriteExperiencedPlans(true);
         config.scoring().setLearningRate(1.0);
         config.scoring().setBrainExpBeta(2.0);
-        config.scoring().setLateArrival_utils_hr(params.lateArrivalUtilsHr); // From CSV
+//        config.scoring().setLateArrival_utils_hr(params.lateArrivalUtilsHr); // From CSV
         config.scoring().setPerforming_utils_hr(params.performingUtilsHr); // From CSV
 
         addActivityParams(config, "rest", REST_STOP_TYPICAL_DURATION_S, 0, 0, MINIMUM_REST_DURATION_S);
@@ -536,8 +536,8 @@ public class RunCharDhamMultipleSimulation {
      */
     private static void configureReplanning(Config config, RunParameters params) {
         config.replanning().clearStrategySettings();
-        ChangeModeConfigGroup changeTripMode = config.changeMode();
-        changeTripMode.setModes(new String [] {modes.toString()});
+//        ChangeModeConfigGroup changeTripMode = config.changeMode();
+//        changeTripMode.setModes(new String [] {modes.toString()});
 
         ReplanningConfigGroup.StrategySettings lcStrategy = new ReplanningConfigGroup.StrategySettings();
         lcStrategy.setStrategyName(FrozenTastesConfigGroup.GROUP_NAME);
