@@ -1,3 +1,0 @@
-Iteration	car	ride
-0	50	50
-1	50	50

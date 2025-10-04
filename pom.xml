@@ -216,6 +216,11 @@
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
 					<!-- We intentionally DO NOT specify a mainClass here, for flexibility -->
+					<archive>
+						<manifest>
+							<mainClass>playground.anuj.charDham.runner.RunCharDhamMultipleSimulation</mainClass>
+						</manifest>
+					</archive>
 				</configuration>
 				<executions>
 					<execution>
