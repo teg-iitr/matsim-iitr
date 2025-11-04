@@ -32,7 +32,7 @@ public class CharDhamInitialPlans {
     private static final double DHAM_VISIT_DURATION = 6.0 * 3600.0;      // 6 hours for darshan/visit
     private static final double OVERNIGHT_STAY_DURATION = 12.0 * 3600.0; // 12 hours for an overnight halt
 
-    public static final double SAMPLE_SIZE = 0.001;
+    public static final double SAMPLE_SIZE = 0.05;
 
     private final Random random = new Random(); // For random choices
 

@@ -19,6 +19,7 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.NetworkChangeEvent;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.scenario.ScenarioUtils;
+import org.matsim.simwrapper.SimWrapperModule;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
@@ -50,9 +51,9 @@ public class RunCharDhamSingleSimulation {
     private static final String TIME_VARIANT_LINKS_FILE = "input/timeVariant_links.csv";
 
     // --- SIMULATION PARAMETERS ---
-    private static final int LAST_ITERATION = 15;
+    private static final int LAST_ITERATION = 100;
     private static final double FLOW_CAPACITY_FACTOR = SAMPLE_SIZE;
-    private static final double STORAGE_CAPACITY_FACTOR = SAMPLE_SIZE * 3;
+    private static final double STORAGE_CAPACITY_FACTOR = SAMPLE_SIZE * 10;
     private static final double SIMULATION_START_TIME_H = 4.0;
     private static final double TEMPLE_OPENING_TIME_H = 5.0;  // 5 AM
     private static final double TEMPLE_CLOSING_TIME_H = 16.0; // 4 PM
@@ -147,6 +148,8 @@ public class RunCharDhamSingleSimulation {
 
                 addTravelTimeBinding(BUS_MODE).to(carTravelTime());
                 addTravelDisutilityFactoryBinding(BUS_MODE).to(carTravelDisutilityFactoryKey());
+
+                new SimWrapperModule();
             }
         });
         controler.run();
@@ -268,6 +271,8 @@ public class RunCharDhamSingleSimulation {
         config.controller().setLastIteration(LAST_ITERATION);
         config.controller().setOutputDirectory(OUTPUT_DIRECTORY);
         config.controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+        config.controller().setWritePlansInterval(20);
+        config.controller().setWriteEventsInterval(20);
         config.vspExperimental().setWritingOutputEvents(true);
 
     }
@@ -287,7 +292,7 @@ public class RunCharDhamSingleSimulation {
         config.qsim().setStorageCapFactor(STORAGE_CAPACITY_FACTOR);
         config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
         config.qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.kinematicWaves);
-        config.qsim().setStuckTime(3600.);
+        config.qsim().setStuckTime(7200);
         config.qsim().setRemoveStuckVehicles(false);
         config.qsim().setNotifyAboutStuckVehicles(true);
         config.qsim().setMainModes(modes);

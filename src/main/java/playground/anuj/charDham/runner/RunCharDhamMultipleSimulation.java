@@ -22,6 +22,7 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
+import org.matsim.simwrapper.SimWrapperModule;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
@@ -98,7 +99,7 @@ public class RunCharDhamMultipleSimulation {
             this.runId = dataMap.getOrDefault("run_id", "default_run");
             this.lastIteration = Integer.parseInt(dataMap.getOrDefault("last_iteration", "2"));
             this.flowCapacityFactor = Double.parseDouble(dataMap.getOrDefault("flow_capacity_factor", "0.5"));
-            this.storageCapacityFactor = Double.parseDouble(dataMap.getOrDefault("storage_capacity_factor", "0.5")) * 3.0;
+            this.storageCapacityFactor = Double.parseDouble(dataMap.getOrDefault("storage_capacity_factor", "0.5")) * 10.0;
 //            this.lateArrivalUtilsHr = Double.parseDouble(dataMap.getOrDefault("lateArrival_utils_hr", "-1.0"));
             this.performingUtilsHr = Double.parseDouble(dataMap.getOrDefault("performing_utils_hr", "6.0"));
             this.carMarginalUtilityOfTraveling = Double.parseDouble(dataMap.getOrDefault("car_marginalUtilityOfTraveling", "-6.0"));
@@ -341,6 +342,8 @@ public class RunCharDhamMultipleSimulation {
 
                 addTravelTimeBinding(BUS_MODE).to(carTravelTime());
                 addTravelDisutilityFactoryBinding(BUS_MODE).to(carTravelDisutilityFactoryKey());
+
+                new SimWrapperModule();
             }
         });
         controler.run();
@@ -451,6 +454,8 @@ public class RunCharDhamMultipleSimulation {
         config.controller().setLastIteration(params.lastIteration); // From CSV
         config.controller().setOutputDirectory(outputDirectory); // Unique for each run
         config.controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
+        config.controller().setWritePlansInterval(20);
+        config.controller().setWriteEventsInterval(20);
         config.vspExperimental().setWritingOutputEvents(true);
     }
 
