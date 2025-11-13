@@ -51,8 +51,8 @@ public class RunCharDhamMultipleSimulation {
     // --- SIMULATION PARAMETERS (Defaults, can be overridden by CSV) ---
     private static final double SIMULATION_START_TIME_H = 4.0;
     private static final double TEMPLE_OPENING_TIME_H = 5.0;  // 5 AM
-    private static final double TEMPLE_CLOSING_TIME_H = 16.0; // 4 PM
-    private static final double REST_STOP_TYPICAL_DURATION_S = 2.0 * 3600.0; // 2 hours
+    private static final double TEMPLE_CLOSING_TIME_H = 17.0; // 7 PM
+    private static final double REST_STOP_TYPICAL_DURATION_S = 3600.0; // 2 hours
     private static final double MINIMUM_REST_DURATION_S = 3600.0;
 
     // --- MODE & SCORING PARAMETERS ---
@@ -342,8 +342,6 @@ public class RunCharDhamMultipleSimulation {
 
                 addTravelTimeBinding(BUS_MODE).to(carTravelTime());
                 addTravelDisutilityFactoryBinding(BUS_MODE).to(carTravelDisutilityFactoryKey());
-
-                new SimWrapperModule();
             }
         });
         controler.run();
@@ -514,21 +512,21 @@ public class RunCharDhamMultipleSimulation {
         busParams.setMarginalUtilityOfTraveling(params.busMarginalUtilityOfTraveling); // From CSV
         config.scoring().addModeParams(busParams);
 
-        addActivityParams(config, "Haridwar", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S); // Open 24h
-        addActivityParams(config, "Srinagar", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
-        addActivityParams(config, "Sonprayag", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
-        addActivityParams(config, "Gaurikund", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
-        addActivityParams(config, "Uttarkashi", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
-        addActivityParams(config, "Barkot", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
-        addActivityParams(config, "Joshimath", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
-        addActivityParams(config, "GovindGhat", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
-        addActivityParams(config, "Ghangaria", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Haridwar", 3 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S); // Open 24h
+        addActivityParams(config, "Srinagar", 2 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Sonprayag", 2 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Gaurikund", 2 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Uttarkashi", 2 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Barkot", 2 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Joshimath", 2 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "GovindGhat", 2 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Ghangaria", 2 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
 
         // Main pilgrimage sites (Temples) with consistent opening/closing times
         double templeOpeningTime_s = TEMPLE_OPENING_TIME_H * 3600.0;
         double templeClosingTime_s = TEMPLE_CLOSING_TIME_H * 3600.0;
-        double templeVisitDuration_s = 6 * 3600.0;
-        double minimalTempleDuration_s = 3 * 3600.0;
+        double templeVisitDuration_s = 3 * 3600.0;
+        double minimalTempleDuration_s = 3600.0;
 
         addActivityParams(config, "Kedarnath", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s, minimalTempleDuration_s);
         addActivityParams(config, "Gangotri", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s, minimalTempleDuration_s);

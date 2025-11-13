@@ -6,6 +6,7 @@ import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkWriter;
 import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.network.NetworkUtils;
+import org.matsim.core.network.algorithms.NetworkSimplifier;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import playground.shivam.trafficChar.core.TrafficCharConfigGroup;
 
@@ -96,8 +97,12 @@ public class CharDhamModifyNetwork {
         }
         System.out.println("Link length check complete.");
 
-        System.out.println("\nWriting modified network to " + matsimModifiedNetworkFile);
+        NetworkUtils.simplifyNetwork(network);
+
         new NetworkWriter(network).write(matsimModifiedNetworkFile);
+
+        System.out.println("\nWriting modified network to " + matsimModifiedNetworkFile);
+
         System.out.println("Done. Modified network saved.");
     }
 
