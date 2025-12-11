@@ -155,10 +155,6 @@ public class CharDhamInitialPlans {
 
                 switch (dham) {
                     case "Kedarnath" -> {
-                        // Stop at Srinagar for rest
-                        addActivityWithDuration(populationFactory, plan, "Srinagar", location2Coord.get("Srinagar"), REST_STOP_DURATION);
-                        addLeg(populationFactory, plan, primaryMode);
-
                         // Overnight halt at Sonprayag before the trek, departing next morning
                         addActivityWithDuration(populationFactory, plan, "Sonprayag", location2Coord.get("Sonprayag"), REST_STOP_DURATION);
                         addLeg(populationFactory, plan, primaryMode); // Sonprayag to Gaurikund by local taxi
@@ -174,9 +170,6 @@ public class CharDhamInitialPlans {
 
                         // Another overnight halt at Sonprayag on return, departing next morning
                         addActivityWithDuration(populationFactory, plan, "Sonprayag", location2Coord.get("Sonprayag"), REST_STOP_DURATION);
-                        addLeg(populationFactory, plan, primaryMode);
-
-                        addActivityWithDuration(populationFactory, plan, "Srinagar", location2Coord.get("Srinagar"), REST_STOP_DURATION);
                     }
                     case "Gangotri" -> {
                         // Intermediate stop in Uttarkashi
