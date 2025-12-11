@@ -97,7 +97,7 @@ public class CharDhamModifyNetwork {
         }
         System.out.println("Link length check complete.");
 
-        NetworkUtils.simplifyNetwork(network);
+//        NetworkUtils.simplifyNetwork(network);
 
         new NetworkWriter(network).write(matsimModifiedNetworkFile);
 

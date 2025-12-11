@@ -145,7 +145,6 @@ public class CharDhamInitialPlans {
             addActivityWithEndTime(populationFactory, plan, "Haridwar", location2Coord.get("Haridwar"), randomEndTime(0, 24, random.nextInt(1) + 1));
             addLeg(populationFactory, plan, primaryMode);
             addLocationChoiceActivity(populationFactory, plan, "rest", location2Coord.get("Haridwar"), REST_STOP_DURATION);
-            addLeg(populationFactory, plan, primaryMode);
             // Get a random dham sequence based on weights from CSV
             List<String> dhamSequence = getRandomDhamSequence();
 
@@ -178,9 +177,6 @@ public class CharDhamInitialPlans {
                         addLeg(populationFactory, plan, primaryMode);
 
                         addActivityWithDuration(populationFactory, plan, "Srinagar", location2Coord.get("Srinagar"), REST_STOP_DURATION);
-                        addLeg(populationFactory, plan, primaryMode);
-
-                        addLocationChoiceActivity(populationFactory, plan, "rest", location2Coord.get("Srinagar"), REST_STOP_DURATION);
                     }
                     case "Gangotri" -> {
                         // Intermediate stop in Uttarkashi
@@ -191,9 +187,6 @@ public class CharDhamInitialPlans {
                         addLeg(populationFactory, plan, primaryMode);
 
                         addActivityWithDuration(populationFactory, plan, "Uttarkashi", location2Coord.get("Uttarkashi"), REST_STOP_DURATION);
-                        addLeg(populationFactory, plan, primaryMode);
-
-                        addLocationChoiceActivity(populationFactory, plan, "rest", location2Coord.get("Srinagar"), REST_STOP_DURATION);
                     }
                     case "Yamunotri" -> {
                         // Intermediate stop in Barkot
@@ -204,9 +197,6 @@ public class CharDhamInitialPlans {
                         addLeg(populationFactory, plan, primaryMode);
 
                         addActivityWithDuration(populationFactory, plan, "Barkot", location2Coord.get("Barkot"), REST_STOP_DURATION);
-                        addLeg(populationFactory, plan, primaryMode);
-
-                        addLocationChoiceActivity(populationFactory, plan, "rest", location2Coord.get("Srinagar"), REST_STOP_DURATION);
                     }
                     case "Badrinath" -> {
                         // Intermediate stop in Joshimath
@@ -216,13 +206,7 @@ public class CharDhamInitialPlans {
                         addActivityWithDuration(populationFactory, plan, "Badrinath", location2Coord.get("Badrinath"), DHAM_VISIT_DURATION);
                         addLeg(populationFactory, plan, primaryMode);
 
-                        addLocationChoiceActivity(populationFactory, plan, "rest", location2Coord.get("Badrinath"), REST_STOP_DURATION);
-                        addLeg(populationFactory, plan, primaryMode);
-
                         addActivityWithDuration(populationFactory, plan, "Joshimath", location2Coord.get("Joshimath"), REST_STOP_DURATION);
-                        addLeg(populationFactory, plan, primaryMode);
-
-                        addLocationChoiceActivity(populationFactory, plan, "rest", location2Coord.get("Srinagar"), REST_STOP_DURATION);
                     }
                     case "Hemkund_Sahib" -> {
                         // Intermediate stop in Joshimath

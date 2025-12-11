@@ -43,7 +43,7 @@ import static playground.anuj.charDham.population.CharDhamInitialPlans.SAMPLE_SI
 public class RunCharDhamSingleSimulation {
 
     // --- FILE PATHS (using the original network file) ---
-    private static final String NETWORK_FILE = "output/network_charDham_modified.xml.gz";
+    private static final String NETWORK_FILE = "output/network_charDham.xml.gz";
     private static final String PLANS_FILE = "output/plan_charDham_updated_v3.xml";
     private static final String FACILITIES_FILE = "output/facilities_charDham.xml";
     private static final String OUTPUT_DIRECTORY = "output/charDham/";
