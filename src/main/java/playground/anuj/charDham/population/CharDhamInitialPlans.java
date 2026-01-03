@@ -31,8 +31,8 @@ public class CharDhamInitialPlans {
     private static final double REST_STOP_DURATION = 3.0 * 3600.0;     // 2 hours for a chosen rest stop
     private static final double DHAM_VISIT_DURATION = 6.0 * 3600.0;      // 6 hours for darshan/visit
     private static final double OVERNIGHT_STAY_DURATION = 12.0 * 3600.0; // 12 hours for an overnight halt
-
-    public static final double SAMPLE_SIZE = 0.1;
+    private static final int DEPARTURE_WINDOW_DAYS = 7;
+    public static final double SAMPLE_SIZE = 0.03;
 
     private final Random random = new Random(); // For random choices
 
@@ -141,8 +141,9 @@ public class CharDhamInitialPlans {
             totalPassengersGenerated += passengersForThisVehicle;
             numberOfPlansGenerated++; // Increment count of generated plans/vehicles
 
+            int departureDay = random.nextInt(DEPARTURE_WINDOW_DAYS) + 1;
             // Start activity in Haridwar with a random end time between 12 AM and 12 AM on day 1
-            addActivityWithEndTime(populationFactory, plan, "Haridwar", location2Coord.get("Haridwar"), randomEndTime(0, 24, random.nextInt(1) + 1));
+            addActivityWithEndTime(populationFactory, plan, "Haridwar", location2Coord.get("Haridwar"), randomEndTime(0, 24, departureDay));
             addLeg(populationFactory, plan, primaryMode);
             addLocationChoiceActivity(populationFactory, plan, "rest", location2Coord.get("Haridwar"), REST_STOP_DURATION);
             // Get a random dham sequence based on weights from CSV
@@ -235,7 +236,6 @@ public class CharDhamInitialPlans {
         // Write population to output file
         PopulationUtils.sampleDown(population, SAMPLE_SIZE);
         new PopulationWriter(population).write(outputPlansFile);
-        System.out.println("Generated " + numberOfPlansGenerated + " plans (vehicles) for a total of " + totalPassengersGenerated + " passengers, saved to " + outputPlansFile);
     }
 
     /**

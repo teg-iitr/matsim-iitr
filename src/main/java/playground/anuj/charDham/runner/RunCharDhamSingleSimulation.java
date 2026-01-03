@@ -5,9 +5,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
-import org.matsim.contrib.locationchoiceIITR.frozenepsilons.BestReplyLocationChoicePlanStrategy;
-import org.matsim.contrib.locationchoiceIITR.frozenepsilons.DestinationChoiceContext;
-import org.matsim.contrib.locationchoiceIITR.frozenepsilons.FrozenTastesConfigGroup;
+import org.matsim.contrib.locationchoice.frozenepsilons.*;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.config.ConfigWriter;
@@ -19,7 +17,6 @@ import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.network.NetworkChangeEvent;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.scenario.ScenarioUtils;
-import org.matsim.simwrapper.SimWrapperModule;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
@@ -43,7 +40,7 @@ import static playground.anuj.charDham.population.CharDhamInitialPlans.SAMPLE_SI
 public class RunCharDhamSingleSimulation {
 
     // --- FILE PATHS (using the original network file) ---
-    private static final String NETWORK_FILE = "output/network_charDham.xml.gz";
+    private static final String NETWORK_FILE = "output/network_charDham_modified.xml.gz";
     private static final String PLANS_FILE = "output/plan_charDham_updated_v3.xml";
     private static final String FACILITIES_FILE = "output/facilities_charDham.xml";
     private static final String OUTPUT_DIRECTORY = "output/charDham/";
@@ -51,15 +48,15 @@ public class RunCharDhamSingleSimulation {
     private static final String TIME_VARIANT_LINKS_FILE = "input/timeVariant_links.csv";
 
     // --- SIMULATION PARAMETERS ---
-    private static final int LAST_ITERATION = 100;
+    private static final int LAST_ITERATION = 15;
     private static final double FLOW_CAPACITY_FACTOR = SAMPLE_SIZE;
-    private static final double STORAGE_CAPACITY_FACTOR = SAMPLE_SIZE * 10;
+    private static final double STORAGE_CAPACITY_FACTOR = SAMPLE_SIZE * 3;
     private static final double SIMULATION_START_TIME_H = 4.0;
     private static final double TEMPLE_OPENING_TIME_H = 5.0;  // 5 AM
-    private static final double TEMPLE_CLOSING_TIME_H = 17.0; // 4 PM
-    private static final double REST_STOP_TYPICAL_DURATION_S = 3600.0;
+    private static final double TEMPLE_CLOSING_TIME_H = 16.0; // 4 PM
+    private static final double REST_STOP_TYPICAL_DURATION_S = 2.0 * 3600.0; // 2 hours
     private static final double MINIMUM_REST_DURATION_S = 3600.0;
-    
+
     // --- MODE & SCORING PARAMETERS ---
     public static final String CAR_MODE = "car";
     public static final String TAXI_MODE = "taxi";
@@ -269,8 +266,6 @@ public class RunCharDhamSingleSimulation {
         config.controller().setLastIteration(LAST_ITERATION);
         config.controller().setOutputDirectory(OUTPUT_DIRECTORY);
         config.controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
-        config.controller().setWritePlansInterval(20);
-        config.controller().setWriteEventsInterval(20);
         config.vspExperimental().setWritingOutputEvents(true);
 
     }
@@ -290,7 +285,7 @@ public class RunCharDhamSingleSimulation {
         config.qsim().setStorageCapFactor(STORAGE_CAPACITY_FACTOR);
         config.qsim().setLinkDynamics(QSimConfigGroup.LinkDynamics.PassingQ);
         config.qsim().setTrafficDynamics(QSimConfigGroup.TrafficDynamics.kinematicWaves);
-        config.qsim().setStuckTime(3600);
+        config.qsim().setStuckTime(3600.);
         config.qsim().setRemoveStuckVehicles(false);
         config.qsim().setNotifyAboutStuckVehicles(true);
         config.qsim().setMainModes(modes);
@@ -336,21 +331,21 @@ public class RunCharDhamSingleSimulation {
         busParams.setMarginalUtilityOfTraveling(-3);
         config.scoring().addModeParams(busParams);
 
-        addActivityParams(config, "Haridwar", 3 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S); // Open 24h
-        addActivityParams(config, "Srinagar", 2 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
-        addActivityParams(config, "Sonprayag", 2 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
-        addActivityParams(config, "Gaurikund", 2 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
-        addActivityParams(config, "Uttarkashi", 2 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
-        addActivityParams(config, "Barkot", 2 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
-        addActivityParams(config, "Joshimath", 2 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
-        addActivityParams(config, "GovindGhat", 2 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
-        addActivityParams(config, "Ghangaria", 2 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Haridwar", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S); // Open 24h
+        addActivityParams(config, "Srinagar", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Sonprayag", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Gaurikund", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Uttarkashi", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Barkot", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Joshimath", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "GovindGhat", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Ghangaria", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
 
         // Main pilgrimage sites (Temples) with consistent opening/closing times
         double templeOpeningTime_s = TEMPLE_OPENING_TIME_H * 3600.0;
         double templeClosingTime_s = TEMPLE_CLOSING_TIME_H * 3600.0;
-        double templeVisitDuration_s = 3 * 3600.0;
-        double minimalTempleDuration_s = 3600.0;
+        double templeVisitDuration_s = 6 * 3600.0;
+        double minimalTempleDuration_s = 3 * 3600.0;
 
         addActivityParams(config, "Kedarnath", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s, minimalTempleDuration_s);
         addActivityParams(config, "Gangotri", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s, minimalTempleDuration_s);

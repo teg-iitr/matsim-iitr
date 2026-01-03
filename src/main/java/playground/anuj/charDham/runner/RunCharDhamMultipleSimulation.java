@@ -22,7 +22,6 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.replanning.strategies.DefaultPlanStrategiesModule;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
-import org.matsim.simwrapper.SimWrapperModule;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.matsim.vehicles.Vehicles;
@@ -51,8 +50,8 @@ public class RunCharDhamMultipleSimulation {
     // --- SIMULATION PARAMETERS (Defaults, can be overridden by CSV) ---
     private static final double SIMULATION_START_TIME_H = 4.0;
     private static final double TEMPLE_OPENING_TIME_H = 5.0;  // 5 AM
-    private static final double TEMPLE_CLOSING_TIME_H = 17.0; // 7 PM
-    private static final double REST_STOP_TYPICAL_DURATION_S = 3600.0; // 2 hours
+    private static final double TEMPLE_CLOSING_TIME_H = 16.0; // 4 PM
+    private static final double REST_STOP_TYPICAL_DURATION_S = 2.0 * 3600.0; // 2 hours
     private static final double MINIMUM_REST_DURATION_S = 3600.0;
 
     // --- MODE & SCORING PARAMETERS ---
@@ -71,7 +70,7 @@ public class RunCharDhamMultipleSimulation {
         int lastIteration;
         double flowCapacityFactor;
         double storageCapacityFactor;
-//        double lateArrivalUtilsHr;
+        //        double lateArrivalUtilsHr;
         double performingUtilsHr;
         double carMarginalUtilityOfTraveling;
         double taxiMarginalUtilityOfTraveling;
@@ -84,7 +83,7 @@ public class RunCharDhamMultipleSimulation {
         double mutationRange;
         double mutationRangeStep;
         double reRouteWeight;
-//        double changeTripModeWeight;
+        //        double changeTripModeWeight;
         double nightTimeSpeed;
 
         // Constructor to parse a CSV line
@@ -99,7 +98,7 @@ public class RunCharDhamMultipleSimulation {
             this.runId = dataMap.getOrDefault("run_id", "default_run");
             this.lastIteration = Integer.parseInt(dataMap.getOrDefault("last_iteration", "2"));
             this.flowCapacityFactor = Double.parseDouble(dataMap.getOrDefault("flow_capacity_factor", "0.5"));
-            this.storageCapacityFactor = Double.parseDouble(dataMap.getOrDefault("storage_capacity_factor", "0.5")) * 10.0;
+            this.storageCapacityFactor = Double.parseDouble(dataMap.getOrDefault("storage_capacity_factor", "0.5")) * 3.0;
 //            this.lateArrivalUtilsHr = Double.parseDouble(dataMap.getOrDefault("lateArrival_utils_hr", "-1.0"));
             this.performingUtilsHr = Double.parseDouble(dataMap.getOrDefault("performing_utils_hr", "6.0"));
             this.carMarginalUtilityOfTraveling = Double.parseDouble(dataMap.getOrDefault("car_marginalUtilityOfTraveling", "-6.0"));
@@ -452,8 +451,6 @@ public class RunCharDhamMultipleSimulation {
         config.controller().setLastIteration(params.lastIteration); // From CSV
         config.controller().setOutputDirectory(outputDirectory); // Unique for each run
         config.controller().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
-        config.controller().setWritePlansInterval(20);
-        config.controller().setWriteEventsInterval(20);
         config.vspExperimental().setWritingOutputEvents(true);
     }
 
@@ -512,21 +509,21 @@ public class RunCharDhamMultipleSimulation {
         busParams.setMarginalUtilityOfTraveling(params.busMarginalUtilityOfTraveling); // From CSV
         config.scoring().addModeParams(busParams);
 
-        addActivityParams(config, "Haridwar", 3 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S); // Open 24h
-        addActivityParams(config, "Srinagar", 2 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
-        addActivityParams(config, "Sonprayag", 2 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
-        addActivityParams(config, "Gaurikund", 2 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
-        addActivityParams(config, "Uttarkashi", 2 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
-        addActivityParams(config, "Barkot", 2 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
-        addActivityParams(config, "Joshimath", 2 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
-        addActivityParams(config, "GovindGhat", 2 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
-        addActivityParams(config, "Ghangaria", 2 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Haridwar", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S); // Open 24h
+        addActivityParams(config, "Srinagar", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Sonprayag", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Gaurikund", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Uttarkashi", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Barkot", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Joshimath", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "GovindGhat", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
+        addActivityParams(config, "Ghangaria", 24 * 3600.0, 0, 0, MINIMUM_REST_DURATION_S);
 
         // Main pilgrimage sites (Temples) with consistent opening/closing times
         double templeOpeningTime_s = TEMPLE_OPENING_TIME_H * 3600.0;
         double templeClosingTime_s = TEMPLE_CLOSING_TIME_H * 3600.0;
-        double templeVisitDuration_s = 3 * 3600.0;
-        double minimalTempleDuration_s = 3600.0;
+        double templeVisitDuration_s = 6 * 3600.0;
+        double minimalTempleDuration_s = 3 * 3600.0;
 
         addActivityParams(config, "Kedarnath", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s, minimalTempleDuration_s);
         addActivityParams(config, "Gangotri", templeVisitDuration_s, templeOpeningTime_s, templeClosingTime_s, minimalTempleDuration_s);
