@@ -23,7 +23,9 @@ public class RunSapanBaseline {
         if ( args==null || args.length==0 || args[0]==null ){
             config = ConfigUtils.loadConfig( "scenario/Simple_config_working.xml" );
         } else {
+            System.out.println("Config file location: "+args[0]);
             config = ConfigUtils.loadConfig(args[0]);
+            System.out.println("RunId: "+runId);
             runId = args[1];
         }
 
