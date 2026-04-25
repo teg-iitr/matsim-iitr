@@ -10,6 +10,7 @@ import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.io.IOUtils;
 import playground.amit.Dehradun.DehradunUtils;
+import playground.amit.utils.FileUtils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -19,8 +20,10 @@ import java.util.stream.Collectors;
 
 import static playground.anuj.charDham.runner.RunCharDhamSingleSimulation.*;
 
-public class Plan_with_end_time {
-    public static final String importantLocationsFile = "input/anuj/UKCharDhamPrimeLocations.txt";
+public class GeneratePlansWithEndTime {
+
+
+    public static final String importantLocationsFile = FileUtils.Chhar_DHAM_HOME_DIR+"input/anuj/UKCharDhamPrimeLocations.txt";
     public static final String outputPlansFile = "output/plan_charDham_updated_v6.xml"; // Updated output file name
     private final Map<String, Coord> location2Coord = new HashMap<>();
     public static final String PASSENGER_ATTRIBUTE = "numberOfPassengers";
@@ -44,7 +47,7 @@ public class Plan_with_end_time {
 
     private final Random random = new Random(); // For random choices
     // New: CSV file for dham activity chains and weights
-    private static final String DHAM_CHAIN_FREQUENCIES_FILE = "input/anuj/dham_activity_chain_frequencies.csv";
+    private static final String DHAM_CHAIN_FREQUENCIES_FILE = FileUtils.Chhar_DHAM_HOME_DIR+"input/anuj/dham_activity_chain_frequencies.csv";
     private List<DhamChainData> dhamChainDataList; // To store parsed CSV data
     private int NUM_AGENTS; // Will be calculated from CSV counts (total passengers)
     private static final int DEFAULT_TOP_ROWS_TO_READ = 25; // Default number of top rows to consider
@@ -71,11 +74,11 @@ public class Plan_with_end_time {
         }
     }
 
-    public Plan_with_end_time() {
+    public GeneratePlansWithEndTime() {
     }
 
     public static void main(String[] args) {
-        new Plan_with_end_time().run();
+        new GeneratePlansWithEndTime().run();
     }
 
     public void run() {
@@ -90,9 +93,9 @@ public class Plan_with_end_time {
         }
 
         //added files for distributions across hours and dates
-        double[] dayWeights = readDayWeights("input/day_weight.csv", DEPARTURE_WINDOW_DAYS);
+        double[] dayWeights = readDayWeights(FileUtils.Chhar_DHAM_HOME_DIR+"input/day_weight.csv", DEPARTURE_WINDOW_DAYS);
         normalize(dayWeights);
-        double[] hourWeights = readHourWeights("input/time_weight.csv", 24);
+        double[] hourWeights = readHourWeights(FileUtils.Chhar_DHAM_HOME_DIR+"input/time_weight.csv", 24);
         normalize(hourWeights);
         double currentTime;
 
@@ -628,7 +631,7 @@ public class Plan_with_end_time {
     }
 
     static {
-        loadTravelTimesFromCSV("input/travelTimes.csv");
+        loadTravelTimesFromCSV(FileUtils.Chhar_DHAM_HOME_DIR+"input/travelTimes.csv");
     }
 
 
